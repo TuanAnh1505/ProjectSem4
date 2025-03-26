@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="44771b7a-4d02-4171-86aa-af71751cd00f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/ApiApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/main/java/com/example/api/ApiApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/Web/main/resources/application.properties" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "git-widget-placeholder": "quang"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\hoanq\OneDrive\T2308M\ProjectSem4\Web" />
+    </key>
+  </component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+</project>
