@@ -1,10 +1,50 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
+# Java & Maven
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+logs/
+*.log
+
+# IDE & OS generated files
+.idea/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Maven specific
+mvnw
+mvnw.cmd
+/target/
+/build/
+/.mvn/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+# Spring Boot specific
+*.env
+application*.yml
+application*.properties
+
+# Security
+*.keystore
+*.p12
+*.jks
+
+# Database
+*.db
+
+# Docker
+/docker/**
+**/docker-compose.override.yml
+
+# Spring Tool Suite (STS)
 .apt_generated
 .classpath
 .factorypath
@@ -13,13 +53,7 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -29,5 +63,8 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# VS Code
 .vscode/
+
+# Git Help
+HELP.md
