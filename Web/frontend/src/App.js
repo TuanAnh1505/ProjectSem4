@@ -1,25 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import styles from "./components/VietnamTourism/VietnamTourism.module.css";
+import Header from "./components/VietnamTourism/Header";
+import MainContent from "./components/VietnamTourism/MainContent";
+import Events from "./components/VietnamTourism/Events";
+import MustSeeSites from "./components/VietnamTourism/MustSeeSites";
+import TravelTips from "./components/VietnamTourism/TravelTips";
+import InternationalNews from "./components/VietnamTourism/InternationalNews";
+import ShareYourStory from "./components/VietnamTourism/ShareYourStory";
+import Newsletter from "./components/VietnamTourism/Newsletter";
+import Footer from "./components/VietnamTourism/Footer";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <div className={styles.appContainer}>
+            <Header />
+            <MainContent />
+            <Events />
+            <MustSeeSites />
+            <TravelTips />
+            <InternationalNews />
+            <ShareYourStory />
+            <Newsletter />
+            <Footer />
+        </div>
+    );
 }
 
 export default App;
