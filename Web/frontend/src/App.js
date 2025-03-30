@@ -1,29 +1,26 @@
 import React from "react";
-import styles from "./components/VietnamTourism/VietnamTourism.module.css";
-import Header from "./components/VietnamTourism/Header";
-import MainContent from "./components/VietnamTourism/MainContent";
-import Events from "./components/VietnamTourism/Events";
-import MustSeeSites from "./components/VietnamTourism/MustSeeSites";
-import TravelTips from "./components/VietnamTourism/TravelTips";
-import InternationalNews from "./components/VietnamTourism/InternationalNews";
-import ShareYourStory from "./components/VietnamTourism/ShareYourStory";
-import Newsletter from "./components/VietnamTourism/Newsletter";
-import Footer from "./components/VietnamTourism/Footer";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import UserDashboard from "./components/UserDashboard";
+import "./App.css";
 
-function App() {
-    return (
-        <div className={styles.appContainer}>
-            <Header />
-            <MainContent />
-            <Events />
-            <MustSeeSites />
-            <TravelTips />
-            <InternationalNews />
-            <ShareYourStory />
-            <Newsletter />
-            <Footer />
-        </div>
-    );
-}
+const App = () => {
+  const isAuthenticated = !!localStorage.getItem("token");
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />}
+        />
+      </Routes>
+    </Router>
+  );
+};
 
 export default App;
