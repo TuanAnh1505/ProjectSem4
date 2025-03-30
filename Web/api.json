@@ -1,0 +1,400 @@
+{
+    "users": [
+        {
+            "UserID": 1,
+            "FullName": "Nguyen Van A",
+            "Email": "nguyenvana@example.com",
+            "Phone": "0909123456",
+            "Address": "123 Duong ABC, TP HCM",
+            "IsActive": 1,
+            "CreatedAt": "2025-03-01 10:00:00"
+        },
+        {
+            "UserID": 2,
+            "FullName": "Tran Thi B",
+            "Email": "tranthib@example.com",
+            "Phone": "0918234567",
+            "Address": "456 Duong XYZ, Ha Noi",
+            "IsActive": 1,
+            "CreatedAt": "2025-03-02 15:30:00"
+        },
+        {
+            "UserID": 3,
+            "FullName": "Le Van C",
+            "Email": "levanc@example.com",
+            "Phone": "0987654321",
+            "Address": "789 Duong DEF, Da Nang",
+            "IsActive": 1,
+            "CreatedAt": "2025-03-03 09:00:00"
+        }
+    ],
+    "roles": [
+        { "RoleID": 1, "RoleName": "Admin" },
+        { "RoleID": 2, "RoleName": "User" },
+        { "RoleID": 3, "RoleName": "Guide" }
+    ],
+    "userRoles": [
+        { "UserID": 1, "RoleID": 1 },
+        { "UserID": 2, "RoleID": 2 },
+        { "UserID": 3, "RoleID": 3 }
+    ],
+    "userTokens": [
+        {
+            "TokenID": 1,
+            "UserID": 1,
+            "Token": "token_abc123",
+            "Expiry": "2025-04-01 10:00:00",
+            "CreatedAt": "2025-03-01 10:00:00"
+        },
+        {
+            "TokenID": 2,
+            "UserID": 2,
+            "Token": "token_xyz789",
+            "Expiry": "2025-04-02 15:30:00",
+            "CreatedAt": "2025-03-02 15:30:00"
+        }
+    ],
+    "bookingStatus": [
+        { "BookingStatusID": 1, "StatusName": "Pending" },
+        { "BookingStatusID": 2, "StatusName": "Confirmed" },
+        { "BookingStatusID": 3, "StatusName": "Cancelled" }
+    ],
+    "paymentStatus": [
+        { "PaymentStatusID": 1, "StatusName": "Paid" },
+        { "PaymentStatusID": 2, "StatusName": "Unpaid" },
+        { "PaymentStatusID": 3, "StatusName": "Refunded" }
+    ],
+    "tourStatus": [
+        { "TourStatusID": 1, "StatusName": "Available" },
+        { "TourStatusID": 2, "StatusName": "Closed" },
+        { "TourStatusID": 3, "StatusName": "Full" }
+    ],
+    "eventStatus": [
+        { "EventStatusID": 1, "StatusName": "Upcoming" },
+        { "EventStatusID": 2, "StatusName": "Ongoing" },
+        { "EventStatusID": 3, "StatusName": "Finished" }
+    ],
+    "feedbackStatus": [
+        { "FeedbackStatusID": 1, "StatusName": "Open" },
+        { "FeedbackStatusID": 2, "StatusName": "Resolved" },
+        { "FeedbackStatusID": 3, "StatusName": "Closed" }
+    ],
+    "destinations": [
+        {
+            "DestinationID": 1,
+            "Name": "Vịnh Hạ Long",
+            "Category": "Natural",
+            "FileType": "Image",
+            "Description": "Di sản thiên nhiên thế giới với hàng ngàn đảo đá.",
+            "Location": "Quảng Ninh, Việt Nam",
+            "Rating": 4.8,
+            "CreatedAt": "2025-01-15 08:00:00"
+        },
+        {
+            "DestinationID": 2,
+            "Name": "Phố cổ Hội An",
+            "Category": "Cultural",
+            "FileType": "Video",
+            "Description": "Khu phố cổ với kiến trúc độc đáo và đèn lồng rực rỡ.",
+            "Location": "Quảng Nam, Việt Nam",
+            "Rating": 4.5,
+            "CreatedAt": "2025-02-10 14:20:00"
+        },
+        {
+            "DestinationID": 3,
+            "Name": "Đà Lạt",
+            "Category": "Natural",
+            "FileType": "Image",
+            "Description": "Thành phố ngàn hoa với khí hậu mát mẻ.",
+            "Location": "Lâm Đồng, Việt Nam",
+            "Rating": 4.6,
+            "CreatedAt": "2025-03-01 09:00:00"
+        }
+    ],
+    "tours": [
+        {
+            "TourID": 1,
+            "Name": "Khám phá Vịnh Hạ Long 2N1D",
+            "Description": "Hành trình khám phá Vịnh Hạ Long bằng tàu du lịch.",
+            "Price": 1500.00,
+            "Duration": 2,
+            "MaxParticipants": 20,
+            "DestinationID": 1,
+            "StatusID": 1,
+            "CreatedAt": "2025-02-01 09:00:00"
+        },
+        {
+            "TourID": 2,
+            "Name": "Hội An về đêm",
+            "Description": "Trải nghiệm phố cổ Hội An lung linh ánh đèn.",
+            "Price": 800.00,
+            "Duration": 1,
+            "MaxParticipants": 15,
+            "DestinationID": 2,
+            "StatusID": 1,
+            "CreatedAt": "2025-02-15 13:45:00"
+        },
+        {
+            "TourID": 3,
+            "Name": "Đà Lạt 3N2D",
+            "Description": "Tham quan hồ Xuân Hương và thung lũng Tình Yêu.",
+            "Price": 2000.00,
+            "Duration": 3,
+            "MaxParticipants": 25,
+            "DestinationID": 3,
+            "StatusID": 1,
+            "CreatedAt": "2025-03-10 10:00:00"
+        }
+    ],
+    "tourGuides": [
+        {
+            "GuideID": 1,
+            "UserID": 3,
+            "ExperienceYears": 5,
+            "Specialization": "Natural Tours",
+            "Languages": "Vietnamese, English",
+            "Rating": 4.7,
+            "CreatedAt": "2025-03-03 09:00:00"
+        }
+    ],
+    "tourGuidesAssignments": [
+        { "TourID": 1, "GuideID": 1 },
+        { "TourID": 3, "GuideID": 1 }
+    ],
+    "bookings": [
+        {
+            "BookingID": 1,
+            "UserID": 1,
+            "TourID": 1,
+            "BookingDate": "2025-03-25 14:00:00",
+            "StatusID": 1,
+            "TotalPrice": 1500.00
+        },
+        {
+            "BookingID": 2,
+            "UserID": 2,
+            "TourID": 2,
+            "BookingDate": "2025-03-26 09:30:00",
+            "StatusID": 2,
+            "TotalPrice": 800.00
+        },
+        {
+            "BookingID": 3,
+            "UserID": 2,
+            "TourID": 3,
+            "BookingDate": "2025-03-27 10:00:00",
+            "StatusID": 2,
+            "TotalPrice": 2000.00
+        }
+    ],
+    "payments": [
+        {
+            "PaymentID": 1,
+            "BookingID": 1,
+            "UserID": 1,
+            "Amount": 1500.00,
+            "PaymentMethod": "Credit Card",
+            "PaymentDate": "2025-03-25 14:30:00",
+            "StatusID": 1,
+            "TransactionID": "TXN123456"
+        },
+        {
+            "PaymentID": 2,
+            "BookingID": 2,
+            "UserID": 2,
+            "Amount": 800.00,
+            "PaymentMethod": "PayPal",
+            "PaymentDate": "2025-03-26 10:00:00",
+            "StatusID": 1,
+            "TransactionID": "TXN789012"
+        }
+    ],
+    "discounts": [
+        {
+            "DiscountID": 1,
+            "Code": "SUMMER25",
+            "Description": "Giảm giá mùa hè 25%",
+            "DiscountPercent": 25,
+            "StartDate": "2025-06-01 00:00:00",
+            "EndDate": "2025-08-31 23:59:59",
+            "CreatedAt": "2025-03-01 09:00:00"
+        },
+        {
+            "DiscountID": 2,
+            "Code": "WELCOME10",
+            "Description": "Giảm giá 10% cho khách mới",
+            "DiscountPercent": 10,
+            "StartDate": "2025-03-01 00:00:00",
+            "EndDate": "2025-12-31 23:59:59",
+            "CreatedAt": "2025-03-01 09:00:00"
+        }
+    ],
+    "userCoupons": [
+        { "UserID": 1, "DiscountID": 1, "Used": 0 },
+        { "UserID": 2, "DiscountID": 2, "Used": 1 }
+    ],
+    "reviews": [
+        {
+            "ReviewID": 1,
+            "UserID": 1,
+            "DestinationID": 1,
+            "Rating": 5,
+            "Comment": "Phong cảnh tuyệt đẹp, rất đáng để ghé thăm!",
+            "CreatedAt": "2025-03-26 15:00:00"
+        },
+        {
+            "ReviewID": 2,
+            "UserID": 2,
+            "DestinationID": 2,
+            "Rating": 4,
+            "Comment": "Phố cổ rất đẹp, nhưng đông đúc vào buổi tối.",
+            "CreatedAt": "2025-03-27 10:00:00"
+        }
+    ],
+    "guideReviews": [
+        {
+            "GuideReviewID": 1,
+            "UserID": 1,
+            "GuideID": 1,
+            "Rating": 4,
+            "Comment": "Hướng dẫn viên nhiệt tình, kiến thức tốt.",
+            "CreatedAt": "2025-03-26 16:00:00"
+        },
+        {
+            "GuideReviewID": 2,
+            "UserID": 2,
+            "GuideID": 1,
+            "Rating": 5,
+            "Comment": "Rất chuyên nghiệp, đáng tin cậy!",
+            "CreatedAt": "2025-03-27 11:00:00"
+        }
+    ],
+    "events": [
+        {
+            "EventID": 1,
+            "Name": "Lễ hội đèn lồng Hội An",
+            "Description": "Lễ hội truyền thống với hàng ngàn đèn lồng.",
+            "Location": "Hội An, Việt Nam",
+            "StartDate": "2025-07-15 18:00:00",
+            "EndDate": "2025-07-15 23:00:00",
+            "TicketPrice": 200.00,
+            "StatusID": 1,
+            "CreatedAt": "2025-03-01 09:00:00"
+        },
+        {
+            "EventID": 2,
+            "Name": "Ngày hội hoa Đà Lạt",
+            "Description": "Triển lãm hoa lớn nhất trong năm.",
+            "Location": "Đà Lạt, Việt Nam",
+            "StartDate": "2025-12-20 09:00:00",
+            "EndDate": "2025-12-25 17:00:00",
+            "TicketPrice": 150.00,
+            "StatusID": 1,
+            "CreatedAt": "2025-03-10 10:00:00"
+        }
+    ],
+    "feedbacks": [
+        {
+            "FeedbackID": 1,
+            "UserID": 1,
+            "TourID": 1,
+            "DestinationID": 1,
+            "EventID": null,
+            "Message": "Tour rất tuyệt, nhưng cần cải thiện dịch vụ ăn uống.",
+            "StatusID": 1,
+            "CreatedAt": "2025-03-26 16:00:00"
+        },
+        {
+            "FeedbackID": 2,
+            "UserID": 2,
+            "TourID": 2,
+            "DestinationID": 2,
+            "EventID": null,
+            "Message": "Hội An đẹp, nhưng xe đưa đón hơi trễ.",
+            "StatusID": 1,
+            "CreatedAt": "2025-03-27 11:00:00"
+        }
+    ],
+    "media": [
+        {
+            "MediaID": 1,
+            "UserID": 1,
+            "FileType": "Image",
+            "FileURL": "https://example.com/images/halbay.jpg",
+            "UploadedAt": "2025-03-25 15:00:00"
+        },
+        {
+            "MediaID": 2,
+            "UserID": 2,
+            "FileType": "Video",
+            "FileURL": "https://example.com/videos/hoian.mp4",
+            "UploadedAt": "2025-03-26 10:00:00"
+        }
+    ],
+    "itineraries": [
+        {
+            "ItineraryID": 1,
+            "UserID": 1,
+            "TourID": 1,
+            "Name": "Hành trình Vịnh Hạ Long",
+            "Description": "Khám phá Vịnh Hạ Long trong 2 ngày.",
+            "StartDate": "2025-04-01 08:00:00",
+            "EndDate": "2025-04-02 17:00:00",
+            "CreatedAt": "2025-03-25 10:00:00"
+        },
+        {
+            "ItineraryID": 2,
+            "UserID": 2,
+            "TourID": 2,
+            "Name": "Hội An 1 ngày",
+            "Description": "Tham quan Hội An trong 1 ngày.",
+            "StartDate": "2025-04-05 18:00:00",
+            "EndDate": "2025-04-05 23:00:00",
+            "CreatedAt": "2025-03-26 09:00:00"
+        }
+    ],
+    "itineraryDetails": [
+        {
+            "ItineraryDetailID": 1,
+            "ItineraryID": 1,
+            "DestinationID": 1,
+            "ActivityType": "Sightseeing",
+            "StartTime": "2025-04-01 09:00:00",
+            "EndTime": "2025-04-01 12:00:00",
+            "Notes": "Tham quan hang Sửng Sốt."
+        },
+        {
+            "ItineraryDetailID": 2,
+            "ItineraryID": 2,
+            "DestinationID": 2,
+            "ActivityType": "Walking Tour",
+            "StartTime": "2025-04-05 19:00:00",
+            "EndTime": "2025-04-05 21:00:00",
+            "Notes": "Dạo phố cổ Hội An."
+        }
+    ],
+    "notifications": [
+        {
+            "NotificationID": 1,
+            "UserID": 1,
+            "SenderID": null,
+            "Title": "Đặt tour thành công",
+            "Message": "Bạn đã đặt tour Khám phá Vịnh Hạ Long thành công!",
+            "NotificationType": "Booking",
+            "IsRead": 0,
+            "RelatedID": 1,
+            "CreatedAt": "2025-03-25 14:00:00"
+        },
+        {
+            "NotificationID": 2,
+            "UserID": 2,
+            "SenderID": 1,
+            "Title": "Thanh toán hoàn tất",
+            "Message": "Thanh toán cho tour Hội An về đêm đã hoàn tất.",
+            "NotificationType": "Payment",
+            "IsRead": 1,
+            "RelatedID": 2,
+            "CreatedAt": "2025-03-26 10:00:00"
+        }
+    ]
+}

@@ -1,0 +1,87 @@
+1. Users
+GET /users: Lấy tất cả người dùng.
+GET /users/1: Lấy thông tin người dùng với UserID = 1.
+POST /users: Tạo người dùng mới.
+{
+    "FullName": "Pham Thi D",
+    "Email": "phamthid@example.com",
+    "Phone": "0971234567",
+    "Address": "101 Duong GHI, Hue",
+    "IsActive": 1
+}
+PUT /users/1: Cập nhật thông tin người dùng với UserID = 1.
+ json
+{
+    "FullName": "Nguyen Van A Updated",
+    "Phone": "0909999999"
+}
+DELETE /users/1: Xóa người dùng với UserID = 1.
+2. Tours
+GET /tours: Lấy tất cả tour.
+GET /tours/1: Lấy thông tin tour với TourID = 1.
+POST /tours: Tạo tour mới.
+{
+    "Name": "Huế 2N1D",
+    "Description": "Khám phá kinh thành Huế.",
+    "Price": 1200.00,
+    "Duration": 2,
+    "MaxParticipants": 20,
+    "DestinationID": 3,
+    "StatusID": 1
+}
+PUT /tours/1: Cập nhật tour với TourID = 1.
+{
+    "Price": 1600.00,
+    "MaxParticipants": 25
+}
+DELETE /tours/1: Xóa tour với TourID = 1.
+3. Bookings
+GET /bookings: Lấy tất cả đặt chỗ.
+GET /bookings/1: Lấy thông tin đặt chỗ với BookingID = 1.
+POST /bookings: Tạo đặt chỗ mới.
+{
+    "UserID": 1,
+    "TourID": 3,
+    "TotalPrice": 2000.00,
+    "StatusID": 1
+}
+PUT /bookings/1: Cập nhật trạng thái đặt chỗ với BookingID = 1.
+{
+    "StatusID": 2
+}
+DELETE /bookings/1: Xóa đặt chỗ với BookingID = 1.
+4. Payments
+GET /payments: Lấy tất cả thanh toán.
+GET /payments/1: Lấy thông tin thanh toán với PaymentID = 1.
+POST /payments: Tạo thanh toán mới.
+{
+    "BookingID": 3,
+    "UserID": 2,
+    "Amount": 2000.00,
+    "PaymentMethod": "Bank Transfer",
+    "StatusID": 1,
+    "TransactionID": "TXN345678"
+}
+PUT /payments/1: Cập nhật trạng thái thanh toán với PaymentID = 1.
+{
+    "StatusID": 3
+}
+DELETE /payments/1: Xóa thanh toán với PaymentID = 1.
+5. Destinations
+GET /destinations: Lấy tất cả điểm đến.
+GET /destinations/1: Lấy thông tin điểm đến với DestinationID = 1.
+POST /destinations: Tạo điểm đến mới.
+{
+    "Name": "Huế",
+    "Category": "Cultural",
+    "FileType": "Image",
+    "Description": "Kinh thành Huế với lịch sử lâu đời.",
+    "Location": "Thừa Thiên Huế, Việt Nam",
+    "Rating": 4.4
+}
+PUT /destinations/1: Cập nhật điểm đến với DestinationID = 1.
+{
+    "Rating": 4.9
+}
+DELETE /destinations/1: Xóa điểm đến với DestinationID = 1.
+

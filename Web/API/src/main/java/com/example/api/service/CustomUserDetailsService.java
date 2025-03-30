@@ -1,4 +1,3 @@
-package com.example.api.service;
-
+package com.example.api.servi
 public class CustomUserDetailsService {
 }
