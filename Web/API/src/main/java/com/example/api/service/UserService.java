@@ -1,7 +1,5 @@
 package com.example.api.service;
 
-
-
 import com.example.api.model.Role;
 import com.example.api.model.User;
 import com.example.api.model.UserToken;
@@ -49,6 +47,7 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setPhone(phone);
         user.setAddress(address);
+        user.setIsActive(false);
 
         // Assign default role (e.g., "USER")
         Set<Role> roles = new HashSet<>();
@@ -64,12 +63,31 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
+    public void activateUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại."));
+        if (user.getIsActive()) {
+            throw new RuntimeException("Tài khoản đã được kích hoạt.");
+        }
+        user.setIsActive(true);
+        userRepository.save(user);
+    }
+
     public String loginUser(String email, String password) {
         if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
             throw new IllegalArgumentException("Email and password must not be empty");
         }
         User user = userRepository.findByEmail(email);
-        if (user != null && passwordEncoder.matches(password, user.getPasswordHash())) {
+        if (user == null) {
+            throw new RuntimeException("Tài khoản không tồn tại.");
+        }
+        if (!user.getIsActive()) {
+            throw new RuntimeException("Tài khoản chưa được kích hoạt.");
+        }
+        if (passwordEncoder.matches(password, user.getPasswordHash())) {
             String token = jwtUtil.generateToken(email);
 
             // Save token to usertokens table
@@ -82,6 +100,6 @@ public class UserService {
 
             return token;
         }
-        throw new RuntimeException("Invalid credentials");
+        throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
     }
 }

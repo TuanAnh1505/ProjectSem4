@@ -25,6 +25,12 @@ public class User {
 
     private String address;
 
+    @Column(name = "is_active", columnDefinition = "BIT DEFAULT 0")
+    private Boolean isActive;
+
+    @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    private java.time.LocalDateTime createdAt;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference // Quản lý phía "cha" của quan hệ
     private Set<UserToken> tokens;
@@ -37,6 +43,11 @@ public class User {
     )
     @JsonManagedReference // Quản lý phía "cha" của quan hệ
     private Set<Role> roles;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = java.time.LocalDateTime.now();
+    }
 
     // Getters and Setters
     public Long getUserid() { return userid; }
@@ -51,6 +62,10 @@ public class User {
     public void setPhone(String phone) { this.phone = phone; }
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
     public Set<UserToken> getTokens() { return tokens; }
     public void setTokens(Set<UserToken> tokens) { this.tokens = tokens; }
     public Set<Role> getRoles() { return roles; }

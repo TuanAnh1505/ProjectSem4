@@ -1,24 +1,26 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
-import UserDashboard from './components/user/UserDashboard';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import UserDashboard from "./components/UserDashboard";
+import "./App.css";
 
-function App() {
-    return (
-        <Router>
-            {/* <nav>
-                <Link to="/login">Login</Link>
-                <Link to="/register">Register</Link>
-            </nav> */}
-            <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/user-dashboard" element={<UserDashboard />} />
-            </Routes>
-        </Router>
-    );
-}
+const App = () => {
+  const isAuthenticated = !!localStorage.getItem("token");
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />}
+        />
+      </Routes>
+    </Router>
+  );
+};
 
 export default App;
