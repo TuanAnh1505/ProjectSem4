@@ -68,7 +68,7 @@ function MyVietnam() {
             <div className={styles.column}>
               <div className={styles.ablockItem4}>
                 <img
-                  <img
+              
   loading="lazy"
   src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/165e50a1eee9e45268b8e846ee28c4bc7b0d17fa?apiKey=540684bd11b7482cbc2dc74299173efd&"
   className={styles.img17}

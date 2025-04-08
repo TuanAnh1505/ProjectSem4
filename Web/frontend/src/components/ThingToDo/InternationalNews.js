@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./VietnamTourism.module.css";
+import styles from "./InternationalNews.module.css";
 
 function InternationalNews() {
   return (
@@ -10,47 +10,52 @@ function InternationalNews() {
       <div className={styles.findoutthereasonswhyVietnamisworthtovisit}>
         Find out the reasons why Vietnam is worth to visit
       </div>
-      <div className={styles.div41}>
-        <div className={styles.div42}>
+      <div className={styles.div44}>
+        <div className={styles.div45}>
           <div className={styles.column12}>
             <img
               loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/19a71fb139e7a641b8a3161271924fbbd7905dd6?apiKey=540684bd11b7482cbc2dc74299173efd&"
-              className={styles.img36}
+              src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/19a71fb139e7a641b8a3161271924fbbd7905dd6?apiKey=b83079aa3b064aefaad9423de3864312&"
+              className={styles.img38}
+              alt=""
             />
           </div>
           <div className={styles.column13}>
             <img
               loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/be7bec0eea6d85d89e6c943c797823c8e331f78a?apiKey=540684bd11b7482cbc2dc74299173efd&"
-              className={styles.img37}
+              src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/be7bec0eea6d85d89e6c943c797823c8e331f78a?apiKey=b83079aa3b064aefaad9423de3864312&"
+              className={styles.img39}
+              alt=""
             />
           </div>
           <div className={styles.column14}>
             <img
               loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/a62d08c24ea62107a172339b239ce81e1f20c09f?apiKey=540684bd11b7482cbc2dc74299173efd&"
-              className={styles.img38}
+              src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/a62d08c24ea62107a172339b239ce81e1f20c09f?apiKey=b83079aa3b064aefaad9423de3864312&"
+              className={styles.img40}
+              alt=""
             />
           </div>
           <div className={styles.column15}>
             <img
               loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/ff0f69e1aa7997dd0bd02d2457a34ea8202c3e78?apiKey=540684bd11b7482cbc2dc74299173efd&"
-              className={styles.img39}
+              src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/ff0f69e1aa7997dd0bd02d2457a34ea8202c3e78?apiKey=b83079aa3b064aefaad9423de3864312&"
+              className={styles.img41}
+              alt=""
             />
           </div>
         </div>
       </div>
-      <div className={styles.div43}>
-        <div className={styles.div44}>
+      <div className={styles.div46}>
+        <div className={styles.div47}>
           <div className={styles.column16}>
             <div className={styles.divinfo}>
-              <div className={styles.div45}>
+              <div className={styles.div48}>
                 <img
                   loading="lazy"
-                  src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/b28e9c43a6d4a3a682983f13772df0ce41ab0d72?apiKey=540684bd11b7482cbc2dc74299173efd&"
-                  className={styles.img40}
+                  src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/b28e9c43a6d4a3a682983f13772df0ce41ab0d72?apiKey=b83079aa3b064aefaad9423de3864312&"
+                  className={styles.img42}
+                  alt=""
                 />
                 CNN Travel
               </div>
@@ -66,11 +71,12 @@ function InternationalNews() {
           </div>
           <div className={styles.column17}>
             <div className={styles.divinfo}>
-              <div className={styles.div47}>
+              <div className={styles.div50}>
                 <img
                   loading="lazy"
-                  src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/d76ba15e44282e014d61f763e193c12bc757169c?apiKey=540684bd11b7482cbc2dc74299173efd&"
-                  className={styles.img41}
+                  src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/d76ba15e44282e014d61f763e193c12bc757169c?apiKey=b83079aa3b064aefaad9423de3864312&"
+                  className={styles.img43}
+                  alt=""
                 />
                 CNTraveller
               </div>
@@ -86,11 +92,12 @@ function InternationalNews() {
           </div>
           <div className={styles.column18}>
             <div className={styles.divinfo2}>
-              <div className={styles.div49}>
+              <div className={styles.div52}>
                 <img
                   loading="lazy"
-                  src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/382201bf7071cf5d9158ce8ac1a026f41f64387d?apiKey=540684bd11b7482cbc2dc74299173efd&"
-                  className={styles.img42}
+                  src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/382201bf7071cf5d9158ce8ac1a026f41f64387d?apiKey=b83079aa3b064aefaad9423de3864312&"
+                  className={styles.img44}
+                  alt=""
                 />
                 The Times
               </div>
@@ -106,11 +113,12 @@ function InternationalNews() {
           </div>
           <div className={styles.column19}>
             <div className={styles.divinfo}>
-              <div className={styles.div51}>
+              <div className={styles.div54}>
                 <img
                   loading="lazy"
-                  src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/6c946394e2bddb40d4e7a0ff7590ca084c5fccfb?apiKey=540684bd11b7482cbc2dc74299173efd&"
-                  className={styles.img43}
+                  src="https://cdn.builder.io/api/v1/image/assets/540684bd11b7482cbc2dc74299173efd/6c946394e2bddb40d4e7a0ff7590ca084c5fccfb?apiKey=b83079aa3b064aefaad9423de3864312&"
+                  className={styles.img45}
+                  alt=""
                 />
                 Travel + Leisure
               </div>
