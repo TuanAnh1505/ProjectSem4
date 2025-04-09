@@ -1,66 +1,129 @@
 import React, { useState } from "react";
-import "../../css/auth/Register.css";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import "../styles/Register.css";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: ""
-  });
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Mật khẩu không khớp!");
-      return;
+    setError("");
+    setSuccess("");
+
+    try {
+      await axios.post("http://localhost:8080/api/auth/register", {
+        fullName,
+        email,
+        password,
+        phone,
+        address,
+      });
+      setSuccess("Đăng ký thành công!");
+      setTimeout(() => navigate("/login"), 1000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Có lỗi xảy ra!");
     }
-    alert("Đăng ký thành công!");
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-bold text-center mb-4">Đăng ký</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            name="email"
-            placeholder="Nhập email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mb-4"
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Mật khẩu"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mb-4"
-            required
-          />
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Nhập lại mật khẩu"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mb-4"
-            required
-          />
-          <button type="submit" className="w-full bg-red-500 text-white p-2 rounded">Đăng ký</button>
-        </form>
-        <p className="login-text">
-          Đã có tài khoản?{" "}
-          <button onClick={switchToLogin} className="login-link">
-            Đăng nhập
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h2>Đăng ký</h2>
+          <button onClick={() => navigate("/")} className="close-button">
+            ✕
           </button>
+        </div>
+        <p className="modal-subtitle">
+          Hoặc đăng ký bằng số điện thoại, email
         </p>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Họ và tên"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="email"
+              placeholder="Nhập email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          {/* <div className="form-group password-group">
+            <input
+              type="password"
+              placeholder="Mật khẩu"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <span className="password-toggle">👁️</span>
+          </div> */}
+                     <div className="form-group password-group">
+                <input
+                    type={showPassword ? "text" : "password"} // Thay đổi kiểu input
+                    placeholder="Mật khẩu"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <span
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)} // Toggle hiển thị mật khẩu
+style={{ cursor: "pointer" }} // Để người dùng biết có thể click
+                >
+                    {showPassword ? "👁️" : "🙈"} {/* Thay đổi icon */}
+                </span>
+            </div>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Số điện thoại"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Địa chỉ"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          {success && <p className="success-message">{success}</p>}
+          <button type="submit" className="submit-button">
+            Đăng ký
+          </button>
+        </form>
+        <div className="modal-footer">
+          <p>
+            Đã có tài khoản?{" "}
+            <button
+              onClick={() => navigate("/login")}
+              className="link-button"
+            >
+              Đăng nhập
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

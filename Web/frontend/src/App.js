@@ -1,18 +1,30 @@
-import React, { useState } from "react";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/auth/Login";
-import Register from "./components/auth/register";
+import Register from "./components/auth/Register";
+import UserDashboard from "./components/UserDashboard";
+import VietnamTourism from "./components/VietnamTourism/VietnamTourism";
+import "./App.css";
 
 const App = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const isAuthenticated = !!localStorage.getItem("token");
 
   return (
-    <div>
-      {isLogin ? (
-        <Login switchToRegister={() => setIsLogin(false)} />
-      ) : (
-        <Register switchToLogin={() => setIsLogin(true)} />
-      )}
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/tourism"
+          element={isAuthenticated ? <VietnamTourism /> : <Navigate to="/login" />}
+        />
+      </Routes>
+    </Router>
   );
 };
 
