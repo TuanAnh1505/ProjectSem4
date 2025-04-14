@@ -7,6 +7,7 @@ import ActivateAccount from "./components/auth/ActivateAccount";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import ChangePassword from "./components/auth/ChangePassword";
+import AdminDashboard from "./components/admin/AdminDashboard";
 import "./App.css";
 
 const App = () => {
@@ -25,6 +26,10 @@ const App = () => {
         <Route
           path="/dashboard"
           element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/admin-dashboard"
+          element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />}
         />
       </Routes>
     </Router>

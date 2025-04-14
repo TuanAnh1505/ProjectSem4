@@ -33,7 +33,14 @@ const Login = () => {
       setSuccess("Đăng nhập thành công!");
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("email", email);
-      setTimeout(() => navigate("/dashboard"), 1000);
+      localStorage.setItem("role", response.data.role); // Store role in localStorage
+
+      // Redirect based on role
+      if (response.data.role === "ADMIN") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Có lỗi xảy ra!");
     }

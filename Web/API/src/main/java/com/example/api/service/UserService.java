@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import com.example.api.service.EmailService;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -96,10 +98,47 @@ public class UserService {
             userToken.setUser(user);
             userToken.setToken(token);
             userToken.setCreatedat(LocalDateTime.now());
-            userToken.setExpiry(LocalDateTime.now().plusHours(10)); 
+            userToken.setExpiry(LocalDateTime.now().plusHours(10));
             userTokenRepository.save(userToken);
 
             return token;
+        }
+        throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
+    }
+
+    public Map<String, Object> loginUserWithRole(String email, String password) {
+        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Email and password must not be empty");
+        }
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("Tài khoản không tồn tại.");
+        }
+        if (!user.getIsActive()) {
+            throw new RuntimeException("Tài khoản chưa được kích hoạt.");
+        }
+        if (passwordEncoder.matches(password, user.getPasswordHash())) {
+            String token = jwtUtil.generateToken(email);
+
+            // Save token to usertokens table
+            UserToken userToken = new UserToken();
+            userToken.setUser(user);
+            userToken.setToken(token);
+            userToken.setCreatedat(LocalDateTime.now());
+            userToken.setExpiry(LocalDateTime.now().plusHours(10)); // 10 hours expiry
+            userTokenRepository.save(userToken);
+
+            // Get the user's role
+            String role = user.getRoles().stream()
+                    .map(Role::getRoleName)
+                    .findFirst()
+                    .orElse("USER");
+
+            // Return token and role
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("role", role);
+            return response;
         }
         throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
     }

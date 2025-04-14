@@ -1,0 +1,28 @@
+.admin-dashboard {
+  padding: 20px;
+  text-align: center;
+}
+
+.admin-dashboard h1 {
+  font-size: 24px;
+  color: #333;
+}
+
+.admin-dashboard p {
+  font-size: 16px;
+  color: #666;
+}
+
+.logout-button {
+  padding: 10px 20px;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #e6393b;
+}

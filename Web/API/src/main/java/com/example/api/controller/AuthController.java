@@ -56,10 +56,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            String token = userService.loginUser(
+            Map<String, Object> response = userService.loginUserWithRole(
                     loginRequest.getEmail(),
                     loginRequest.getPassword());
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
