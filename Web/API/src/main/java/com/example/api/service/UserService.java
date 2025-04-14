@@ -10,6 +10,7 @@ import com.example.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.api.service.EmailService;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -26,9 +27,11 @@ public class UserService {
 
     @Autowired
     private UserTokenRepository userTokenRepository;
-
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private EmailService emailService;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -36,7 +39,6 @@ public class UserService {
         if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
             throw new IllegalArgumentException("Email and password must not be empty");
         }
-        // Check if email already exists
         if (userRepository.findByEmail(email) != null) {
             throw new RuntimeException("Email already exists");
         }
@@ -49,7 +51,6 @@ public class UserService {
         user.setAddress(address);
         user.setIsActive(false);
 
-        // Assign default role (e.g., "USER")
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByRoleName("USER");
         if (userRole == null) {
@@ -91,12 +92,11 @@ public class UserService {
         if (passwordEncoder.matches(password, user.getPasswordHash())) {
             String token = jwtUtil.generateToken(email);
 
-            // Save token to usertokens table
             UserToken userToken = new UserToken();
             userToken.setUser(user);
             userToken.setToken(token);
             userToken.setCreatedat(LocalDateTime.now());
-            userToken.setExpiry(LocalDateTime.now().plusHours(10)); // 10 hours expiry
+            userToken.setExpiry(LocalDateTime.now().plusHours(10)); 
             userTokenRepository.save(userToken);
 
             return token;
@@ -105,20 +105,32 @@ public class UserService {
     }
 
     public void changePassword(String email, String currentPassword, String newPassword) {
-        if (email == null || email.isEmpty() || currentPassword == null || currentPassword.isEmpty()
-                || newPassword == null || newPassword.isEmpty()) {
-            throw new IllegalArgumentException("Email, current password, and new password must not be empty");
-        }
-
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new RuntimeException("Người dùng không tồn tại.");
         }
 
         if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
-            throw new RuntimeException("Current password is incorrect");
+            throw new RuntimeException("Mật khẩu hiện tại không chính xác.");
         }
 
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public void sendPasswordResetEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("Email không tồn tại trong hệ thống.");
+        }
+
+        String resetLink = "http://localhost:3000/reset-password?userId=" + user.getUserid();
+        emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+    }
+
+    public void resetPassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại."));
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }

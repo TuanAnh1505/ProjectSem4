@@ -13,7 +13,6 @@ const Login = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Extract the success message from the query parameter
     const params = new URLSearchParams(location.search);
     const message = params.get("message");
     if (message) {
@@ -33,6 +32,7 @@ const Login = () => {
       });
       setSuccess("Đăng nhập thành công!");
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("email", email);
       setTimeout(() => navigate("/dashboard"), 1000);
     } catch (err) {
       setError(err.response?.data?.message || "Có lỗi xảy ra!");
@@ -93,7 +93,8 @@ const Login = () => {
               Đăng ký tài khoản
             </button>
           </p>
-          <button className="link-button">Khôi phục mật khẩu</button>
+          <button onClick={() => navigate("/forgot-password")}
+           className="link-button">Khôi phục mật khẩu</button>
         </div>
       </div>
     </div>

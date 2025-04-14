@@ -4,6 +4,9 @@ import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import UserDashboard from "./components/user/UserDashboard";
 import ActivateAccount from "./components/auth/ActivateAccount";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPassword from "./components/auth/ResetPassword";
+import ChangePassword from "./components/auth/ChangePassword";
 import "./App.css";
 
 const App = () => {
@@ -16,6 +19,9 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/activate" element={<ActivateAccount />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/change-password" element={<ChangePassword />} />
         <Route
           path="/dashboard"
           element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />}

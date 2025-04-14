@@ -33,4 +33,24 @@ public class EmailService {
             throw new RuntimeException("Gửi email thất bại", e);
         }
     }
+
+    public void sendPasswordResetEmail(String to, String resetLink) {
+        jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject("Đặt lại mật khẩu");
+            String htmlContent = "<html><body>" +
+                    "<p>Nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:</p>" +
+                    "<a href=\"" + resetLink
+                    + "\" style=\"display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;\">Đặt lại mật khẩu</a>"
+                    +
+                    "</body></html>";
+            helper.setText(htmlContent, true);
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Gửi email thất bại", e);
+        }
+    }
 }
