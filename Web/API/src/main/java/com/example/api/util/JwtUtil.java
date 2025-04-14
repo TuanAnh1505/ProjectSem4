@@ -17,7 +17,6 @@ public class JwtUtil {
     private String secret;
 
     private Key getSigningKey() {
-        // Generate a secure key if the provided secret is not long enough
         if (secret.length() < 64) {
             System.out.println("Warning: Secret key is too short. Generating a secure key...");
             return Keys.secretKeyFor(SignatureAlgorithm.HS512);
@@ -29,7 +28,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) 
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }

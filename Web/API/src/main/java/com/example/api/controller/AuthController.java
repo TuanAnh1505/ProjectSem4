@@ -4,12 +4,14 @@ import com.example.api.dto.RegisterRequest;
 import com.example.api.dto.LoginRequest;
 import com.example.api.model.User;
 import com.example.api.service.UserService;
+
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import com.example.api.service.EmailService;
-
 
 
 @RestController
@@ -29,8 +31,7 @@ public class AuthController {
                     registerRequest.getEmail(),
                     registerRequest.getPassword(),
                     registerRequest.getPhone(),
-                    registerRequest.getAddress()
-            );
+                    registerRequest.getAddress());
 
             user.setIsActive(false); // Ensure account is inactive
             userService.saveUser(user);
@@ -45,11 +46,13 @@ public class AuthController {
     }
 
     @GetMapping("/activate")
-    public ResponseEntity<?> activateAccount(@RequestParam Long userId) {
+    public ResponseEntity<String> activateAccount(@RequestParam Long userId) {
         try {
             userService.activateUser(userId);
+            // Return a success message
             return ResponseEntity.ok("Tài khoản đã được kích hoạt thành công.");
         } catch (RuntimeException e) {
+            // Return an error message
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -59,11 +62,12 @@ public class AuthController {
         try {
             String token = userService.loginUser(
                     loginRequest.getEmail(),
-                    loginRequest.getPassword()
-            );
+                    loginRequest.getPassword());
             return ResponseEntity.ok(token);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+
+
 }

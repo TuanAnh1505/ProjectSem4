@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import  "../styles/Login.css";
+import "../styles/Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +10,16 @@ const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Extract the success message from the query parameter
+    const params = new URLSearchParams(location.search);
+    const message = params.get("message");
+    if (message) {
+      setSuccess(message);
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,8 +49,9 @@ const Login = () => {
           </button>
         </div>
         <p className="modal-subtitle">
-          Hoặc đăng nhập bằng số điện thoại, email
+          Đăng nhập bằng email và password của bạn.
         </p>
+        {success && <p className="success-message">{success}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -51,34 +62,23 @@ const Login = () => {
               required
             />
           </div>
-          {/* <div className="form-group password-group">
+          <div className="form-group password-group">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Mật khẩu"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <span className="password-toggle">👁️</span>
-          </div> */}
-           <div className="form-group password-group">
-                <input
-                    type={showPassword ? "text" : "password"} // Thay đổi kiểu input
-                    placeholder="Mật khẩu"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <span
-                    className="password-toggle"
-                    onClick={() => setShowPassword(!showPassword)} // Toggle hiển thị mật khẩu
-                    style={{ cursor: "pointer" }} // Để người dùng biết có thể click
-                >
-                    {showPassword ? "👁️" : "🙈"} {/* Thay đổi icon */}
-                </span>
-            </div>
+            <span
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ cursor: "pointer" }}
+            >
+              {showPassword ? "👁️" : "🙈"}
+            </span>
+          </div>
           {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
           <button type="submit" className="submit-button">
             Đăng nhập
           </button>

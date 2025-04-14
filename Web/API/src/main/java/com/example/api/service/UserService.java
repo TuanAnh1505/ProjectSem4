@@ -68,7 +68,8 @@ public class UserService {
     }
 
     public void activateUser(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại."));
         if (user.getIsActive()) {
             throw new RuntimeException("Tài khoản đã được kích hoạt.");
         }
@@ -101,5 +102,24 @@ public class UserService {
             return token;
         }
         throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
+    }
+
+    public void changePassword(String email, String currentPassword, String newPassword) {
+        if (email == null || email.isEmpty() || currentPassword == null || currentPassword.isEmpty()
+                || newPassword == null || newPassword.isEmpty()) {
+            throw new IllegalArgumentException("Email, current password, and new password must not be empty");
+        }
+
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }
