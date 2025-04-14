@@ -1,6 +1,7 @@
 .admin-dashboard {
   padding: 20px;
   text-align: center;
+  display: flex;
 }
 
 .admin-dashboard h1 {
@@ -25,4 +26,56 @@
 
 .logout-button:hover {
   background-color: #e6393b;
+}
+
+.aside-nav {
+  width: 250px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+}
+
+.aside-nav h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.aside-nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+.aside-nav ul li {
+  padding: 10px 0;
+  cursor: pointer;
+  color: #007bff;
+}
+
+.aside-nav ul li:hover {
+  text-decoration: underline;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.chart-container {
+  margin-top: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+  justify-content: center;
+  max-width: 300px; 
+}
+
+.chart-container canvas {
+  max-width: 100%; 
+  height: auto; 
+  aspect-ratio: 1; 
+  max-height: 300px; 
 }
