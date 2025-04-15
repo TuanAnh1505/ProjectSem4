@@ -10,7 +10,6 @@ import com.example.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.example.api.service.EmailService;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

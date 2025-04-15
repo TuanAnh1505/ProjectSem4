@@ -8,6 +8,8 @@ import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import ChangePassword from "./components/auth/ChangePassword";
 import AdminDashboard from "./components/admin/AdminDashboard";
+import UserIndex from "./components/admin/user/UserIndex";
+
 import "./App.css";
 
 const App = () => {
@@ -31,6 +33,11 @@ const App = () => {
           path="/admin-dashboard"
           element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />}
         />
+        <Route
+          path="/user"
+          element={isAuthenticated ? <UserIndex /> : <Navigate to="/login" />}
+        />
+
       </Routes>
     </Router>
   );

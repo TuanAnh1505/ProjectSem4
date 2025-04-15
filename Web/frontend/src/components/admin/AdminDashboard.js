@@ -7,6 +7,7 @@ import {
   Legend,
 } from "chart.js";
 import { Pie } from "react-chartjs-2";
+import UserIndex from "./user/UserIndex";
 import "../styles/AdminDashboard.css";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -15,7 +16,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isAsideCollapsed, setIsAsideCollapsed] = useState(false); 
+  const [isAsideCollapsed, setIsAsideCollapsed] = useState(false);
+  const [activePage, setActivePage] = useState("dashboard"); // State to track the active page
   const [chartData, setChartData] = useState({
     labels: ["Đã kích hoạt", "Chưa kích hoạt"],
     datasets: [
@@ -93,7 +95,7 @@ const AdminDashboard = () => {
   };
 
   const toggleAside = () => {
-    setIsAsideCollapsed((prev) => !prev); 
+    setIsAsideCollapsed((prev) => !prev);
   };
 
   return (
@@ -103,29 +105,27 @@ const AdminDashboard = () => {
           <div className="aside-header">
             <div className="logo-container">
               <img
-                src="" 
+                src=""
                 alt=""
                 className="logo"
               />
             </div>
-            
+
             <button className="toggle-button" onClick={toggleAside}>
               x {/* Hamburger menu icon */}
             </button>
-            
           </div>
         )}
         {!isAsideCollapsed && (
           <ul className="aside-menu">
             <li className="menu-section">MAIN PAGES</li>
-            <li onClick={() => navigate("/admin-dashboard")}>
+            <li onClick={() => setActivePage("dashboard")}>
               <span className="menu-icon">📊</span>
               <span className="menu-text">Dashboard</span>
             </li>
-            {/* ...other menu items... */}
             <div className="account-section">
               <li className="menu-section">ACCOUNT PAGES</li>
-              <li onClick={() => navigate("/user")}>
+              <li onClick={() => setActivePage("user")}>
                 <span className="menu-icon">👤</span>
                 <span className="menu-text">User</span>
               </li>
@@ -162,12 +162,18 @@ const AdminDashboard = () => {
             </div>
           )}
         </div>
-        <h1>Trang Dành Cho Quản Trị Viên (ADMIN)</h1>
-        <p>Chào mừng bạn đến với dashboard dành cho quản trị viên!</p>
-        <div className="chart-container">
-          <h4>Biểu đồ số lượng tài khoản</h4>
-          <Pie data={chartData} options={chartOptions} />
-        </div>
+        {activePage === "dashboard" ? (
+          <>
+            <h1>Trang Dành Cho Quản Trị Viên (ADMIN)</h1>
+            <p>Chào mừng bạn đến với dashboard dành cho quản trị viên!</p>
+            <div className="chart-container">
+              <h4>Biểu đồ số lượng tài khoản</h4>
+              <Pie data={chartData} options={chartOptions} />
+            </div>
+          </>
+        ) : (
+          <UserIndex />
+        )}
       </main>
     </div>
   );
