@@ -15,13 +15,14 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isAsideCollapsed, setIsAsideCollapsed] = useState(false); 
   const [chartData, setChartData] = useState({
     labels: ["Đã kích hoạt", "Chưa kích hoạt"],
     datasets: [
       {
         label: "Số lượng tài khoản",
-        data: [0, 0], 
-        backgroundColor: ["#28a745", "#dc3545"], 
+        data: [0, 0],
+        backgroundColor: ["#28a745", "#dc3545"],
         hoverBackgroundColor: ["#218838", "#c82333"],
       },
     ],
@@ -30,15 +31,15 @@ const AdminDashboard = () => {
   const chartOptions = {
     plugins: {
       legend: {
-        position: "bottom", 
+        position: "bottom",
         labels: {
           font: {
-            size: 14, 
+            size: 14,
           },
         },
       },
     },
-    maintainAspectRatio: false, 
+    maintainAspectRatio: false,
   };
 
   useEffect(() => {
@@ -91,17 +92,57 @@ const AdminDashboard = () => {
     setShowDropdown((prev) => !prev);
   };
 
+  const toggleAside = () => {
+    setIsAsideCollapsed((prev) => !prev); 
+  };
+
   return (
     <div className="admin-dashboard">
-      <aside className="aside-nav">
-        <h2>Quản trị</h2>
-        <ul>
-          <li onClick={() => navigate("/admin-dashboard")}>Dashboard</li>
-          <li onClick={() => navigate("/change-password")}>Đổi mật khẩu</li>
-          <li onClick={handleLogout}>Đăng xuất</li>
-        </ul>
+      <aside className={`aside-nav ${isAsideCollapsed ? "collapsed" : ""}`}>
+        {!isAsideCollapsed && (
+          <div className="aside-header">
+            <div className="logo-container">
+              <img
+                src="" 
+                alt=""
+                className="logo"
+              />
+            </div>
+            
+            <button className="toggle-button" onClick={toggleAside}>
+              x {/* Hamburger menu icon */}
+            </button>
+            
+          </div>
+        )}
+        {!isAsideCollapsed && (
+          <ul className="aside-menu">
+            <li className="menu-section">MAIN PAGES</li>
+            <li onClick={() => navigate("/admin-dashboard")}>
+              <span className="menu-icon">📊</span>
+              <span className="menu-text">Dashboard</span>
+            </li>
+            {/* ...other menu items... */}
+            <div className="account-section">
+              <li className="menu-section">ACCOUNT PAGES</li>
+              <li onClick={() => navigate("/user")}>
+                <span className="menu-icon">👤</span>
+                <span className="menu-text">User</span>
+              </li>
+              <li onClick={handleLogout}>
+                <span className="menu-icon">🚪</span>
+                <span className="menu-text">Logout</span>
+              </li>
+            </div>
+          </ul>
+        )}
       </aside>
-      <main className="main-content">
+      <main className={`main-content ${isAsideCollapsed ? "collapsed" : ""}`}>
+        {isAsideCollapsed && (
+          <button className="toggle-button-main" onClick={toggleAside}>
+            ☰ {/* Hamburger menu icon */}
+          </button>
+        )}
         <div className="button-container">
           <div className="user-icon" onClick={toggleDropdown}>
             👤
