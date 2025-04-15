@@ -9,6 +9,8 @@ import ResetPassword from "./components/auth/ResetPassword";
 import ChangePassword from "./components/auth/ChangePassword";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import UserIndex from "./components/admin/user/UserIndex";
+import DashboardPage from "./components/admin/DashboardPage";
+import AdminPage from "./components/admin/AdminPage";
 
 import "./App.css";
 
@@ -37,7 +39,8 @@ const App = () => {
           path="/user"
           element={isAuthenticated ? <UserIndex /> : <Navigate to="/login" />}
         />
-
+        <Route path="/admin/dashboard" element={<DashboardPage />} />
+        <Route path="/admin/user" element={<AdminPage />} />
       </Routes>
     </Router>
   );
