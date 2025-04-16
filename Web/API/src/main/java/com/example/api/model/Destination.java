@@ -1,49 +1,107 @@
+
 package com.example.api.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
+import lombok.*;
+
 
 import java.time.LocalDateTime;
-
+@Getter
+@Setter
 @Entity
+@Table(name = "destinations")
 @Data
-@Table(name = "Destinations")
 public class Destination {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer destinationId;
+    private Integer destinationid;
 
-    @NotBlank(message = "Name is required")
-    @Size(max = 100, message = "Name must not exceed 100 characters")
     @Column(nullable = false)
     private String name;
 
-    @NotBlank(message = "Category is required")
-    @Size(max = 100, message = "Category must not exceed 100 characters")
     @Column(nullable = false)
     private String category;
 
-    @NotNull(message = "FileType is required")
     @Enumerated(EnumType.STRING)
-    private FileType fileType;
+    private FileType filetype;
 
-    @Size(max = 65535, message = "Description must not exceed 65535 characters")
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Size(max = 255, message = "Location must not exceed 255 characters")
     private String location;
 
-    @Min(value = 0, message = "Rating must be at least 0")
-    @Max(value = 5, message = "Rating must not exceed 5")
     @Column(columnDefinition = "FLOAT DEFAULT 0")
     private Float rating;
 
-    @Column(name = "createdAt", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "createdat", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime createdat;
 
     public enum FileType {
-        Image, Video
+        image, video
+    }
+
+    public Integer getDestinationid() {
+        return destinationid;
+    }
+
+    public void setDestinationid(Integer destinationid) {
+        this.destinationid = destinationid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public FileType getFiletype() {
+        return filetype;
+    }
+
+    public void setFiletype(FileType filetype) {
+        this.filetype = filetype;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Float getRating() {
+        return rating;
+    }
+
+    public void setRating(Float rating) {
+        this.rating = rating;
+    }
+
+    public LocalDateTime getCreatedat() {
+        return createdat;
+    }
+
+    public void setCreatedat(LocalDateTime createdat) {
+        this.createdat = createdat;
     }
 }

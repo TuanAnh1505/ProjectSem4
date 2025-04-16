@@ -1,30 +1,74 @@
+
 package com.example.api.dto;
 
-import jakarta.validation.constraints.*;
-import lombok.Data;
+import lombok.*;
 
+
+@Getter
+@Setter
 @Data
 public class DestinationDTO {
-    private Integer destinationId;
-
-    @NotBlank(message = "Name is required")
-    @Size(max = 255, message = "Name must not exceed 255 characters")
+    private Integer destinationid;
     private String name;
-
-    @NotBlank(message = "Category is required")
-    @Size(max = 100, message = "Category must not exceed 100 characters")
     private String category;
-
-    @NotNull(message = "FileType is required")
-    private String fileType;
-
-    @Size(max = 65535, message = "Description must not exceed 65535 characters")
+    private String filetype;
     private String description;
-
-    @Size(max = 255, message = "Location must not exceed 255 characters")
     private String location;
-
-    @Min(value = 0, message = "Rating must be at least 0")
-    @Max(value = 5, message = "Rating must not exceed 5")
     private Float rating;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFiletype() {
+        return filetype;
+    }
+
+    public void setFiletype(String filetype) {
+        this.filetype = filetype;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Float getRating() {
+        return rating;
+    }
+
+    public void setRating(Float rating) {
+        this.rating = rating;
+    }
+
+    public Integer getDestinationid() {
+        return destinationid;
+    }
+
+    public void setDestinationid(Integer destinationid) {
+        this.destinationid = destinationid;
+    }
 }

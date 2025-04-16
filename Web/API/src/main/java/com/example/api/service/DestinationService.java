@@ -6,8 +6,8 @@ import com.example.api.repository.DestinationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,65 +15,72 @@ public class DestinationService {
 
     @Autowired
     private DestinationRepository destinationRepository;
-
-    // CREATE
-    public Destination createDestination(DestinationDTO destinationDTO) {
-        Destination destination = new Destination();
-        mapDtoToEntity(destinationDTO, destination);
-        return destinationRepository.save(destination);
+    public DestinationDTO createDestination(DestinationDTO destinationDTO) {
+        Destination destination = mapToEntity(destinationDTO);
+        Destination savedDestination = destinationRepository.save(destination);
+        return mapToDTO(savedDestination);
     }
 
-    // READ all
+
+    public DestinationDTO getDestinationById(Integer id) {
+        Destination destination = destinationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Destination not found with id: " + id));
+        return mapToDTO(destination);
+    }
     public List<DestinationDTO> getAllDestinations() {
         return destinationRepository.findAll().stream()
-                .map(this::mapEntityToDto)
+                .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
-
-    // READ by ID
-    public Optional<DestinationDTO> getDestinationById(Integer id) {
-        return destinationRepository.findById(id)
-                .map(this::mapEntityToDto);
-    }
-
-    // UPDATE
     public DestinationDTO updateDestination(Integer id, DestinationDTO destinationDTO) {
-        Optional<Destination> existingDestination = destinationRepository.findById(id);
-        if (existingDestination.isPresent()) {
-            Destination destination = existingDestination.get();
-            mapDtoToEntity(destinationDTO, destination);
-            Destination updatedDestination = destinationRepository.save(destination);
-            return mapEntityToDto(updatedDestination);
-        } else {
-            throw new RuntimeException("Destination not found with id: " + id);
-        }
+        Destination destination = destinationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Destination not found with id: " + id));
+        updateEntityFromDTO(destination, destinationDTO);
+        Destination updatedDestination = destinationRepository.save(destination);
+        return mapToDTO(updatedDestination);
     }
-
-    // DELETE
     public void deleteDestination(Integer id) {
-        if (destinationRepository.existsById(id)) {
-            destinationRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Destination not found with id: " + id);
+        Destination destination = destinationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Destination not found with id: " + id));
+        destinationRepository.delete(destination);
+    }
+    private Destination mapToEntity(DestinationDTO dto) {
+        Destination destination = new Destination();
+        destination.setDestinationid(dto.getDestinationid());
+        destination.setName(dto.getName());
+        destination.setCategory(dto.getCategory());
+        destination.setDescription(dto.getDescription());
+        destination.setLocation(dto.getLocation());
+        destination.setRating(dto.getRating());
+        if (dto.getFiletype() != null) {
+            destination.setFiletype(Destination.FileType.valueOf(dto.getFiletype()));
         }
+        destination.setCreatedat(LocalDateTime.now());
+        return destination;
     }
-    private void mapDtoToEntity(DestinationDTO dto, Destination entity) {
-        entity.setName(dto.getName());
-        entity.setCategory(dto.getCategory());
-        entity.setFileType(Destination.FileType.valueOf(dto.getFileType()));
-        entity.setDescription(dto.getDescription());
-        entity.setLocation(dto.getLocation());
-        entity.setRating(dto.getRating());
-    }
-    private DestinationDTO mapEntityToDto(Destination entity) {
+    private DestinationDTO mapToDTO(Destination destination) {
         DestinationDTO dto = new DestinationDTO();
-        dto.setDestinationId(entity.getDestinationId());
-        dto.setName(entity.getName());
-        dto.setCategory(entity.getCategory());
-        dto.setFileType(entity.getFileType().name());
-        dto.setDescription(entity.getDescription());
-        dto.setLocation(entity.getLocation());
-        dto.setRating(entity.getRating());
+        dto.setDestinationid(destination.getDestinationid());
+        dto.setName(destination.getName());
+        dto.setCategory(destination.getCategory());
+        dto.setDescription(destination.getDescription());
+        dto.setLocation(destination.getLocation());
+        dto.setRating(destination.getRating());
+
+        if (destination.getFiletype() != null) {
+            dto.setFiletype(destination.getFiletype().name());
+        }
         return dto;
+    }
+    private void updateEntityFromDTO(Destination destination, DestinationDTO dto) {
+        destination.setName(dto.getName());
+        destination.setCategory(dto.getCategory());
+        destination.setDescription(dto.getDescription());
+        destination.setLocation(dto.getLocation());
+        destination.setRating(dto.getRating());
+        if (dto.getFiletype() != null) {
+            destination.setFiletype(Destination.FileType.valueOf(dto.getFiletype()));
+        }
+
     }
 }
