@@ -88,9 +88,6 @@ const AdminDashboard = ({ children }) => {
               >
                 Đổi Mật Khẩu
               </button>
-              <button onClick={handleLogout} className="dropdown-item">
-                Đăng xuất
-              </button>
             </div>
           )}
         </div>

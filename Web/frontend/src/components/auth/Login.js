@@ -33,7 +33,7 @@ const Login = () => {
       setSuccess("Đăng nhập thành công!");
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("email", email);
-      localStorage.setItem("role", response.data.role); // Store role in localStorage
+      localStorage.setItem("role", response.data.role); 
 
       // Redirect based on role
       if (response.data.role === "ADMIN") {
