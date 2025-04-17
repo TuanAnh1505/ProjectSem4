@@ -1,11 +1,14 @@
 package com.example.api.controller;
 
+import com.example.api.dto.UserDTO; // Import UserDTO
 import com.example.api.service.AdminService;
+import com.example.api.model.User; // Import User model
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,5 +21,10 @@ public class AdminController {
     @GetMapping("/account-stats")
     public Map<String, Integer> getAccountStats() {
         return adminService.getAccountStats();
+    }
+
+    @GetMapping("/users")
+    public List<UserDTO> getUsers() {
+        return adminService.getUserDTOs(); // Return DTOs instead of full User objects
     }
 }

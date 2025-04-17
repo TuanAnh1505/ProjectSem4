@@ -1,0 +1,159 @@
+Container chính
+.container-fluid {
+  padding: 20px;
+}
+
+.sidebar-open {
+
+  transition: margin 0.3s ease-in-out;
+}
+
+/* Tiêu đề */
+h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Bảng */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Tiêu đề bảng */
+.user-table thead {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.user-table th {
+  padding: 15px;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #555;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+/* Nội dung bảng */
+.user-table td {
+  padding:  15px;
+  text-align: left;
+  font-size: 0.95rem;
+  color: #333;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+/* Hiệu ứng hover */
+.user-table tbody tr:hover {
+  background-color: #f1f3f5;
+}
+
+/* Cột trạng thái */
+.badge {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 12px;
+}
+
+.badge.bg-success {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.badge.bg-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+/* Nút hành động */
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border: none;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
+/* Icon trong nút */
+.fas.fa-trash {
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .user-table {
+    font-size: 0.85rem;
+  }
+
+  .user-table th,
+  .user-table td {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Table scroll */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+
+
+
+/* Pagination container */
+.pagination-container {
+  margin-top: 20px;
+}
+
+/* Pagination button styling */
+.pagination-button {
+  background-color: #f8f9fa; /* Light gray background */
+  border: 1px solid #dee2e6; /* Border color */
+  color: #007bff; /* Bootstrap primary color */
+  padding: 5px 10px;
+  margin: 0 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pagination-button:hover {
+  background-color: #007bff; /* Bootstrap primary color */
+  color: #fff; /* White text */
+}
+
+.pagination-button.active {
+  background-color: #007bff; /* Active button background */
+  color: #fff; /* Active button text */
+  border-color: #007bff;
+}

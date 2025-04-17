@@ -1,11 +1,15 @@
 package com.example.api.service;
 
+import com.example.api.dto.UserDTO;
+import com.example.api.model.User;
 import com.example.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
@@ -24,5 +28,19 @@ public class AdminService {
         stats.put("nonActivatedAccounts", nonActivatedAccounts);
 
         return stats;
+    }
+
+    public List<UserDTO> getUserDTOs() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(user -> new UserDTO(
+                        user.getUserid(),
+                        user.getFullName(),
+                        user.getEmail(),
+                        user.getPhone(),
+                        user.getAddress(),
+                        user.getIsActive(),
+                        user.getCreatedAt()))
+                .collect(Collectors.toList());
     }
 }

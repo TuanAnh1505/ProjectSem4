@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/AdminDashboard.css";
+import logo from "../../assets/logo.png"; // Import logo
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();
@@ -36,11 +37,7 @@ const AdminDashboard = ({ children }) => {
         {!isAsideCollapsed && (
           <div className="aside-header">
             <div className="logo-container">
-              <img
-                src=""
-                alt=""
-                className="logo"
-              />
+              <img src={logo} alt="Logo" className="logo" />
             </div>
 
             <button className="toggle-button" onClick={toggleAside}>
@@ -69,7 +66,7 @@ const AdminDashboard = ({ children }) => {
           </ul>
         )}
       </aside>
-      <main className={`main-content ${isAsideCollapsed ? "collapsed" : ""}`}>
+      <main className={`main-content ${isAsideCollapsed ? "collapsed" : ""}`} style={{ width: isAsideCollapsed ? "calc(100% - 50px)" : "calc(100% - 250px)" }}>
         {isAsideCollapsed && (
           <button className="toggle-button-main" onClick={toggleAside}>
             ☰ {/* Hamburger menu icon */}
@@ -92,7 +89,21 @@ const AdminDashboard = ({ children }) => {
           )}
         </div>
         {children}
+
+
+          <footer style={{ 
+            backgroundColor: "#f8f9fa", 
+            textAlign: "center", 
+            padding: "15px 0", 
+            color: "#333" 
+          }}>
+            <p>© 2023 Admin Dashboard. All rights reserved.</p>
+            <p>Designed by Your Name</p>
+          </footer>
+
+
       </main>
+      
     </div>
   );
 };
