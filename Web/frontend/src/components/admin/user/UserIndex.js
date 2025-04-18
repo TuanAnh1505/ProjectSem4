@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/UserIndex.css"; // Đảm bảo đường dẫn đúng
+import { useTranslation } from "react-i18next";
+import "../../styles/UserIndex.css";
+
 
 const UserIndex = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1); // Current page state
-  const [usersPerPage] = useState(10); // Number of users per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(10);
 
-
-
-  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -36,75 +36,79 @@ const UserIndex = () => {
     fetchUsers();
   }, []);
 
-  // Get current users for the current page
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
-  // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+   
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{ height: "100vh" }}
+        >
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">{t("loading")}</span>
+          </div>
         </div>
-      </div>
+
     );
   }
 
   return (
-    <div className="main-container">
 
-      <h1 className="title text-center mb-4">Danh sách người dùng</h1>
-      <div className="table-responsive">
-        <table className="table table-bordered table-hover table-striped user-table">
-          <thead className="table-light">
-            <tr>
-              <th>ID</th>
-              <th>Họ và tên</th>
-              <th>Email</th>
-              <th>Số điện thoại</th>
-              <th>Địa chỉ</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentUsers.map((user) => (
-              <tr key={user.userid}>
-                <td>{user.userid}</td>
-                <td>{user.fullName}</td>
-                <td>{user.email}</td>
-                <td>{user.phone}</td>
-                <td>{user.address}</td>
-                <td>
-                  {user.isActive ? (
-                    <span className="badge bg-success">Hoạt động</span>
-                  ) : (
-                    <span className="badge bg-secondary">Ngưng</span>
-                  )}
-                </td>
-                <td>{new Date(user.createdAt).toLocaleString()}</td>
-                <td className="text-center">
-                  <button className="btn btn-danger btn-sm">
-                    <i className="fas fa-trash"></i>
-                  </button>
-                </td>
+      <div className="main-container">
+        <h1 className="title text-center mb-4">{t("user_list_title")}</h1>
+        <div className="table-responsive">
+          <table className="table table-bordered table-hover table-striped user-table">
+            <thead className="table-light">
+              <tr>
+                <th>{t("id")}</th>
+                <th>{t("full_name")}</th>
+                <th>{t("email")}</th>
+                <th>{t("phone")}</th>
+                <th>{t("address")}</th>
+                <th>{t("status")}</th>
+                <th>{t("created_at")}</th>
+                <th>{t("actions")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentUsers.map((user) => (
+                <tr key={user.userid}>
+                  <td>{user.userid}</td>
+                  <td>{user.fullName}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>{user.address}</td>
+                  <td>
+                    {user.isActive ? (
+                      <span className="badge bg-success">{t("active")}</span>
+                    ) : (
+                      <span className="badge bg-secondary">{t("inactive")}</span>
+                    )}
+                  </td>
+                  <td>{new Date(user.createdAt).toLocaleString()}</td>
+                  <td className="text-center">
+                    <button className="btn btn-danger btn-sm">
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Pagination
+          usersPerPage={usersPerPage}
+          totalUsers={users.length}
+          paginate={paginate}
+          currentPage={currentPage}
+        />
       </div>
-      <Pagination
-        usersPerPage={usersPerPage}
-        totalUsers={users.length}
-        paginate={paginate}
-        currentPage={currentPage}
-      />
-    </div>
+
   );
 };
 
