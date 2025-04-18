@@ -17,7 +17,9 @@
   width: 400px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
+.modal-content * {
+  box-sizing: border-box;
+}
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -54,6 +56,7 @@
   border-radius: 4px;
   background: #f5f5f5;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 .password-group {
@@ -115,3 +118,6 @@
 .link-button:hover {
   text-decoration: underline;
 }
+
+
+

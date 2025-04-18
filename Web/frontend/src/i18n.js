@@ -32,6 +32,10 @@ const resources = {
       actions: "Actions",
       active: "Active",
       inactive: "Inactive",
+      // Bản dịch cho bộ lọc
+      total_users: "Total Users",
+      all_users: "All Users",
+
     },
   },
   vi: {
@@ -63,6 +67,9 @@ const resources = {
       actions: "Hành động",
       active: "Hoạt động",
       inactive: "Ngưng",
+      // Bản dịch cho bộ lọc
+      total_users: "Tổng số người dùng",
+      all_users: "Tất cả người dùng",
     },
   },
 };

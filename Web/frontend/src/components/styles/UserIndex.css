@@ -157,3 +157,95 @@ h1 {
   color: #fff; /* Active button text */
   border-color: #007bff;
 }
+
+
+/* Container chính */
+.main-container {
+  padding: 20px;
+}
+
+/* Bộ lọc */
+.filter-container {
+  display: flex;
+  justify-content: flex-end; /* Căn phải */
+  margin-bottom: 20px;
+}
+
+.filter-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Căn phải các phần tử con */
+}
+
+.filter-content {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Khoảng cách giữa select và text */
+}
+
+.filter-select {
+  width: 150px;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.total-users {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  background-color: #f1f3f5;
+  padding: 6px 12px;
+  border-radius: 5px;
+}
+
+/* Bảng */
+.user-table {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table-light {
+  background-color: #f8f9fa;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 5px 10px;
+}
+
+/* Phân trang */
+.pagination-container {
+  margin-top: 20px;
+}
+
+.pagination-button {
+  margin: 0 5px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.pagination-button:hover {
+  background-color: #a3a3a3;
+}
+
+.pagination-button.active {
+  background-color: #878889;
+  color: #fff;
+  border-color: #878889;
+}
