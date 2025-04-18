@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "usertokens")
 public class UserToken {
+    
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

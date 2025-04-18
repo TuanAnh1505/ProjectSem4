@@ -16,6 +16,7 @@ const DashboardPage = () => {
         hoverBackgroundColor: ["#218838", "#c82333"],
       },
     ],
+    
   });
 
   const chartOptions = {

@@ -32,6 +32,8 @@ public class EmailService {
         } catch (MessagingException e) {
             throw new RuntimeException("Gửi email thất bại", e);
         }
+
+        
     }
 
     public void sendPasswordResetEmail(String to, String resetLink) {

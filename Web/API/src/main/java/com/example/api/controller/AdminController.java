@@ -28,3 +28,4 @@ public class AdminController {
         return adminService.getUserDTOs(); // Return DTOs instead of full User objects
     }
 }
+

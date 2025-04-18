@@ -9,6 +9,7 @@ const UserIndex = () => {
 
 
 
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {

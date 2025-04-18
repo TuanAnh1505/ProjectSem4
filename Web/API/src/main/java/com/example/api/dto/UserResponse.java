@@ -16,6 +16,7 @@ public class UserResponse {
         this.address = address;
     }
 
+    
     // Getters and Setters
     public Long getUserId() {
         return userId;
@@ -28,7 +29,7 @@ public class UserResponse {
     public String getFullName() {
         return fullName;
     }
-
+    
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }

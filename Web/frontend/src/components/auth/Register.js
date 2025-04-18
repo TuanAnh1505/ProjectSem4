@@ -26,6 +26,7 @@ const Register = () => {
     setShowPassword(!showPassword);
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");

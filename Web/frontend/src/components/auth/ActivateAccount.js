@@ -21,6 +21,7 @@ const ActivateAccount = () => {
       }
     };
 
+    
     activateAccount();
   }, [searchParams, navigate]);
 

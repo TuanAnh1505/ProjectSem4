@@ -19,6 +19,7 @@ public class Role {
     @JsonBackReference // Quản lý phía "con" của quan hệ
     private Set<User> users;
 
+    
     // Getters and Setters
     public Integer getRoleid() { return roleid; }
     public void setRoleid(Integer roleid) { this.roleid = roleid; }

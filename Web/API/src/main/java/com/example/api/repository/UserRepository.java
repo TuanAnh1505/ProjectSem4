@@ -10,3 +10,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     int countByIsActive(boolean isActive);
 }
+
+

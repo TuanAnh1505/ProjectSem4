@@ -31,6 +31,7 @@ public class UserDTO {
         this.userid = userid;
     }
 
+    
     public String getFullName() {
         return fullName;
     }

@@ -21,6 +21,7 @@ const ResetPassword = () => {
       return;
     }
 
+    
     const userId = searchParams.get("userId");
     try {
       const response = await axios.post("http://localhost:8080/api/auth/reset-password", {

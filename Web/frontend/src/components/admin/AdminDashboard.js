@@ -9,6 +9,7 @@ const AdminDashboard = ({ children }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isAsideCollapsed, setIsAsideCollapsed] = useState(false);
 
+  
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
     if (storedEmail) {
