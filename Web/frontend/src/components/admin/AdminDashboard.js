@@ -60,7 +60,7 @@ const AdminDashboard = ({ children }) => {
               <img src={logo} alt="Logo" className="logo" />
             </div>
             <button className="toggle-button" onClick={toggleAside}>
-              x
+            ✕
             </button>
           </div>
         )}

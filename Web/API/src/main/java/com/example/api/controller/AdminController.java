@@ -1,8 +1,8 @@
 package com.example.api.controller;
 
-import com.example.api.dto.UserDTO; // Import UserDTO
+import com.example.api.dto.UserDTO;
 import com.example.api.service.AdminService;
-import com.example.api.model.User; // Import User model
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +25,7 @@ public class AdminController {
 
     @GetMapping("/users")
     public List<UserDTO> getUsers() {
-        return adminService.getUserDTOs(); // Return DTOs instead of full User objects
+        return adminService.getUserDTOs(); 
     }
 }
 

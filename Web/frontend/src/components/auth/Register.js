@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from "axios";
 import "../styles/Register.css";
 
@@ -90,7 +91,7 @@ const Register = () => {
               onClick={togglePasswordVisibility}
               style={{ cursor: "pointer" }}
             >
-              {showPassword ? "👁️" : "🙈"}
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
           <div className="form-group">
