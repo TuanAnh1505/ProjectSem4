@@ -54,6 +54,12 @@ public class TourService {
                 .orElseThrow(() -> new RuntimeException("Tour not found with id: " + id));
         tourRepository.delete(tour);
     }
+    public List<TourDTO> searchTours(String name, Integer destinationid) {
+        List<Tour> tours = tourRepository.findByNameAndDestination(name, destinationid);
+        return tours.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
     private Tour mapToEntity(TourDTO dto) {
         Tour tour = new Tour();
         tour.setTourid(dto.getTourid());

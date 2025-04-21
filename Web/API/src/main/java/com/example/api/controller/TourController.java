@@ -43,4 +43,11 @@ public class TourController {
         tourService.deleteTour(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<TourDTO>> searchTours(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "destinationid", required = false) Integer destinationid) {
+        List<TourDTO> tours = tourService.searchTours(name, destinationid);
+        return ResponseEntity.ok(tours);
+    }
 }
