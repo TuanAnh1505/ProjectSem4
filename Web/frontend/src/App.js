@@ -14,8 +14,21 @@ import AdminPage from "./components/admin/AdminPage";
 
 import "./App.css";
 
-const App = () => {
+const App = () => {  
   const isAuthenticated = !!localStorage.getItem("token");
+  const userRole = localStorage.getItem("role");
+  
+  const ProtectedRoute = ({ element, requiredRole }) => {
+    if (!isAuthenticated) {
+      return <Navigate to="/login" />;
+    }
+    
+    if (requiredRole && userRole !== requiredRole) {
+      return <Navigate to="/dashboard" />;
+    }
+    
+    return element;
+  };
 
   
   return (
@@ -30,18 +43,26 @@ const App = () => {
         <Route path="/change-password" element={<ChangePassword />} />
         <Route
           path="/dashboard"
-          element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />}
+          element={<ProtectedRoute element={<UserDashboard />} />}
         />
+
+        {/* Admin routes */}
         <Route
           path="/admin-dashboard"
-          element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />}
+          element={<ProtectedRoute element={<AdminDashboard />} requiredRole="ADMIN" />}
         />
         <Route
           path="/user"
-          element={isAuthenticated ? <UserIndex /> : <Navigate to="/login" />}
+          element={<ProtectedRoute element={<UserIndex />} requiredRole="ADMIN" />}
         />
-        <Route path="/admin/dashboard" element={<DashboardPage />} />
-        <Route path="/admin/user" element={<AdminPage />} />
+        <Route
+          path="/admin/dashboard"
+          element={<ProtectedRoute element={<DashboardPage />} requiredRole="ADMIN" />}
+        />
+        <Route
+          path="/admin/user"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+        />
       </Routes>
     </Router>
   );

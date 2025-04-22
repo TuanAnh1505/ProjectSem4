@@ -5,6 +5,8 @@ import com.example.api.dto.LoginRequest;
 import com.example.api.model.User;
 import com.example.api.service.UserService;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import com.example.api.service.EmailService;
 
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -99,5 +102,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+
+
+    
 
 }

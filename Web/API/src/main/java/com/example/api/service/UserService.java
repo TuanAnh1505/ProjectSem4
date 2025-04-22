@@ -7,6 +7,9 @@ import com.example.api.repository.RoleRepository;
 import com.example.api.repository.UserRepository;
 import com.example.api.repository.UserTokenRepository;
 import com.example.api.util.JwtUtil;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -173,4 +176,7 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
+
+
 }

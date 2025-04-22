@@ -3,6 +3,9 @@ package com.example.api.service;
 import com.example.api.dto.UserDTO;
 import com.example.api.model.User;
 import com.example.api.repository.UserRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,5 +47,13 @@ public class AdminService {
                         user.getIsActive(),
                         user.getCreatedAt()))
                 .collect(Collectors.toList());
+    }
+
+    public int deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+        user.setIsActive(false);
+        userRepository.save(user);
+        return userRepository.countByIsActive(true); 
     }
 }
