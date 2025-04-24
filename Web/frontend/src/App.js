@@ -14,6 +14,7 @@ import AdminPage from "./components/admin/AdminPage";
 
 import "./App.css";
 
+
 const App = () => {  
   const isAuthenticated = !!localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
@@ -63,6 +64,10 @@ const App = () => {
           path="/admin/user"
           element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
         />
+        {/* <Route
+          path="/admin/user/register"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+        /> */}
       </Routes>
     </Router>
   );

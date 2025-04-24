@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from "axios";
-import "../styles/Register.css";
+import "../styles/user/Register.css";
 
 const API_REGISTER_URL = "http://localhost:8080/api/auth/register";
 const SUCCESS_MESSAGE = "Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.";

@@ -29,13 +29,17 @@ public class AdminController {
 
     @GetMapping("/users")
     public List<UserDTO> getUsers() {
-        return adminService.getUserDTOs(); 
+        return adminService.getUserDTOs();
     }
 
     @DeleteMapping("/delete-account/{userid}")
-    public ResponseEntity<Integer> deleteUser(@PathVariable Long userid) {
-        int activeUsers = adminService.deleteUser(userid);
-        return new ResponseEntity<>(activeUsers, HttpStatus.OK);
+    public ResponseEntity<?> deleteUserAccount(@PathVariable Long userid) {
+        try {
+            adminService.deleteUserAccount(userid);
+            return ResponseEntity.ok("User account successfully deleted");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
-}
 
+}

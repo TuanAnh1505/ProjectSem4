@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "../styles/ChangePassword.css";
+import "../styles/user/ChangePassword.css";
 
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");

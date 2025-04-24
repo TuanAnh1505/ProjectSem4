@@ -36,6 +36,21 @@ const resources = {
       total_users: "Total Users",
       all_users: "All Users",
 
+      // Bản dịch cho UserRegister
+      register_title: "Register",
+      register_new: "Register New User",
+      register_success: "User registered successfully!",
+      register_error: "Error registering user.",
+      full_name_placeholder: "Enter full name",
+      email_placeholder: "Enter email",
+      password_placeholder: "Enter password",
+      phone_placeholder: "Enter phone number",
+      address_placeholder: "Enter address",
+      role_placeholder: "Select role",
+      register_button: "Register",
+
+      // Bản dịch cho các thông báo lỗi
+      no_accounts_found: "No accounts found.",
     },
   },
   vi: {
@@ -70,6 +85,20 @@ const resources = {
       // Bản dịch cho bộ lọc
       total_users: "Tổng số người dùng",
       all_users: "Tất cả người dùng",
+      // Bản dịch cho UserRegister
+      register_title: "Đăng Ký",
+      register_new: "Đăng Ký Người Dùng Mới",
+      register_success: "Người dùng đã được đăng ký thành công!",
+      register_error: "Lỗi khi đăng ký người dùng.",
+      full_name_placeholder: "Nhập họ và tên",
+      email_placeholder: "Nhập email",
+      password_placeholder: "Nhập mật khẩu",
+      phone_placeholder: "Nhập số điện thoại",
+      address_placeholder: "Nhập địa chỉ",
+      role_placeholder: "Chọn vai trò",
+      register_button: "Đăng Ký",
+      // Bản dịch cho các thông báo lỗi
+      no_accounts_found: "Không tìm thấy tài khoản nào.",
     },
   },
 };
