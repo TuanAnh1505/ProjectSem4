@@ -1,23 +1,36 @@
+
 package com.example.api.dto;
 
+import lombok.Data;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
+@Data
 public class TourDTO {
-    private Integer tourid;
-    private String name;
-    private String description;
-    private BigDecimal price;
-    private Integer duration;
-    private Integer maxparticipants;
-    private Integer destinationid;
-    private Integer statusid;
+    private Integer tourId;
 
-    public Integer getTourid() {
-        return tourid;
+    @NotNull(message = "Name cannot be null")
+    private String name;
+
+    private String description;
+
+    @NotNull(message = "Price cannot be null")
+    private BigDecimal price;
+
+    private Integer duration;
+
+    private Integer maxParticipants;
+
+    private Integer destinationId;
+
+    private Integer statusId;
+
+    public Integer getTourId() {
+        return tourId;
     }
 
-    public void setTourid(Integer tourid) {
-        this.tourid = tourid;
+    public void setTourId(Integer tourId) {
+        this.tourId = tourId;
     }
 
     public String getName() {
@@ -52,27 +65,27 @@ public class TourDTO {
         this.duration = duration;
     }
 
-    public Integer getMaxparticipants() {
-        return maxparticipants;
+    public Integer getMaxParticipants() {
+        return maxParticipants;
     }
 
-    public void setMaxparticipants(Integer maxparticipants) {
-        this.maxparticipants = maxparticipants;
+    public void setMaxParticipants(Integer maxParticipants) {
+        this.maxParticipants = maxParticipants;
     }
 
-    public Integer getDestinationid() {
-        return destinationid;
+    public Integer getDestinationId() {
+        return destinationId;
     }
 
-    public void setDestinationid(Integer destinationid) {
-        this.destinationid = destinationid;
+    public void setDestinationId(Integer destinationId) {
+        this.destinationId = destinationId;
     }
 
-    public Integer getStatusid() {
-        return statusid;
+    public Integer getStatusId() {
+        return statusId;
     }
 
-    public void setStatusid(Integer statusid) {
-        this.statusid = statusid;
+    public void setStatusId(Integer statusId) {
+        this.statusId = statusId;
     }
 }

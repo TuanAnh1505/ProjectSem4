@@ -1,3 +1,4 @@
+
 package com.example.api.controller;
 
 import com.example.api.dto.TourDTO;
@@ -11,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tours")
 public class TourController {
+
     @Autowired
     private TourService tourService;
 
@@ -32,6 +34,14 @@ public class TourController {
         return ResponseEntity.ok(tours);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<TourDTO>> searchTours(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "destinationId", required = false) Integer destinationId) {
+        List<TourDTO> tours = tourService.searchTours(name, destinationId);
+        return ResponseEntity.ok(tours);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TourDTO> updateTour(@PathVariable Integer id, @RequestBody TourDTO tourDTO) {
         TourDTO updatedTour = tourService.updateTour(id, tourDTO);
@@ -42,12 +52,5 @@ public class TourController {
     public ResponseEntity<Void> deleteTour(@PathVariable Integer id) {
         tourService.deleteTour(id);
         return ResponseEntity.noContent().build();
-    }
-    @GetMapping("/search")
-    public ResponseEntity<List<TourDTO>> searchTours(
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "destinationid", required = false) Integer destinationid) {
-        List<TourDTO> tours = tourService.searchTours(name, destinationid);
-        return ResponseEntity.ok(tours);
     }
 }

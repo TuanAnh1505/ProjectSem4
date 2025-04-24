@@ -1,3 +1,4 @@
+
 package com.example.api.service;
 
 import com.example.api.dto.TourDTO;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class TourService {
+
     @Autowired
     private TourRepository tourRepository;
 
@@ -25,10 +27,17 @@ public class TourService {
     private TourStatusRepository tourStatusRepository;
 
     public TourDTO createTour(TourDTO tourDTO) {
+        if (tourDTO.getName() == null || tourDTO.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        if (tourDTO.getPrice() == null) {
+            throw new IllegalArgumentException("Price cannot be null");
+        }
         Tour tour = mapToEntity(tourDTO);
         Tour savedTour = tourRepository.save(tour);
         return mapToDTO(savedTour);
     }
+
     public TourDTO getTourById(Integer id) {
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tour not found with id: " + id));
@@ -42,6 +51,12 @@ public class TourService {
     }
 
     public TourDTO updateTour(Integer id, TourDTO tourDTO) {
+        if (tourDTO.getName() == null || tourDTO.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        if (tourDTO.getPrice() == null) {
+            throw new IllegalArgumentException("Price cannot be null");
+        }
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tour not found with id: " + id));
         updateEntityFromDTO(tour, tourDTO);
@@ -54,28 +69,30 @@ public class TourService {
                 .orElseThrow(() -> new RuntimeException("Tour not found with id: " + id));
         tourRepository.delete(tour);
     }
-    public List<TourDTO> searchTours(String name, Integer destinationid) {
-        List<Tour> tours = tourRepository.findByNameAndDestination(name, destinationid);
+
+    public List<TourDTO> searchTours(String name, Integer destinationId) {
+        List<Tour> tours = tourRepository.findByNameAndDestination(name, destinationId);
         return tours.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
+
     private Tour mapToEntity(TourDTO dto) {
         Tour tour = new Tour();
-        tour.setTourid(dto.getTourid());
+        tour.setTourId(dto.getTourId());
         tour.setName(dto.getName());
         tour.setDescription(dto.getDescription());
         tour.setPrice(dto.getPrice());
         tour.setDuration(dto.getDuration());
-        tour.setMaxparticipants(dto.getMaxparticipants());
-        if (dto.getDestinationid() != null) {
-            Destination destination = destinationRepository.findById(dto.getDestinationid())
-                    .orElseThrow(() -> new RuntimeException("Destination not found with id: " + dto.getDestinationid()));
+        tour.setMaxParticipants(dto.getMaxParticipants());
+        if (dto.getDestinationId() != null) {
+            Destination destination = destinationRepository.findById(dto.getDestinationId())
+                    .orElseThrow(() -> new RuntimeException("Destination not found with id: " + dto.getDestinationId()));
             tour.setDestination(destination);
         }
-        if (dto.getStatusid() != null) {
-            TourStatus status = tourStatusRepository.findById(dto.getStatusid())
-                    .orElseThrow(() -> new RuntimeException("TourStatus not found with id: " + dto.getStatusid()));
+        if (dto.getStatusId() != null) {
+            TourStatus status = tourStatusRepository.findById(dto.getStatusId())
+                    .orElseThrow(() -> new RuntimeException("TourStatus not found with id: " + dto.getStatusId()));
             tour.setStatus(status);
         }
         return tour;
@@ -83,17 +100,17 @@ public class TourService {
 
     private TourDTO mapToDTO(Tour tour) {
         TourDTO dto = new TourDTO();
-        dto.setTourid(tour.getTourid());
+        dto.setTourId(tour.getTourId());
         dto.setName(tour.getName());
         dto.setDescription(tour.getDescription());
         dto.setPrice(tour.getPrice());
         dto.setDuration(tour.getDuration());
-        dto.setMaxparticipants(tour.getMaxparticipants());
+        dto.setMaxParticipants(tour.getMaxParticipants());
         if (tour.getDestination() != null) {
-            dto.setDestinationid(tour.getDestination().getDestinationid());
+            dto.setDestinationId(tour.getDestination().getDestinationId());
         }
         if (tour.getStatus() != null) {
-            dto.setStatusid(tour.getStatus().getTourstatusid());
+            dto.setStatusId(tour.getStatus().getTourStatusId());
         }
         return dto;
     }
@@ -103,17 +120,16 @@ public class TourService {
         tour.setDescription(dto.getDescription());
         tour.setPrice(dto.getPrice());
         tour.setDuration(dto.getDuration());
-        tour.setMaxparticipants(dto.getMaxparticipants());
-        if (dto.getDestinationid() != null) {
-            Destination destination = destinationRepository.findById(dto.getDestinationid())
-                    .orElseThrow(() -> new RuntimeException("Destination not found with id: " + dto.getDestinationid()));
+        tour.setMaxParticipants(dto.getMaxParticipants());
+        if (dto.getDestinationId() != null) {
+            Destination destination = destinationRepository.findById(dto.getDestinationId())
+                    .orElseThrow(() -> new RuntimeException("Destination not found with id: " + dto.getDestinationId()));
             tour.setDestination(destination);
         }
-        if (dto.getStatusid() != null) {
-            TourStatus status = tourStatusRepository.findById(dto.getStatusid())
-                    .orElseThrow(() -> new RuntimeException("TourStatus not found with id: " + dto.getStatusid()));
+        if (dto.getStatusId() != null) {
+            TourStatus status = tourStatusRepository.findById(dto.getStatusId())
+                    .orElseThrow(() -> new RuntimeException("TourStatus not found with id: " + dto.getStatusId()));
             tour.setStatus(status);
         }
     }
-
 }

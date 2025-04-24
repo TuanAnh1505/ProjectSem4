@@ -1,13 +1,9 @@
-
 package com.example.api.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-
+import lombok.Data;
 import java.time.LocalDateTime;
-@Getter
-@Setter
+
 @Entity
 @Table(name = "destinations")
 @Data
@@ -15,7 +11,8 @@ public class Destination {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer destinationid;
+    @Column(name = "destination_id")
+    private Integer destinationId;
 
     @Column(nullable = false)
     private String name;
@@ -24,29 +21,30 @@ public class Destination {
     private String category;
 
     @Enumerated(EnumType.STRING)
-    private FileType filetype;
+    @Column(name = "file_type")
+    private FileType fileType;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
     private String location;
 
-    @Column(columnDefinition = "FLOAT DEFAULT 0")
-    private Float rating;
+    @Column(columnDefinition = "DECIMAL(3,1) DEFAULT 0")
+    private Double rating;
 
-    @Column(name = "createdat", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdat;
+    @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     public enum FileType {
         image, video
     }
 
-    public Integer getDestinationid() {
-        return destinationid;
+    public Integer getDestinationId() {
+        return destinationId;
     }
 
-    public void setDestinationid(Integer destinationid) {
-        this.destinationid = destinationid;
+    public void setDestinationId(Integer destinationId) {
+        this.destinationId = destinationId;
     }
 
     public String getName() {
@@ -65,12 +63,12 @@ public class Destination {
         this.category = category;
     }
 
-    public FileType getFiletype() {
-        return filetype;
+    public FileType getFileType() {
+        return fileType;
     }
 
-    public void setFiletype(FileType filetype) {
-        this.filetype = filetype;
+    public void setFileType(FileType fileType) {
+        this.fileType = fileType;
     }
 
     public String getDescription() {
@@ -89,19 +87,19 @@ public class Destination {
         this.location = location;
     }
 
-    public Float getRating() {
+    public Double getRating() {
         return rating;
     }
 
-    public void setRating(Float rating) {
+    public void setRating(Double rating) {
         this.rating = rating;
     }
 
-    public LocalDateTime getCreatedat() {
-        return createdat;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedat(LocalDateTime createdat) {
-        this.createdat = createdat;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

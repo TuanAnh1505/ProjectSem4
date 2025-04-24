@@ -1,22 +1,30 @@
 package com.example.api.dto;
 
+import lombok.Data;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+
+@Data
 public class TourStatusDTO {
-    private  Integer tourstatusid;
-    private String statusname;
+    private Integer tourStatusId;
 
-    public Integer getTourstatusid() {
-        return tourstatusid;
+    @NotNull(message = "Status name cannot be null")
+    @NotBlank(message = "Status name cannot be blank")
+    private String statusName;
+
+    public Integer getTourStatusId() {
+        return tourStatusId;
     }
 
-    public void setTourstatusid(Integer tourstatusid) {
-        this.tourstatusid = tourstatusid;
+    public void setTourStatusId(Integer tourStatusId) {
+        this.tourStatusId = tourStatusId;
     }
 
-    public String getStatusname() {
-        return statusname;
+    public String getStatusName() {
+        return statusName;
     }
 
-    public void setStatusname(String statusname) {
-        this.statusname = statusname;
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
     }
 }

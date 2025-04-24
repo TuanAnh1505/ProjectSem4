@@ -1,20 +1,41 @@
 
 package com.example.api.dto;
 
-import lombok.*;
+import lombok.Data;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 
-
-@Getter
-@Setter
 @Data
 public class DestinationDTO {
-    private Integer destinationid;
+    private Integer destinationId;
+
+    @NotNull(message = "Name cannot be null")
+    @NotBlank(message = "Name cannot be blank")
     private String name;
+
+    @NotNull(message = "Category cannot be null")
+    @NotBlank(message = "Category cannot be blank")
     private String category;
-    private String filetype;
+
+    private String fileType;
+
     private String description;
+
     private String location;
-    private Float rating;
+
+    @Min(value = 0, message = "Rating must be between 0 and 5")
+    @Max(value = 5, message = "Rating must be between 0 and 5")
+    private Double rating;
+
+    public Integer getDestinationId() {
+        return destinationId;
+    }
+
+    public void setDestinationId(Integer destinationId) {
+        this.destinationId = destinationId;
+    }
 
     public String getName() {
         return name;
@@ -24,20 +45,20 @@ public class DestinationDTO {
         this.name = name;
     }
 
-    public String getFiletype() {
-        return filetype;
-    }
-
-    public void setFiletype(String filetype) {
-        this.filetype = filetype;
-    }
-
     public String getCategory() {
         return category;
     }
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
     }
 
     public String getDescription() {
@@ -56,19 +77,11 @@ public class DestinationDTO {
         this.location = location;
     }
 
-    public Float getRating() {
+    public Double getRating() {
         return rating;
     }
 
-    public void setRating(Float rating) {
+    public void setRating(Double rating) {
         this.rating = rating;
-    }
-
-    public Integer getDestinationid() {
-        return destinationid;
-    }
-
-    public void setDestinationid(Integer destinationid) {
-        this.destinationid = destinationid;
     }
 }

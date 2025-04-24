@@ -1,18 +1,20 @@
+
 package com.example.api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "tours")
 @Data
 public class Tour {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer tourid;
+    @Column(name = "tour_id")
+    private Integer tourId;
 
     @Column(nullable = false)
     private String name;
@@ -24,26 +26,27 @@ public class Tour {
     private BigDecimal price;
 
     private Integer duration;
-    private Integer maxparticipants;
+
+    @Column(name = "max_participants")
+    private Integer maxParticipants;
 
     @ManyToOne
-    @JoinColumn(name = "destinationid")
+    @JoinColumn(name = "destination_id")
     private Destination destination;
 
     @ManyToOne
-    @JoinColumn(name = "statusid")
+    @JoinColumn(name = "status_id")
     private TourStatus status;
 
-    @Column(name = "createdat", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
-    private LocalDateTime createdat;
+    @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-
-    public Integer getTourid() {
-        return tourid;
+    public Integer getTourId() {
+        return tourId;
     }
 
-    public void setTourid(Integer tourid) {
-        this.tourid = tourid;
+    public void setTourId(Integer tourId) {
+        this.tourId = tourId;
     }
 
     public String getName() {
@@ -78,12 +81,12 @@ public class Tour {
         this.duration = duration;
     }
 
-    public Integer getMaxparticipants() {
-        return maxparticipants;
+    public Integer getMaxParticipants() {
+        return maxParticipants;
     }
 
-    public void setMaxparticipants(Integer maxparticipants) {
-        this.maxparticipants = maxparticipants;
+    public void setMaxParticipants(Integer maxParticipants) {
+        this.maxParticipants = maxParticipants;
     }
 
     public Destination getDestination() {
@@ -102,11 +105,11 @@ public class Tour {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedat() {
-        return createdat;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedat(LocalDateTime createdat) {
-        this.createdat = createdat;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

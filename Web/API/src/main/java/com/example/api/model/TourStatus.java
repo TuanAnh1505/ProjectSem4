@@ -1,32 +1,35 @@
+
 package com.example.api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@Table(name = "tour_status")
 @Data
-@Table(name="tour_status")
 public class TourStatus {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer tourstatusid;
+    @Column(name = "tour_status_id")
+    private Integer tourStatusId;
 
-    @Column(name = "statusname", nullable = false , unique = true,length = 100)
-    private String statusname;
+    @Column(name = "status_name", nullable = false, unique = true)
+    private String statusName;
 
-    public Integer getTourstatusid() {
-        return tourstatusid;
+    public Integer getTourStatusId() {
+        return tourStatusId;
     }
 
-    public void setTourstatusid(Integer tourstatusid) {
-        this.tourstatusid = tourstatusid;
+    public void setTourStatusId(Integer tourStatusId) {
+        this.tourStatusId = tourStatusId;
     }
 
-    public String getStatusname() {
-        return statusname;
+    public String getStatusName() {
+        return statusName;
     }
 
-    public void setStatusname(String statusname) {
-        this.statusname = statusname;
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
     }
 }
