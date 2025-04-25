@@ -19,6 +19,7 @@ const App = () => {
           path="/dashboard"
           element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />}
         />
+        
         <Route
           path="/tourism"
           element={isAuthenticated ? <VietnamTourism /> : <Navigate to="/login" />}
