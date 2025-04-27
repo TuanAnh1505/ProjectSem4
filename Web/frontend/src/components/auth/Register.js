@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../styles/Register.css";
+import "../styles/user/Register.css";
+
+const API_REGISTER_URL = "http://localhost:8080/api/auth/register";
+const SUCCESS_MESSAGE = "Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.";
+const ERROR_MESSAGE = "Có lỗi xảy ra!";
 
 const Register = () => {
   const [fullName, setFullName] = useState("");
@@ -14,30 +18,38 @@ const Register = () => {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
+  const handleInputChange = (setter) => (e) => {
+    setter(e.target.value);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
     try {
-      await axios.post("http://localhost:8080/api/auth/register", {
+      await axios.post(API_REGISTER_URL, {
         fullName,
         email,
         password,
         phone,
         address,
       });
-      setSuccess("Đăng ký thành công!");
-      setTimeout(() => navigate("/login"), 1000);
+      setSuccess(SUCCESS_MESSAGE);
     } catch (err) {
-      setError(err.response?.data?.message || "Có lỗi xảy ra!");
+      setError(err.response?.data?.message || ERROR_MESSAGE);
     }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="register-modal-overlay">
+      <div className="register-modal-content">
+        <div className="register-modal-header">
           <h2>Đăng ký</h2>
           <button onClick={() => navigate("/")} className="close-button">
             ✕
@@ -47,64 +59,54 @@ const Register = () => {
           Hoặc đăng ký bằng số điện thoại, email
         </p>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="register-form-group">
             <input
               type="text"
               placeholder="Họ và tên"
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={handleInputChange(setFullName)}
               required
             />
           </div>
-          <div className="form-group">
+          <div className="register-form-group">
             <input
               type="email"
               placeholder="Nhập email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleInputChange(setEmail)}
               required
             />
           </div>
-          {/* <div className="form-group password-group">
+          <div className="register-form-group register-password-group">
             <input
-              type="password"
-              placeholder="Mật khẩu"
+              type={showPassword ? "text" : "password"}
+              placeholder="Nhập mật khẩu"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handleInputChange(setPassword)}
               required
             />
-            <span className="password-toggle">👁️</span>
-          </div> */}
-                     <div className="form-group password-group">
-                <input
-                    type={showPassword ? "text" : "password"} // Thay đổi kiểu input
-                    placeholder="Mật khẩu"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <span
-                    className="password-toggle"
-                    onClick={() => setShowPassword(!showPassword)} // Toggle hiển thị mật khẩu
-                    style={{ cursor: "pointer" }} // Để người dùng biết có thể click
-                >
-                    {showPassword ? "👁️" : "🙈"} {/* Thay đổi icon */}
-                </span>
-            </div>
-          <div className="form-group">
+            <span
+              className="register-password-toggle"
+              onClick={togglePasswordVisibility}
+              style={{ cursor: "pointer" }}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
+          <div className="register-form-group">
             <input
               type="text"
               placeholder="Số điện thoại"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handleInputChange(setPhone)}
             />
           </div>
-          <div className="form-group">
+          <div className="register-form-group">
             <input
               type="text"
               placeholder="Địa chỉ"
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={handleInputChange(setAddress)}
             />
           </div>
           {error && <p className="error-message">{error}</p>}
@@ -116,10 +118,7 @@ const Register = () => {
         <div className="modal-footer">
           <p>
             Đã có tài khoản?{" "}
-            <button
-              onClick={() => navigate("/login")}
-              className="link-button"
-            >
+            <button onClick={() => navigate("/login")} className="link-button">
               Đăng nhập
             </button>
           </p>

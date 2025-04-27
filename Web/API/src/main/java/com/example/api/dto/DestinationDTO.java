@@ -20,7 +20,7 @@ public class DestinationDTO {
     @NotBlank(message = "Category cannot be blank")
     private String category;
 
-    private List<String> filePaths;
+    private List<String> filePaths; // Stores file paths (e.g., "/uploads/destinations/uuid_file.jpg")
 
     private String description;
 
