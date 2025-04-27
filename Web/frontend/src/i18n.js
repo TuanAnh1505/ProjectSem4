@@ -8,11 +8,14 @@ const resources = {
       // Bản dịch cho AdminDashboard và DashboardPage
       admin_dashboard_title: "Admin Dashboard",
       welcome_message: "Welcome to the admin dashboard!",
-      chart_title: "Account Statistics Chart",
+      chart_user_title: "Account Statistics Chart",
+      chart_destination_title: "Destination Statistics Chart",
+      number_destination_title : "Number of Destinations",
       activated_accounts: "Activated",
       non_activated_accounts: "Non-Activated",
       main_pages: "MAIN PAGES",
       dashboard: "Dashboard",
+      destination: "Destination",
       account_pages: "ACCOUNT PAGES",
       user: "User",
       logout: "Logout",
@@ -51,6 +54,19 @@ const resources = {
 
       // Bản dịch cho các thông báo lỗi
       no_accounts_found: "No accounts found.",
+
+      // Destination
+
+      destination_title: "Destinations List",
+      create_destination: "Create",
+      name:"Name",
+      category:"Category",
+      file_paths:"File Paths",
+      destinations:"Description",
+      location: "Location",
+      rating: "Rating",
+
+
     },
   },
   vi: {
@@ -58,11 +74,14 @@ const resources = {
       // Bản dịch cho AdminDashboard và DashboardPage
       admin_dashboard_title: "Trang Dành Cho Quản Trị Viên",
       welcome_message: "Chào mừng bạn đến với dashboard dành cho quản trị viên!",
-      chart_title: "Biểu đồ số lượng tài khoản",
+      chart_user_title: "Biểu đồ tài khoản",
+      chart_destination_title: "Biểu đồ địa điểm",
+      number_destination_title: "Số lượng địa điểm",
       activated_accounts: "Đã kích hoạt",
       non_activated_accounts: "Chưa kích hoạt",
       main_pages: "TRANG CHÍNH",
       dashboard: "Bảng Điều Khiển",
+      destination: "Điểm Đến",
       account_pages: "TRANG TÀI KHOẢN",
       user: "Người Dùng",
       logout: "Đăng Xuất",
@@ -99,6 +118,17 @@ const resources = {
       register_button: "Đăng Ký",
       // Bản dịch cho các thông báo lỗi
       no_accounts_found: "Không tìm thấy tài khoản nào.",
+
+      // Bản dịch cho Destination
+
+      destination_title: "Danh Sách Điểm Đến",
+      create_destination: "Tạo Mới",
+      name:"Tên",
+      category:" Danh Mục",
+      file_paths:" Đường Dẫn Tệp",
+      destinations:" Điểm Đến",
+      location: " Vị Trí",
+      rating: " Xếp Hạng",
     },
   },
 };

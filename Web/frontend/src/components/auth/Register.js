@@ -48,9 +48,9 @@ const Register = () => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="register-modal-overlay">
+      <div className="register-modal-content">
+        <div className="register-modal-header">
           <h2>Đăng ký</h2>
           <button onClick={() => navigate("/")} className="close-button">
             ✕
@@ -60,7 +60,7 @@ const Register = () => {
           Hoặc đăng ký bằng số điện thoại, email
         </p>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="register-form-group">
             <input
               type="text"
               placeholder="Họ và tên"
@@ -69,7 +69,7 @@ const Register = () => {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="register-form-group">
             <input
               type="email"
               placeholder="Nhập email"
@@ -78,7 +78,7 @@ const Register = () => {
               required
             />
           </div>
-          <div className="form-group password-group">
+          <div className="register-form-group register-password-group">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Nhập mật khẩu"
@@ -87,14 +87,14 @@ const Register = () => {
               required
             />
             <span
-              className="password-toggle"
+              className="register-password-toggle"
               onClick={togglePasswordVisibility}
               style={{ cursor: "pointer" }}
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-          <div className="form-group">
+          <div className="register-form-group">
             <input
               type="text"
               placeholder="Số điện thoại"
@@ -102,7 +102,7 @@ const Register = () => {
               onChange={handleInputChange(setPhone)}
             />
           </div>
-          <div className="form-group">
+          <div className="register-form-group">
             <input
               type="text"
               placeholder="Địa chỉ"

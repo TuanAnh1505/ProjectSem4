@@ -1,4 +1,4 @@
-.modal-overlay {
+.login-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -10,7 +10,7 @@
   align-items: center;
 }
 
-.modal-content {
+.login-modal-content {
   background: white;
   padding: 24px;
   border-radius: 8px;
@@ -20,14 +20,14 @@
 .modal-content * {
   box-sizing: border-box;
 }
-.modal-header {
+.login-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
  
-.modal-header h2 {
+.login-modal-header h2 {
   font-size: 24px;
   font-weight: bold;
 }
@@ -45,13 +45,14 @@
   margin-bottom: 16px;
 }
 
-.form-group {
+.login-form-group {
   margin-bottom: 16px;
 }
 
-.form-group input {
+.login-form-group input {
   width: 100%;
   padding: 10px;
+
   border: 1px solid #ddd;
   border-radius: 4px;
   background: #f5f5f5;
@@ -63,7 +64,7 @@
   position: relative;
 }
 
-.password-toggle {
+.login-password-toggle {
   position: absolute;
   right: 10px;
   top: 50%;
@@ -102,7 +103,7 @@
   margin-top: 16px;
 }
 
-.modal-footer p {
+.login-modal-footer p {
   color: #666;
   margin-bottom: 8px;
 }
@@ -119,5 +120,23 @@
   text-decoration: underline;
 }
 
+.login-password-group {
+  position: relative;
+  width: 100%;
+}
+
+.login-password-group input {
+  width: 100%;
+  padding-right: 40px; /* Make space for the icon */
+}
+
+.login-password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 1;
+}
 
 

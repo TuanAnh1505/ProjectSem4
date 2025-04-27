@@ -27,7 +27,7 @@ const ForgotPassword = () => {
     <div className="forgot-password-container">
       <h2>Quên mật khẩu</h2>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
+        <div className="forgot-password-form-group">
           <input
             type="email"
             placeholder="Nhập email của bạn"

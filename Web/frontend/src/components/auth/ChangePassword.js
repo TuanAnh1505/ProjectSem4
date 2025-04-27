@@ -45,7 +45,7 @@ const ChangePassword = () => {
     <div className="change-password-container">
       <h2>Đổi Mật Khẩu</h2>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
+        <div className="change-password-form-group">
           <input
             type="password"
             placeholder="Mật khẩu hiện tại"
@@ -54,7 +54,7 @@ const ChangePassword = () => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className="change-password-form-group">
           <input
             type="password"
             placeholder="Mật khẩu mới"
@@ -63,7 +63,7 @@ const ChangePassword = () => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className="change-password-form-group">
           <input
             type="password"
             placeholder="Xác nhận mật khẩu"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import "../../styles/admin/UserIndex.css";
 
 const UserIndex = () => {
@@ -12,7 +12,7 @@ const UserIndex = () => {
   const [usersPerPage] = useState(10);
   const [filterStatus, setFilterStatus] = useState("all");
   const [message, setMessage] = useState(""); // For success/error messages
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {

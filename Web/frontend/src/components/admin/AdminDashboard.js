@@ -71,6 +71,10 @@ const AdminDashboard = ({ children }) => {
               <span className="menu-icon">📊</span>
               <span className="menu-text">{t("dashboard")}</span>
             </li>
+            <li onClick={() => navigate("/admin/destination")}>
+              <span className="menu-icon">🌍</span>
+              <span className="menu-text">{t("destination")}</span>
+            </li>
             <div className="account-section">
               <li className="menu-section">{t("account_pages")}</li>
               <li onClick={() => navigate("/admin/user")}>

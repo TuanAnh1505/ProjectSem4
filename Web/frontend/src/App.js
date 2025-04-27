@@ -12,6 +12,7 @@ import UserIndex from "./components/admin/user/UserIndex";
 import DashboardPage from "./components/admin/DashboardPage";
 import AdminPage from "./components/admin/AdminPage";
 
+
 import "./App.css";
 
 
@@ -68,6 +69,22 @@ const App = () => {
           path="/admin/user/register"
           element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
         /> */}
+        <Route
+          path="/admin/destination"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+        />
+        <Route
+          path="/admin/destination/add"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+        />
+        <Route
+          path="/admin/destination/edit/:destinationId"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+        />
+        <Route
+          path="/admin/destination/:destinationId"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}       
+        />
       </Routes>
     </Router>
   );

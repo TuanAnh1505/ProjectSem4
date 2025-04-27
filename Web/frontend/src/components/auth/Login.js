@@ -47,6 +47,10 @@ const Login = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const handleGoogleLogin = () => {
     // Placeholder for Google login functionality
     console.log("Google login clicked");
@@ -54,9 +58,9 @@ const Login = () => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="login-modal-overlay">
+      <div className="login-modal-content">
+        <div className="login-modal-header">
           <h2>Đăng nhập</h2>
           <button onClick={() => navigate("/")} className="close-button">
             ✕
@@ -67,7 +71,7 @@ const Login = () => {
         </p>
         {success && <p className="success-message">{success}</p>}
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="login-form-group">
             <input
               type="email"
               placeholder="Nhập email"
@@ -76,21 +80,22 @@ const Login = () => {
               required
             />
           </div>
-          <div className="form-group password-group">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Mật khẩu"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <span
-              className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{ cursor: "pointer" }}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
+          <div className="login-form-group">
+            <div className="login-password-group">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Mật khẩu"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <span
+                className="login-password-toggle"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
           </div>
           {error && <p className="error-message">{error}</p>}
           <button type="submit" className="submit-button">

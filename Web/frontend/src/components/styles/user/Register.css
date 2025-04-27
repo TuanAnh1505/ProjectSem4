@@ -1,4 +1,4 @@
-.modal-overlay {
+.register-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -10,29 +10,29 @@
     align-items: center;
   }
   
-  .modal-content {
+  .register-modal-content {
     background: white;
     padding: 24px;
     border-radius: 8px;
     width: 400px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
-  .modal-content * {
+  .register-modal-content * {
     box-sizing: border-box;
   }
-  .modal-header {
+  .register-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
   }
    
-  .modal-header h2 {
+  .register-modal-header h2 {
     font-size: 24px;
     font-weight: bold;
   }
   
-  .close-button {
+  .register-close-button {
     background: none;
     border: none;
     font-size: 18px;
@@ -40,16 +40,16 @@
     color: #666;
   }
   
-  .modal-subtitle {
+  .register-modal-subtitle {
     color: #666;
     margin-bottom: 16px;
   }
   
-  .form-group {
+  .register-form-group {
     margin-bottom: 16px;
   }
   
-  .form-group input {
+  .register-form-group input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
@@ -59,11 +59,11 @@
     box-sizing: border-box;
   }
   
-  .password-group {
+  .register-password-group {
     position: relative;
   }
   
-  .password-toggle {
+  .register-password-toggle {
     position: absolute;
     right: 10px;
     top: 50%;

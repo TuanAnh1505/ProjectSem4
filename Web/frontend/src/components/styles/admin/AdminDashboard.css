@@ -349,3 +349,57 @@
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+
+
+.charts-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Hai cột bằng nhau */
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.chart-box {
+  height: 300px; /* Chiều cao mặc định cho biểu đồ Bar */
+  width: 100%;
+  max-width: 500px; /* Chiều rộng mặc định */
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pie-chart-box {
+  height: 300px; /* Chiều cao nhỏ hơn cho biểu đồ Pie */
+  max-width: 300px; /* Chiều rộng nhỏ hơn */
+}
+
+/* .chart-box:hover {
+  transform: translateY(-5px);
+} */
+
+.chart-box h4 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.chart-box canvas {
+  max-height: 100%;
+}
+
+@media (max-width: 768px) {
+  .charts-container {
+    grid-template-columns: 1fr; /* Một cột trên màn hình nhỏ */
+  }
+
+  .chart-box,
+  .pie-chart-box {
+    max-width: 100%; /* Đầy đủ chiều rộng trên màn hình nhỏ */
+  }
+}
