@@ -34,7 +34,7 @@ const Login = () => {
       setSuccess("Đăng nhập thành công!");
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("email", email);
-      localStorage.setItem("role", response.data.role);
+      localStorage.setItem("role", response.data.role); 
 
       // Redirect based on role
       if (response.data.role === "ADMIN") {
@@ -102,7 +102,7 @@ const Login = () => {
             Đăng nhập
           </button>
         </form>
-        <button
+        <button 
           className="google-login-button"
           onClick={handleGoogleLogin}
           style={{
@@ -119,10 +119,10 @@ const Login = () => {
             fontSize: "16px",
           }}
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 48 48"
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 48 48" 
             style={{ marginRight: "10px" }}
           >
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -143,8 +143,8 @@ const Login = () => {
               Đăng ký tài khoản
             </button>
           </p>
-          <button
-            onClick={() => navigate("/forgot-password")}
+          <button 
+            onClick={() => navigate("/forgot-password")} 
             className="link-button"
           >
             Khôi phục mật khẩu

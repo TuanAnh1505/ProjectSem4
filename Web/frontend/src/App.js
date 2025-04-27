@@ -16,23 +16,23 @@ import AdminPage from "./components/admin/AdminPage";
 import "./App.css";
 
 
-const App = () => {
+const App = () => {  
   const isAuthenticated = !!localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
-
+  
   const ProtectedRoute = ({ element, requiredRole }) => {
     if (!isAuthenticated) {
       return <Navigate to="/login" />;
     }
-
+    
     if (requiredRole && userRole !== requiredRole) {
       return <Navigate to="/dashboard" />;
     }
-
+    
     return element;
   };
 
-
+  
   return (
     <Router>
       <Routes>
@@ -83,12 +83,12 @@ const App = () => {
         />
         <Route
           path="/admin/destination/:destinationId"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}       
         />
       </Routes>
     </Router>
   );
-}
+};
 
 export default App;
 

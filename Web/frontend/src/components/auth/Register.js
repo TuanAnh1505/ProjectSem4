@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from "axios";
 import "../styles/user/Register.css";
 
@@ -26,7 +27,7 @@ const Register = () => {
     setShowPassword(!showPassword);
   };
 
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
