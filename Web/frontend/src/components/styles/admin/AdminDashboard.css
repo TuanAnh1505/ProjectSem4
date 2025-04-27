@@ -1,0 +1,405 @@
+.admin-dashboard {
+  padding: 20px;
+  text-align: center;
+  display: flex;
+}
+
+.admin-dashboard h1 {
+  font-size: 24px;
+  color: #333;
+}
+
+.admin-dashboard p {
+  font-size: 16px;
+  color: #666;
+}
+ 
+.logout-button {
+  padding: 10px 20px;
+  background-color: #ff4d4f;
+  color: white;
+  border: none; 
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #e6393b;
+}
+
+.aside-nav {
+  width: 250px; 
+  background-color: #ffffff; 
+  color: #333;
+  height: 100vh; 
+  position: fixed; 
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease, transform 0.3s ease; 
+  border-right: 1px solid #ddd;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.aside-nav.collapsed {
+  transform: translateX(-100%); 
+}
+
+.aside-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.logo-container {
+  text-align: center;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+
+}
+
+.logo-container h2 {
+  font-size: 16px;
+  margin: 0;
+  color: #333;
+}
+
+.logo-container p {
+  font-size: 12px;
+  margin: 0;
+  color: #666;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+}
+
+.aside-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-section {
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  padding: 10px 20px;
+  text-transform: uppercase;
+}
+
+.aside-menu li {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.aside-menu li:hover {
+  background-color: #f5f5f5;
+}
+
+.menu-icon {
+  font-size: 18px;
+  margin-right: 10px;
+  color: #333;
+}
+
+.menu-text {
+  font-size: 14px;
+  color: #333;
+}
+
+.aside-nav.collapsed .menu-text {
+  display: none; 
+}
+
+.main-content {
+  margin-left: 250px; 
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+.main-content.collapsed {
+  margin-left: 0; 
+}
+
+.aside-nav.collapsed + .main-content {
+  margin-left: 60px; 
+}
+
+.toggle-button-main {
+  background: none;
+  border: 2px solid #cbcbcb; 
+  border-radius: 50%; 
+  font-size: 20px;
+  cursor: pointer;
+  color: #cbcbcb;
+  width: 40px; 
+  height: 40px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000; 
+  transition: background-color 0.3s ease, color 0.3s ease; 
+}
+
+.toggle-button-main:hover {
+  background-color: #616161; 
+  color: #fff; 
+}
+
+.chart-container {
+  margin-top: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+  justify-content: center;
+  max-width: 300px; 
+}
+
+.chart-container canvas {
+  max-width: 100%; 
+  height: auto; 
+  aspect-ratio: 1; 
+  max-height: 300px; 
+}
+
+.account-section {
+  position: absolute;
+  bottom: 20px; 
+  left: 0;
+  width: 100%; 
+  padding: 10px 20px;
+  border-top: 1px solid #ddd; 
+}
+
+.account-section .menu-section {
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.account-section li {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.account-section li:hover {
+  background-color: #f5f5f5;
+}
+
+.account-section .menu-icon {
+  font-size: 18px;
+  margin-right: 10px;
+  color: #333;
+}
+
+.account-section .menu-text {
+  font-size: 14px;
+  color: #333;
+}
+
+.aside-nav.collapsed .account-section .menu-text {
+  display: none; 
+}
+
+
+
+
+
+/* Default main-content styling */
+.main-content {
+  transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition */
+  margin-left: 250px; /* Default margin when sidebar is expanded */
+  width: calc(100% - 250px); /* Adjust width based on sidebar */
+}
+
+/* When sidebar is collapsed */
+.main-content.collapsed {
+  margin-left: 50px; /* Adjust margin for collapsed sidebar */
+  width: calc(100% - 50px); /* Adjust width for collapsed sidebar */
+}
+
+/* Sidebar styling */
+.aside-nav {
+  width: 250px; /* Default sidebar width */
+  transition: width 0.3s ease; /* Smooth transition */
+}
+
+.aside-nav.collapsed {
+  width: 50px; /* Collapsed sidebar width */
+}
+
+/* Toggle button styling */
+.toggle-button-main {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.custom-select {
+  position: relative;
+  display: inline-block;
+  font-family: Arial, sans-serif;
+}
+
+.custom-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 8px 30px 8px 40px;
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 200px;
+}
+
+.custom-select::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background-size: cover;
+  border-radius: 50%;
+}
+
+.flag-vi::before {
+  background: url('https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg') no-repeat center center;
+  background-size: cover;
+}
+
+.flag-en::before {
+  background: url('https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg') no-repeat center center;
+  background-size: cover;
+}
+
+.custom-select::after {
+  content: '▼';
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 12px;
+  color: #333;
+}
+
+.custom-select select:focus {
+  border-color: #007bff;
+}
+
+.custom-select select:hover {
+  border-color: #666;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+
+
+.charts-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Hai cột bằng nhau */
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.chart-box {
+  height: 300px; /* Chiều cao mặc định cho biểu đồ Bar */
+  width: 100%;
+  max-width: 500px; /* Chiều rộng mặc định */
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pie-chart-box {
+  height: 300px; /* Chiều cao nhỏ hơn cho biểu đồ Pie */
+  max-width: 300px; /* Chiều rộng nhỏ hơn */
+}
+
+/* .chart-box:hover {
+  transform: translateY(-5px);
+} */
+
+.chart-box h4 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.chart-box canvas {
+  max-height: 100%;
+}
+
+@media (max-width: 768px) {
+  .charts-container {
+    grid-template-columns: 1fr; /* Một cột trên màn hình nhỏ */
+  }
+
+  .chart-box,
+  .pie-chart-box {
+    max-width: 100%; /* Đầy đủ chiều rộng trên màn hình nhỏ */
+  }
+}
