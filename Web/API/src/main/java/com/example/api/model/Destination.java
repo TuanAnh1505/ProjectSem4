@@ -23,6 +23,8 @@ public class Destination {
     @Enumerated(EnumType.STRING)
     @Column(name = "file_type")
     private FileType fileType;
+    @Column(name = "file_url")
+    private String fileUrl;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -69,6 +71,14 @@ public class Destination {
 
     public void setFileType(FileType fileType) {
         this.fileType = fileType;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 
     public String getDescription() {

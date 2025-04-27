@@ -15,6 +15,10 @@ public class DestinationService {
     @Autowired
     private DestinationRepository destinationRepository;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
+
     public DestinationDTO createDestination(DestinationDTO destinationDTO) {
         if (destinationDTO.getName() == null || destinationDTO.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Name cannot be null or empty");
@@ -48,6 +52,13 @@ public class DestinationService {
         }
         Destination destination = destinationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Destination not found with id: " + id));
+        if (destination.getFileUrl() != null && destinationDTO.getFileUrl() != null && !destination.getFileUrl().equals(destinationDTO.getFileUrl())) {
+            try {
+                fileStorageService.deleteFile(destination.getFileUrl());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to delete old file: " + e.getMessage());
+            }
+        }
         updateEntityFromDTO(destination, destinationDTO);
         Destination updatedDestination = destinationRepository.save(destination);
         return mapToDTO(updatedDestination);
@@ -56,6 +67,13 @@ public class DestinationService {
     public void deleteDestination(Integer id) {
         Destination destination = destinationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Destination not found with id: " + id));
+        if(destination.getFileUrl()!= null){
+            try {
+                fileStorageService.deleteFile(destination.getFileUrl());
+            }catch (Exception e){
+                throw new RuntimeException("File to delete file: " + e.getMessage());
+            }
+        }
         destinationRepository.delete(destination);
     }
 

@@ -20,7 +20,7 @@ public class DestinationDTO {
     private String category;
 
     private String fileType;
-
+    private String fileUrl;
     private String description;
 
     private String location;
@@ -59,6 +59,14 @@ public class DestinationDTO {
 
     public void setFileType(String fileType) {
         this.fileType = fileType;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 
     public String getDescription() {
