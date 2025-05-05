@@ -220,6 +220,7 @@ const resources = {
       choose_image_video: "Chọn hình ảnh/video",
       create_event: "Tạo sự kiện",
 
+      
       // Dịch tháng
       january: "Tháng Một",
       february: "Tháng Hai",
