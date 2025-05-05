@@ -85,6 +85,24 @@ const App = () => {
           path="/admin/destination/:destinationId"
           element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}       
         />
+
+
+        <Route
+          path="/admin/event"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+        />
+        <Route
+          path="/admin/event/add"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+        />
+        <Route
+          path="/admin/event/edit/:eventId"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+        />
+        <Route
+          path="/admin/event/:eventId"
+          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}       
+        />  
       </Routes>
     </Router>
   );

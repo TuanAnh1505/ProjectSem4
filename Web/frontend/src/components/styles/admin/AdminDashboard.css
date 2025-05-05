@@ -376,6 +376,7 @@
 .pie-chart-box {
   height: 300px; /* Chiều cao nhỏ hơn cho biểu đồ Pie */
   max-width: 300px; /* Chiều rộng nhỏ hơn */
+  margin-left: 100px;
 }
 
 /* .chart-box:hover {
