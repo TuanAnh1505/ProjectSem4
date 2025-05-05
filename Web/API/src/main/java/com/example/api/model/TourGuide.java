@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "tour_guides")
 @Data
@@ -11,77 +14,47 @@ public class TourGuide {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "guide_id")
-    private Integer guideId;
+    private Long guideId;
 
-    @Column(name = "userid", nullable = false, unique = true)
+    @Column(name = "userid",unique = true,nullable = false)
     private Long userId;
 
-    @Column(name = "experience_years")
+    @Column(name="experience_years")
     private Integer experienceYears;
 
+    @Column(name = "specialization")
     private String specialization;
 
+    @Column(name = "languages")
     private String languages;
 
-    @Column(columnDefinition = "DECIMAL(3,1) DEFAULT 0")
+    @Column(name = "rating")
     private Double rating;
 
-    @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public Integer getGuideId() {
-        return guideId;
+    @OneToOne
+    @JoinColumn(name = "userid", insertable = false, updatable = false)
+    private User user;
+
+    @ManyToMany
+    @JoinTable(
+            name = "tour_guides_assignments",
+            joinColumns = @JoinColumn(name = "guide_id"),
+            inverseJoinColumns = @JoinColumn(name = "tour_id")
+    )
+    private List<Tour> tours = new ArrayList<>();
+
+    @OneToMany(mappedBy = "tourGuide", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GuideReview> reviews = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (rating == null) {
+            rating = 0.0;
+        }
     }
 
-    public void setGuideId(Integer guideId) {
-        this.guideId = guideId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Integer getExperienceYears() {
-        return experienceYears;
-    }
-
-    public void setExperienceYears(Integer experienceYears) {
-        this.experienceYears = experienceYears;
-    }
-
-    public String getSpecialization() {
-        return specialization;
-    }
-
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
-    }
-
-    public String getLanguages() {
-        return languages;
-    }
-
-    public void setLanguages(String languages) {
-        this.languages = languages;
-    }
-
-    public Double getRating() {
-        return rating;
-    }
-
-    public void setRating(Double rating) {
-        this.rating = rating;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }
