@@ -36,6 +36,9 @@ public class Destination {
      @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToMany(mappedBy = "destinations")
+    private List<Tour> tours;
+
     // Other fields, getters, and setters
 
 

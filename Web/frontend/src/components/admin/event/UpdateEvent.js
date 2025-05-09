@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useTranslation } from 'react-i18next';
 import '../../styles/event/AddEvent.css';
 
 const UpdateEvent = () => {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const { eventId } = useParams();
     const [event, setEvent] = useState({
@@ -71,7 +69,7 @@ const UpdateEvent = () => {
             setError(error.response?.data?.message || 'Failed to load event');
             navigate('/admin/event');
         }
-    }, [t, eventId, navigate]);
+    }, [eventId, navigate]);
 
     useEffect(() => {   
         loadEventData();
@@ -136,12 +134,12 @@ const UpdateEvent = () => {
 
     return (
         <div className="add-event-container">
-            <h2 className="form-title">{t("update_event")}</h2>
+            <h2 className="form-title">Update Event</h2>
             {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="event-form-row">
                     <div className="event-form-group">
-                        <label className="form-label">{t("event_name")}</label>
+                        <label className="form-label">Event Name</label>
                         <input
                             type="text"
                             className={`form-input ${fieldErrors.name ? 'error' : ''}`}
@@ -154,7 +152,7 @@ const UpdateEvent = () => {
                     </div>
 
                     <div className="event-form-group">
-                        <label className="form-label">{t("event_location")}</label>
+                        <label className="form-label">Location</label>
                         <input
                             type="text"
                             className={`form-input ${fieldErrors.location ? 'error' : ''}`}
@@ -169,7 +167,7 @@ const UpdateEvent = () => {
 
                 <div className="event-form-row">
                     <div className="event-form-group">
-                        <label className="form-label">{t("event_start_date")}</label>
+                        <label className="form-label">Start Date</label>
                         <input
                             type="datetime-local"
                             className={`form-input ${fieldErrors.startDate ? 'error' : ''}`}
@@ -182,7 +180,7 @@ const UpdateEvent = () => {
                     </div>
 
                     <div className="event-form-group">
-                        <label className="form-label">{t("event_end_date")}</label>
+                        <label className="form-label">End Date</label>
                         <input
                             type="datetime-local"
                             className={`form-input ${fieldErrors.endDate ? 'error' : ''}`}
@@ -197,7 +195,7 @@ const UpdateEvent = () => {
 
                 <div className="event-form-row">
                     <div className="event-form-group">
-                        <label className="form-label">{t("event_ticket_price")}</label>
+                        <label className="form-label">Ticket Price</label>
                         <input
                             type="number"
                             className={`form-input ${fieldErrors.ticketPrice ? 'error' : ''}`}
@@ -211,7 +209,7 @@ const UpdateEvent = () => {
                     </div>
 
                     <div className="event-form-group">
-                        <label className="form-label">{t("event_status")}</label>
+                        <label className="form-label">Status</label>
                         <select
                             className={`form-input ${fieldErrors.statusName ? 'error' : ''}`}
                             name="statusName"
@@ -231,7 +229,7 @@ const UpdateEvent = () => {
                 </div>
 
                 <div className="form-group full-width">
-                    <label className="form-label">{t("event_description")}</label>
+                    <label className="form-label">Description</label>
                     <textarea
                         className={`form-input ${fieldErrors.description ? 'error' : ''}`}
                         name="description"
@@ -249,7 +247,7 @@ const UpdateEvent = () => {
                 <div className="update-destination-form-group">
                     <div className="file-input-container">
                         <label htmlFor="files" className="file-input-label">
-                        {t("choose_image_video")}
+                            Choose Images/Videos
                         </label>
                         <input
                             id="files"
@@ -283,6 +281,33 @@ const UpdateEvent = () => {
                     </div>
                 )}
 
+
+                {/* New Files Preview */}
+                {previewUrls.length > 0 && (
+                    <div className="preview-container">
+                        {previewUrls.map((url, index) => (
+                            <div key={index} className="preview-item">
+                                <button 
+                                    type="button"
+                                    className="delete-preview"
+                                    onClick={() => {
+                                        setFiles(prev => prev.filter((_, i) => i !== index));
+                                        setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+                                        URL.revokeObjectURL(url);
+                                    }}
+                                >
+                                    ×
+                                </button>
+                                {files[index]?.type.startsWith('image/') ? (
+                                    <img src={url} alt={`Preview ${index + 1}`} />
+                                ) : (
+                                    <video src={url} controls />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 <button
                     type="submit"
                     className="submit-button"
@@ -294,7 +319,7 @@ const UpdateEvent = () => {
                             <span className="loading-spinner"></span>
                         </>
                     ) : (
-                        [t("update_event")]
+                        'Update Event'
                     )}
                 </button>
             </form>

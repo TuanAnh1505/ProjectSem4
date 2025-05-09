@@ -348,16 +348,22 @@ const EventIndex = () => {
                             
                             <td>
                                 <Link
-                                    to={`/admin/event/edit/${event.eventId}`}
-                                    className="btn btn-warning btn-sm me-2"
+                                    to={`/admin/event/detail/${event.eventId}`}
+                                    className="action-link"
                                 >
-                                    <i className="bi bi-pencil text-white"></i>
+                                     🔍  
                                 </Link>
-                                <button 
-                                    onClick={() => deleteEvent(event.eventId)}
-                                    className="btn btn-danger btn-sm"
+                                <Link
+                                    to={`/admin/event/edit/${event.eventId}`}
+                                   className="action-link"
                                 >
-                                    <i className="bi bi-trash"></i>
+                                    ✏️
+                                </Link>
+                                <button className="delete-button"
+                                    onClick={() => deleteEvent(event.eventId)}
+                                    
+                                >
+                                    🗑️
                                 </button>
                             </td>
                         </tr>

@@ -32,9 +32,11 @@ const Login = () => {
         password,
       });
       setSuccess("Đăng nhập thành công!");
-      localStorage.setItem("token", response.data.token);
+      const { token, role, userId } = response.data;
+      localStorage.setItem("token", token);
       localStorage.setItem("email", email);
-      localStorage.setItem("role", response.data.role); 
+      localStorage.setItem('userId', userId);
+      localStorage.setItem("role", role); 
 
       // Redirect based on role
       if (response.data.role === "ADMIN") {
@@ -133,7 +135,7 @@ const Login = () => {
           </svg>
           Đăng nhập bằng Google
         </button>
-        <div className="modal-footer">
+        <div className="modal-footer-lgoin">
           <p>
             Chưa có tài khoản?{" "}
             <button

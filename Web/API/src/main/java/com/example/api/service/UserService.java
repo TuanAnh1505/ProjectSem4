@@ -1,14 +1,16 @@
 package com.example.api.service;
 
+import com.example.api.model.Discount;
 import com.example.api.model.Role;
 import com.example.api.model.User;
 import com.example.api.model.UserToken;
+import com.example.api.repository.DiscountRepository;
 import com.example.api.repository.RoleRepository;
 import com.example.api.repository.UserRepository;
 import com.example.api.repository.UserTokenRepository;
 import com.example.api.util.JwtUtil;
 
-import jakarta.persistence.EntityNotFoundException;
+// import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,11 +32,14 @@ public class UserService {
     private RoleRepository roleRepository;
 
     @Autowired
+    private DiscountRepository discountRepository;
+
+    @Autowired
     private UserTokenRepository userTokenRepository;
+
     @Autowired
     private JwtUtil jwtUtil;
 
-    
     @Autowired
     private EmailService emailService;
 
@@ -54,8 +59,9 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setPhone(phone);
         user.setAddress(address);
-        user.setIsActive(false);
+        user.setIsActive(false); // Người dùng phải kích hoạt tài khoản sau khi đăng ký
 
+        // Gán role mặc định USER
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByRoleName("USER");
         if (userRole == null) {
@@ -66,7 +72,19 @@ public class UserService {
         roles.add(userRole);
         user.setRoles(roles);
 
-        return userRepository.save(user);
+        // Lưu người dùng vào DB
+        User savedUser = userRepository.save(user);
+
+        // Gửi email kích hoạt
+        emailService.sendActivationEmail(savedUser.getEmail(), savedUser.getUserid());
+
+        // Gửi mã giảm giá NEWUSER10 nếu còn hạn
+        Discount welcome = discountRepository.findByCode("NEWUSER10").orElse(null);
+        if (welcome != null && LocalDateTime.now().isBefore(welcome.getEndDate())) {
+            emailService.sendDiscountCodeEmail(savedUser.getEmail(), welcome.getCode(), welcome.getDescription());
+        }
+
+        return savedUser;
     }
 
     public void saveUser(User user) {
@@ -109,6 +127,44 @@ public class UserService {
         throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
     }
 
+    // public Map<String, Object> loginUserWithRole(String email, String password) {
+    //     if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+    //         throw new IllegalArgumentException("Email and password must not be empty");
+    //     }
+    //     User user = userRepository.findByEmail(email);
+    //     if (user == null) {
+    //         throw new RuntimeException("Tài khoản không tồn tại.");
+    //     }
+    //     if (!user.getIsActive()) {
+    //         throw new RuntimeException("Tài khoản chưa được kích hoạt.");
+    //     }
+    //     if (passwordEncoder.matches(password, user.getPasswordHash())) {
+    //         String token = jwtUtil.generateToken(email);
+
+    //         // Save token to usertokens table
+    //         UserToken userToken = new UserToken();
+    //         userToken.setUser(user);
+    //         userToken.setToken(token);
+    //         userToken.setCreatedat(LocalDateTime.now());
+    //         userToken.setExpiry(LocalDateTime.now().plusHours(10)); // 10 hours expiry
+    //         userTokenRepository.save(userToken);
+
+    //         // Get the user's role
+    //         String role = user.getRoles().stream()
+    //                 .map(Role::getRoleName)
+    //                 .findFirst()
+    //                 .orElse("USER");
+
+    //         // Return token and role
+    //         Map<String, Object> response = new HashMap<>();
+    //         response.put("token", token);
+    //         response.put("role", role);
+    //         response.put("userId", user.getUserid());
+    //         return response;
+    //     }
+    //     throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
+    // }
+
     public Map<String, Object> loginUserWithRole(String email, String password) {
         if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
             throw new IllegalArgumentException("Email and password must not be empty");
@@ -123,24 +179,22 @@ public class UserService {
         if (passwordEncoder.matches(password, user.getPasswordHash())) {
             String token = jwtUtil.generateToken(email);
 
-            // Save token to usertokens table
             UserToken userToken = new UserToken();
             userToken.setUser(user);
             userToken.setToken(token);
             userToken.setCreatedat(LocalDateTime.now());
-            userToken.setExpiry(LocalDateTime.now().plusHours(10)); // 10 hours expiry
+            userToken.setExpiry(LocalDateTime.now().plusHours(10));
             userTokenRepository.save(userToken);
 
-            // Get the user's role
             String role = user.getRoles().stream()
                     .map(Role::getRoleName)
                     .findFirst()
                     .orElse("USER");
 
-            // Return token and role
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("role", role);
+            response.put("userId", user.getUserid());
             return response;
         }
         throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
@@ -176,7 +230,5 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
-
-
 
 }

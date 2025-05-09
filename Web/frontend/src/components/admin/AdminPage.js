@@ -8,35 +8,82 @@ import UpdateDestination from "./destination/UpdateDestination";
 import EventIndex from "./event/EventIndex";
 import AddEvent from "./event/AddEvent";
 import UpdateEvent from "./event/UpdateEvent";
+import AddTour from "./tour/AddTour";
+import UpdateTour from "./tour/UpdateTour";
+import TourIndex from "./tour/TourIndex";
+import DetailDestination from "./destination/DetailDestination";
+import DetailEvent from "./event/DetailEvent";
+import DetailTour from "./tour/DetailTour";
+
+import AddItinerary from "./itinerary/AddItinerary";
+import UpdateItinerary from "./itinerary/UpdateItinerary";
+import ItineraryIndex from "./itinerary/ItineraryIndex";
+import DetailItinerary from "./itinerary/DetailItinerary";
+
 
 const AdminPage = () => {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
-  // Xác định component dựa trên path
+
   const getComponent = () => {
-    // Kiểm tra cả 2 trường hợp destination và destinations
     if (pathSegments.includes('destination') || pathSegments.includes('destinations')) {
       if (pathSegments.includes('add')) {
         return <AddDestination />;
+      }
+      if (pathSegments.includes('detail')) {
+        return <DetailDestination />;
       }
       if (pathSegments.includes('edit')) {
         return <UpdateDestination />;
       }
       return <DestinationIndex />;
     }
-
+    
     if (pathSegments.includes('event') || pathSegments.includes('events')) {
       if (pathSegments.includes('add')) {
         return <AddEvent />;
+      }
+      if (pathSegments.includes('detail')) {
+        return <DetailEvent />;
       }
       if (pathSegments.includes('edit')) {
         return <UpdateEvent />;
       }
       return <EventIndex />;
     }
-    // Mặc định hiển thị UserIndex nếu không match với destinations
-    return <UserIndex />;
+    
+    if (pathSegments.includes('tour') || pathSegments.includes('tours')) {
+      if (pathSegments.includes('add')) {
+        return <AddTour />;
+      }
+      if (pathSegments.includes('detail')) {
+        return <DetailTour />;
+      }
+      if (pathSegments.includes('edit')) {
+        return <UpdateTour />;
+      }
+      return <TourIndex />;
+    }
+
+    if (pathSegments.includes('itinerary') || pathSegments.includes('itineraries')) {
+      if (pathSegments.includes('add')) {
+        return <AddItinerary />;
+      }
+      if (pathSegments.includes('detail')) {
+        return <DetailItinerary />;
+      }
+      if (pathSegments.includes('edit')) {
+        return <UpdateItinerary />;
+      }
+      return <ItineraryIndex />;
+    }
+
+    if (pathSegments.includes('user')) {
+      return <UserIndex />;
+    }
+
+    return <AdminDashboard />;
   };
 
   return (
