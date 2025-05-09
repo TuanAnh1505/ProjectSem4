@@ -1,0 +1,46 @@
+.hero {
+  position: relative;
+  width: 100vw;
+  min-width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80') center center no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.hero-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(30,30,30,0.2);
+  text-align: center;
+  z-index: 2;
+}
+
+.hero-text h1 {
+  font-size: 3.2rem;
+  font-family: "HoneyCream", cursive;
+  background: rgba(0,0,0,0.18);
+  padding: 0.5em 1.5em;
+  border-radius: 8px;
+  letter-spacing: 2px;
+}
+
+@media (max-width: 1024px) {
+  .hero {
+    height: 180px;
+    max-height: 180px;
+  }
+  .hero-text h1 {
+    font-size: 1.6rem;
+    padding: 0.3em 0.8em;
+  }
+} 
