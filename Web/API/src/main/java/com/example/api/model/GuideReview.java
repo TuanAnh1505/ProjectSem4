@@ -2,8 +2,6 @@ package com.example.api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,30 +9,29 @@ import java.time.LocalDateTime;
 @Data
 public class GuideReview {
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    @Column(name = "review_id")
-    private Long reviewId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "guide_review_id")
+    private Integer guideReviewId;
 
-    @Column(name = "user_id")
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userid")
+    private User user;
 
-    @Column(name = "guide_id")
-    private Integer guideId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guide_id")
+    private TourGuide guide;
 
     @Column(name = "rating")
-    private BigDecimal rating;
+    private Integer rating;
 
     @Column(name = "comment")
     private String comment;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-    @ManyToOne
-    @JoinColumn(name = "guide_id", insertable = false, updatable = false)
-    private TourGuide tourGuide;
 
-    @ManyToOne
-    @JoinColumn(name = "userid", insertable = false, updatable = false)
-    private User user;
-
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
