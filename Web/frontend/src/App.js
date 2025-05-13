@@ -1,29 +1,66 @@
-import React from "react";
-import styles from "./components/VietnamTourism/VietnamTourism.module.css";
-import Header from "./components/VietnamTourism/Header";
-import MainContent from "./components/VietnamTourism/MainContent";
-import Events from "./components/VietnamTourism/Events";
-import MustSeeSites from "./components/VietnamTourism/MustSeeSites";
-import TravelTips from "./components/VietnamTourism/TravelTips";
-import InternationalNews from "./components/VietnamTourism/InternationalNews";
-import ShareYourStory from "./components/VietnamTourism/ShareYourStory";
-import Newsletter from "./components/VietnamTourism/Newsletter";
-import Footer from "./components/VietnamTourism/Footer";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './components/VietnamTourism/index';
+import Header from './components/Header/Header';
+import Footer from './components/Footer/Footer';
+import PlacesToGo from './components/PlaceToGo/PlaceToGo';
+import ThingsToDo from './components/ThingToDo/ThingsToDo';
+// import các component khác nếu có
+
+// Layout component that wraps all pages with Header and Footer
+const Layout = ({ children }) => {
+  return (
+    <div>
+      <Header />
+      {children}
+      <Footer />
+    </div>
+  );
+};
 
 function App() {
-    return (
-        <div className={styles.appContainer}>
-            <Header />
-            <MainContent />
-            <Events />
-            <MustSeeSites />
-            <TravelTips />
-            <InternationalNews />
-            <ShareYourStory />
-            <Newsletter />
-            <Footer />
-        </div>
-    );
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={
+          <Layout>
+            <Home />
+          </Layout>
+        } />
+        {/* Add more routes here as needed */}
+        <Route path="/live-fully" element={
+          <Layout>
+            <Home />
+          </Layout>
+        } />
+        <Route path="/places-to-go" element={
+          <Layout>
+            <PlacesToGo />
+          </Layout>
+        } />
+        <Route path="/things-to-do" element={
+          <Layout>
+            <ThingsToDo />
+          </Layout>
+        } />
+        <Route path="/plan" element={
+          <Layout>
+            <Home />
+          </Layout>
+        } />
+        <Route path="/offers" element={
+          <Layout>
+            <Home />
+          </Layout>
+        } />
+        <Route path="/green-travel" element={
+          <Layout>
+            <Home />
+          </Layout>
+        } />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
