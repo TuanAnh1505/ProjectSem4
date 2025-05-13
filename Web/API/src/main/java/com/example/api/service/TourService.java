@@ -1,135 +1,81 @@
-
 package com.example.api.service;
 
 import com.example.api.dto.TourDTO;
 import com.example.api.model.Destination;
+import com.example.api.model.Event;
 import com.example.api.model.Tour;
 import com.example.api.model.TourStatus;
 import com.example.api.repository.DestinationRepository;
+import com.example.api.repository.EventRepository;
 import com.example.api.repository.TourRepository;
-import com.example.api.repository.TourStatusRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class TourService {
 
-    @Autowired
-    private TourRepository tourRepository;
+    private final TourRepository tourRepo;
+    private final DestinationRepository destRepo;
+    private final EventRepository eventRepo;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    @Autowired
-    private DestinationRepository destinationRepository;
-
-    @Autowired
-    private TourStatusRepository tourStatusRepository;
-
-    public TourDTO createTour(TourDTO tourDTO) {
-        if (tourDTO.getName() == null || tourDTO.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be null or empty");
-        }
-        if (tourDTO.getPrice() == null) {
-            throw new IllegalArgumentException("Price cannot be null");
-        }
-        Tour tour = mapToEntity(tourDTO);
-        Tour savedTour = tourRepository.save(tour);
-        return mapToDTO(savedTour);
+    public Tour createTour(TourDTO dto) {
+        Tour tour = new Tour();
+        BeanUtils.copyProperties(dto, tour);
+        tour.setDestinations(destRepo.findAllById(dto.getDestinationIds()));
+        tour.setEvents(eventRepo.findAllById(dto.getEventIds()));
+        return tourRepo.save(tour);
     }
 
-    public TourDTO getTourById(Integer id) {
-        Tour tour = tourRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tour not found with id: " + id));
-        return mapToDTO(tour);
-    }
-
-    public List<TourDTO> getAllTours() {
-        return tourRepository.findAll().stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public TourDTO updateTour(Integer id, TourDTO tourDTO) {
-        if (tourDTO.getName() == null || tourDTO.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be null or empty");
-        }
-        if (tourDTO.getPrice() == null) {
-            throw new IllegalArgumentException("Price cannot be null");
-        }
-        Tour tour = tourRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tour not found with id: " + id));
-        updateEntityFromDTO(tour, tourDTO);
-        Tour updatedTour = tourRepository.save(tour);
-        return mapToDTO(updatedTour);
+    public Tour updateTour(Integer id, TourDTO dto) {
+        Tour tour = tourRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tour not found"));
+        BeanUtils.copyProperties(dto, tour, "tourId");
+        tour.setDestinations(destRepo.findAllById(dto.getDestinationIds()));
+        tour.setEvents(eventRepo.findAllById(dto.getEventIds()));
+        return tourRepo.save(tour);
     }
 
     public void deleteTour(Integer id) {
-        Tour tour = tourRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tour not found with id: " + id));
-        tourRepository.delete(tour);
+        tourRepo.deleteById(id);
     }
 
-    public List<TourDTO> searchTours(String name, Integer destinationId) {
-        List<Tour> tours = tourRepository.findByNameAndDestination(name, destinationId);
-        return tours.stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+    public Tour getTourDetail(Integer id) {
+        return tourRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tour not found"));
     }
 
-    private Tour mapToEntity(TourDTO dto) {
-        Tour tour = new Tour();
-        tour.setTourId(dto.getTourId());
-        tour.setName(dto.getName());
-        tour.setDescription(dto.getDescription());
-        tour.setPrice(dto.getPrice());
-        tour.setDuration(dto.getDuration());
-        tour.setMaxParticipants(dto.getMaxParticipants());
-        if (dto.getDestinationId() != null) {
-            Destination destination = destinationRepository.findById(dto.getDestinationId())
-                    .orElseThrow(() -> new RuntimeException("Destination not found with id: " + dto.getDestinationId()));
-            tour.setDestination(destination);
-        }
-        if (dto.getStatusId() != null) {
-            TourStatus status = tourStatusRepository.findById(dto.getStatusId())
-                    .orElseThrow(() -> new RuntimeException("TourStatus not found with id: " + dto.getStatusId()));
-            tour.setStatus(status);
-        }
-        return tour;
+    public List<Tour> getAllTours() {
+        return tourRepo.findAll();
     }
 
-    private TourDTO mapToDTO(Tour tour) {
-        TourDTO dto = new TourDTO();
-        dto.setTourId(tour.getTourId());
-        dto.setName(tour.getName());
-        dto.setDescription(tour.getDescription());
-        dto.setPrice(tour.getPrice());
-        dto.setDuration(tour.getDuration());
-        dto.setMaxParticipants(tour.getMaxParticipants());
-        if (tour.getDestination() != null) {
-            dto.setDestinationId(tour.getDestination().getDestinationId());
-        }
-        if (tour.getStatus() != null) {
-            dto.setStatusId(tour.getStatus().getTourStatusId());
-        }
-        return dto;
+    public List<Tour> getRandomTours(int count, Integer excludeTourId) {
+        String sql = "SELECT * FROM tours WHERE tour_id <> :excludeTourId ORDER BY RAND() LIMIT " + count;
+        return entityManager.createNativeQuery(sql, Tour.class)
+                .setParameter("excludeTourId", excludeTourId)
+                .getResultList();
     }
 
-    private void updateEntityFromDTO(Tour tour, TourDTO dto) {
-        tour.setName(dto.getName());
-        tour.setDescription(dto.getDescription());
-        tour.setPrice(dto.getPrice());
-        tour.setDuration(dto.getDuration());
-        tour.setMaxParticipants(dto.getMaxParticipants());
-        if (dto.getDestinationId() != null) {
-            Destination destination = destinationRepository.findById(dto.getDestinationId())
-                    .orElseThrow(() -> new RuntimeException("Destination not found with id: " + dto.getDestinationId()));
-            tour.setDestination(destination);
-        }
-        if (dto.getStatusId() != null) {
-            TourStatus status = tourStatusRepository.findById(dto.getStatusId())
-                    .orElseThrow(() -> new RuntimeException("TourStatus not found with id: " + dto.getStatusId()));
-            tour.setStatus(status);
-        }
+    public List<Destination> getTourDestinations(Integer tourId) {
+        return tourRepo.findById(tourId)
+            .map(Tour::getDestinations)
+            .orElse(Collections.emptyList());
+    }
+
+    public List<Event> getTourEvents(Integer tourId) {
+        return tourRepo.findById(tourId)
+            .map(Tour::getEvents)
+            .orElse(Collections.emptyList());
     }
 }

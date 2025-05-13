@@ -1,0 +1,207 @@
+.destination-detail {
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.media-section-detail {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 400px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.preview-container-detail {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-navigation {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.nav-button {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* .nav-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+} */
+
+.nav-button i {
+    font-size: 20px;
+}
+
+.media-preview-detail {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+.media-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    cursor: pointer;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.preview-count-detail {
+    position: absolute;
+    right: 66px;
+    top: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.info-item {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+    min-width: 120px;
+}
+
+.info-item span {
+    margin-left: 10px;
+    color: #666;
+}
+
+.info-item-description {
+    padding: 10px 0;
+    margin: 20px 0;
+}
+
+.info-item-description label {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.info-item-description span {
+    color: #666;
+    line-height: 1.6;
+    display: block;
+    padding: 10px 0;
+}
+
+.back-button {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-bottom: 20px;
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
+    color: white;
+}
+
+/* Modal styles from DestinationIndex */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.modal-media {
+    max-width: 100%;
+    max-height: 90vh;
+}
+
+.modal-close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.modal-nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.modal-nav-button.prev {
+    left: 10px;
+}
+
+.modal-nav-button.next {
+    right: 10px;
+}

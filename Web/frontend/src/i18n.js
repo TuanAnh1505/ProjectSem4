@@ -67,8 +67,6 @@ const resources = {
       location: "Location",
       rating: "Rating",
 
-      // Event
-      // Bản dịch cho Event
       event: "Event",
       event_management: "Event Management",
       filter_by_month:"Filter By Month",
@@ -83,42 +81,7 @@ const resources = {
       filter_by_price: "Filter By Ticket Price",
       min_price: "Min Price",
       max_price: "Max Price",
-      events_by_status_title: "Events By Status Chart",
-      event_creation_trend_title: "Event Creation Trend",
-      events_by_status: "Events By Status",
-      events_created_over_time: "Events Created Over Time",
-      number_of_events: "Number of Events",
-      date: "Date",
 
-      //Add, Update Event
-      update_event: "Update Event",
-      add_event: "Add New Event",
-      event_name: "Event Name",
-      event_description: "Event Description",
-      event_start_date: "Event Start Date",
-      event_end_date: "Event End Date",
-      event_location: "Event Location",
-      event_ticket_price: "Event Ticket Price",
-      event_status: "Event Status",
-      choose_image_video: "Choose Image/Video",
-      create_event: "Create Event",
-      
-
-
-      // Dịch tháng
-      january: "January",
-      february: "February",
-      march: "March",
-      april: "April",
-      may: "May",
-      june: "June",
-      july: "July",
-      august: "August",
-      september: "September",
-      october: "October",
-      november: "November",
-      december: "December",
-      
     },
   },
   vi: {
@@ -184,7 +147,7 @@ const resources = {
 
 
 
-      // Event
+
       // Bản dịch cho Event
       event: "Sự kiện",
       event_management: "Quản lý sự kiện",
@@ -200,41 +163,6 @@ const resources = {
       filter_by_price: "Lọc theo giá vé",
       min_price: "Giá tối thiểu",
       max_price: "Giá tối đa",
-      events_by_status_title: "Biểu đồ sự kiện theo trạng thái",
-      event_creation_trend_title: "Xu hướng tạo sự kiện",
-      events_by_status: "Sự kiện theo trạng thái",
-      events_created_over_time: "Sự kiện được tạo theo thời gian",
-      number_of_events: "Số lượng sự kiện",
-      date: "Ngày",
-
-      //Add, Update Event
-      update_event: "Cập nhật sự kiện",
-      add_event: "Thêm sự kiện",
-      event_name: "Tên sự kiện",
-      event_description: "Mô tả sự kiện",
-      event_start_date: "Ngày bắt đầu sự kiện",
-      event_end_date: "Ngày kết thúc sự kiện",
-      event_location: "Địa điểm sự kiện",
-      event_ticket_price: "Giá vé sự kiện",
-      event_status: "Trạng thái sự kiện",
-      choose_image_video: "Chọn hình ảnh/video",
-      create_event: "Tạo sự kiện",
-
-      
-      // Dịch tháng
-      january: "Tháng Một",
-      february: "Tháng Hai",
-      march: "Tháng Ba",
-      april: "Tháng Tư",
-      may: "Tháng Năm",
-      june: "Tháng Sáu",
-      july: "Tháng Bảy",
-      august: "Tháng Tám",
-      september: "Tháng Chín",
-      october: "Tháng Mười",
-      november: "Tháng Mười Một",
-      december: "Tháng Mười Hai",
-
     },
   },
 };

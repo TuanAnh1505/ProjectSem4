@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useTranslation } from "react-i18next";
 import '../../styles/event/AddEvent.css';
 
 const AddEvent = () => {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const [event, setEvent] = useState({
         name: '',
@@ -33,7 +31,7 @@ const AddEvent = () => {
         return () => {
             previewUrls.forEach(url => URL.revokeObjectURL(url));
         };
-    },  [t, previewUrls]);
+    }, [previewUrls]);
 
     const fetchEventStatuses = async () => {
         try {
@@ -146,12 +144,12 @@ const AddEvent = () => {
 
     return (
         <div className="add-event-container">
-            <h2 className="form-title">{t("add_event")}</h2>
+            <h2 className="form-title">Add New Event</h2>
             {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="event-form-row">
                     <div className="event-form-group">
-                        <label htmlFor="name">{t("event_name")}</label>
+                        <label htmlFor="name">Event Name</label>
                         <input
                             type="text"
                             id="name"
@@ -164,7 +162,7 @@ const AddEvent = () => {
                     </div>
 
                     <div className="event-form-group">
-                        <label htmlFor="location">{t("event_location")}</label>
+                        <label htmlFor="location">Location</label>
                         <input
                             type="text"
                             id="location"
@@ -179,7 +177,7 @@ const AddEvent = () => {
 
                 <div className="event-form-row">
                     <div className="event-form-group">
-                        <label htmlFor="startDate">{t("event_start_date")}</label>
+                        <label htmlFor="startDate">Start Date</label>
                         <input
                             type="datetime-local"
                             id="startDate"
@@ -192,7 +190,7 @@ const AddEvent = () => {
                     </div>
 
                     <div className="event-form-group">
-                        <label htmlFor="endDate">{t("event_end_date")}</label>
+                        <label htmlFor="endDate">End Date</label>
                         <input
                             type="datetime-local"
                             id="endDate"
@@ -207,7 +205,7 @@ const AddEvent = () => {
 
                 <div className="event-form-row">
                     <div className="event-form-group">
-                        <label htmlFor="ticketPrice">{t("event_ticket_price")}</label>
+                        <label htmlFor="ticketPrice">Ticket Price</label>
                         <input
                             type="number"
                             id="ticketPrice"
@@ -222,7 +220,7 @@ const AddEvent = () => {
                     </div>
 
                     <div className="event-form-group">
-                        <label htmlFor="statusName">{t("event_status")}</label>
+                        <label htmlFor="statusName">Status</label>
                         <select
                             id="statusName"
                             name="statusName"
@@ -242,10 +240,10 @@ const AddEvent = () => {
                 </div>
 
                 <div className="form-group full-width">
-                    <label htmlFor="description" className="form-label">{t("event_description")}</label>
+                    <label htmlFor="description" className="form-label">Description</label>
                     <textarea
                         id="description"
-                        className={`form-input ${fieldErrors.description ? 'error' : ''}`}
+                        className={`event-form-input ${fieldErrors.description ? 'error' : ''}`}
                         name="description"
                         value={event.description}
                         onChange={handleChange}
@@ -262,7 +260,7 @@ const AddEvent = () => {
                 <div className="form-group">
                     <div className="file-input-container">
                         <label htmlFor="files" className="file-input-label">
-                        {t("choose_image_video")}
+                            Choose Images/Videos
                         </label>
                         <input
                             id="files"
@@ -301,7 +299,7 @@ const AddEvent = () => {
                     className="submit-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Creating...' : [t("create_event")]}
+                    {isLoading ? 'Creating...' : 'Create Event'}
                 </button>
             </form>
         </div>

@@ -1,4 +1,3 @@
-
 package com.example.api.model;
 
 import jakarta.persistence.*;
@@ -7,12 +6,12 @@ import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "tours")
 @Data
 public class Tour {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tour_id")
@@ -29,25 +28,31 @@ public class Tour {
 
     private Integer duration;
 
-    @Column(name = "max_participants")
+    @Column(name = "max_participants", columnDefinition = "INT DEFAULT 0")
     private Integer maxParticipants;
 
-    @ManyToOne
-    @JoinColumn(name = "destination_id")
-    private Destination destination;
+    @Column(name = "status_id")
+    private Integer statusId;
 
-    @ManyToOne
-    @JoinColumn(name = "status_id")
-    private TourStatus status;
-
-    @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
-    @ManyToOne
-    @JoinColumn(name = "status_id", insertable = false, updatable = false)
-    private TourStatus tourStatus;
-
-    @ManyToMany(mappedBy = "tours")
-    private List<TourGuide> tourGuides = new ArrayList<>();
+    @Column(name = "image_url")
+    private String imageUrl;
 
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "tour_destinations",
+        joinColumns = @JoinColumn(name = "tour_id"),
+        inverseJoinColumns = @JoinColumn(name = "destination_id")
+    )
+    @JsonIgnoreProperties("tours")
+    private List<Destination> destinations;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "tour_events",
+        joinColumns = @JoinColumn(name = "tour_id"),
+        inverseJoinColumns = @JoinColumn(name = "event_id")
+    )
+    @JsonIgnoreProperties("tours")
+    private List<Event> events;
 }

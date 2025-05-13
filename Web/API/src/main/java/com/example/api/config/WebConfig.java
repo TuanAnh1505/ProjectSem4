@@ -11,24 +11,21 @@ import java.io.File;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowCredentials(true);
-            }
-        };
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:3000")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String uploadPath = System.getProperty("user.dir") + File.separator + "uploads";
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath + File.separator)
+        registry.addResourceHandler("/uploads/**", "/uploads/tours/**")
+                .addResourceLocations("file:" + uploadPath + File.separator,
+                        "file:" + uploadPath + File.separator + "tours" + File.separator)
                 .setCachePeriod(3600)
                 .resourceChain(true);
     }

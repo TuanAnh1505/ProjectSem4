@@ -6,9 +6,9 @@
     transition: transform 0.2s;
 }
 
-.media-preview:hover {
+/* .media-preview:hover {
     transform: scale(1.05);
-}
+} */
 
 .preview-container {
     position: relative;
@@ -149,7 +149,7 @@
 }
 
 .table td {
-    padding: 12px;
+    padding: 0;
     border-bottom: 1px solid #dee2e6;
     color: #444;
     text-align: left;

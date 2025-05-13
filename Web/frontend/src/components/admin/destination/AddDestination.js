@@ -220,7 +220,7 @@ const AddDestination = () => {
                         <input
                             id="name"
                             type="text"
-                            className={`form-input ${fieldErrors.name ? 'error' : ''}`}
+                            className={`destination-form-input ${fieldErrors.name ? 'error' : ''}`}
                             name="name"
                             value={destination.name}
                             onChange={handleChange}
@@ -233,7 +233,7 @@ const AddDestination = () => {
                         <input
                             id="category"
                             type="text"
-                            className={`form-input ${fieldErrors.category ? 'error' : ''}`}
+                            className={`destination-form-input ${fieldErrors.category ? 'error' : ''}`}
                             name="category"
                             value={destination.category}
                             onChange={handleChange}
@@ -249,7 +249,7 @@ const AddDestination = () => {
                         <input
                             id="location"
                             type="text"
-                            className={`form-input ${fieldErrors.location ? 'error' : ''}`}
+                            className={`destination-form-input ${fieldErrors.location ? 'error' : ''}`}
                             name="location"
                             value={destination.location}
                             onChange={handleChange}
@@ -271,7 +271,7 @@ const AddDestination = () => {
                     <label htmlFor="description" className="form-label">Description</label>
                     <textarea
                         id="description"
-                        className={`form-input ${fieldErrors.description ? 'error' : ''}`}
+                        className={`destination-form-input ${fieldErrors.description ? 'error' : ''}`}
                         name="description"
                         value={destination.description}
                         onChange={handleChange}

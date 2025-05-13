@@ -14,96 +14,195 @@ import AdminPage from "./components/admin/AdminPage";
 
 
 import "./App.css";
+import TourDashboard from "./components/tour/TourDashboard";
+import TourDetailDashboard from "./components/tour/TourDetailDashboard ";
+import BookingPassenger from "./components/booking/BookingPassenger";
+import MomoPaymentPage from "./components/payment/MomoPaymentPage";
+import BookingConfirmation from "./components/booking/BookingConfirmation";
 
 
-const App = () => {  
+
+const App = () => {
   const isAuthenticated = !!localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
-  
+
   const ProtectedRoute = ({ element, requiredRole }) => {
     if (!isAuthenticated) {
       return <Navigate to="/login" />;
     }
-    
+
     if (requiredRole && userRole !== requiredRole) {
       return <Navigate to="/dashboard" />;
     }
-    
+
     return element;
   };
 
-  
+
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/activate" element={<ActivateAccount />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/change-password" element={<ChangePassword />} />
-        <Route
-          path="/dashboard"
-          element={<ProtectedRoute element={<UserDashboard />} />}
-        />
 
-        {/* Admin routes */}
-        <Route
-          path="/admin-dashboard"
-          element={<ProtectedRoute element={<AdminDashboard />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/user"
-          element={<ProtectedRoute element={<UserIndex />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/admin/dashboard"
-          element={<ProtectedRoute element={<DashboardPage />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/admin/user"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
-        />
-        {/* <Route
+      <div>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/activate" element={<ActivateAccount />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoute element={<UserDashboard />} />}
+          />
+          <Route
+            path="/tour-dashboard"
+            element={<ProtectedRoute element={<TourDashboard />} />}
+          />
+          <Route
+            path="/tour-dashboard/detail/:tourId"
+            element={<ProtectedRoute element={<TourDetailDashboard />} />}
+          />
+          <Route
+            path="/booking-passenger"
+            element={<ProtectedRoute element={<BookingPassenger/>} />}
+          /> 
+          <Route
+            path="/booking-confirmation"
+            element={<ProtectedRoute element={<BookingConfirmation/>} />}
+          /> 
+
+          <Route
+            path="/momo-payment"
+            element={<ProtectedRoute element={<MomoPaymentPage/>} />}
+          /> 
+
+
+          {/* Admin routes */}
+          <Route
+            path="/admin-dashboard"
+            element={<ProtectedRoute element={<AdminDashboard />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/user"
+            element={<ProtectedRoute element={<UserIndex />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/dashboard"
+            element={<ProtectedRoute element={<DashboardPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/user"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          {/* <Route
           path="/admin/user/register"
           element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
         /> */}
-        <Route
-          path="/admin/destination"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/admin/destination/add"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/admin/destination/edit/:destinationId"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/admin/destination/:destinationId"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}       
-        />
 
 
-        <Route
-          path="/admin/event"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/admin/event/add"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/admin/event/edit/:eventId"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
-        />
-        <Route
-          path="/admin/event/:eventId"
-          element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}       
-        />  
-      </Routes>
+          {/* Destination */}
+          <Route
+            path="/admin/destination"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/destination/add"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/destination/detail/:destinationId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/destination/edit/:destinationId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/destination/:destinationId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          {/* Event */}
+          <Route
+            path="/admin/event"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/event/add"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/event/detail/:eventId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/event/edit/:eventId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/event/:eventId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+
+          {/* Tour */}
+          <Route
+            path="/admin/tour"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/tour/add"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/tour/detail/:tourId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/tour/edit/:tourId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/tour/:tourId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          {/* Itinerary */}
+          <Route
+            path="/admin/itinerary"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/itinerary/add"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/itinerary/detail/:itineraryId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/itinerary/edit/:itineraryId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/itinerary/:itineraryId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />} 
+          />
+
+          
+          {/* Booking */}
+          <Route
+            path="/admin/booking"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/booking/detail/:bookingId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+        </Routes>
+      </div>
     </Router>
   );
 };

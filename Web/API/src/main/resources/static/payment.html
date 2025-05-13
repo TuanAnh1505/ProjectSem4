@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán Tour</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .payment-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .payment-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .payment-form {
+            margin-top: 20px;
+        }
+        .payment-button {
+            background-color: #A50064;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .payment-button:hover {
+            background-color: #8B0057;
+        }
+        .amount-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #A50064;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="payment-container">
+            <div class="payment-header">
+                <h2>Thanh Toán Tour</h2>
+                <p>Vui lòng kiểm tra thông tin thanh toán</p>
+            </div>
+            
+            <div class="amount-display">
+                <span id="displayAmount">0 VNĐ</span>
+            </div>
+
+            <form id="paymentForm" class="payment-form">
+                <div class="mb-3">
+                    <label for="bookingId" class="form-label">Mã đặt tour</label>
+                    <input type="number" class="form-control" id="bookingId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="userId" class="form-label">Mã người dùng</label>
+                    <input type="number" class="form-control" id="userId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Số tiền (VNĐ)</label>
+                    <input type="number" class="form-control" id="amount" required>
+                </div>
+                <button type="submit" class="payment-button">
+                    Thanh toán qua MoMo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('amount').addEventListener('input', function(e) {
+            const amount = e.target.value;
+            document.getElementById('displayAmount').textContent = 
+                new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                    .format(amount);
+        });
+
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const paymentData = {
+                bookingId: parseInt(document.getElementById('bookingId').value),
+                userId: parseInt(document.getElementById('userId').value),
+                amount: parseFloat(document.getElementById('amount').value)
+            };
+
+            try {
+                const response = await fetch('/api/payment/momo-create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const data = await response.json();
+                
+                if (data.payUrl) {
+                    window.location.href = data.payUrl;
+                } else {
+                    alert('Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại sau!');
+            }
+        });
+    </script>
+</body>
+</html> 

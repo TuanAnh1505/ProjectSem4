@@ -46,6 +46,9 @@ public class Event {
     @Column(name = "file_path")
     private List<String> filePaths = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "events")
+    private List<Tour> tours;
+
     @PrePersist
     @PreUpdate
     private void validateDates() {

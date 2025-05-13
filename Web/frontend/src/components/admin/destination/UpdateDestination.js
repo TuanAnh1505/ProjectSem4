@@ -128,7 +128,7 @@ const UpdateDestination = () => {
                         <label className="form-label">Name</label>
                         <input
                             type="text"
-                            className={`form-input ${fieldErrors.name ? 'error' : ''}`}
+                            className={`update-destination-form-input ${fieldErrors.name ? 'error' : ''}`}
                             name="name"
                             value={destination.name}
                             onChange={(e) => setDestination({ ...destination, name: e.target.value })}
@@ -180,7 +180,7 @@ const UpdateDestination = () => {
                     <label htmlFor="description" className="form-label">Description</label>
                     <textarea
                         id="description"
-                        className={`form-input ${fieldErrors.description ? 'error' : ''}`}
+                        className={`update-destination-form-input ${fieldErrors.description ? 'error' : ''}`}
                         name="description"
                         value={destination.description}
                         onChange={handleChange}
