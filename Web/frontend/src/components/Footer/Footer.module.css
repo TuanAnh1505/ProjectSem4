@@ -1,0 +1,166 @@
+.footer {
+  background-color: #333;
+  color: #fff;
+  padding: 40px 0 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.colMd4 {
+  width: 33.333333%;
+  padding: 0 15px;
+}
+
+.colMd2 {
+  width: 16.666667%;
+  padding: 0 15px;
+}
+
+.colMdPush1 {
+  margin-left: 8.333333%;
+}
+
+.colMdPush2 {
+  margin-left: 16.666667%;
+}
+
+.footerWidget {
+  margin-bottom: 30px;
+}
+
+.footerWidget h4 {
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.footerWidget dd {
+  margin-bottom: 15px;
+}
+
+.formNewsletter input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #555;
+  background: #444;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.bgRedCorners {
+  background: #e31837;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.social {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.social li {
+  margin-right: 10px;
+}
+
+.social img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.logo img {
+  max-width: 200px;
+  margin-top: 20px;
+}
+
+.inlineFlex {
+  display: flex;
+  margin-top: 20px;
+}
+
+.halfWidth {
+  width: 50%;
+}
+
+.desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #ccc;
+}
+
+.certificate {
+  float: right;
+  margin-right: 0;
+}
+
+.copyright {
+  border-top: 1px solid #444;
+  padding: 20px 0;
+  margin-top: 20px;
+  position: relative;
+}
+
+.btnBacktop {
+  position: absolute;
+  right: 15px;
+  top: -40px;
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btnBacktop img {
+  width: 20px;
+  height: 20px;
+}
+
+.clearfix {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.clearfix li {
+  color: #ccc;
+  font-size: 14px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .colMd4,
+  .colMd2 {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .inlineFlex {
+    flex-direction: column;
+  }
+
+  .halfWidth {
+    width: 100%;
+  }
+
+  .certificate {
+    float: none;
+    margin: 20px 0;
+  }
+}
