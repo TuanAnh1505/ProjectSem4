@@ -19,6 +19,8 @@ import AddItinerary from "./itinerary/AddItinerary";
 import UpdateItinerary from "./itinerary/UpdateItinerary";
 import ItineraryIndex from "./itinerary/ItineraryIndex";
 import DetailItinerary from "./itinerary/DetailItinerary";
+import DetailBooking from "./booking/DetailBooking";
+import BookingIndex from "./booking/BookingIndex";
 
 
 const AdminPage = () => {
@@ -77,6 +79,13 @@ const AdminPage = () => {
         return <UpdateItinerary />;
       }
       return <ItineraryIndex />;
+    }
+
+    if (pathSegments.includes('booking') || pathSegments.includes('bookings')) {
+      if (pathSegments.includes('detail')) {
+        return <DetailBooking />;
+      }
+      return <BookingIndex />;
     }
 
     if (pathSegments.includes('user')) {

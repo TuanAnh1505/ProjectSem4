@@ -37,3 +37,4 @@ public class Booking {
     @Column(name = "total_price")
     private BigDecimal totalPrice;
 }
+

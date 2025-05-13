@@ -31,4 +31,23 @@ public class BookingController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
+
+
+    @GetMapping("/admin-bookings")
+    public ResponseEntity<?> getAllBookings() {
+        return ResponseEntity.ok(bookingService.getAllBookings());
+    }
+
+    @GetMapping("/admin-bookings/{id}")
+    public ResponseEntity<?> getBookingDetail(@PathVariable Integer id) {
+        try {
+            Map<String, Object> data = bookingService.getBookingDetail(id);
+            return ResponseEntity.ok(data);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
 }

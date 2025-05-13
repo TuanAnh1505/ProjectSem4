@@ -243,7 +243,7 @@ const AddEvent = () => {
                     <label htmlFor="description" className="form-label">Description</label>
                     <textarea
                         id="description"
-                        className={`form-input ${fieldErrors.description ? 'error' : ''}`}
+                        className={`event-form-input ${fieldErrors.description ? 'error' : ''}`}
                         name="description"
                         value={event.description}
                         onChange={handleChange}

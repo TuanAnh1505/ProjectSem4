@@ -16,6 +16,9 @@ import AdminPage from "./components/admin/AdminPage";
 import "./App.css";
 import TourDashboard from "./components/tour/TourDashboard";
 import TourDetailDashboard from "./components/tour/TourDetailDashboard ";
+import BookingPassenger from "./components/booking/BookingPassenger";
+import MomoPaymentPage from "./components/payment/MomoPaymentPage";
+import BookingConfirmation from "./components/booking/BookingConfirmation";
 
 
 
@@ -60,11 +63,19 @@ const App = () => {
             path="/tour-dashboard/detail/:tourId"
             element={<ProtectedRoute element={<TourDetailDashboard />} />}
           />
-          {/* <Route
-          path="/booking/:tourId"
-          element={<ProtectedRoute element={<BookingDashboard />} />}
-        />  */}
+          <Route
+            path="/booking-passenger"
+            element={<ProtectedRoute element={<BookingPassenger/>} />}
+          /> 
+          <Route
+            path="/booking-confirmation"
+            element={<ProtectedRoute element={<BookingConfirmation/>} />}
+          /> 
 
+          <Route
+            path="/momo-payment"
+            element={<ProtectedRoute element={<MomoPaymentPage/>} />}
+          /> 
 
 
           {/* Admin routes */}
@@ -177,6 +188,17 @@ const App = () => {
           <Route
             path="/admin/itinerary/:itineraryId"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />} 
+          />
+
+          
+          {/* Booking */}
+          <Route
+            path="/admin/booking"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/booking/detail/:bookingId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
 
         </Routes>

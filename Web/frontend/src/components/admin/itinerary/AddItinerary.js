@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './AddItinerary.css';
 
 export default function AddItinerary() {
   const navigate = useNavigate();
@@ -162,13 +163,13 @@ export default function AddItinerary() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Thêm lịch trình</h2>
+    <form onSubmit={handleSubmit} className="itinerary-form">
+      <h2 className="itinerary-title">Thêm lịch trình</h2>
 
-      <div className="mb-4">
-        <label className="block mb-2">Chọn Tour:</label>
+      <div className="form-group">
+        <label className="form-label">Chọn Tour:</label>
         <select
-          className="w-full p-2 border rounded"
+          className="form-select"
           onChange={handleTourChange}
           value={selectedTour || ''}
           required
@@ -184,105 +185,105 @@ export default function AddItinerary() {
 
       {selectedTour && selectedTour !== '' && (
         <>
-          {/* Basic Info */}
-          
-
-          {/* Title and Description */}
-          <div className="mb-4">
-            <label className="block mb-2">Tiêu đề:</label>
+          <div className="form-group">
+            <label className="form-label">Tiêu đề:</label>
             <input
               name="title"
-              className="w-full p-2 border rounded"
-              placeholder="Tiêu đề"
+              className="form-input"
+              placeholder="Nhập tiêu đề lịch trình"
               value={form.title}
               onChange={e => setForm({...form, title: e.target.value})}
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block mb-2">Mô tả:</label>
+          <div className="form-group">
+            <label className="form-label">Mô tả:</label>
             <textarea
               name="description"
-              className="w-full p-2 border rounded"
-              placeholder="Mô tả"
+              className="form-textarea"
+              placeholder="Nhập mô tả chi tiết"
               value={form.description}
               onChange={e => setForm({...form, description: e.target.value})}
               rows="4"
             ></textarea>
           </div>
 
-          {/* Destinations */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold mb-2">Điểm đến:</h3>
-            {destinations.map(dest => (
-              <div key={dest.destinationId} className="border p-4 rounded mb-4"> {/* Changed from dest.id */}
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    checked={form.destinations.some(d => d.destinationId === dest.destinationId)}
-                    onChange={() => handleDestinationToggle(dest)}
-                  />
-                  <span className="font-bold">{dest.name}</span>
-                </div>
-                {form.destinations.some(d => d.destinationId === dest.destinationId) && (
-                  <div className="ml-6">
+          <div className="form-group">
+            <h3 className="section-title">Điểm đến:</h3>
+            <div className="space-y-4">
+              {destinations.map(dest => (
+                <div key={dest.destinationId} className="destination-card">
+                  <div className="card-header">
                     <input
-                      type="number"
-                      placeholder="Thứ tự thăm quan"
-                      className="w-full p-2 border rounded mb-2"
-                      value={form.destinations.find(d => d.destinationId === dest.destinationId)?.visitOrder || ''}
-                      onChange={e => handleDestinationDetail(dest.destinationId, 'visitOrder', e.target.value)}
+                      type="checkbox"
+                      className="custom-checkbox"
+                      checked={form.destinations.some(d => d.destinationId === dest.destinationId)}
+                      onChange={() => handleDestinationToggle(dest)}
                     />
-                    <textarea
-                      placeholder="Chi tiết thăm quan..."
-                      className="w-full p-2 border rounded"
-                      value={form.destinations.find(d => d.destinationId === dest.destinationId)?.note || ''}
-                      onChange={e => handleDestinationDetail(dest.destinationId, 'note', e.target.value)}
-                    />
+                    <span className="font-semibold">{dest.name}</span>
                   </div>
-                )}
-              </div>
-            ))}
+                  {form.destinations.some(d => d.destinationId === dest.destinationId) && (
+                    <div className="card-content">
+                      <input
+                        type="number"
+                        placeholder="Thứ tự thăm quan"
+                        className="form-input"
+                        value={form.destinations.find(d => d.destinationId === dest.destinationId)?.visitOrder || ''}
+                        onChange={e => handleDestinationDetail(dest.destinationId, 'visitOrder', e.target.value)}
+                      />
+                      <textarea
+                        placeholder="Chi tiết thăm quan..."
+                        className="form-textarea"
+                        value={form.destinations.find(d => d.destinationId === dest.destinationId)?.note || ''}
+                        onChange={e => handleDestinationDetail(dest.destinationId, 'note', e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Events */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold mb-2">Sự kiện:</h3>
-            {events.map(event => (
-              <div key={event.eventId} className="border p-4 rounded mb-4"> {/* Changed from event.id */}
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    onChange={() => handleEventToggle(event)}
-                    checked={form.events.some(e => e.eventId === event.eventId)}
-                  />
-                  <span className="font-bold">{event.name}</span>
-                </div>
-                {form.events.some(e => e.eventId === event.eventId) && (
-                  <div className="ml-6">
+          <div className="form-group">
+            <h3 className="section-title">Sự kiện:</h3>
+            <div className="space-y-4">
+              {events.map(event => (
+                <div key={event.eventId} className="event-card">
+                  <div className="card-header">
                     <input
-                      type="datetime-local"
-                      className="w-full p-2 border rounded mb-2"
-                      value={form.events.find(e => e.eventId === event.eventId)?.attendTime || ''}
-                      onChange={e => handleEventChange(event.eventId, 'attendTime', e.target.value)}
+                      type="checkbox"
+                      className="custom-checkbox"
+                      onChange={() => handleEventToggle(event)}
+                      checked={form.events.some(e => e.eventId === event.eventId)}
                     />
-                    <textarea
-                      placeholder="Chi tiết sự kiện..."
-                      className="w-full p-2 border rounded"
-                      value={form.events.find(e => e.eventId === event.eventId)?.note || ''}
-                      onChange={e => handleEventChange(event.eventId, 'note', e.target.value)}
-                    />
+                    <span className="font-semibold">{event.name}</span>
                   </div>
-                )}
-              </div>
-            ))}
+                  {form.events.some(e => e.eventId === event.eventId) && (
+                    <div className="card-content">
+                      <input
+                        type="datetime-local"
+                        className="form-input"
+                        value={form.events.find(e => e.eventId === event.eventId)?.attendTime || ''}
+                        onChange={e => handleEventChange(event.eventId, 'attendTime', e.target.value)}
+                      />
+                      <textarea
+                        placeholder="Chi tiết sự kiện..."
+                        className="form-textarea"
+                        value={form.events.find(e => e.eventId === event.eventId)?.note || ''}
+                        onChange={e => handleEventChange(event.eventId, 'note', e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+            className="submit-button-add-itinerary"
           >
-            Lưu
+            Lưu lịch trình
           </button>
         </>
       )}

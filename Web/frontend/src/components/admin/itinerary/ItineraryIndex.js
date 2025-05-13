@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './ItineraryIndex.css';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 
 export default function ItineraryIndex() {
   const [itineraries, setItineraries] = useState([]);
@@ -67,71 +69,71 @@ export default function ItineraryIndex() {
     return tour ? tour.name : "Unknown Tour";
   };
 
-  if (loading) return <div className="text-center py-4">Đang tải...</div>;
-  if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
+  if (loading) return <div className="loading-text">Đang tải...</div>;
+  if (error) return <div className="error-text">{error}</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Lịch trình Tour</h2>
+    <div className="itinerary-container">
+      <div className="itinerary-header">
+        <h2 className="itinerary-title">Lịch trình Tour</h2>
         <Link 
           to="/admin/itinerary/add" 
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="add-itinerary-btn"
         >
           Thêm lịch trình
         </Link>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead className="bg-gray-100">
+      <div className="itinerary-table-container">
+        <table className="itinerary-table">
+          <thead className="itinerary-table-header">
             <tr>
-              <th className="px-6 py-3 border-b text-left">Tour</th>
-             
-              <th className="px-6 py-3 border-b text-left">Tiêu đề</th>
-              <th className="px-6 py-3 border-b text-left">Mô tả</th>
-              <th className="px-6 py-3 border-b text-left">Điểm đến</th>
-              <th className="px-6 py-3 border-b text-left">Sự kiện</th>
-              <th className="px-6 py-3 border-b text-center">Thao tác</th>
+              <th>Tour</th>
+              <th>Tiêu đề</th>
+              <th>Mô tả</th>
+              <th>Điểm đến</th>
+              <th>Sự kiện</th>
+              <th className="text-center">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {itineraries.map(item => (
-              <tr key={item.itineraryId} className="hover:bg-gray-50">
-                <td className="px-6 py-4 border-b">{getTourName(item.tourId)}</td>
-                <td className="px-6 py-4 border-b">{item.title || 'N/A'}</td>
-                <td className="px-6 py-4 border-b">
+              <tr key={item.itineraryId} className="itinerary-table-row">
+                <td className="itinerary-table-cell">{getTourName(item.tourId)}</td>
+                <td className="itinerary-table-cell">{item.title || 'N/A'}</td>
+                <td className="itinerary-table-cell">
                   {item.description?.length > 50 
                     ? `${item.description.substring(0, 50)}...` 
                     : item.description || 'N/A'}
                 </td>
-                <td className="px-6 py-4 border-b">
+                <td className="itinerary-table-cell">
                   {Array.isArray(item.destinations) ? item.destinations.length : 0} điểm đến
                 </td>
-                <td className="px-6 py-4 border-b">
+                <td className="itinerary-table-cell">
                   {Array.isArray(item.events) ? item.events.length : 0} sự kiện
                 </td>
-                <td className="px-6 py-4 border-b text-center">
-                  <div className="flex justify-center gap-2">
+                <td className="itinerary-table-cell">
+                  <div className="itinerary-actions">
                     <Link 
                       to={`/admin/itinerary/detail/${item.itineraryId}`}
-                      className="text-blue-500 hover:text-blue-700"
+                      className="itinerary-action-link"
+                      title="Chi tiết"
                     >
-                      Chi tiết
+                      <Eye size={18} />
                     </Link>
-                    <span>|</span>
                     <Link 
                       to={`/admin/itinerary/edit/${item.itineraryId}`}
-                      className="text-green-500 hover:text-green-700"
+                      className="itinerary-action-edit"
+                      title="Sửa"
                     >
-                      Sửa
+                      <Pencil size={18} />
                     </Link>
-                    <span>|</span>
                     <button 
                       onClick={() => handleDelete(item.itineraryId)}
-                      className="text-red-500 hover:text-red-700"
+                      className="itinerary-action-delete"
+                      title="Xóa"
                     >
-                      Xóa
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </td>

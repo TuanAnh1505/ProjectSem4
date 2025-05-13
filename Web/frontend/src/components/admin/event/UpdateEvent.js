@@ -231,7 +231,7 @@ const UpdateEvent = () => {
                 <div className="form-group full-width">
                     <label className="form-label">Description</label>
                     <textarea
-                        className={`form-input ${fieldErrors.description ? 'error' : ''}`}
+                        className={`event-form-input ${fieldErrors.description ? 'error' : ''}`}
                         name="description"
                         value={event.description}
                         onChange={(e) => setEvent({ ...event, description: e.target.value })}

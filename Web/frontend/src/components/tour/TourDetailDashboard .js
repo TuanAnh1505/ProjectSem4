@@ -209,8 +209,17 @@ export default function TourDetailDashboard() {
 
       const res = await axios.post('http://localhost:8080/api/bookings', bookingRequest, config);
       if (res.data && (res.data.bookingId || res.data.message)) {
-        setMessage(`✅ ${res.data.message || 'Booking successful!'} ${res.data.bookingId ? `(ID: ${res.data.bookingId})` : ''}`);
-        setTimeout(() => navigate('/bookings'), 2000);
+        setMessage(`✅ ${res.data.message || 'Booking successful!'}`);
+        // Navigate to BookingPassenger with necessary data
+        navigate('/booking-passenger', { 
+          state: { 
+            bookingId: res.data.bookingId,
+            tourInfo: tour,
+            selectedDate: formattedDate,
+            discountCode: discountCode,
+            selectedDate: selectedDate
+          }
+        });
       } else {
         throw new Error('Invalid response from server');
       }
@@ -259,49 +268,9 @@ export default function TourDetailDashboard() {
             <span>{tour.events.map(ev => `${ev.name} (${new Date(ev.startDate).toLocaleDateString()})`).join(', ')}</span>
           </div>
         </div>
-        {/* Booking Form */}
-        <div className="booking-form">
-          <h3>🧾 Book This Tour</h3>
 
-          <div className="booking-row">
-            <div className="form-group calendar">
-              <label>Chọn ngày khởi hành:</label>
-              <Calendar
-                locale="vi"
-                onChange={setSelectedDate}
-                value={selectedDate}
-                minDate={new Date()}
-                tileClassName={({ date, view }) => {
-                  if (view === 'month' && date.getDate() === 27 && date.getMonth() === 4) {
-                    return 'highlight-price';
-                  }
-                }}
-              />
-            </div>
 
-            <div className="form-group discount">
-              <label>Mã giảm giá (nếu có):</label>
-              <input
-                type="text"
-                placeholder="VD: NEWUSER10"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <button
-            className="btn submit-btn"
-            onClick={handleBooking}
-            disabled={bookingLoading}
-          >
-            {bookingLoading ? 'Đang xử lý...' : '✅ Đặt tour ngay'}
-          </button>
-
-          {message && <div className="message-box">{message}</div>}
-        </div>
-
-        {/* Itinerary Section */}
+{/* Itinerary Section */}
         <div className="itinerary-section mb-8">
           <h2 className="text-2xl font-bold mb-4">LỊCH TRÌNH TOUR</h2>
           {itineraries.length > 0 ? (
@@ -388,6 +357,51 @@ export default function TourDetailDashboard() {
             <p className="text-gray-500 text-center py-4">Chưa có lịch trình cho tour này</p>
           )}
         </div>
+
+
+        {/* Booking Form */}
+        <div className="booking-form">
+          <h3>🧾 Book This Tour</h3>
+
+          <div className="booking-row">
+            <div className="form-group calendar">
+              <label>Chọn ngày khởi hành:</label>
+              <Calendar
+                locale="vi"
+                onChange={setSelectedDate}
+                value={selectedDate}
+                minDate={new Date()}
+                tileClassName={({ date, view }) => {
+                  if (view === 'month' && date.getDate() === 27 && date.getMonth() === 4) {
+                    return 'highlight-price';
+                  }
+                }}
+              />
+            </div>
+
+            <div className="form-group discount">
+              <label>Mã giảm giá (nếu có):</label>
+              <input
+                type="text"
+                placeholder="VD: NEWUSER10"
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <button
+            className="btn submit-btn"
+            onClick={handleBooking}
+            disabled={bookingLoading}
+          >
+            {bookingLoading ? 'Đang xử lý...' : '✅ Đặt ngay'}
+          </button>
+
+          {message && <div className="message-box">{message}</div>}
+        </div>
+
+        
 
         {/* Related Tours Section */}
         <div className="related-tours-section">

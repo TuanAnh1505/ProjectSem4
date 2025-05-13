@@ -69,7 +69,7 @@ public class UserDTO {
     }
 
     public void setIsActive(boolean isActive) {
-        isActive = isActive;
+        this.isActive = isActive;
     }
 
     public LocalDateTime getCreatedAt() {
