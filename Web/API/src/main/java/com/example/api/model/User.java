@@ -39,6 +39,16 @@ public class User {
     @JoinTable(name = "userroles", joinColumns = @JoinColumn(name = "userid"), inverseJoinColumns = @JoinColumn(name = "roleid"))
     @JsonManagedReference // Quản lý phía "cha" của quan hệ
     private Set<Role> roles;
+    @OneToOne(mappedBy = "user")
+    private TourGuide tourGuide;
+
+    public TourGuide getTourGuide() {
+        return tourGuide;
+    }
+
+    public void setTourGuide(TourGuide tourGuide) {
+        this.tourGuide = tourGuide;
+    }
 
     @PrePersist
     protected void onCreate() {

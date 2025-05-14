@@ -281,6 +281,7 @@
   position: relative;
   display: inline-block;
   font-family: Arial, sans-serif;
+  margin-top: 15px;
 }
 
 .custom-select select {
@@ -296,12 +297,13 @@
   border-radius: 4px;
   width: 100%;
   max-width: 200px;
+
 }
 
 .custom-select::before {
   content: '';
   position: absolute;
-  top: 50%;
+  top: 34%;
   left: 10px;
   transform: translateY(-50%);
   width: 20px;
@@ -323,7 +325,7 @@
 .custom-select::after {
   content: '▼';
   position: absolute;
-  top: 50%;
+  top: 34%;
   right: 10px;
   transform: translateY(-50%);
   pointer-events: none;

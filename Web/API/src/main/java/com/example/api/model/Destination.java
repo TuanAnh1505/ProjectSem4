@@ -15,10 +15,10 @@ public class Destination {
     @Column(name = "destination_id")
     private Integer destinationId;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "category", nullable = false)
     private String category;
 
     @ElementCollection
@@ -36,7 +36,14 @@ public class Destination {
      @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToMany(mappedBy = "destinations")
+    private List<Tour> tours;
+
     // Other fields, getters, and setters
 
-
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
+

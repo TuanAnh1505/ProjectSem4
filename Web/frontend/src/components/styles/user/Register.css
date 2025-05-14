@@ -97,14 +97,15 @@
     background: #e6393b;
   }
   
-  .modal-footer {
+  .modal-footer-register {
     text-align: center;
     margin-top: 16px;
   }
   
-  .modal-footer p {
+  .modal-footer-register p {
     color: #666;
     margin-bottom: 8px;
+    font-size: 16px;
   }
   
   .link-button {

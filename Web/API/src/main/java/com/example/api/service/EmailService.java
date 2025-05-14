@@ -55,4 +55,24 @@ public class EmailService {
             throw new RuntimeException("Gửi email thất bại", e);
         }
     }
+
+    public void sendDiscountCodeEmail(String to, String code, String description) {
+        jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+    
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject("🎁 Mã giảm giá từ Tour Booking");
+            String htmlContent = "<html><body>" +
+                    "<p>Bạn đã nhận được một mã giảm giá:</p>" +
+                    "<p><strong>Mã:</strong> " + code + "</p>" +
+                    "<p><strong>Mô tả:</strong> " + description + "</p>" +
+                    "<p>Hãy sử dụng mã này khi đặt tour để được giảm giá!</p>" +
+                    "</body></html>";
+            helper.setText(htmlContent, true);
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Gửi email thất bại", e);
+        }
+    }
 }

@@ -1,79 +1,115 @@
-
 package com.example.api.service;
 
 import com.example.api.dto.TourGuideDTO;
 import com.example.api.model.TourGuide;
+import com.example.api.model.User;
 import com.example.api.repository.TourGuideRepository;
+import com.example.api.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class TourGuideService {
 
     @Autowired
     private TourGuideRepository tourGuideRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public TourGuideDTO createTourGuide(TourGuideDTO tourGuideDTO) {
-        if (tourGuideDTO.getUserId() == null) {
-            throw new IllegalArgumentException("User ID cannot be null");
+        // Check if user exists
+        User user = userRepository.findById(tourGuideDTO.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + tourGuideDTO.getUserId()));
+
+        // Check if user is already a tour guide
+        if (tourGuideRepository.existsByUserId(tourGuideDTO.getUserId())) {
+            throw new IllegalStateException("User is already a tour guide");
         }
-        if (tourGuideRepository.findByUserId(tourGuideDTO.getUserId()).isPresent()) {
-            throw new IllegalArgumentException("User ID " + tourGuideDTO.getUserId() + " is already associated with a tour guide");
-        }
-        TourGuide tourGuide = mapToEntity(tourGuideDTO);
+
+        TourGuide tourGuide = new TourGuide();
+        tourGuide.setUserId(tourGuideDTO.getUserId());
+        tourGuide.setExperienceYears(tourGuideDTO.getExperienceYears());
+        tourGuide.setSpecialization(tourGuideDTO.getSpecialization());
+        tourGuide.setLanguages(tourGuideDTO.getLanguages());
+        tourGuide.setRating(tourGuideDTO.getRating() != null ? tourGuideDTO.getRating() : 0.0);
+
         TourGuide savedTourGuide = tourGuideRepository.save(tourGuide);
-        return mapToDTO(savedTourGuide);
+        return convertToDTO(savedTourGuide);
     }
 
-    public TourGuideDTO getTourGuideById(Integer id) {
+    public TourGuideDTO getTourGuideById(Long id) {
         TourGuide tourGuide = tourGuideRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("TourGuide not found with id: " + id));
-        return mapToDTO(tourGuide);
+                .orElseThrow(() -> new EntityNotFoundException("Tour guide not found with id: " + id));
+        return convertToDTO(tourGuide);
     }
 
     public List<TourGuideDTO> getAllTourGuides() {
         return tourGuideRepository.findAll().stream()
-                .map(this::mapToDTO)
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    public TourGuideDTO updateTourGuide(Integer id, TourGuideDTO tourGuideDTO) {
-        if (tourGuideDTO.getUserId() == null) {
-            throw new IllegalArgumentException("User ID cannot be null");
-        }
-        TourGuide existingTourGuide = tourGuideRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("TourGuide not found with id: " + id));
-        if (!existingTourGuide.getUserId().equals(tourGuideDTO.getUserId())) {
-            if (tourGuideRepository.findByUserId(tourGuideDTO.getUserId()).isPresent()) {
-                throw new IllegalArgumentException("User ID " + tourGuideDTO.getUserId() + " is already associated with another tour guide");
-            }
-        }
-        updateEntityFromDTO(existingTourGuide, tourGuideDTO);
-        TourGuide updatedTourGuide = tourGuideRepository.save(existingTourGuide);
-        return mapToDTO(updatedTourGuide);
-    }
-
-    public void deleteTourGuide(Integer id) {
+    public TourGuideDTO updateTourGuide(Long id, TourGuideDTO tourGuideDTO) {
         TourGuide tourGuide = tourGuideRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("TourGuide not found with id: " + id));
-        tourGuideRepository.delete(tourGuide);
+                .orElseThrow(() -> new EntityNotFoundException("Tour guide not found with id: " + id));
+
+        // Update fields
+        if (tourGuideDTO.getExperienceYears() != null) {
+            tourGuide.setExperienceYears(tourGuideDTO.getExperienceYears());
+        }
+        if (tourGuideDTO.getSpecialization() != null) {
+            tourGuide.setSpecialization(tourGuideDTO.getSpecialization());
+        }
+        if (tourGuideDTO.getLanguages() != null) {
+            tourGuide.setLanguages(tourGuideDTO.getLanguages());
+        }
+        if (tourGuideDTO.getRating() != null) {
+            tourGuide.setRating(tourGuideDTO.getRating());
+        }
+
+        TourGuide updatedTourGuide = tourGuideRepository.save(tourGuide);
+        return convertToDTO(updatedTourGuide);
     }
 
-    private TourGuide mapToEntity(TourGuideDTO dto) {
-        TourGuide tourGuide = new TourGuide();
-        tourGuide.setGuideId(dto.getGuideId());
-        tourGuide.setUserId(dto.getUserId());
-        tourGuide.setExperienceYears(dto.getExperienceYears());
-        tourGuide.setSpecialization(dto.getSpecialization());
-        tourGuide.setLanguages(dto.getLanguages());
-        tourGuide.setRating(dto.getRating());
-        return tourGuide;
+    public void deleteTourGuide(Long id) {
+        if (!tourGuideRepository.existsById(id)) {
+            throw new EntityNotFoundException("Tour guide not found with id: " + id);
+        }
+        tourGuideRepository.deleteById(id);
     }
 
-    private TourGuideDTO mapToDTO(TourGuide tourGuide) {
+    public List<TourGuideDTO> findByMinRating(Double minRating) {
+        return tourGuideRepository.findByMinRating(minRating).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<TourGuideDTO> findByMinExperience(Integer minExperience) {
+        return tourGuideRepository.findByMinExperience(minExperience).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<TourGuideDTO> findBySpecialization(String specialization) {
+        return tourGuideRepository.findBySpecializationContaining(specialization).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<TourGuideDTO> findByLanguage(String language) {
+        return tourGuideRepository.findByLanguageContaining(language).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private TourGuideDTO convertToDTO(TourGuide tourGuide) {
         TourGuideDTO dto = new TourGuideDTO();
         dto.setGuideId(tourGuide.getGuideId());
         dto.setUserId(tourGuide.getUserId());
@@ -81,14 +117,7 @@ public class TourGuideService {
         dto.setSpecialization(tourGuide.getSpecialization());
         dto.setLanguages(tourGuide.getLanguages());
         dto.setRating(tourGuide.getRating());
+        dto.setCreatedAt(tourGuide.getCreatedAt());
         return dto;
-    }
-
-    private void updateEntityFromDTO(TourGuide tourGuide, TourGuideDTO dto) {
-        tourGuide.setUserId(dto.getUserId());
-        tourGuide.setExperienceYears(dto.getExperienceYears());
-        tourGuide.setSpecialization(dto.getSpecialization());
-        tourGuide.setLanguages(dto.getLanguages());
-        tourGuide.setRating(dto.getRating());
     }
 }

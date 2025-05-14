@@ -2,86 +2,63 @@ package com.example.api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "tour_guides")
 @Data
 public class TourGuide {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "guide_id")
-    private Integer guideId;
+    @Column(name = "guide_id", columnDefinition = "int(11)")
+    private Long guideId;
 
-    @Column(name = "userid", nullable = false, unique = true)
+    @Column(name = "userid", columnDefinition = "bigint(20)", unique = true, nullable = false)
     private Long userId;
 
-    @Column(name = "experience_years")
+    @Column(name = "experience_years", columnDefinition = "int(11)")
     private Integer experienceYears;
 
+    @Column(name = "specialization", columnDefinition = "varchar(255)")
     private String specialization;
 
+    @Column(name = "languages", columnDefinition = "varchar(255)")
     private String languages;
 
-    @Column(columnDefinition = "DECIMAL(3,1) DEFAULT 0")
+    @Column(name = "rating", columnDefinition = "decimal(3,1) default 0.0")
+    @ColumnDefault("0.0")
     private Double rating;
 
-    @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
+    @Column(name = "created_at", columnDefinition = "datetime default current_timestamp")
+    @ColumnDefault("current_timestamp")
     private LocalDateTime createdAt;
 
-    public Integer getGuideId() {
-        return guideId;
-    }
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userid", insertable = false, updatable = false)
+    private User user;
 
-    public void setGuideId(Integer guideId) {
-        this.guideId = guideId;
-    }
+    @ManyToMany
+    @JoinTable(
+        name = "tour_guides_assignments",
+        joinColumns = @JoinColumn(name = "guide_id", columnDefinition = "int(11)"),
+        inverseJoinColumns = @JoinColumn(name = "tour_id", columnDefinition = "int(11)")
+    )
+    private List<Tour> tours = new ArrayList<>();
 
-    public Long getUserId() {
-        return userId;
-    }
+    @OneToMany(mappedBy = "guide", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GuideReview> reviews = new ArrayList<>();
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Integer getExperienceYears() {
-        return experienceYears;
-    }
-
-    public void setExperienceYears(Integer experienceYears) {
-        this.experienceYears = experienceYears;
-    }
-
-    public String getSpecialization() {
-        return specialization;
-    }
-
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
-    }
-
-    public String getLanguages() {
-        return languages;
-    }
-
-    public void setLanguages(String languages) {
-        this.languages = languages;
-    }
-
-    public Double getRating() {
-        return rating;
-    }
-
-    public void setRating(Double rating) {
-        this.rating = rating;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (rating == null) {
+            rating = 0.0;
+        }
     }
 }

@@ -156,7 +156,7 @@ const DestinationIndex = () => {
             <div className="header">
                 <h2>{t("destination_title")}</h2>
                 <Link to="/admin/destination/add" className="create-btn">
-                    {t("create_destination")}
+                    {t("create")}
                 </Link>
             </div>
             <table className="table">
@@ -198,16 +198,20 @@ const DestinationIndex = () => {
                             <td>{destination.rating}</td>
                             <td>
                                 <Link
-                                    to={`/admin/destination/edit/${destination.destinationId}`}
-                                    className="btn btn-warning btn-sm me-2"
+                                    to={`/admin/destination/detail/${destination.destinationId}`}
+                                    className="action-link"
                                 >
-                                    <i className="bi bi-pencil text-white"></i>
+                                    🔍  
                                 </Link>
-
-                                <button onClick={() => deleteDestination(destination.destinationId)}
-                                    className="btn btn-danger btn-sm">
-                                    <i class="bi bi-trash"></i>
-
+                                <Link
+                                    to={`/admin/destination/edit/${destination.destinationId}`}
+                                    className="action-link"
+                                >
+                                  ✏️
+                                </Link>
+                                <button className="delete-button"  onClick={() => deleteDestination(destination.destinationId)}
+                                    >
+                                    🗑️
                                 </button>
                             </td>
                         </tr>

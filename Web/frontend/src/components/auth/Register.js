@@ -116,7 +116,7 @@ const Register = () => {
             Đăng ký
           </button>
         </form>
-        <div className="modal-footer">
+        <div className="modal-footer-register">
           <p>
             Đã có tài khoản?{" "}
             <button onClick={() => navigate("/login")} className="link-button">

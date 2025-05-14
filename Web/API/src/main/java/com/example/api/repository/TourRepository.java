@@ -1,18 +1,17 @@
-
 package com.example.api.repository;
 
 import com.example.api.model.Tour;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface TourRepository extends JpaRepository<Tour, Integer> {
+    @Query(value = "SELECT * FROM tours WHERE tour_id <> :excludeTourId ORDER BY RAND() LIMIT 4", nativeQuery = true)
+    List<Tour> findRandomTours(@Param("excludeTourId") Integer excludeTourId);
 
-    @Query("SELECT t FROM Tour t WHERE (:name IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-            "AND (:destinationId IS NULL OR t.destination.destinationId = :destinationId)")
-    List<Tour> findByNameAndDestination(@Param("name") String name, @Param("destinationId") Integer destinationId);
+
 }

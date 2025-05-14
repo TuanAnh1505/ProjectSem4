@@ -1,16 +1,17 @@
-
 package com.example.api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "tours")
 @Data
 public class Tour {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tour_id")
@@ -27,89 +28,31 @@ public class Tour {
 
     private Integer duration;
 
-    @Column(name = "max_participants")
+    @Column(name = "max_participants", columnDefinition = "INT DEFAULT 0")
     private Integer maxParticipants;
 
-    @ManyToOne
-    @JoinColumn(name = "destination_id")
-    private Destination destination;
+    @Column(name = "status_id")
+    private Integer statusId;
 
-    @ManyToOne
-    @JoinColumn(name = "status_id")
-    private TourStatus status;
+    @Column(name = "image_url")
+    private String imageUrl;
 
-    @Column(name = "created_at", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
 
-    public Integer getTourId() {
-        return tourId;
-    }
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "tour_destinations",
+        joinColumns = @JoinColumn(name = "tour_id"),
+        inverseJoinColumns = @JoinColumn(name = "destination_id")
+    )
+    @JsonIgnoreProperties("tours")
+    private List<Destination> destinations;
 
-    public void setTourId(Integer tourId) {
-        this.tourId = tourId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public Integer getMaxParticipants() {
-        return maxParticipants;
-    }
-
-    public void setMaxParticipants(Integer maxParticipants) {
-        this.maxParticipants = maxParticipants;
-    }
-
-    public Destination getDestination() {
-        return destination;
-    }
-
-    public void setDestination(Destination destination) {
-        this.destination = destination;
-    }
-
-    public TourStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TourStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "tour_events",
+        joinColumns = @JoinColumn(name = "tour_id"),
+        inverseJoinColumns = @JoinColumn(name = "event_id")
+    )
+    @JsonIgnoreProperties("tours")
+    private List<Event> events;
 }
