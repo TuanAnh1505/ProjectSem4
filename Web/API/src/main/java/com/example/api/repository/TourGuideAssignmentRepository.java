@@ -16,7 +16,7 @@ public interface TourGuideAssignmentRepository extends JpaRepository<TourGuideAs
     List<TourGuideAssignment> findByTourIdAndGuideMinRating(
             @Param("tourId") Integer tourId,
             @Param("minRating") Double minRating);
-    @Query("SELECT tga FROM TourGuideAssignment tga WHERE tga.guide.id = :guideId AND tga.tour.status.statusName = :statusName")
+    @Query("SELECT tga FROM TourGuideAssignment tga JOIN TourStatus ts ON tga.tour.statusId = ts.tourStatusId WHERE tga.guide.id = :guideId AND ts.statusName = :statusName")
     List<TourGuideAssignment> findByGuideIdAndTourStatus(
             @Param("guideId") Integer guideId,
             @Param("statusName") String statusName);
