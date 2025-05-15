@@ -18,9 +18,7 @@ const Header = () => (
         </h1>
         <nav className={styles.mainNav}>
           <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
+           
             <li className={styles.hasFlyout}>
               <Link to="/live-fully" className={styles.lang}>
                 Live fully in Vietnam <span className={styles.arrow}></span>
@@ -139,7 +137,7 @@ const Header = () => (
               </div>
             </li>
             <li className={styles.hasFlyout}>
-              <Link to="/plan">
+              <Link to="/plan-your-trip">
                 Plan your trip <span className={styles.arrow}></span>
               </Link>
               <div className={styles.flyout}>
@@ -164,7 +162,7 @@ const Header = () => (
               </div>
             </li>
             <li>
-              <Link to="/offers">Travel offers</Link>
+              <Link to="/tour-booking">Tour booking</Link>
             </li>
             <li>
               <Link to="/green-travel">Green travel</Link>
@@ -174,9 +172,7 @@ const Header = () => (
                 EN <span className={styles.arrow}></span>
               </a>
               <div className={styles.flyout}>
-                <ul>
-                  <li><a href="https://vietnam.travel/jp">日本語</a></li>
-                </ul>
+                
               </div>
             </li>
           </ul>

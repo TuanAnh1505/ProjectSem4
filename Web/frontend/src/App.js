@@ -5,6 +5,7 @@ import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import PlacesToGo from './components/PlaceToGo/PlaceToGo';
 import ThingsToDo from './components/ThingToDo/ThingsToDo';
+
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import UserDashboard from './components/user/UserDashboard';
@@ -22,7 +23,9 @@ import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
 import BookingConfirmation from './components/booking/BookingConfirmation';
 import './App.css';
-
+import PlanYourTrip from './components/PlanYourTrip/PlanYourTrip';
+import Tourbooking from './components/TourBooking/Tourbooking';
+// import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
   return (
@@ -75,14 +78,14 @@ const App = () => {
             <ThingsToDo />
           </Layout>
         } />
-        <Route path="/plan" element={
+        <Route path="/plan-your-trip" element={
           <Layout>
-            <Home />
+            <PlanYourTrip />
           </Layout>
         } />
-        <Route path="/offers" element={
+        <Route path="/tour-booking" element={
           <Layout>
-            <Home />
+            <Tourbooking />
           </Layout>
         } />
         <Route path="/green-travel" element={
