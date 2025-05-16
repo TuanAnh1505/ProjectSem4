@@ -7,11 +7,11 @@ import { Eye, Pencil, Trash2 } from 'lucide-react';
 export default function ItineraryIndex() {
   const [itineraries, setItineraries] = useState([]);
   const [tours, setTours] = useState([]);
-  const navigate = useNavigate();
-  const tourId = localStorage.getItem("selectedTourId");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [reload, setReload] = useState(0);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -25,9 +25,7 @@ export default function ItineraryIndex() {
       .then(res => setTours(res.data))
       .catch(err => {
         console.error("Error loading tours:", err);
-        if (err.response?.status === 401) {
-          navigate('/login');
-        }
+        if (err.response?.status === 401) navigate('/login');
       });
   }, [navigate]);
 
@@ -36,27 +34,23 @@ export default function ItineraryIndex() {
       setLoading(true);
       try {
         const res = await axios.get(`http://localhost:8080/api/itineraries`);
-        console.log('Raw itineraries data:', res.data);
         setItineraries(res.data);
       } catch (err) {
         console.error('Error fetching itineraries:', err);
         setError(err.message);
-        if (err.response?.status === 401) {
-          navigate('/login');
-        }
+        if (err.response?.status === 401) navigate('/login');
       } finally {
         setLoading(false);
       }
     };
-
     fetchItineraries();
-  }, [navigate, reload]); // Add reload dependency
+  }, [navigate, reload]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Bạn có chắc muốn xóa lịch trình này?')) {
       try {
         await axios.delete(`http://localhost:8080/api/itineraries/${id}`);
-        setReload(prev => prev + 1); // Trigger reload after delete
+        setReload(prev => prev + 1);
       } catch (err) {
         console.error(err);
         alert('Không thể xóa lịch trình này');
@@ -66,7 +60,16 @@ export default function ItineraryIndex() {
 
   const getTourName = (tourId) => {
     const tour = tours.find(t => t.tourId === tourId);
-    return tour ? tour.name : "Unknown Tour";
+    return tour ? tour.name : "Không rõ";
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      return new Date(dateStr).toLocaleDateString('vi-VN');
+    } catch {
+      return '';
+    }
   };
 
   if (loading) return <div className="loading-text">Đang tải...</div>;
@@ -75,12 +78,9 @@ export default function ItineraryIndex() {
   return (
     <div className="itinerary-container">
       <div className="itinerary-header">
-        <h2 className="itinerary-title">Lịch trình Tour</h2>
-        <Link 
-          to="/admin/itinerary/add" 
-          className="add-itinerary-btn"
-        >
-          Thêm lịch trình
+        <h2 className="itinerary-title">Danh sách lịch trình tour</h2>
+        <Link to="/admin/itinerary/add" className="add-itinerary-btn">
+          + Thêm lịch trình
         </Link>
       </div>
 
@@ -90,7 +90,8 @@ export default function ItineraryIndex() {
             <tr>
               <th>Tour</th>
               <th>Tiêu đề</th>
-              <th>Mô tả</th>
+              <th>Ngày bắt đầu</th>
+              <th>Ngày kết thúc</th>
               <th>Điểm đến</th>
               <th>Sự kiện</th>
               <th className="text-center">Thao tác</th>
@@ -101,34 +102,31 @@ export default function ItineraryIndex() {
               <tr key={item.itineraryId} className="itinerary-table-row">
                 <td className="itinerary-table-cell">{getTourName(item.tourId)}</td>
                 <td className="itinerary-table-cell">{item.title || 'N/A'}</td>
+                <td className="itinerary-table-cell">{formatDate(item.startDate)}</td>
+                <td className="itinerary-table-cell">{formatDate(item.endDate)}</td>
                 <td className="itinerary-table-cell">
-                  {item.description?.length > 50 
-                    ? `${item.description.substring(0, 50)}...` 
-                    : item.description || 'N/A'}
-                </td>
-                <td className="itinerary-table-cell">
-                  {Array.isArray(item.destinations) ? item.destinations.length : 0} điểm đến
+                  {Array.isArray(item.destinations) ? item.destinations.length : 0} điểm
                 </td>
                 <td className="itinerary-table-cell">
                   {Array.isArray(item.events) ? item.events.length : 0} sự kiện
                 </td>
                 <td className="itinerary-table-cell">
                   <div className="itinerary-actions">
-                    <Link 
+                    <Link
                       to={`/admin/itinerary/detail/${item.itineraryId}`}
                       className="itinerary-action-link"
-                      title="Chi tiết"
+                      title="Xem chi tiết"
                     >
                       <Eye size={18} />
                     </Link>
-                    <Link 
+                    <Link
                       to={`/admin/itinerary/edit/${item.itineraryId}`}
                       className="itinerary-action-edit"
-                      title="Sửa"
+                      title="Chỉnh sửa"
                     >
                       <Pencil size={18} />
                     </Link>
-                    <button 
+                    <button
                       onClick={() => handleDelete(item.itineraryId)}
                       className="itinerary-action-delete"
                       title="Xóa"
@@ -139,6 +137,13 @@ export default function ItineraryIndex() {
                 </td>
               </tr>
             ))}
+            {itineraries.length === 0 && (
+              <tr>
+                <td colSpan="7" className="text-center text-gray-500 py-6">
+                  Không có lịch trình nào.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

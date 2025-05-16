@@ -181,10 +181,6 @@ const DetailBooking = () => {
               <label>Giá tour:</label>
               <span>{parseFloat(booking.tour?.price).toLocaleString()}đ</span>
             </div>
-            <div className="info-item">
-              <label>Ngày khởi hành:</label>
-              <span>{new Date(booking.selectedDate).toLocaleDateString('vi-VN')}</span>
-            </div>
           </div>
         </div>
 

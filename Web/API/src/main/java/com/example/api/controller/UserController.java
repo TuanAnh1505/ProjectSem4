@@ -1,5 +1,7 @@
 package com.example.api.controller;
 
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +16,10 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserInfoDTO> getUserInfo(@PathVariable Long id) {
+    @GetMapping("/{publicId}")
+    public ResponseEntity<UserInfoDTO> getUserInfo(@PathVariable String publicId) {
         try {
-            UserInfoDTO userInfo = userService.getUserInfo(id);
+            UserInfoDTO userInfo = userService.getUserInfo(publicId);
             return ResponseEntity.ok(userInfo);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

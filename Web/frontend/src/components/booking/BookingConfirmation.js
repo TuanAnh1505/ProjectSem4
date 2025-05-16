@@ -28,7 +28,25 @@ function getTypeAndAge(passenger) {
 const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bookingId, passengers, tourInfo, contactInfo, selectedDate: stateSelectedDate } = location.state || {};
+  const { bookingId, passengers, tourInfo, contactInfo, itinerary } = location.state || {};
+  const [expandedDestinationIds, setExpandedDestinationIds] = React.useState([]);
+  const [expandedEventIds, setExpandedEventIds] = React.useState([]);
+
+  const toggleDestinationNote = (destinationId) => {
+    setExpandedDestinationIds(prev =>
+      prev.includes(destinationId)
+        ? prev.filter(id => id !== destinationId)
+        : [...prev, destinationId]
+    );
+  };
+
+  const toggleEventNote = (eventId) => {
+    setExpandedEventIds(prev =>
+      prev.includes(eventId)
+        ? prev.filter(id => id !== eventId)
+        : [...prev, eventId]
+    );
+  };
 
   if (!bookingId || !passengers || !tourInfo) {
     return (
@@ -41,11 +59,6 @@ const BookingConfirmation = () => {
 
   // Lấy thông tin liên lạc từ contactInfo hoặc passengers[0]
   const contact = contactInfo || passengers[0] || {};
-
-  // Lấy ngày khởi hành ưu tiên theo thứ tự: state.selectedDate -> tourInfo.selectedDate -> passengers[0].selectedDate
-  const departureDate = stateSelectedDate || tourInfo.selectedDate || (passengers[0] && passengers[0].selectedDate);
-
-  console.log('departureDate:', departureDate, 'stateSelectedDate:', stateSelectedDate, 'tourInfo.selectedDate:', tourInfo.selectedDate, 'passengers[0].selectedDate:', passengers[0] && passengers[0].selectedDate);
 
   const calculateTotal = () => {
     let total = 0;
@@ -91,17 +104,6 @@ const BookingConfirmation = () => {
           <div className="confirmation-box" style={{ border: '1px solid #bbbbbb', background: '#fff', borderRadius: 8, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px #eee' }}>
             <h4 style={{ marginBottom: 12, color: '#1976d2' }}>CHI TIẾT BOOKING</h4>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Mã đặt chỗ:</b> <span style={{ color: 'red', flex: 1 }}>{bookingId}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}>
-              <b style={{ minWidth: 150 }}>Ngày khởi hành:</b>
-              <span style={{ flex: 1 }}>
-                {departureDate
-                  ? (() => {
-                      const d = new Date(departureDate);
-                      return isNaN(d) ? '--' : d.toLocaleDateString('vi-VN');
-                    })()
-                  : '--'}
-              </span>
-            </div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Ngày đặt:</b> <span style={{ flex: 1 }}>{new Date().toLocaleString('vi-VN')}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Số khách:</b> <span style={{ flex: 1 }}>{passengers.length}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold', flex: 1 }}>{calculateTotal().toLocaleString()} đ</span></div>
@@ -179,6 +181,69 @@ const BookingConfirmation = () => {
               <div style={{ marginBottom: 8 }}><b>Mã booking:</b> <span style={{ color: 'red' }}>{bookingId}</span></div>
               <div style={{ marginBottom: 8 }}><b>Trạng thái:</b> <span style={{ color: '#388e3c', fontWeight: 'bold' }}>{bookingStatus}</span></div>
               {/* <div style={{ marginBottom: 8 }}><b>Thông tin chuyến bay:</b> {flightInfo}</div> */}
+              {/* Lịch trình đã chọn */}
+              {itinerary && (
+                <div className="itinerary-summary" style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  background: '#f8f9fa',
+                  borderRadius: 8,
+                  height: 220,
+                  overflowY: 'auto',
+                  boxSizing: 'border-box',
+                  transition: 'height 0.2s',
+                  minHeight: 120,
+                  maxHeight: 300
+                }}>
+                  <h4 style={{fontWeight: 'bold'}}>Lịch trình đã chọn</h4>
+                  <div><b>{itinerary.name ? itinerary.name : `Lịch trình`}</b></div>
+                  {(itinerary.startDate || itinerary.endDate) && (
+                    <div>
+                      {itinerary.startDate && (
+                        <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
+                      )}
+                      {itinerary.startDate && itinerary.endDate && ' - '}
+                      {itinerary.endDate && (
+                        <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
+                      )}
+                    </div>
+                  )}
+                  {itinerary.destinations && itinerary.destinations.length > 0 && (
+                    <div style={{marginTop: 8}}>
+                      <b>Điểm đến:</b>
+                      <ul style={{margin: 0, paddingLeft: 20}}>
+                        {itinerary.destinations.sort((a, b) => a.visitOrder - b.visitOrder).map(dest => (
+                          <li key={dest.destinationId} style={{cursor: 'pointer'}} onClick={() => toggleDestinationNote(dest.destinationId)}>
+                            Ngày {dest.visitOrder}: {dest.name}
+                            {expandedDestinationIds.includes(dest.destinationId) && (
+                              <div style={{marginLeft: 16, color: '#555', fontStyle: 'italic', fontSize: 14}}>
+                                {dest.note ? dest.note : 'Không có ghi chú'}
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {itinerary.events && itinerary.events.length > 0 && (
+                    <div style={{marginTop: 8}}>
+                      <b>Sự kiện:</b>
+                      <ul style={{margin: 0, paddingLeft: 20}}>
+                        {itinerary.events.map(event => (
+                          <li key={event.eventId} style={{cursor: 'pointer'}} onClick={() => toggleEventNote(event.eventId)}>
+                            {event.name}
+                            {expandedEventIds.includes(event.eventId) && (
+                              <div style={{marginLeft: 16, color: '#555', fontStyle: 'italic', fontSize: 14}}>
+                                {event.note ? event.note : 'Không có ghi chú'}
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
               <button style={{ background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 4, padding: '10px 24px', fontWeight: 'bold', marginTop: 12, cursor: 'pointer' }}>
                 Thanh toán ngay
               </button>

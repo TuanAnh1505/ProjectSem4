@@ -3,6 +3,8 @@ package com.example.api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -20,6 +22,12 @@ public class TourItinerary {
     private String title;
 
     private String description;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();

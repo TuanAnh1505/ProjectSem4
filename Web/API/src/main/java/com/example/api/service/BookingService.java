@@ -1,11 +1,7 @@
 package com.example.api.service;
 
 import com.example.api.dto.BookingDTO;
-import com.example.api.dto.BookingDetailDTO;
-import com.example.api.dto.BookingPassengerDTO;
 import com.example.api.dto.TourBookingRequest;
-import com.example.api.dto.TourDTO;
-import com.example.api.dto.UserDTO;
 import com.example.api.model.*;
 import com.example.api.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -36,15 +32,10 @@ public class BookingService {
             System.out.println("=== Booking Request Received ===");
             System.out.println("User ID: " + request.getUserId());
             System.out.println("Tour ID: " + request.getTourId());
-            System.out.println("Selected Date: " + request.getSelectedDate());
             System.out.println("Discount Code: " + request.getDiscountCode());
 
-            if (request.getUserId() == null || request.getTourId() == null || request.getSelectedDate() == null) {
+            if (request.getUserId() == null || request.getTourId() == null) {
                 throw new RuntimeException("Thiếu thông tin bắt buộc để đặt tour.");
-            }
-
-            if (request.getSelectedDate().isBefore(LocalDate.now())) {
-                throw new RuntimeException("Ngày khởi hành không hợp lệ (quá khứ).");
             }
 
             User user = userRepository.findById(request.getUserId())
@@ -84,7 +75,6 @@ public class BookingService {
             booking.setUser(user);
             booking.setTour(tour);
             booking.setBookingDate(LocalDateTime.now());
-            booking.setSelectedDate(request.getSelectedDate());
             booking.setTotalPrice(price);
             booking.setStatus(status);
 
@@ -102,7 +92,6 @@ public class BookingService {
             return saved;
         } catch (Exception e) {
             System.err.println("Lỗi khi đặt tour: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Đặt tour thất bại: " + e.getMessage(), e);
         }
     }
@@ -113,10 +102,9 @@ public class BookingService {
                 b.getBookingId(),
                 b.getUser() != null ? b.getUser().getFullName() : null,
                 b.getTour() != null ? b.getTour().getName() : null,
-                b.getSelectedDate() != null ? b.getSelectedDate().toString() : null,
                 b.getBookingDate() != null ? b.getBookingDate().toString() : null,
                 b.getStatus() != null ? b.getStatus().getStatusName() : null,
-                b.getTotalPrice())).collect(java.util.stream.Collectors.toList());
+                b.getTotalPrice())).collect(Collectors.toList());
     }
 
     public Map<String, Object> getBookingDetail(Integer bookingId) {
@@ -129,7 +117,6 @@ public class BookingService {
         Map<String, Object> bookingDetails = new HashMap<>();
         bookingDetails.put("bookingId", booking.getBookingId());
         bookingDetails.put("bookingDate", booking.getBookingDate());
-        bookingDetails.put("selectedDate", booking.getSelectedDate());
         bookingDetails.put("totalPrice", booking.getTotalPrice());
 
         // User
@@ -160,7 +147,7 @@ public class BookingService {
             bookingDetails.put("status", statusDetails);
         }
 
-        // Passengers: convert to Map, do NOT return entity directly!
+        // Passengers
         List<Map<String, Object>> passengerList = passengers.stream().map(p -> {
             Map<String, Object> map = new HashMap<>();
             map.put("passengerId", p.getPassengerId());

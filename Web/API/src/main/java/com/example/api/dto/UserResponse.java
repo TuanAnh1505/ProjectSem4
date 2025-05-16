@@ -1,15 +1,19 @@
 package com.example.api.dto;
 
+import java.util.UUID;
+
 public class UserResponse {
-    private Long userId;
+    // private Long userId;
+    private UUID publicId;
     private String fullName;
     private String email;
     private String phone;
     private String address;
 
     // Constructor
-    public UserResponse(Long userId, String fullName, String email, String phone, String address) {
-        this.userId = userId;
+    public UserResponse( UUID publicId, String fullName, String email, String phone, String address) {
+        // this.userId = userId;
+        this.publicId = publicId;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
@@ -18,12 +22,20 @@ public class UserResponse {
 
     
     // Getters and Setters
-    public Long getUserId() {
-        return userId;
+    // public Long getUserId() {
+    //     return userId;
+    // }
+
+    // public void setUserId(Long userId) {
+    //     this.userId = userId;
+    // }
+
+    public UUID getPublicId() {
+        return publicId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setPublicId(UUID publicId) {
+        this.publicId = publicId;
     }
 
     public String getFullName() {

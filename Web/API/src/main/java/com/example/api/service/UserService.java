@@ -14,17 +14,23 @@ import com.example.api.util.JwtUtil;
 // import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UserService {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private UserRepository userRepository;
@@ -54,46 +60,51 @@ public class UserService {
             throw new RuntimeException("Email already exists");
         }
 
-        User user = new User();
-        user.setFullName(fullName);
-        user.setEmail(email);
-        user.setPasswordHash(passwordEncoder.encode(password));
-        user.setPhone(phone);
-        user.setAddress(address);
-        user.setIsActive(false); // Người dùng phải kích hoạt tài khoản sau khi đăng ký
+        try {
+            User user = new User();
+            user.setFullName(fullName);
+            user.setEmail(email);
+            user.setPasswordHash(passwordEncoder.encode(password));
+            user.setPhone(phone);
+            user.setAddress(address);
+            user.setIsActive(false);
+            user.setPublicId(UUID.randomUUID().toString());
 
-        // Gán role mặc định USER
-        Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByRoleName("USER");
-        if (userRole == null) {
-            userRole = new Role();
-            userRole.setRoleName("USER");
-            roleRepository.save(userRole);
+            // Gán role mặc định USER
+            Set<Role> roles = new HashSet<>();
+            Role userRole = roleRepository.findByRoleName("USER");
+            if (userRole == null) {
+                userRole = new Role();
+                userRole.setRoleName("USER");
+                roleRepository.save(userRole);
+            }
+            roles.add(userRole);
+            user.setRoles(roles);
+
+            // Lưu người dùng vào DB
+            User savedUser = userRepository.save(user);
+
+            // Gửi email kích hoạt
+            emailService.sendActivationEmail(savedUser.getEmail(), savedUser.getPublicId(), true);
+
+            // Gửi mã giảm giá NEWUSER10 nếu còn hạn
+            Discount welcome = discountRepository.findByCode("NEWUSER10").orElse(null);
+            if (welcome != null && LocalDateTime.now().isBefore(welcome.getEndDate())) {
+                emailService.sendDiscountCodeEmail(savedUser.getEmail(), welcome.getCode(), welcome.getDescription());
+            }
+
+            return savedUser;
+        } catch (Exception e) {
+            throw new RuntimeException("Error registering user: " + e.getMessage(), e);
         }
-        roles.add(userRole);
-        user.setRoles(roles);
-
-        // Lưu người dùng vào DB
-        User savedUser = userRepository.save(user);
-
-        // Gửi email kích hoạt
-        emailService.sendActivationEmail(savedUser.getEmail(), savedUser.getUserid());
-
-        // Gửi mã giảm giá NEWUSER10 nếu còn hạn
-        Discount welcome = discountRepository.findByCode("NEWUSER10").orElse(null);
-        if (welcome != null && LocalDateTime.now().isBefore(welcome.getEndDate())) {
-            emailService.sendDiscountCodeEmail(savedUser.getEmail(), welcome.getCode(), welcome.getDescription());
-        }
-
-        return savedUser;
     }
 
     public void saveUser(User user) {
         userRepository.save(user);
     }
 
-    public void activateUser(Long userId) {
-        User user = userRepository.findById(userId)
+    public void activateUser(String publicId) {
+        User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại."));
         if (user.getIsActive()) {
             throw new RuntimeException("Tài khoản đã được kích hoạt.");
@@ -120,7 +131,7 @@ public class UserService {
             userToken.setUser(user);
             userToken.setToken(token);
             userToken.setCreatedat(LocalDateTime.now());
-            userToken.setExpiry(LocalDateTime.now().plusHours(10));
+            userToken.setExpiry(LocalDateTime.now().plusMinutes(10));
             userTokenRepository.save(userToken);
 
             return token;
@@ -146,7 +157,7 @@ public class UserService {
             userToken.setUser(user);
             userToken.setToken(token);
             userToken.setCreatedat(LocalDateTime.now());
-            userToken.setExpiry(LocalDateTime.now().plusHours(10));
+            userToken.setExpiry(LocalDateTime.now().plusMinutes(10));
             userTokenRepository.save(userToken);
 
             String role = user.getRoles().stream()
@@ -157,7 +168,7 @@ public class UserService {
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("role", role);
-            response.put("userId", user.getUserid());
+            response.put("publicId", user.getPublicId());
             return response;
         }
         throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
@@ -183,27 +194,33 @@ public class UserService {
             throw new RuntimeException("Email không tồn tại trong hệ thống.");
         }
 
-        String resetLink = "http://localhost:3000/reset-password?userId=" + user.getUserid();
-        emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getPublicId());
     }
 
-    public void resetPassword(Long userId, String newPassword) {
-        User user = userRepository.findById(userId)
+    public void resetPassword(String publicId, String newPassword) {
+        User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại."));
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 
-    public UserInfoDTO getUserInfo(Long id) {
-        User user = userRepository.findById(id)
+    public UserInfoDTO getUserInfo(String publicId) {
+        User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return UserInfoDTO.builder()
-                .userid(user.getUserid())
+                // .userid(user.getUserid())
+                .publicId(user.getPublicId())
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .email(user.getEmail())
                 .address(user.getAddress())
                 .build();
+    }
+
+   @Scheduled(fixedRate = 36000000)
+    public void deleteExpiredTokens() {
+        userTokenRepository.deleteAllByExpiryBefore(LocalDateTime.now());
+        jdbcTemplate.execute("ALTER TABLE usertokens AUTO_INCREMENT = 1");
     }
 }

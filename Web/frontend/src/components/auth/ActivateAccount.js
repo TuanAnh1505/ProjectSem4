@@ -8,9 +8,9 @@ const ActivateAccount = () => {
 
   useEffect(() => {
     const activateAccount = async () => {
-      const userId = searchParams.get("userId");
+      const publicId = searchParams.get("publicId");
       try {
-        const response = await axios.get(`http://localhost:8080/api/auth/activate?userId=${userId}`);
+        const response = await axios.get(`http://localhost:8080/api/auth/activate?publicId=${publicId}`);
         // Use the response data as the success message
         const successMessage = response.data || "Tài khoản đã được kích hoạt thành công";
         navigate(`/login?message=${encodeURIComponent(successMessage)}`);
