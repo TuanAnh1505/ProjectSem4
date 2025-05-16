@@ -790,15 +790,13 @@
 
 .swiper-slide img,
 .thumb-custom {
-  width: 200px;
-  height: 900px;
-  min-height: 500px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   display: block;
   margin: 0;
   padding: 0;
   border: none;
-  background: #000;
 }
 
 @media (max-width: 768px) {
