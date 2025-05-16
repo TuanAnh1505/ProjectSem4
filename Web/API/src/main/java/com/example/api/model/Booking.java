@@ -27,9 +27,6 @@ public class Booking {
     @Column(name = "booking_date")
     private LocalDateTime bookingDate;
 
-    @Column(name = "selected_date")
-    private LocalDate selectedDate;
-
     @ManyToOne
     @JoinColumn(name = "status_id")
     private BookingStatus status;

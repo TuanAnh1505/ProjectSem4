@@ -4,8 +4,7 @@ import com.example.api.dto.RegisterRequest;
 import com.example.api.dto.LoginRequest;
 import com.example.api.model.User;
 import com.example.api.service.UserService;
-
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import com.example.api.service.EmailService;
 
 import java.util.Map;
-
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,7 +25,7 @@ public class AuthController {
     private EmailService emailService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
             User user = userService.registerUser(
                     registerRequest.getFullName(),
@@ -38,18 +37,20 @@ public class AuthController {
             user.setIsActive(false);
             userService.saveUser(user);
 
-            emailService.sendActivationEmail(user.getEmail(), user.getUserid());
+            emailService.sendActivationEmail(user.getEmail(), user.getPublicId(), Boolean.TRUE.equals(registerRequest.getIsApp()));
 
             return ResponseEntity.ok("Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
     @GetMapping("/activate")
-    public ResponseEntity<String> activateAccount(@RequestParam Long userId) {
+    public ResponseEntity<String> activateAccount(@RequestParam String publicId) {
         try {
-            userService.activateUser(userId);
+            userService.activateUser(publicId);
             return ResponseEntity.ok("Tài khoản đã được kích hoạt thành công.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -81,14 +82,15 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         try {
-            Long userId = Long.parseLong(request.get("userId"));
+            String publicId = request.get("publicId");
             String newPassword = request.get("newPassword");
-            userService.resetPassword(userId, newPassword);
+            userService.resetPassword(publicId, newPassword);
             return ResponseEntity.ok("Mật khẩu đã được đặt lại thành công.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
 
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request) {
@@ -102,9 +104,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
-
-
-    
-
 }

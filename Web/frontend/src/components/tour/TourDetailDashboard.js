@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Calendar from 'react-calendar';
-import vi from 'date-fns/locale/vi';
-import 'react-calendar/dist/Calendar.css'
 import '../styles/tour/TourDetailDashboard.css';
 import '../styles/booking/BookingDashboard.css';
 
@@ -13,7 +10,6 @@ export default function TourDetailDashboard() {
   const [tour, setTour] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState('');
   const [discountCode, setDiscountCode] = useState('');
   const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -21,12 +17,7 @@ export default function TourDetailDashboard() {
   const [itineraries, setItineraries] = useState([]);
   const [expandedDestinations, setExpandedDestinations] = useState({});
   const [expandedEvents, setExpandedEvents] = useState({});
-
-  const formatDate = (date) => {
-    if (!date) return null;
-    const d = new Date(date);
-    return d.toISOString().split('T')[0];
-  };
+  const [selectedItineraryId, setSelectedItineraryId] = useState(null);
 
   const toggleDestination = (destId) => {
     setExpandedDestinations(prev => ({
@@ -106,10 +97,8 @@ export default function TourDetailDashboard() {
           config
         );
         
-        // Fetch destination and event names for each itinerary
         const itinerariesWithDetails = await Promise.all(
           res.data.map(async (itinerary) => {
-            // Handle destinations
             let destinationsWithNames = [];
             if (itinerary.destinations) {
               destinationsWithNames = await Promise.all(
@@ -120,15 +109,13 @@ export default function TourDetailDashboard() {
                       config
                     );
                     return { ...dest, name: destRes.data.name };
-                  } catch (err) {
-                    console.error(`Error fetching destination ${dest.destinationId}:`, err);
+                  } catch {
                     return { ...dest, name: "Unknown Destination" };
                   }
                 })
               );
             }
 
-            // Handle events
             let eventsWithNames = [];
             if (itinerary.events) {
               eventsWithNames = await Promise.all(
@@ -139,8 +126,7 @@ export default function TourDetailDashboard() {
                       config
                     );
                     return { ...event, name: eventRes.data.name };
-                  } catch (err) {
-                    console.error(`Error fetching event ${event.eventId}:`, err);
+                  } catch {
                     return { ...event, name: "Unknown Event" };
                   }
                 })
@@ -173,20 +159,8 @@ export default function TourDetailDashboard() {
         setMessage('Please login to book this tour');
         return navigate('/login');
       }
-
-      if (!selectedDate) {
-        setMessage('Vui lòng chọn ngày khởi hành');
-        return;
-      }
-
-      const formattedDate = formatDate(selectedDate);
-      if (!formattedDate) {
-        setMessage('❌ Ngày không hợp lệ');
-        return;
-      }
-
-      if (new Date(formattedDate) < new Date().setHours(0, 0, 0, 0)) {
-        setMessage('❌ Không thể đặt tour cho ngày trong quá khứ');
+      if (!selectedItineraryId) {
+        setMessage('Vui lòng chọn lịch trình muốn đặt!');
         return;
       }
 
@@ -201,23 +175,19 @@ export default function TourDetailDashboard() {
       const bookingRequest = {
         userId: parseInt(userId),
         tourId: parseInt(tourId),
-        discountCode: discountCode.trim() || null,
-        selectedDate: formattedDate
+        itineraryId: selectedItineraryId,
+        discountCode: discountCode.trim() || null
       };
 
-      console.log('Sending booking request:', bookingRequest); // Add this for debugging
-
       const res = await axios.post('http://localhost:8080/api/bookings', bookingRequest, config);
-      if (res.data && (res.data.bookingId || res.data.message)) {
+      if (res.data && res.data.bookingId) {
         setMessage(`✅ ${res.data.message || 'Booking successful!'}`);
-        // Navigate to BookingPassenger with necessary data
         navigate('/booking-passenger', { 
           state: { 
             bookingId: res.data.bookingId,
             tourInfo: tour,
-            selectedDate: formattedDate,
             discountCode: discountCode,
-            selectedDate: selectedDate
+            itinerary: itineraries.find(i => i.itineraryId === selectedItineraryId)
           }
         });
       } else {
@@ -259,47 +229,54 @@ export default function TourDetailDashboard() {
             <label>Description:</label>
             <span>{tour.description || 'No description provided.'}</span>
           </div>
-          <div className="info-row">
-            <label>Destinations:</label>
-            <span>{tour.destinations.map(dest => dest.name).join(', ')}</span>
-          </div>
-          <div className="info-row">
-            <label>Events:</label>
-            <span>{tour.events.map(ev => `${ev.name} (${new Date(ev.startDate).toLocaleDateString()})`).join(', ')}</span>
-          </div>
         </div>
 
-
-{/* Itinerary Section */}
-        <div className="itinerary-section mb-8">
-          <h2 className="text-2xl font-bold mb-4">LỊCH TRÌNH TOUR</h2>
+        <div className="itinerary-section">
+          <h2 className="itinerary-title">LỊCH TRÌNH TOUR</h2>
           {itineraries.length > 0 ? (
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold mb-6 text-center text-blue-700">Tour : {tour.name}</h3>
-              {itineraries.sort((a, b) => a.dayNumber - b.dayNumber).map((itinerary) => (
-                <div key={itinerary.itineraryId} className="bg-white shadow rounded-lg p-6">
-                  
-                  {/* Destinations */}
+              {itineraries.sort((a, b) => a.dayNumber - b.dayNumber).map((itinerary, idx) => (
+                <div key={itinerary.itineraryId} className="itinerary-card">
+                  <div className="itinerary-header">
+                    <input
+                      type="radio"
+                      name="selectedItinerary"
+                      value={itinerary.itineraryId}
+                      checked={selectedItineraryId === itinerary.itineraryId}
+                      onChange={() => setSelectedItineraryId(itinerary.itineraryId)}
+                      style={{ accentColor: '#1976d2', width: 18, height: 18 }}
+                      className="mr-2"
+                    />
+                    <h3>{itinerary.name ? itinerary.name : `Lịch trình ${idx + 1}`}</h3>
+                  </div>
+                  {(itinerary.startDate || itinerary.endDate) && (
+                    <div className="itinerary-date">
+                      {itinerary.startDate && (
+                        <span className="start">Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
+                      )}
+                      {itinerary.startDate && itinerary.endDate && <span> - </span>}
+                      {itinerary.endDate && (
+                        <span className="end">Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
+                      )}
+                    </div>
+                  )}
                   {itinerary.destinations && itinerary.destinations.length > 0 && (
                     <div className="mb-4">
-                      <h4 className="font-semibold text-lg mb-2">Điểm đến:</h4>
-                      <div className="space-y-2">
+                      <h4 className="font-semibold text-lg mb-2 text-blue-700">🗺️ Điểm đến:</h4>
+                      <div>
                         {itinerary.destinations
                           .sort((a, b) => a.visitOrder - b.visitOrder)
                           .map((dest) => (
-                            <div key={dest.destinationId} className="ml-4 p-3 border rounded-lg">
-                              <div 
-                                className="flex items-center gap-2 cursor-pointer" 
-                                onClick={() => toggleDestination(dest.destinationId)}
-                              >
-                                <span className="text-blue-500 font-bold">Ngày : {dest.visitOrder}</span>
-                                <span className="font-medium text-lg">  -   Điểm đến : {dest.name}</span>
-                              </div>
+                            <div
+                              key={dest.destinationId}
+                              className="itinerary-destination"
+                              onClick={() => toggleDestination(dest.destinationId)}
+                            >
+                              <span className="day-label">📅 Ngày {dest.visitOrder}</span>
+                              <span className="dest-name">- {dest.name}</span>
                               {expandedDestinations[dest.destinationId] && (
-                                <div className="mt-2 ml-6 text-gray-600">
-                                  <p className="text-sm italic whitespace-pre-wrap" style={{marginLeft: '2rem'}}>
-                                    {dest.note || "Không có chi tiết"}
-                                  </p>
+                                <div className="itinerary-note">
+                                  {dest.note || <span className="note-empty">Không có chi tiết</span>}
                                 </div>
                               )}
                             </div>
@@ -307,27 +284,22 @@ export default function TourDetailDashboard() {
                       </div>
                     </div>
                   )}
-
-                  {/* Events */}
                   {itinerary.events && itinerary.events.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-lg mb-2">Sự kiện:</h4>
-                      <div className="space-y-2">
+                      <h4 className="font-semibold text-lg mb-2 text-red-700">🎉 Sự kiện:</h4>
+                      <div>
                         {itinerary.events.map((event) => (
-                          <div key={event.eventId} className="ml-4 p-3 border rounded-lg">
-                            <div 
-                              className="flex items-center gap-2 cursor-pointer"
-                              onClick={() => toggleEvent(event.eventId)}
-                             
-                            >
-                              <span className="text-green-500 font-bold"></span>
-                              <span className="font-medium text-lg">    Sự kiện : {event.name}</span>
-                            </div>
+                          <div
+                            key={event.eventId}
+                            className="itinerary-event"
+                            onClick={() => toggleEvent(event.eventId)}
+                          >
+                            <span className="event-label">🎈 Sự kiện: {event.name}</span>
                             {expandedEvents[event.eventId] && (
-                              <div className="mt-2 ml-6 text-gray-600">
-                                <p className="text-sm">
+                              <div className="itinerary-note">
+                                <div>
                                   <span className="font-medium">Thời gian: </span>
-                                  {event.attendTime 
+                                  {event.attendTime
                                     ? new Date(event.attendTime).toLocaleString('vi-VN', {
                                         weekday: 'long',
                                         year: 'numeric',
@@ -336,13 +308,13 @@ export default function TourDetailDashboard() {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                       })
-                                    : "Chưa có thời gian cụ thể"
+                                    : <span className="note-empty">Chưa có thời gian cụ thể</span>
                                   }
-                                </p>
-                                <p className="text-sm mt-1 italic">
-                                  <span className="font-medium"style={{marginLeft: '2rem'}}>Chi tiết: </span>
-                                  {event.note || "Không có chi tiết"}
-                                </p>
+                                </div>
+                                <div className="mt-1">
+                                  <span className="font-medium">Chi tiết: </span>
+                                  {event.note || <span className="note-empty">Không có chi tiết</span>}
+                                </div>
                               </div>
                             )}
                           </div>
@@ -358,36 +330,16 @@ export default function TourDetailDashboard() {
           )}
         </div>
 
-
-        {/* Booking Form */}
         <div className="booking-form">
           <h3>🧾 Book This Tour</h3>
-
-          <div className="booking-row">
-            <div className="form-group calendar">
-              <label>Chọn ngày khởi hành:</label>
-              <Calendar
-                locale="vi"
-                onChange={setSelectedDate}
-                value={selectedDate}
-                minDate={new Date()}
-                tileClassName={({ date, view }) => {
-                  if (view === 'month' && date.getDate() === 27 && date.getMonth() === 4) {
-                    return 'highlight-price';
-                  }
-                }}
-              />
-            </div>
-
-            <div className="form-group discount">
-              <label>Mã giảm giá (nếu có):</label>
-              <input
-                type="text"
-                placeholder="VD: NEWUSER10"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value)}
-              />
-            </div>
+          <div className="form-group discount">
+            <label>Mã giảm giá (nếu có):</label>
+            <input
+              type="text"
+              placeholder="VD: NEWUSER10"
+              value={discountCode}
+              onChange={(e) => setDiscountCode(e.target.value)}
+            />
           </div>
 
           <button
@@ -401,9 +353,6 @@ export default function TourDetailDashboard() {
           {message && <div className="message-box">{message}</div>}
         </div>
 
-        
-
-        {/* Related Tours Section */}
         <div className="related-tours-section">
           <h2>CÁC CHƯƠNG TRÌNH KHÁC</h2>
           <div className="related-tours-grid">
@@ -420,10 +369,6 @@ export default function TourDetailDashboard() {
                 </div>
                 <div className="tour-info">
                   <h3>{tour.name}</h3>
-                  {/* <p>
-                    <span className="location">🚩 Khởi hành: {tour.startLocation}</span>
-                    <span className="code">Mã chương trình: {tour.tourCode}</span>
-                  </p> */}
                   <div className="price-section">
                     <span className="price">Giá từ {tour.price.toLocaleString()}đ</span>
                     <button 
@@ -438,7 +383,6 @@ export default function TourDetailDashboard() {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

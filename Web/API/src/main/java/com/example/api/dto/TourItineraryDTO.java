@@ -1,5 +1,7 @@
 package com.example.api.dto;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -9,6 +11,8 @@ public class TourItineraryDTO {
     private Integer tourId;
     private String title;
     private String description;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @Data
     public static class DestinationDetail {
@@ -21,7 +25,7 @@ public class TourItineraryDTO {
     @Data
     public static class EventDetail {
         private Integer eventId;
-        private String attendTime;
+        private LocalDateTime  attendTime;
         private String note;
         private String name; // for display purposes
     }

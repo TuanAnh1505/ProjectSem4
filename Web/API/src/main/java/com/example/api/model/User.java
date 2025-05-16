@@ -2,8 +2,10 @@ package com.example.api.model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -11,14 +13,21 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore // Ẩn userid khỏi JSON response
     private Long userid;
+
+    @Column(name = "public_id", nullable = false, unique = true, updatable = false, length = 36, columnDefinition = "CHAR(36)")
+    // Lưu UUID dạng chuỗi 36 ký tự, tương thích với MySQL CHAR(36)
+    private String publicId;
 
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(unique = true)
     private String email;
 
     @Column(name = "password_hash")
+    @JsonIgnore // Ẩn password hash khỏi JSON response
     private String passwordHash;
 
     private String phone;
@@ -53,6 +62,9 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.createdAt = java.time.LocalDateTime.now();
+        if (this.publicId == null) {
+            this.publicId = java.util.UUID.randomUUID().toString();
+        }
     }
 
     // Getters and Setters
@@ -62,6 +74,14 @@ public class User {
 
     public void setUserid(Long userid) {
         this.userid = userid;
+    }
+
+    public String getPublicId() {
+        return publicId;
+    }
+
+    public void setPublicId(String publicId) {
+        this.publicId = publicId;
     }
 
     public String getFullName() {

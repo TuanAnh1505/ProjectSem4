@@ -3,7 +3,8 @@ package com.example.api.dto;
 import java.time.LocalDateTime;
 
 public class UserDTO {
-    private Long userid;
+    // private Long userid;
+    private String publicId;
     private String fullName;
     private String email;
     private String phone;
@@ -11,9 +12,10 @@ public class UserDTO {
     private boolean isActive;
     private LocalDateTime createdAt;
 
-    public UserDTO(Long userid, String fullName, String email, String phone, String address, boolean isActive,
+    public UserDTO(String publicId, String fullName, String email, String phone, String address, boolean isActive,
             LocalDateTime createdAt) {
-        this.userid = userid;
+        // this.userid = userid;
+        this.publicId = publicId;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
@@ -23,15 +25,22 @@ public class UserDTO {
     }
 
     // Getters and setters
-    public Long getUserid() {
-        return userid;
+    // public Long getUserid() {
+    //     return userid;
+    // }
+
+    // public void setUserid(Long userid) {
+    //     this.userid = userid;
+    // }
+
+    public String getPublicId() {
+        return publicId;
     }
 
-    public void setUserid(Long userid) {
-        this.userid = userid;
+    public void setPublicId(String publicId) {
+        this.publicId = publicId;
     }
 
-    
     public String getFullName() {
         return fullName;
     }

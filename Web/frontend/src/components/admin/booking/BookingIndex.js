@@ -12,7 +12,6 @@ const BookingTable = ({ bookings }) => (
           <th>Mã</th>
           <th>Người đặt</th>
           <th>Tour</th>
-          <th>Ngày khởi hành</th>
           <th>Ngày đặt</th>
           <th>Trạng thái</th>
           <th>Tổng tiền</th>
@@ -25,7 +24,6 @@ const BookingTable = ({ bookings }) => (
             <td>{b.bookingId}</td>
             <td>{b.userFullName || 'N/A'}</td>
             <td>{b.tourName || 'N/A'}</td>
-            <td>{b.selectedDate ? new Date(b.selectedDate).toLocaleDateString() : 'N/A'}</td>
             <td>{b.bookingDate ? new Date(b.bookingDate).toLocaleString() : 'N/A'}</td>
             <td>
               <span className={`status-badge status-${(b.statusName || '').toLowerCase()}`}>{b.statusName || 'N/A'}</span>

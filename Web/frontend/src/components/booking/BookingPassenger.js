@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 const BookingPassenger = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bookingId, tourInfo, selectedDate } = location.state || {};
+  const { bookingId, tourInfo, selectedDate, itinerary } = location.state || {};
 
   // State cho thông tin người đặt tour
   const [useLoggedInInfo, setUseLoggedInInfo] = useState(true);
@@ -49,6 +49,8 @@ const BookingPassenger = () => {
   const [bookedTour, setBookedTour] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [expandedDestinationIds, setExpandedDestinationIds] = useState([]);
+  const [expandedEventIds, setExpandedEventIds] = useState([]);
 
   // Cập nhật contactInfo khi toggle useLoggedInInfo
   useEffect(() => {
@@ -172,6 +174,24 @@ const BookingPassenger = () => {
   // Toggle sử dụng thông tin đăng nhập
   const handleToggleUserInfo = () => {
     setUseLoggedInInfo(prev => !prev);
+  };
+
+  // Toggle hiển thị note điểm đến
+  const toggleDestinationNote = (destinationId) => {
+    setExpandedDestinationIds(prev =>
+      prev.includes(destinationId)
+        ? prev.filter(id => id !== destinationId)
+        : [...prev, destinationId]
+    );
+  };
+
+  // Toggle hiển thị note sự kiện
+  const toggleEventNote = (eventId) => {
+    setExpandedEventIds(prev =>
+      prev.includes(eventId)
+        ? prev.filter(id => id !== eventId)
+        : [...prev, eventId]
+    );
   };
 
   // Validate dữ liệu trước khi submit
@@ -302,7 +322,7 @@ const BookingPassenger = () => {
       
       toast.success('Đăng ký thông tin hành khách thành công!');
       navigate('/booking-confirmation', {
-        state: { bookingId, passengers: res.data, tourInfo: bookedTour, selectedDate }
+        state: { bookingId, passengers: res.data, tourInfo: bookedTour, itinerary}
       });
     } catch (err) {
       const msg = err.response?.data?.message || 'Đã có lỗi xảy ra khi đăng ký thông tin hành khách';
@@ -553,6 +573,70 @@ const BookingPassenger = () => {
                 <p>Mã đặt tour: {bookingId}</p>
               </div>
             </div>
+
+            {/* Hiển thị thông tin lịch trình đã đặt nếu có */}
+            {itinerary && (
+              <div className="itinerary-summary" style={{
+                marginTop: '1rem',
+                padding: '1rem',
+                background: '#f8f9fa',
+                borderRadius: 8,
+                height: 220,
+                overflowY: 'auto',
+                boxSizing: 'border-box',
+                transition: 'height 0.2s',
+                minHeight: 120,
+                maxHeight: 300
+              }}>
+                <h4 style={{fontWeight: 'bold'}}>Lịch trình đã chọn</h4>
+                <div><b>{itinerary.name ? itinerary.name : `Lịch trình`}</b></div>
+                {(itinerary.startDate || itinerary.endDate) && (
+                  <div>
+                    {itinerary.startDate && (
+                      <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
+                    )}
+                    {itinerary.startDate && itinerary.endDate && ' - '}
+                    {itinerary.endDate && (
+                      <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
+                    )}
+                  </div>
+                )}
+                {itinerary.destinations && itinerary.destinations.length > 0 && (
+                  <div style={{marginTop: 8}}>
+                    <b>Điểm đến:</b>
+                    <ul style={{margin: 0, paddingLeft: 20}}>
+                      {itinerary.destinations.sort((a, b) => a.visitOrder - b.visitOrder).map(dest => (
+                        <li key={dest.destinationId} style={{cursor: 'pointer'}} onClick={() => toggleDestinationNote(dest.destinationId)}>
+                          Ngày {dest.visitOrder}: {dest.name}
+                          {expandedDestinationIds.includes(dest.destinationId) && (
+                            <div style={{marginLeft: 16, color: '#555', fontStyle: 'italic', fontSize: 14}}>
+                              {dest.note ? dest.note : 'Không có ghi chú'}
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {itinerary.events && itinerary.events.length > 0 && (
+                  <div style={{marginTop: 8}}>
+                    <b>Sự kiện:</b>
+                    <ul style={{margin: 0, paddingLeft: 20}}>
+                      {itinerary.events.map(event => (
+                        <li key={event.eventId} style={{cursor: 'pointer'}} onClick={() => toggleEventNote(event.eventId)}>
+                          {event.name}
+                          {expandedEventIds.includes(event.eventId) && (
+                            <div style={{marginLeft: 16, color: '#555', fontStyle: 'italic', fontSize: 14}}>
+                              {event.note ? event.note : 'Không có ghi chú'}
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="price-breakdown">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

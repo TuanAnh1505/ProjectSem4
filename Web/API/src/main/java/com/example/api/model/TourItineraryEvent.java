@@ -18,10 +18,6 @@ public class TourItineraryEvent {
     @Column(name = "event_id")
     private Integer eventId;
 
-    @ManyToOne
-    @JoinColumn(name = "event_id", insertable = false, updatable = false)
-    private Event event;
-
     @Column(name = "attend_time") // Fix column name
     private LocalDateTime attendTime;
 

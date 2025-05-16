@@ -20,28 +20,30 @@ const ForgotPassword = () => {
     } catch (err) {
       setError(err.response?.data || "Có lỗi xảy ra!");
     }
-    
   };
 
   return (
-    <div className="forgot-password-container">
-      <h2>Quên mật khẩu</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="forgot-password-form-group">
-          <input
-            type="email"
-            placeholder="Nhập email của bạn"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        {message && <p className="success-message">{message}</p>}
-        {error && <p className="error-message">{error}</p>}
-        <button type="submit" className="submit-button">
-          Gửi email đặt lại mật khẩu
-        </button>
-      </form>
+    <div className="forgot-container">
+      <div className="forgot-box">
+        <h2 className="forgot-header">Quên mật khẩu</h2>
+        <form className="forgot-form" onSubmit={handleSubmit}>
+          <div className="forgot-input-group">
+            <input
+              type="email"
+              className="forgot-input"
+              placeholder="Nhập email của bạn"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          {message && <p className="forgot-success">{message}</p>}
+          {error && <p className="forgot-error">{error}</p>}
+          <button type="submit" className="forgot-btn">
+            Gửi email đặt lại mật khẩu
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

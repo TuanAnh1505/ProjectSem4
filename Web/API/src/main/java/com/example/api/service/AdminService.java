@@ -45,7 +45,7 @@ public class AdminService {
         List<User> users = userRepository.findAll();
         return users.stream()
                 .map(user -> new UserDTO(
-                        user.getUserid(),
+                        user.getPublicId(),
                         user.getFullName(),
                         user.getEmail(),
                         user.getPhone(),

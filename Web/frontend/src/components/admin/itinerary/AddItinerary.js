@@ -5,7 +5,7 @@ import './AddItinerary.css';
 
 export default function AddItinerary() {
   const navigate = useNavigate();
-  
+
   const [tours, setTours] = useState([]);
   const [selectedTour, setSelectedTour] = useState(null);
   const [destinations, setDestinations] = useState([]);
@@ -14,13 +14,14 @@ export default function AddItinerary() {
     tourId: '',
     title: '',
     description: '',
+    startDate: '',
+    endDate: '',
     destinations: [],
     events: []
   });
 
-  // Add axios interceptor for authentication
   useEffect(() => {
-    const token = localStorage.getItem('token'); // assuming you store JWT token in localStorage
+    const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
@@ -47,7 +48,6 @@ export default function AddItinerary() {
             axios.get(`http://localhost:8080/api/tours/${tourId}/destinations`),
             axios.get(`http://localhost:8080/api/tours/${tourId}/events`)
           ]);
-          
           setDestinations(destRes.data || []);
           setEvents(eventRes.data || []);
           setForm(prev => ({ ...prev, tourId: tourId }));
@@ -57,7 +57,6 @@ export default function AddItinerary() {
           setEvents([]);
         }
       };
-      
       fetchData();
     }
   }, [selectedTour]);
@@ -79,9 +78,9 @@ export default function AddItinerary() {
       const destinations = exists
         ? prev.destinations.filter(d => d.destinationId !== dest.destinationId)
         : [...prev.destinations, {
-            destinationId: dest.destinationId, // Changed from dest.id
+            destinationId: dest.destinationId,
             name: dest.name,
-            visitOrder: '', // Remove default value
+            visitOrder: '',
             note: ''
           }];
       return { ...prev, destinations };
@@ -91,8 +90,8 @@ export default function AddItinerary() {
   const handleDestinationDetail = (destId, field, value) => {
     setForm(prev => ({
       ...prev,
-      destinations: prev.destinations.map(d => 
-        d.destinationId === destId 
+      destinations: prev.destinations.map(d =>
+        d.destinationId === destId
           ? { ...d, [field]: value }
           : d
       )
@@ -105,7 +104,7 @@ export default function AddItinerary() {
       const events = exists
         ? prev.events.filter(e => e.eventId !== event.eventId)
         : [...prev.events, {
-            eventId: event.eventId, // Changed from event.id
+            eventId: event.eventId,
             name: event.name,
             attendTime: '',
             note: ''
@@ -117,8 +116,8 @@ export default function AddItinerary() {
   const handleEventChange = (eventId, field, value) => {
     setForm(prev => ({
       ...prev,
-      events: prev.events.map(e => 
-        e.eventId === eventId 
+      events: prev.events.map(e =>
+        e.eventId === eventId
           ? { ...e, [field]: value }
           : e
       )
@@ -133,13 +132,14 @@ export default function AddItinerary() {
         return;
       }
 
-      // Truncate notes to maximum 255 characters
       const truncateNote = (note) => (note || '').substring(0, 255);
 
       const formattedData = {
         tourId: parseInt(selectedTour),
         title: form.title,
         description: form.description || '',
+        startDate: form.startDate || null,
+        endDate: form.endDate || null,
         destinations: form.destinations.map(dest => ({
           destinationId: parseInt(dest.destinationId),
           visitOrder: parseInt(dest.visitOrder) || 1,
@@ -147,7 +147,7 @@ export default function AddItinerary() {
         })).sort((a, b) => a.visitOrder - b.visitOrder),
         events: form.events.map(event => ({
           eventId: parseInt(event.eventId),
-          attendTime: event.attendTime || new Date().toISOString(),
+          attendTime: event.attendTime || null,
           note: truncateNote(event.note)
         }))
       };
@@ -158,7 +158,7 @@ export default function AddItinerary() {
       navigate("/admin/itinerary");
     } catch (err) {
       console.error("Error details:", err.response?.data);
-      alert("Failed to create itinerary: " + (err.response?.data?.error || err.message));
+      alert("Lưu lịch trình thất bại: " + (err.response?.data?.error || err.message));
     }
   };
 
@@ -167,124 +167,82 @@ export default function AddItinerary() {
       <h2 className="itinerary-title">Thêm lịch trình</h2>
 
       <div className="form-group">
-        <label className="form-label">Chọn Tour:</label>
-        <select
-          className="form-select"
-          onChange={handleTourChange}
-          value={selectedTour || ''}
-          required
-        >
+        <label>Chọn Tour:</label>
+        <select className="form-select" onChange={handleTourChange} value={selectedTour || ''} required>
           <option value="">-- Chọn tour --</option>
           {tours.map(tour => (
-            <option key={tour.tourId} value={tour.tourId}>
-              {tour.name}
-            </option>
+            <option key={tour.tourId} value={tour.tourId}>{tour.name}</option>
           ))}
         </select>
       </div>
 
-      {selectedTour && selectedTour !== '' && (
+      {selectedTour && (
         <>
           <div className="form-group">
-            <label className="form-label">Tiêu đề:</label>
-            <input
-              name="title"
-              className="form-input"
-              placeholder="Nhập tiêu đề lịch trình"
-              value={form.title}
-              onChange={e => setForm({...form, title: e.target.value})}
-            />
+            <label>Tiêu đề:</label>
+            <input className="form-input" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Nhập tiêu đề lịch trình" />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Mô tả:</label>
-            <textarea
-              name="description"
-              className="form-textarea"
-              placeholder="Nhập mô tả chi tiết"
-              value={form.description}
-              onChange={e => setForm({...form, description: e.target.value})}
-              rows="4"
-            ></textarea>
+            <label>Mô tả:</label>
+            <textarea className="form-textarea" rows="3" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}></textarea>
           </div>
 
           <div className="form-group">
-            <h3 className="section-title">Điểm đến:</h3>
-            <div className="space-y-4">
-              {destinations.map(dest => (
-                <div key={dest.destinationId} className="destination-card">
-                  <div className="card-header">
-                    <input
-                      type="checkbox"
-                      className="custom-checkbox"
-                      checked={form.destinations.some(d => d.destinationId === dest.destinationId)}
-                      onChange={() => handleDestinationToggle(dest)}
-                    />
-                    <span className="font-semibold">{dest.name}</span>
-                  </div>
-                  {form.destinations.some(d => d.destinationId === dest.destinationId) && (
-                    <div className="card-content">
-                      <input
-                        type="number"
-                        placeholder="Thứ tự thăm quan"
-                        className="form-input"
-                        value={form.destinations.find(d => d.destinationId === dest.destinationId)?.visitOrder || ''}
-                        onChange={e => handleDestinationDetail(dest.destinationId, 'visitOrder', e.target.value)}
-                      />
-                      <textarea
-                        placeholder="Chi tiết thăm quan..."
-                        className="form-textarea"
-                        value={form.destinations.find(d => d.destinationId === dest.destinationId)?.note || ''}
-                        onChange={e => handleDestinationDetail(dest.destinationId, 'note', e.target.value)}
-                      />
-                    </div>
-                  )}
+            <label>Ngày bắt đầu:</label>
+            <input type="date" className="form-input" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} />
+          </div>
+
+          <div className="form-group">
+            <label>Ngày kết thúc:</label>
+            <input type="date" className="form-input" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} />
+          </div>
+
+          <div className="form-group">
+            <h3>Điểm đến:</h3>
+            {destinations.map(dest => (
+              <div key={dest.destinationId} className="destination-card">
+                <div>
+                  <input type="checkbox" checked={form.destinations.some(d => d.destinationId === dest.destinationId)} onChange={() => handleDestinationToggle(dest)} />
+                  <span>{dest.name}</span>
                 </div>
-              ))}
-            </div>
+                {form.destinations.some(d => d.destinationId === dest.destinationId) && (
+                  <>
+                    <input type="number" placeholder="Thứ tự thăm quan" className="form-input"
+                      value={form.destinations.find(d => d.destinationId === dest.destinationId)?.visitOrder || ''}
+                      onChange={e => handleDestinationDetail(dest.destinationId, 'visitOrder', e.target.value)} />
+                    <textarea placeholder="Ghi chú điểm đến..." className="form-textarea"
+                      value={form.destinations.find(d => d.destinationId === dest.destinationId)?.note || ''}
+                      onChange={e => handleDestinationDetail(dest.destinationId, 'note', e.target.value)} />
+                  </>
+                )}
+              </div>
+            ))}
           </div>
 
           <div className="form-group">
-            <h3 className="section-title">Sự kiện:</h3>
-            <div className="space-y-4">
-              {events.map(event => (
-                <div key={event.eventId} className="event-card">
-                  <div className="card-header">
-                    <input
-                      type="checkbox"
-                      className="custom-checkbox"
-                      onChange={() => handleEventToggle(event)}
-                      checked={form.events.some(e => e.eventId === event.eventId)}
-                    />
-                    <span className="font-semibold">{event.name}</span>
-                  </div>
-                  {form.events.some(e => e.eventId === event.eventId) && (
-                    <div className="card-content">
-                      <input
-                        type="datetime-local"
-                        className="form-input"
-                        value={form.events.find(e => e.eventId === event.eventId)?.attendTime || ''}
-                        onChange={e => handleEventChange(event.eventId, 'attendTime', e.target.value)}
-                      />
-                      <textarea
-                        placeholder="Chi tiết sự kiện..."
-                        className="form-textarea"
-                        value={form.events.find(e => e.eventId === event.eventId)?.note || ''}
-                        onChange={e => handleEventChange(event.eventId, 'note', e.target.value)}
-                      />
-                    </div>
-                  )}
+            <h3>Sự kiện:</h3>
+            {events.map(event => (
+              <div key={event.eventId} className="event-card">
+                <div>
+                  <input type="checkbox" checked={form.events.some(e => e.eventId === event.eventId)} onChange={() => handleEventToggle(event)} />
+                  <span>{event.name}</span>
                 </div>
-              ))}
-            </div>
+                {form.events.some(e => e.eventId === event.eventId) && (
+                  <>
+                    <input type="datetime-local" className="form-input"
+                      value={form.events.find(e => e.eventId === event.eventId)?.attendTime || ''}
+                      onChange={e => handleEventChange(event.eventId, 'attendTime', e.target.value)} />
+                    <textarea placeholder="Ghi chú sự kiện..." className="form-textarea"
+                      value={form.events.find(e => e.eventId === event.eventId)?.note || ''}
+                      onChange={e => handleEventChange(event.eventId, 'note', e.target.value)} />
+                  </>
+                )}
+              </div>
+            ))}
           </div>
 
-          <button
-            type="submit"
-            className="submit-button-add-itinerary"
-          >
-            Lưu lịch trình
-          </button>
+          <button type="submit" className="submit-button-add-itinerary">Lưu lịch trình</button>
         </>
       )}
     </form>

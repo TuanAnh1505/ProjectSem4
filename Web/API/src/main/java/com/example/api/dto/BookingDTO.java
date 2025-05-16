@@ -6,16 +6,14 @@ public class BookingDTO {
     private Integer bookingId;
     private String userFullName;
     private String tourName;
-    private String selectedDate;
     private String bookingDate;
     private String statusName;
     private BigDecimal totalPrice;
 
-    public BookingDTO(Integer bookingId, String userFullName, String tourName, String selectedDate, String bookingDate, String statusName, BigDecimal totalPrice) {
+    public BookingDTO(Integer bookingId, String userFullName, String tourName, String bookingDate, String statusName, BigDecimal totalPrice) {
         this.bookingId = bookingId;
         this.userFullName = userFullName;
         this.tourName = tourName;
-        this.selectedDate = selectedDate;
         this.bookingDate = bookingDate;
         this.statusName = statusName;
         this.totalPrice = totalPrice;
@@ -28,8 +26,6 @@ public class BookingDTO {
     public void setUserFullName(String userFullName) { this.userFullName = userFullName; }
     public String getTourName() { return tourName; }
     public void setTourName(String tourName) { this.tourName = tourName; }
-    public String getSelectedDate() { return selectedDate; }
-    public void setSelectedDate(String selectedDate) { this.selectedDate = selectedDate; }
     public String getBookingDate() { return bookingDate; }
     public void setBookingDate(String bookingDate) { this.bookingDate = bookingDate; }
     public String getStatusName() { return statusName; }

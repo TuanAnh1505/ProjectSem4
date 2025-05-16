@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaPlaneDeparture } from 'react-icons/fa';
 import axios from "axios";
 import "../styles/user/Register.css";
 
@@ -43,86 +43,107 @@ const Register = () => {
       });
       setSuccess(SUCCESS_MESSAGE);
     } catch (err) {
-      setError(err.response?.data?.message || ERROR_MESSAGE);
+      // Ưu tiên lấy message chi tiết từ backend nếu có
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.response?.data ||
+        ERROR_MESSAGE;
+      setError(typeof errorMessage === 'string' ? errorMessage : ERROR_MESSAGE);
     }
   };
 
   return (
-    <div className="register-modal-overlay">
-      <div className="register-modal-content">
-        <div className="register-modal-header">
-          <h2>Đăng ký</h2>
-          <button onClick={() => navigate("/")} className="close-button">
-            ✕
-          </button>
-        </div>
-        <p className="modal-subtitle">
-          Hoặc đăng ký bằng số điện thoại, email
-        </p>
-        <form onSubmit={handleSubmit}>
-          <div className="register-form-group">
-            <input
-              type="text"
-              placeholder="Họ và tên"
-              value={fullName}
-              onChange={handleInputChange(setFullName)}
-              required
-            />
+    <div className="register-container">
+      <div className="register-box">
+        <div className="register-image-section"></div>
+        <div className="register-form-section">
+          <div className="register-header">
+            <div className="register-brand">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/201/201623.png"
+                alt="Travel Tour Logo"
+                className="register-logo"
+              />
+              <h1 className="register-title">
+                TravelTour
+                <span className="travel-icon"><FaPlaneDeparture /></span>
+              </h1>
+            </div>
+            <button onClick={() => navigate("/")} className="register-close">✕</button>
           </div>
-          <div className="register-form-group">
-            <input
-              type="email"
-              placeholder="Nhập email"
-              value={email}
-              onChange={handleInputChange(setEmail)}
-              required
-            />
-          </div>
-          <div className="register-form-group register-password-group">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Nhập mật khẩu"
-              value={password}
-              onChange={handleInputChange(setPassword)}
-              required
-            />
-            <span
-              className="register-password-toggle"
-              onClick={togglePasswordVisibility}
-              style={{ cursor: "pointer" }}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </div>
-          <div className="register-form-group">
-            <input
-              type="text"
-              placeholder="Số điện thoại"
-              value={phone}
-              onChange={handleInputChange(setPhone)}
-            />
-          </div>
-          <div className="register-form-group">
-            <input
-              type="text"
-              placeholder="Địa chỉ"
-              value={address}
-              onChange={handleInputChange(setAddress)}
-            />
-          </div>
-          {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
-          <button type="submit" className="submit-button">
-            Đăng ký
-          </button>
-        </form>
-        <div className="modal-footer-register">
-          <p>
-            Đã có tài khoản?{" "}
-            <button onClick={() => navigate("/login")} className="link-button">
+          <h2 className="register-welcome">Chào mừng bạn!</h2>
+          <p className="register-subtitle">
+            Đăng ký để bắt đầu hành trình khám phá những điểm đến tuyệt vời
+          </p>
+          <form className="register-form" onSubmit={handleSubmit}>
+            <div className="register-input-group">
+              <input
+                type="text"
+                className="register-input"
+                placeholder="Họ và tên"
+                value={fullName}
+                onChange={handleInputChange(setFullName)}
+                required
+              />
+            </div>
+            <div className="register-input-group">
+              <input
+                type="email"
+                className="register-input"
+                placeholder="Nhập email"
+                value={email}
+                onChange={handleInputChange(setEmail)}
+                required
+              />
+            </div>
+            <div className="register-input-group register-password-group">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="register-input"
+                placeholder="Nhập mật khẩu"
+                value={password}
+                onChange={handleInputChange(setPassword)}
+                required
+              />
+              <span
+                className="register-password-toggle"
+                onClick={togglePasswordVisibility}
+                style={{ cursor: "pointer" }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+            <div className="register-input-group">
+              <input
+                type="text"
+                className="register-input"
+                placeholder="Số điện thoại"
+                value={phone}
+                onChange={handleInputChange(setPhone)}
+              />
+            </div>
+            <div className="register-input-group">
+              <input
+                type="text"
+                className="register-input"
+                placeholder="Địa chỉ"
+                value={address}
+                onChange={handleInputChange(setAddress)}
+              />
+            </div>
+            {error && <p className="register-error-message">{error}</p>}
+            {success && <p className="register-success-message">{success}</p>}
+            <button type="submit" className="register-btn">
+              Đăng ký
+            </button>
+          </form>
+          <div className="register-footer">
+            <span>Đã có tài khoản?</span>
+            <button onClick={() => navigate("/login")} className="register-link">
               Đăng nhập
             </button>
-          </p>
+          </div>
         </div>
       </div>
     </div>

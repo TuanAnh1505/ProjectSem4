@@ -1,21 +1,15 @@
 package com.example.api.service;
 
 import com.example.api.dto.TourItineraryDTO;
-import com.example.api.model.Destination;
-import com.example.api.model.Event;
-import com.example.api.model.TourItinerary;
-import com.example.api.model.TourItineraryDestination;
-import com.example.api.model.TourItineraryEvent;
-import com.example.api.repository.TourItineraryDestinationRepository;
-import com.example.api.repository.TourItineraryEventRepository;
-import com.example.api.repository.TourItineraryRepository;
-import com.example.api.repository.DestinationRepository;
-import com.example.api.repository.EventRepository;
+import com.example.api.model.*;
+import com.example.api.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.time.LocalDateTime;
 
 @Service
 public class TourItineraryService {
@@ -29,16 +23,20 @@ public class TourItineraryService {
     @Autowired
     private DestinationRepository destinationRepo;
     @Autowired
-    private EventRepository eventRepository; // Renamed from eventRepo to avoid duplicate field
+    private EventRepository eventRepository;
 
     public TourItineraryDTO createItinerary(TourItineraryDTO dto) {
         TourItinerary itinerary = new TourItinerary();
         itinerary.setTourId(dto.getTourId());
         itinerary.setTitle(dto.getTitle());
         itinerary.setDescription(dto.getDescription());
+
+        itinerary.setStartDate(dto.getStartDate());
+        itinerary.setEndDate(dto.getEndDate());
+
         itinerary = itineraryRepo.save(itinerary);
 
-        // Save destinations with details
+        // Save destinations
         if (dto.getDestinations() != null) {
             for (TourItineraryDTO.DestinationDetail dest : dto.getDestinations()) {
                 TourItineraryDestination destEntity = new TourItineraryDestination();
@@ -50,19 +48,13 @@ public class TourItineraryService {
             }
         }
 
-        // Save events with details
+        // Save events
         if (dto.getEvents() != null) {
             for (TourItineraryDTO.EventDetail event : dto.getEvents()) {
                 TourItineraryEvent eventEntity = new TourItineraryEvent();
                 eventEntity.setItineraryId(itinerary.getItineraryId());
                 eventEntity.setEventId(event.getEventId());
-                try {
-                    eventEntity.setAttendTime(
-                            event.getAttendTime() != null ? LocalDateTime.parse(event.getAttendTime()) : null);
-                } catch (Exception e) {
-                    // Handle date parse error
-                    throw new RuntimeException("Invalid date format for event: " + event.getName());
-                }
+                eventEntity.setAttendTime(event.getAttendTime());
                 eventEntity.setNote(event.getNote());
                 eventRepo.save(eventEntity);
             }
@@ -77,6 +69,8 @@ public class TourItineraryService {
 
         itinerary.setTitle(dto.getTitle());
         itinerary.setDescription(dto.getDescription());
+        itinerary.setStartDate(dto.getStartDate());
+        itinerary.setEndDate(dto.getEndDate());
         itineraryRepo.save(itinerary);
 
         // Update destinations
@@ -99,51 +93,13 @@ public class TourItineraryService {
                 TourItineraryEvent eventEntity = new TourItineraryEvent();
                 eventEntity.setItineraryId(itinerary.getItineraryId());
                 eventEntity.setEventId(event.getEventId());
-                eventEntity.setAttendTime(LocalDateTime.parse(event.getAttendTime()));
+                eventEntity.setAttendTime(event.getAttendTime());
                 eventEntity.setNote(event.getNote());
                 eventRepo.save(eventEntity);
             }
         }
 
         return getItineraryDetail(itinerary.getItineraryId());
-    }
-
-    public List<TourItineraryDTO> getItinerariesByTourId(Integer tourId) {
-        return itineraryRepo.findByTourId(tourId).stream().map(i -> {
-            TourItineraryDTO dto = new TourItineraryDTO();
-            dto.setItineraryId(i.getItineraryId());
-            dto.setTourId(i.getTourId());
-            dto.setTitle(i.getTitle());
-            dto.setDescription(i.getDescription());
-
-            // Load destination details for each itinerary
-            List<TourItineraryDTO.DestinationDetail> destinations = destRepo.findByItineraryId(i.getItineraryId())
-                    .stream()
-                    .map(d -> {
-                        TourItineraryDTO.DestinationDetail detail = new TourItineraryDTO.DestinationDetail();
-                        detail.setDestinationId(d.getDestinationId());
-                        detail.setVisitOrder(d.getVisitOrder());
-                        detail.setNote(d.getNote());
-                        return detail;
-                    })
-                    .collect(Collectors.toList());
-            dto.setDestinations(destinations);
-
-            // Load event details for each itinerary
-            List<TourItineraryDTO.EventDetail> events = eventRepo.findByItineraryId(i.getItineraryId())
-                    .stream()
-                    .map(e -> {
-                        TourItineraryDTO.EventDetail detail = new TourItineraryDTO.EventDetail();
-                        detail.setEventId(e.getEventId());
-                        detail.setAttendTime(e.getAttendTime() != null ? e.getAttendTime().toString() : null);
-                        detail.setNote(e.getNote());
-                        return detail;
-                    })
-                    .collect(Collectors.toList());
-            dto.setEvents(events);
-
-            return dto;
-        }).collect(Collectors.toList());
     }
 
     public TourItineraryDTO getItineraryDetail(Integer itineraryId) {
@@ -155,8 +111,10 @@ public class TourItineraryService {
         dto.setTourId(i.getTourId());
         dto.setTitle(i.getTitle());
         dto.setDescription(i.getDescription());
+        dto.setStartDate(i.getStartDate());
+        dto.setEndDate(i.getEndDate());
 
-        // Load destination details
+        // Load destinations
         List<TourItineraryDTO.DestinationDetail> destinations = destRepo.findByItineraryId(itineraryId)
                 .stream()
                 .map(d -> {
@@ -164,25 +122,45 @@ public class TourItineraryService {
                     detail.setDestinationId(d.getDestinationId());
                     detail.setVisitOrder(d.getVisitOrder());
                     detail.setNote(d.getNote());
+
+                    // Optional: fetch destination name for display
+                    destinationRepo.findById(d.getDestinationId()).ifPresent(dest -> detail.setName(dest.getName()));
+
                     return detail;
                 })
                 .collect(Collectors.toList());
         dto.setDestinations(destinations);
 
-        // Load event details
+        // Load events
         List<TourItineraryDTO.EventDetail> events = eventRepo.findByItineraryId(itineraryId)
                 .stream()
                 .map(e -> {
                     TourItineraryDTO.EventDetail detail = new TourItineraryDTO.EventDetail();
                     detail.setEventId(e.getEventId());
-                    detail.setAttendTime(e.getAttendTime().toString());
+                    detail.setAttendTime(e.getAttendTime());
                     detail.setNote(e.getNote());
+
+                    // Optional: fetch event name for display
+                    eventRepository.findById(e.getEventId()).ifPresent(ev -> detail.setName(ev.getName()));
+
                     return detail;
                 })
                 .collect(Collectors.toList());
         dto.setEvents(events);
 
         return dto;
+    }
+
+    public List<TourItineraryDTO> getItinerariesByTourId(Integer tourId) {
+        return itineraryRepo.findByTourId(tourId).stream()
+                .map(i -> getItineraryDetail(i.getItineraryId()))
+                .collect(Collectors.toList());
+    }
+
+    public List<TourItineraryDTO> getAllItineraries() {
+        return itineraryRepo.findAll().stream()
+                .map(i -> getItineraryDetail(i.getItineraryId()))
+                .collect(Collectors.toList());
     }
 
     public void deleteItinerary(Integer itineraryId) {
@@ -197,46 +175,5 @@ public class TourItineraryService {
 
     public List<Event> getTourEvents(Integer tourId) {
         return eventRepository.findByTourId(tourId);
-    }
-
-    public List<TourItineraryDTO> getAllItineraries() {
-        return itineraryRepo.findAll().stream()
-                .map(i -> {
-                    TourItineraryDTO dto = new TourItineraryDTO();
-                    dto.setItineraryId(i.getItineraryId());
-                    dto.setTourId(i.getTourId());
-                    dto.setTitle(i.getTitle());
-                    dto.setDescription(i.getDescription());
-
-                    // Load destination details
-                    List<TourItineraryDTO.DestinationDetail> destinations = destRepo
-                            .findByItineraryId(i.getItineraryId())
-                            .stream()
-                            .map(d -> {
-                                TourItineraryDTO.DestinationDetail detail = new TourItineraryDTO.DestinationDetail();
-                                detail.setDestinationId(d.getDestinationId());
-                                detail.setVisitOrder(d.getVisitOrder());
-                                detail.setNote(d.getNote());
-                                return detail;
-                            })
-                            .collect(Collectors.toList());
-                    dto.setDestinations(destinations);
-
-                    // Load event details
-                    List<TourItineraryDTO.EventDetail> events = eventRepo.findByItineraryId(i.getItineraryId())
-                            .stream()
-                            .map(e -> {
-                                TourItineraryDTO.EventDetail detail = new TourItineraryDTO.EventDetail();
-                                detail.setEventId(e.getEventId());
-                                detail.setAttendTime(e.getAttendTime() != null ? e.getAttendTime().toString() : null);
-                                detail.setNote(e.getNote());
-                                return detail;
-                            })
-                            .collect(Collectors.toList());
-                    dto.setEvents(events);
-
-                    return dto;
-                })
-                .collect(Collectors.toList());
     }
 }

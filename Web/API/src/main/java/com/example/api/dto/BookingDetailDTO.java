@@ -9,7 +9,6 @@ public class BookingDetailDTO {
     private UserDTO user;
     private TourDTO tour;
     private LocalDateTime bookingDate;
-    private LocalDate selectedDate;
     private BigDecimal totalPrice;
     private String statusName;
 
@@ -44,14 +43,6 @@ public class BookingDetailDTO {
 
     public void setBookingDate(LocalDateTime bookingDate) {
         this.bookingDate = bookingDate;
-    }
-
-    public LocalDate getSelectedDate() {
-        return selectedDate;
-    }
-
-    public void setSelectedDate(LocalDate selectedDate) {
-        this.selectedDate = selectedDate;
     }
 
     public BigDecimal getTotalPrice() {

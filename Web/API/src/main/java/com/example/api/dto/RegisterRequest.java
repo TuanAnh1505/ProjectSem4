@@ -1,11 +1,24 @@
 package com.example.api.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class RegisterRequest {
+    @NotBlank(message = "Họ và tên không được để trống")
     private String fullName;
+
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không hợp lệ")
     private String email;
+
+    @NotBlank(message = "Mật khẩu không được để trống")
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String password;
+
     private String phone;
     private String address;
+    private Boolean isApp = false;
 
     // Getters and Setters
     public String getFullName() {
@@ -28,7 +41,6 @@ public class RegisterRequest {
         return password;
     }
 
-    
     public void setPassword(String password) {
         this.password = password;
     }
@@ -47,5 +59,13 @@ public class RegisterRequest {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Boolean getIsApp() {
+        return isApp;
+    }
+
+    public void setIsApp(Boolean isApp) {
+        this.isApp = isApp;
     }
 }
