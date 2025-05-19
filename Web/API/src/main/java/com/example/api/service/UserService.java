@@ -169,6 +169,7 @@ public class UserService {
             response.put("token", token);
             response.put("role", role);
             response.put("publicId", user.getPublicId());
+            response.put("userId", user.getUserid());
             return response;
         }
         throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");

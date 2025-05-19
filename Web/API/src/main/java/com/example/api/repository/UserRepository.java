@@ -12,6 +12,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPublicId(String publicId);
 
     int countByIsActive(boolean isActive);
+
+    
 }
 
 

@@ -14,4 +14,6 @@ public class EventStatus {
 
     @Column(name = "status_name", nullable = false, unique = true)
     private String statusName;
+
+    
 }

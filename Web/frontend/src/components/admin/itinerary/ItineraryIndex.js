@@ -1,152 +1,158 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import './ItineraryIndex.css';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
 
-export default function ItineraryIndex() {
-  const [itineraries, setItineraries] = useState([]);
-  const [tours, setTours] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [reload, setReload] = useState(0);
+const API_URL = 'http://localhost:8080';
 
-  const navigate = useNavigate();
+const ItineraryIndex = () => {
+    const [itineraries, setItineraries] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-  }, []);
+    useEffect(() => {
+        fetchItineraries();
+    }, []);
 
-  useEffect(() => {
-    axios.get("http://localhost:8080/api/tours")
-      .then(res => setTours(res.data))
-      .catch(err => {
-        console.error("Error loading tours:", err);
-        if (err.response?.status === 401) navigate('/login');
-      });
-  }, [navigate]);
-
-  useEffect(() => {
     const fetchItineraries = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`http://localhost:8080/api/itineraries`);
-        setItineraries(res.data);
-      } catch (err) {
-        console.error('Error fetching itineraries:', err);
-        setError(err.message);
-        if (err.response?.status === 401) navigate('/login');
-      } finally {
-        setLoading(false);
-      }
+        try {
+            setLoading(true);
+            setError(null);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${API_URL}/api/itineraries`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('Fetched itineraries:', response.data);
+            setItineraries(response.data);
+        } catch (error) {
+            console.error('Error fetching itineraries:', error);
+            setError('Failed to fetch itineraries. Please try again later.');
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        } finally {
+            setLoading(false);
+        }
     };
-    fetchItineraries();
-  }, [navigate, reload]);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc muốn xóa lịch trình này?')) {
-      try {
-        await axios.delete(`http://localhost:8080/api/itineraries/${id}`);
-        setReload(prev => prev + 1);
-      } catch (err) {
-        console.error(err);
-        alert('Không thể xóa lịch trình này');
-      }
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this itinerary?')) {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.delete(`${API_URL}/api/itineraries/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                fetchItineraries();
+            } catch (error) {
+                console.error('Error deleting itinerary:', error);
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                }
+            }
+        }
+    };
+
+    const formatTime = (timeString) => {
+        if (!timeString) return '';
+        try {
+            const [hours, minutes] = timeString.split(':');
+            const date = new Date();
+            date.setHours(parseInt(hours, 10));
+            date.setMinutes(parseInt(minutes, 10));
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch (error) {
+            console.error('Error formatting time:', error);
+            return timeString;
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="container mt-4">
+                <div className="d-flex justify-content-center">
+                    <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        );
     }
-  };
 
-  const getTourName = (tourId) => {
-    const tour = tours.find(t => t.tourId === tourId);
-    return tour ? tour.name : "Không rõ";
-  };
+    return (
+        <div className="container mt-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2>Tour Itineraries</h2>
+                <Link to="/admin/itineraries/add" className="btn btn-primary">
+                    Add New Itinerary
+                </Link>
+            </div>
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    try {
-      return new Date(dateStr).toLocaleDateString('vi-VN');
-    } catch {
-      return '';
-    }
-  };
-
-  if (loading) return <div className="loading-text">Đang tải...</div>;
-  if (error) return <div className="error-text">{error}</div>;
-
-  return (
-    <div className="itinerary-container">
-      <div className="itinerary-header">
-        <h2 className="itinerary-title">Danh sách lịch trình tour</h2>
-        <Link to="/admin/itinerary/add" className="add-itinerary-btn">
-          + Thêm lịch trình
-        </Link>
-      </div>
-
-      <div className="itinerary-table-container">
-        <table className="itinerary-table">
-          <thead className="itinerary-table-header">
-            <tr>
-              <th>Tour</th>
-              <th>Tiêu đề</th>
-              <th>Ngày bắt đầu</th>
-              <th>Ngày kết thúc</th>
-              <th>Điểm đến</th>
-              <th>Sự kiện</th>
-              <th className="text-center">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {itineraries.map(item => (
-              <tr key={item.itineraryId} className="itinerary-table-row">
-                <td className="itinerary-table-cell">{getTourName(item.tourId)}</td>
-                <td className="itinerary-table-cell">{item.title || 'N/A'}</td>
-                <td className="itinerary-table-cell">{formatDate(item.startDate)}</td>
-                <td className="itinerary-table-cell">{formatDate(item.endDate)}</td>
-                <td className="itinerary-table-cell">
-                  {Array.isArray(item.destinations) ? item.destinations.length : 0} điểm
-                </td>
-                <td className="itinerary-table-cell">
-                  {Array.isArray(item.events) ? item.events.length : 0} sự kiện
-                </td>
-                <td className="itinerary-table-cell">
-                  <div className="itinerary-actions">
-                    <Link
-                      to={`/admin/itinerary/detail/${item.itineraryId}`}
-                      className="itinerary-action-link"
-                      title="Xem chi tiết"
-                    >
-                      <Eye size={18} />
-                    </Link>
-                    <Link
-                      to={`/admin/itinerary/edit/${item.itineraryId}`}
-                      className="itinerary-action-edit"
-                      title="Chỉnh sửa"
-                    >
-                      <Pencil size={18} />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(item.itineraryId)}
-                      className="itinerary-action-delete"
-                      title="Xóa"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {itineraries.length === 0 && (
-              <tr>
-                <td colSpan="7" className="text-center text-gray-500 py-6">
-                  Không có lịch trình nào.
-                </td>
-              </tr>
+            {error && (
+                <div className="alert alert-danger" role="alert">
+                    {error}
+                </div>
             )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
+
+            {itineraries.length === 0 ? (
+                <div className="alert alert-info" role="alert">
+                    No itineraries found.
+                </div>
+            ) : (
+                <div className="table-responsive">
+                    <table className="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Schedule ID</th>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {itineraries.map((itinerary) => (
+                                <tr key={itinerary.itineraryId}>
+                                    <td>{itinerary.itineraryId}</td>
+                                    <td>{itinerary.scheduleId}</td>
+                                    <td>{itinerary.title}</td>
+                                    <td>{itinerary.type}</td>
+                                    <td>{formatTime(itinerary.startTime)}</td>
+                                    <td>{formatTime(itinerary.endTime)}</td>
+                                    <td>
+                                        <Link 
+                                            to={`/admin/itineraries/detail/${itinerary.itineraryId}`}
+                                            className="btn btn-info btn-sm me-2"
+                                        >
+                                            View
+                                        </Link>
+                                        <Link 
+                                            to={`/admin/itineraries/edit/${itinerary.itineraryId}`}
+                                            className="btn btn-warning btn-sm me-2"
+                                        >
+                                            Edit
+                                        </Link>
+                                        <button
+                                            onClick={() => handleDelete(itinerary.itineraryId)}
+                                            className="btn btn-danger btn-sm"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default ItineraryIndex; 

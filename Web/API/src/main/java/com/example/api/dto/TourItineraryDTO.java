@@ -1,35 +1,33 @@
 package com.example.api.dto;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.time.LocalTime;
+
+import com.example.api.model.TourItinerary;
 
 @Data
 public class TourItineraryDTO {
     private Integer itineraryId;
-    private Integer tourId;
+
+    @NotNull(message = "Schedule ID is required")
+    private Integer scheduleId;
+
+    @NotBlank(message = "Title is required")
+    @Size(max = 255, message = "Title must be less than 255 characters")
     private String title;
+
     private String description;
-    private LocalDate startDate;
-    private LocalDate endDate;
 
-    @Data
-    public static class DestinationDetail {
-        private Integer destinationId;
-        private Integer visitOrder;
-        private String note;
-        private String name; // for display purposes
-    }
+    @NotNull(message = "Start time is required")
+    private LocalTime startTime;
 
-    @Data
-    public static class EventDetail {
-        private Integer eventId;
-        private LocalDateTime  attendTime;
-        private String note;
-        private String name; // for display purposes
-    }
+    @NotNull(message = "End time is required")
+    private LocalTime endTime;
 
-    private List<DestinationDetail> destinations;
-    private List<EventDetail> events;
+    @NotBlank(message = "Type is required")
+    @Size(max = 50, message = "Type must be less than 50 characters")
+    private String type;
 }

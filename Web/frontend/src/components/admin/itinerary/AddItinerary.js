@@ -1,250 +1,316 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './AddItinerary.css';
+import axios from 'axios';
 
-export default function AddItinerary() {
-  const navigate = useNavigate();
+const API_URL = 'http://localhost:8080';
 
-  const [tours, setTours] = useState([]);
-  const [selectedTour, setSelectedTour] = useState(null);
-  const [destinations, setDestinations] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [form, setForm] = useState({
-    tourId: '',
-    title: '',
-    description: '',
-    startDate: '',
-    endDate: '',
-    destinations: [],
-    events: []
-  });
+const AddItinerary = () => {
+    const navigate = useNavigate();
+    const [tours, setTours] = useState([]);
+    const [selectedTour, setSelectedTour] = useState('');
+    const [tourSchedules, setTourSchedules] = useState([]);
+    const [formData, setFormData] = useState({
+        scheduleId: '',
+        title: '',
+        description: '',
+        startTime: '',
+        endTime: '',
+        type: ''
+    });
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-  }, []);
+    useEffect(() => {
+        fetchTours();
+    }, []);
 
-  useEffect(() => {
     const fetchTours = async () => {
-      try {
-        const res = await axios.get("http://localhost:8080/api/tours");
-        setTours(res.data);
-      } catch (err) {
-        console.error("Error loading tours:", err);
-      }
-    };
-    fetchTours();
-  }, []);
-
-  useEffect(() => {
-    if (selectedTour) {
-      const fetchData = async () => {
         try {
-          const tourId = parseInt(selectedTour);
-          const [destRes, eventRes] = await Promise.all([
-            axios.get(`http://localhost:8080/api/tours/${tourId}/destinations`),
-            axios.get(`http://localhost:8080/api/tours/${tourId}/events`)
-          ]);
-          setDestinations(destRes.data || []);
-          setEvents(eventRes.data || []);
-          setForm(prev => ({ ...prev, tourId: tourId }));
-        } catch (err) {
-          console.error("Error loading destinations/events:", err);
-          setDestinations([]);
-          setEvents([]);
+            setLoading(true);
+            setError(null);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${API_URL}/api/tours`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setTours(response.data);
+        } catch (error) {
+            console.error('Error fetching tours:', error);
+            setError('Failed to load tours');
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        } finally {
+            setLoading(false);
         }
-      };
-      fetchData();
-    }
-  }, [selectedTour]);
+    };
 
-  const handleTourChange = (e) => {
-    const tourId = e.target.value;
-    setSelectedTour(tourId);
-    setForm(prev => ({
-      ...prev,
-      tourId: tourId,
-      destinations: [],
-      events: []
-    }));
-  };
+    const fetchTourSchedules = async (tourId) => {
+        try {
+            setLoading(true);
+            setError(null);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${API_URL}/api/schedules/tour/${tourId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setTourSchedules(response.data);
+        } catch (error) {
+            console.error('Error fetching tour schedules:', error);
+            setError('Failed to load tour schedules');
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handleDestinationToggle = (dest) => {
-    setForm(prev => {
-      const exists = prev.destinations.some(d => d.destinationId === dest.destinationId);
-      const destinations = exists
-        ? prev.destinations.filter(d => d.destinationId !== dest.destinationId)
-        : [...prev.destinations, {
-            destinationId: dest.destinationId,
-            name: dest.name,
-            visitOrder: '',
-            note: ''
-          }];
-      return { ...prev, destinations };
-    });
-  };
+    const handleTourChange = async (e) => {
+        const tourId = e.target.value;
+        setSelectedTour(tourId);
+        if (tourId) {
+            await fetchTourSchedules(tourId);
+        } else {
+            setTourSchedules([]);
+        }
+    };
 
-  const handleDestinationDetail = (destId, field, value) => {
-    setForm(prev => ({
-      ...prev,
-      destinations: prev.destinations.map(d =>
-        d.destinationId === destId
-          ? { ...d, [field]: value }
-          : d
-      )
-    }));
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
 
-  const handleEventToggle = (event) => {
-    setForm(prev => {
-      const exists = prev.events.some(e => e.eventId === event.eventId);
-      const events = exists
-        ? prev.events.filter(e => e.eventId !== event.eventId)
-        : [...prev.events, {
-            eventId: event.eventId,
-            name: event.name,
-            attendTime: '',
-            note: ''
-          }];
-      return { ...prev, events };
-    });
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setLoading(true);
+            setError(null);
+            const token = localStorage.getItem('token');
+            
+            // Validate form data
+            if (!formData.scheduleId || !formData.title || !formData.startTime || !formData.endTime || !formData.type) {
+                throw new Error('Please fill in all required fields');
+            }
 
-  const handleEventChange = (eventId, field, value) => {
-    setForm(prev => ({
-      ...prev,
-      events: prev.events.map(e =>
-        e.eventId === eventId
-          ? { ...e, [field]: value }
-          : e
-      )
-    }));
-  };
+            // Validate time
+            const [startHours, startMinutes] = formData.startTime.split(':').map(Number);
+            const [endHours, endMinutes] = formData.endTime.split(':').map(Number);
+            
+            const startTotalMinutes = startHours * 60 + startMinutes;
+            const endTotalMinutes = endHours * 60 + endMinutes;
+            
+            if (endTotalMinutes <= startTotalMinutes) {
+                throw new Error('End time must be after start time');
+            }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (!selectedTour || !form.title) {
-        alert('Vui lòng điền đầy đủ thông tin');
-        return;
-      }
+            const response = await axios.post(`${API_URL}/api/itineraries`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('Created itinerary:', response.data);
+            navigate('/admin/itineraries');
+        } catch (error) {
+            console.error('Error adding itinerary:', error);
+            setError(error.response?.data?.message || error.message || 'Failed to add itinerary');
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      const truncateNote = (note) => (note || '').substring(0, 255);
-
-      const formattedData = {
-        tourId: parseInt(selectedTour),
-        title: form.title,
-        description: form.description || '',
-        startDate: form.startDate || null,
-        endDate: form.endDate || null,
-        destinations: form.destinations.map(dest => ({
-          destinationId: parseInt(dest.destinationId),
-          visitOrder: parseInt(dest.visitOrder) || 1,
-          note: truncateNote(dest.note)
-        })).sort((a, b) => a.visitOrder - b.visitOrder),
-        events: form.events.map(event => ({
-          eventId: parseInt(event.eventId),
-          attendTime: event.attendTime || null,
-          note: truncateNote(event.note)
-        }))
-      };
-
-      console.log('Submitting data:', formattedData);
-      const response = await axios.post("http://localhost:8080/api/itineraries", formattedData);
-      console.log('Response:', response.data);
-      navigate("/admin/itinerary");
-    } catch (err) {
-      console.error("Error details:", err.response?.data);
-      alert("Lưu lịch trình thất bại: " + (err.response?.data?.error || err.message));
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="itinerary-form">
-      <h2 className="itinerary-title">Thêm lịch trình</h2>
-
-      <div className="form-group">
-        <label>Chọn Tour:</label>
-        <select className="form-select" onChange={handleTourChange} value={selectedTour || ''} required>
-          <option value="">-- Chọn tour --</option>
-          {tours.map(tour => (
-            <option key={tour.tourId} value={tour.tourId}>{tour.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {selectedTour && (
-        <>
-          <div className="form-group">
-            <label>Tiêu đề:</label>
-            <input className="form-input" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Nhập tiêu đề lịch trình" />
-          </div>
-
-          <div className="form-group">
-            <label>Mô tả:</label>
-            <textarea className="form-textarea" rows="3" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}></textarea>
-          </div>
-
-          <div className="form-group">
-            <label>Ngày bắt đầu:</label>
-            <input type="date" className="form-input" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} />
-          </div>
-
-          <div className="form-group">
-            <label>Ngày kết thúc:</label>
-            <input type="date" className="form-input" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} />
-          </div>
-
-          <div className="form-group">
-            <h3>Điểm đến:</h3>
-            {destinations.map(dest => (
-              <div key={dest.destinationId} className="destination-card">
-                <div>
-                  <input type="checkbox" checked={form.destinations.some(d => d.destinationId === dest.destinationId)} onChange={() => handleDestinationToggle(dest)} />
-                  <span>{dest.name}</span>
+    if (loading) {
+        return (
+            <div className="container mt-4">
+                <div className="d-flex justify-content-center">
+                    <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
                 </div>
-                {form.destinations.some(d => d.destinationId === dest.destinationId) && (
-                  <>
-                    <input type="number" placeholder="Thứ tự thăm quan" className="form-input"
-                      value={form.destinations.find(d => d.destinationId === dest.destinationId)?.visitOrder || ''}
-                      onChange={e => handleDestinationDetail(dest.destinationId, 'visitOrder', e.target.value)} />
-                    <textarea placeholder="Ghi chú điểm đến..." className="form-textarea"
-                      value={form.destinations.find(d => d.destinationId === dest.destinationId)?.note || ''}
-                      onChange={e => handleDestinationDetail(dest.destinationId, 'note', e.target.value)} />
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
+            </div>
+        );
+    }
 
-          <div className="form-group">
-            <h3>Sự kiện:</h3>
-            {events.map(event => (
-              <div key={event.eventId} className="event-card">
-                <div>
-                  <input type="checkbox" checked={form.events.some(e => e.eventId === event.eventId)} onChange={() => handleEventToggle(event)} />
-                  <span>{event.name}</span>
+    return (
+        <div className="container mt-4">
+            <h2>Add New Itinerary</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+            <form onSubmit={handleSubmit} className="mt-4">
+                <div className="row mb-4">
+                    <div className="col-md-6">
+                        <label className="form-label">Select Tour</label>
+                        <select
+                            className="form-select"
+                            value={selectedTour}
+                            onChange={handleTourChange}
+                            required
+                        >
+                            <option value="">Select a Tour</option>
+                            {tours.map(tour => (
+                                <option key={tour.tourId} value={tour.tourId}>
+                                    {tour.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
-                {form.events.some(e => e.eventId === event.eventId) && (
-                  <>
-                    <input type="datetime-local" className="form-input"
-                      value={form.events.find(e => e.eventId === event.eventId)?.attendTime || ''}
-                      onChange={e => handleEventChange(event.eventId, 'attendTime', e.target.value)} />
-                    <textarea placeholder="Ghi chú sự kiện..." className="form-textarea"
-                      value={form.events.find(e => e.eventId === event.eventId)?.note || ''}
-                      onChange={e => handleEventChange(event.eventId, 'note', e.target.value)} />
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
 
-          <button type="submit" className="submit-button-add-itinerary">Lưu lịch trình</button>
-        </>
-      )}
-    </form>
-  );
-}
+                {selectedTour && tourSchedules.length > 0 && (
+                    <div className="row mb-4">
+                        <div className="col-12">
+                            <h4>Available Schedules for this Tour</h4>
+                            <div className="table-responsive">
+                                <table className="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Schedule ID</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {tourSchedules.map(schedule => (
+                                            <tr key={schedule.scheduleId}>
+                                                <td>{schedule.scheduleId}</td>
+                                                <td>{new Date(schedule.startDate).toLocaleDateString('en-US', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}</td>
+                                                <td>{new Date(schedule.endDate).toLocaleDateString('en-US', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}</td>
+                                                <td>{schedule.status}</td>
+                                                <td>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-primary"
+                                                        onClick={() => setFormData(prev => ({
+                                                            ...prev,
+                                                            scheduleId: schedule.scheduleId
+                                                        }))}
+                                                    >
+                                                        Select
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {formData.scheduleId && (
+                    <>
+                        <div className="mb-3">
+                            <label className="form-label">Title</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Description</label>
+                            <textarea
+                                className="form-control"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleChange}
+                                rows="3"
+                            />
+                        </div>
+
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <label className="form-label">Start Time</label>
+                                <input
+                                    type="time"
+                                    className="form-control"
+                                    name="startTime"
+                                    value={formData.startTime}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="col-md-6 mb-3">
+                                <label className="form-label">End Time</label>
+                                <input
+                                    type="time"
+                                    className="form-control"
+                                    name="endTime"
+                                    value={formData.endTime}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="row">
+                            <div className="col-md-4 mb-3">
+                                <label className="form-label">Type</label>
+                                <select
+                                    className="form-select"
+                                    name="type"
+                                    value={formData.type}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Select Type</option>
+                                    <option value="DESTINATION">Destination</option>
+                                    <option value="EVENT">Event</option>
+                                    <option value="ACTIVITY">Activity</option>
+                                    <option value="MEAL">Meal</option>
+                                    <option value="TRANSPORT">Transport</option>
+                                </select>
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                <div className="mt-4">
+                    <button 
+                        type="submit" 
+                        className="btn btn-primary me-2"
+                        disabled={!formData.scheduleId || loading}
+                    >
+                        {loading ? 'Saving...' : 'Save'}
+                    </button>
+                    <button 
+                        type="button" 
+                        className="btn btn-secondary"
+                        onClick={() => navigate('/admin/itineraries')}
+                        disabled={loading}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
+
+export default AddItinerary; 

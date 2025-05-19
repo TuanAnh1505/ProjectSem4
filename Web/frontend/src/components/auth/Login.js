@@ -32,10 +32,11 @@ const Login = () => {
         password,
       });
       setSuccess("Đăng nhập thành công!");
-      const { token, role, userId } = response.data;
+      const { token, role, userId, publicId } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("email", email);
-      localStorage.setItem('publicId', userId);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem("publicId", publicId);
       localStorage.setItem("role", role); 
 
       if (response.data.role === "ADMIN") {

@@ -1,38 +1,33 @@
 package com.example.api.model;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalTime;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-@Data
 @Entity
-@Table(name = "tour_itineraries")
+@Table(name = "tour_itinerary")
+@Data
 public class TourItinerary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "itinerary_id")
     private Integer itineraryId;
 
-    @Column(name = "tour_id")
-    private Integer tourId;
+    @Column(name = "schedule_id", nullable = false)
+    private Integer scheduleId;
 
+    @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "start_date")
-    private LocalDate startDate;
+    @Column(name = "start_time")
+    private LocalTime startTime;
 
-    @Column(name = "end_date")
-    private LocalDate endDate;
+    @Column(name = "end_time")
+    private LocalTime endTime;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-
-
-    // Getters & Setters
+    @Column(name = "type", nullable = false)
+    private String type;
 }

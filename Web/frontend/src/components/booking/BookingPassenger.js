@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 const BookingPassenger = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bookingId, tourInfo, selectedDate, itinerary } = location.state || {};
+  const { bookingId, tourInfo, selectedDate, itineraries = [] } = location.state || {};
 
   // State cho thông tin người đặt tour
   const [useLoggedInInfo, setUseLoggedInInfo] = useState(true);
@@ -52,6 +52,15 @@ const BookingPassenger = () => {
   const [expandedDestinationIds, setExpandedDestinationIds] = useState([]);
   const [expandedEventIds, setExpandedEventIds] = useState([]);
 
+  function formatTime(timeStr) {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':');
+    let hour = parseInt(h, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    return `${hour}:${m} ${ampm}`;
+  }
+
   // Cập nhật contactInfo khi toggle useLoggedInInfo
   useEffect(() => {
     if (useLoggedInInfo) {
@@ -76,10 +85,10 @@ const BookingPassenger = () => {
     const fetchUserInfo = async () => {
       try {
         const token = localStorage.getItem('token');
-        const userId = localStorage.getItem('userId');
-        if (!token || !userId) return navigate('/login');
+        const publicId = localStorage.getItem('publicId');
+        if (!token || !publicId) return navigate('/login');
 
-        const res = await axios.get(`http://localhost:8080/api/users/${userId}`, {
+        const res = await axios.get(`http://localhost:8080/api/users/${publicId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = res.data;
@@ -237,8 +246,8 @@ const BookingPassenger = () => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
-      if (!token || !userId) return navigate('/login');
+      const publicId = localStorage.getItem('publicId');
+      if (!token || !publicId) return navigate('/login');
 
       // Tạo danh sách hành khách (chỉ để log, không gửi cả mảng này lên backend)
       const allPassengers = [];
@@ -303,7 +312,7 @@ const BookingPassenger = () => {
 
       const payload = {
         bookingId: parseInt(bookingId),
-        userId: parseInt(userId),
+        publicId: publicId,
         contactInfo: {
           fullName: contactInfo.fullName.trim(),
           phoneNumber: contactInfo.phoneNumber.trim(),
@@ -322,7 +331,7 @@ const BookingPassenger = () => {
       
       toast.success('Đăng ký thông tin hành khách thành công!');
       navigate('/booking-confirmation', {
-        state: { bookingId, passengers: res.data, tourInfo: bookedTour, itinerary}
+        state: { bookingId, passengers: res.data, tourInfo: bookedTour, itineraries }
       });
     } catch (err) {
       const msg = err.response?.data?.message || 'Đã có lỗi xảy ra khi đăng ký thông tin hành khách';
@@ -565,7 +574,6 @@ const BookingPassenger = () => {
               <div className="tour-image-booking-passenger">
                 <img src={`http://localhost:8080${bookedTour.imageUrl}`} alt={bookedTour.name} />
               </div>
-
               <div className="tour-details">
                 <h3>{bookedTour.name}</h3>
                 <p>Ngày khởi hành: {new Date(selectedDate).toLocaleDateString('vi-VN')}</p>
@@ -573,106 +581,95 @@ const BookingPassenger = () => {
                 <p>Mã đặt tour: {bookingId}</p>
               </div>
             </div>
-
-            {/* Hiển thị thông tin lịch trình đã đặt nếu có */}
-            {itinerary && (
-              <div className="itinerary-summary" style={{
-                marginTop: '1rem',
-                padding: '1rem',
-                background: '#f8f9fa',
-                borderRadius: 8,
-                height: 220,
-                overflowY: 'auto',
-                boxSizing: 'border-box',
-                transition: 'height 0.2s',
-                minHeight: 120,
-                maxHeight: 300
-              }}>
-                <h4 style={{fontWeight: 'bold'}}>Lịch trình đã chọn</h4>
-                <div><b>{itinerary.name ? itinerary.name : `Lịch trình`}</b></div>
-                {(itinerary.startDate || itinerary.endDate) && (
-                  <div>
-                    {itinerary.startDate && (
-                      <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
-                    )}
-                    {itinerary.startDate && itinerary.endDate && ' - '}
-                    {itinerary.endDate && (
-                      <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
-                    )}
-                  </div>
-                )}
-                {itinerary.destinations && itinerary.destinations.length > 0 && (
-                  <div style={{marginTop: 8}}>
-                    <b>Điểm đến:</b>
-                    <ul style={{margin: 0, paddingLeft: 20}}>
-                      {itinerary.destinations.sort((a, b) => a.visitOrder - b.visitOrder).map(dest => (
-                        <li key={dest.destinationId} style={{cursor: 'pointer'}} onClick={() => toggleDestinationNote(dest.destinationId)}>
-                          Ngày {dest.visitOrder}: {dest.name}
-                          {expandedDestinationIds.includes(dest.destinationId) && (
-                            <div style={{marginLeft: 16, color: '#555', fontStyle: 'italic', fontSize: 14}}>
-                              {dest.note ? dest.note : 'Không có ghi chú'}
-                            </div>
+            <div>
+              {/* Hiển thị danh sách lịch trình đã chọn nếu có */}
+              {itineraries && itineraries.length > 0 && (
+                <div className="itinerary-summary" style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  background: '#f8f9fa',
+                  borderRadius: 8,
+                  height: 220,
+                  overflowY: 'auto',
+                  boxSizing: 'border-box',
+                  transition: 'height 0.2s',
+                  minHeight: 120,
+                  maxHeight: 300
+                }}>
+                  <h4 style={{fontWeight: 'bold'}}>Lịch trình đã chọn</h4>
+                  {itineraries.map((itinerary, idx) => (
+                    <div key={itinerary.itineraryId} style={{marginBottom: 12}}>
+                      <div><b>{itinerary.title || `Lịch trình ${idx + 1}`}</b></div>
+                      {(itinerary.startDate || itinerary.endDate) && (
+                        <div>
+                          {itinerary.startDate && (
+                            <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
                           )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {itinerary.events && itinerary.events.length > 0 && (
-                  <div style={{marginTop: 8}}>
-                    <b>Sự kiện:</b>
-                    <ul style={{margin: 0, paddingLeft: 20}}>
-                      {itinerary.events.map(event => (
-                        <li key={event.eventId} style={{cursor: 'pointer'}} onClick={() => toggleEventNote(event.eventId)}>
-                          {event.name}
-                          {expandedEventIds.includes(event.eventId) && (
-                            <div style={{marginLeft: 16, color: '#555', fontStyle: 'italic', fontSize: 14}}>
-                              {event.note ? event.note : 'Không có ghi chú'}
-                            </div>
+                          {itinerary.startDate && itinerary.endDate && ' - '}
+                          {itinerary.endDate && (
+                            <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
                           )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                        </div>
+                      )}
+                      {itinerary.startTime && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Giờ bắt đầu:</b> {formatTime(itinerary.startTime)}</div>
+                        </div>
+                      )}
+                      {itinerary.endTime && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Giờ kết thúc:</b> {formatTime(itinerary.endTime)}</div>
+                        </div>
+                      )}
+                      {itinerary.description && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Mô tả:</b> {itinerary.description}</div>
+                        </div>
+                      )}
+                      {itinerary.type && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Loại:</b> {itinerary.type}</div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="price-breakdown">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 'bold', fontSize: 15 }}>
+                    <span role="img" aria-label="user">👥</span> KHÁCH HÀNG + PHỤ THU
+                  </span>
+                  <span style={{ color: 'red', fontWeight: 'bold', fontSize: 24, marginLeft: 70 }}>
+                    {totalPrice.toLocaleString()} đ
+                  </span>
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  {passengerCounts.adult > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Người lớn</span>
+                      <span>{passengerCounts.adult} x {bookedTour.price.toLocaleString()} đ</span>
+                    </div>
+                  )}
+                  {passengerCounts.child > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Trẻ em</span>
+                      <span>{passengerCounts.child} x {(bookedTour.price * 0.5).toLocaleString()} đ</span>
+                    </div>
+                  )}
+                  {passengerCounts.infant > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Em bé</span>
+                      <span>{passengerCounts.infant} x {(bookedTour.price * 0.25).toLocaleString()} đ</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-
-            <div className="price-breakdown">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'bold', fontSize: 15 }}>
-                  <span role="img" aria-label="user">👥</span> KHÁCH HÀNG + PHỤ THU
-                </span>
-                <span style={{ color: 'red', fontWeight: 'bold', fontSize: 24, marginLeft: 70 }}>
-                  {totalPrice.toLocaleString()} đ
-                </span>
+              <div className="submit-section">
+                <button className="submit-button" onClick={handleSubmitPassengers} disabled={isSubmitting}>
+                  {isSubmitting ? 'Đang xử lý...' : 'Đặt ngay'}
+                </button>
               </div>
-              <div style={{ marginTop: 8 }}>
-                {passengerCounts.adult > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Người lớn</span>
-                    <span>{passengerCounts.adult} x {bookedTour.price.toLocaleString()} đ</span>
-                  </div>
-                )}
-                {passengerCounts.child > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Trẻ em</span>
-                    <span>{passengerCounts.child} x {(bookedTour.price * 0.5).toLocaleString()} đ</span>
-                  </div>
-                )}
-                {passengerCounts.infant > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Em bé</span>
-                    <span>{passengerCounts.infant} x {(bookedTour.price * 0.25).toLocaleString()} đ</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="submit-section">
-              <button className="submit-button" onClick={handleSubmitPassengers} disabled={isSubmitting}>
-                {isSubmitting ? 'Đang xử lý...' : 'Đặt ngay'}
-              </button>
             </div>
           </div>
         )}
