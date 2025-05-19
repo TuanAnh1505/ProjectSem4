@@ -1,179 +1,159 @@
 package com.example.api.service;
 
-import com.example.api.dto.TourItineraryDTO;
-import com.example.api.model.*;
-import com.example.api.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import com.example.api.model.TourItinerary;
+import com.example.api.dto.TourItineraryDTO;
+import com.example.api.repository.TourItineraryRepository;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TourItineraryService {
+    private static final Logger logger = LoggerFactory.getLogger(TourItineraryService.class);
+    private final TourItineraryRepository repository;
 
-    @Autowired
-    private TourItineraryRepository itineraryRepo;
-    @Autowired
-    private TourItineraryDestinationRepository destRepo;
-    @Autowired
-    private TourItineraryEventRepository eventRepo;
-    @Autowired
-    private DestinationRepository destinationRepo;
-    @Autowired
-    private EventRepository eventRepository;
-
-    public TourItineraryDTO createItinerary(TourItineraryDTO dto) {
-        TourItinerary itinerary = new TourItinerary();
-        itinerary.setTourId(dto.getTourId());
-        itinerary.setTitle(dto.getTitle());
-        itinerary.setDescription(dto.getDescription());
-
-        itinerary.setStartDate(dto.getStartDate());
-        itinerary.setEndDate(dto.getEndDate());
-
-        itinerary = itineraryRepo.save(itinerary);
-
-        // Save destinations
-        if (dto.getDestinations() != null) {
-            for (TourItineraryDTO.DestinationDetail dest : dto.getDestinations()) {
-                TourItineraryDestination destEntity = new TourItineraryDestination();
-                destEntity.setItineraryId(itinerary.getItineraryId());
-                destEntity.setDestinationId(dest.getDestinationId());
-                destEntity.setVisitOrder(dest.getVisitOrder());
-                destEntity.setNote(dest.getNote());
-                destRepo.save(destEntity);
-            }
+    @Transactional
+    public TourItineraryDTO create(TourItineraryDTO dto) {
+        try {
+            logger.info("Creating new itinerary with data: {}", dto);
+            validateTimes(dto);
+            TourItinerary entity = mapToEntity(dto);
+            TourItinerary saved = repository.save(entity);
+            logger.info("Successfully created itinerary with id: {}", saved.getItineraryId());
+            return mapToDTO(saved);
+        } catch (Exception e) {
+            logger.error("Error creating itinerary", e);
+            throw new RuntimeException("Failed to create itinerary: " + e.getMessage());
         }
+    }
 
-        // Save events
-        if (dto.getEvents() != null) {
-            for (TourItineraryDTO.EventDetail event : dto.getEvents()) {
-                TourItineraryEvent eventEntity = new TourItineraryEvent();
-                eventEntity.setItineraryId(itinerary.getItineraryId());
-                eventEntity.setEventId(event.getEventId());
-                eventEntity.setAttendTime(event.getAttendTime());
-                eventEntity.setNote(event.getNote());
-                eventRepo.save(eventEntity);
-            }
+    @Transactional(readOnly = true)
+    public TourItineraryDTO getById(Integer id) {
+        try {
+            logger.info("Fetching itinerary with id: {}", id);
+            TourItinerary entity = repository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Tour itinerary not found with id: " + id));
+            return mapToDTO(entity);
+        } catch (Exception e) {
+            logger.error("Error fetching itinerary with id: {}", id, e);
+            throw new RuntimeException("Failed to fetch itinerary: " + e.getMessage());
         }
-
-        return getItineraryDetail(itinerary.getItineraryId());
     }
 
-    public TourItineraryDTO updateItinerary(TourItineraryDTO dto) {
-        TourItinerary itinerary = itineraryRepo.findById(dto.getItineraryId())
-                .orElseThrow(() -> new RuntimeException("Itinerary not found"));
-
-        itinerary.setTitle(dto.getTitle());
-        itinerary.setDescription(dto.getDescription());
-        itinerary.setStartDate(dto.getStartDate());
-        itinerary.setEndDate(dto.getEndDate());
-        itineraryRepo.save(itinerary);
-
-        // Update destinations
-        destRepo.deleteAll(destRepo.findByItineraryId(itinerary.getItineraryId()));
-        if (dto.getDestinations() != null) {
-            for (TourItineraryDTO.DestinationDetail dest : dto.getDestinations()) {
-                TourItineraryDestination destEntity = new TourItineraryDestination();
-                destEntity.setItineraryId(itinerary.getItineraryId());
-                destEntity.setDestinationId(dest.getDestinationId());
-                destEntity.setVisitOrder(dest.getVisitOrder());
-                destEntity.setNote(dest.getNote());
-                destRepo.save(destEntity);
-            }
+    @Transactional(readOnly = true)
+    public List<TourItineraryDTO> getByScheduleId(Integer scheduleId) {
+        try {
+            logger.info("Fetching itineraries for schedule id: {}", scheduleId);
+            List<TourItinerary> entities = repository.findByScheduleId(scheduleId);
+            logger.info("Found {} itineraries for schedule id: {}", entities.size(), scheduleId);
+            return entities.stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Error fetching itineraries for schedule id: {}", scheduleId, e);
+            throw new RuntimeException("Failed to fetch itineraries: " + e.getMessage());
         }
+    }
 
-        // Update events
-        eventRepo.deleteAll(eventRepo.findByItineraryId(itinerary.getItineraryId()));
-        if (dto.getEvents() != null) {
-            for (TourItineraryDTO.EventDetail event : dto.getEvents()) {
-                TourItineraryEvent eventEntity = new TourItineraryEvent();
-                eventEntity.setItineraryId(itinerary.getItineraryId());
-                eventEntity.setEventId(event.getEventId());
-                eventEntity.setAttendTime(event.getAttendTime());
-                eventEntity.setNote(event.getNote());
-                eventRepo.save(eventEntity);
-            }
+    @Transactional(readOnly = true)
+    public List<TourItineraryDTO> getAll() {
+        try {
+            logger.info("Fetching all itineraries");
+            List<TourItinerary> entities = repository.findAll();
+            logger.info("Found {} itineraries", entities.size());
+            return entities.stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Error fetching all itineraries", e);
+            throw new RuntimeException("Failed to fetch itineraries: " + e.getMessage());
         }
-
-        return getItineraryDetail(itinerary.getItineraryId());
     }
 
-    public TourItineraryDTO getItineraryDetail(Integer itineraryId) {
-        TourItinerary i = itineraryRepo.findById(itineraryId)
-                .orElseThrow(() -> new RuntimeException("Itinerary not found"));
-
-        TourItineraryDTO dto = new TourItineraryDTO();
-        dto.setItineraryId(i.getItineraryId());
-        dto.setTourId(i.getTourId());
-        dto.setTitle(i.getTitle());
-        dto.setDescription(i.getDescription());
-        dto.setStartDate(i.getStartDate());
-        dto.setEndDate(i.getEndDate());
-
-        // Load destinations
-        List<TourItineraryDTO.DestinationDetail> destinations = destRepo.findByItineraryId(itineraryId)
-                .stream()
-                .map(d -> {
-                    TourItineraryDTO.DestinationDetail detail = new TourItineraryDTO.DestinationDetail();
-                    detail.setDestinationId(d.getDestinationId());
-                    detail.setVisitOrder(d.getVisitOrder());
-                    detail.setNote(d.getNote());
-
-                    // Optional: fetch destination name for display
-                    destinationRepo.findById(d.getDestinationId()).ifPresent(dest -> detail.setName(dest.getName()));
-
-                    return detail;
-                })
-                .collect(Collectors.toList());
-        dto.setDestinations(destinations);
-
-        // Load events
-        List<TourItineraryDTO.EventDetail> events = eventRepo.findByItineraryId(itineraryId)
-                .stream()
-                .map(e -> {
-                    TourItineraryDTO.EventDetail detail = new TourItineraryDTO.EventDetail();
-                    detail.setEventId(e.getEventId());
-                    detail.setAttendTime(e.getAttendTime());
-                    detail.setNote(e.getNote());
-
-                    // Optional: fetch event name for display
-                    eventRepository.findById(e.getEventId()).ifPresent(ev -> detail.setName(ev.getName()));
-
-                    return detail;
-                })
-                .collect(Collectors.toList());
-        dto.setEvents(events);
-
-        return dto;
+    @Transactional
+    public TourItineraryDTO update(Integer id, TourItineraryDTO dto) {
+        try {
+            logger.info("Updating itinerary with id: {}", id);
+            TourItinerary entity = repository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Tour itinerary not found with id: " + id));
+            validateTimes(dto);
+            mapToEntity(dto, entity);
+            TourItinerary updated = repository.save(entity);
+            logger.info("Successfully updated itinerary with id: {}", id);
+            return mapToDTO(updated);
+        } catch (Exception e) {
+            logger.error("Error updating itinerary with id: {}", id, e);
+            throw new RuntimeException("Failed to update itinerary: " + e.getMessage());
+        }
     }
 
-    public List<TourItineraryDTO> getItinerariesByTourId(Integer tourId) {
-        return itineraryRepo.findByTourId(tourId).stream()
-                .map(i -> getItineraryDetail(i.getItineraryId()))
-                .collect(Collectors.toList());
+    @Transactional
+    public void delete(Integer id) {
+        try {
+            logger.info("Deleting itinerary with id: {}", id);
+            if (!repository.existsById(id)) {
+                throw new IllegalArgumentException("Tour itinerary not found with id: " + id);
+            }
+            repository.deleteById(id);
+            logger.info("Successfully deleted itinerary with id: {}", id);
+        } catch (Exception e) {
+            logger.error("Error deleting itinerary with id: {}", id, e);
+            throw new RuntimeException("Failed to delete itinerary: " + e.getMessage());
+        }
     }
 
-    public List<TourItineraryDTO> getAllItineraries() {
-        return itineraryRepo.findAll().stream()
-                .map(i -> getItineraryDetail(i.getItineraryId()))
-                .collect(Collectors.toList());
+    private void validateTimes(TourItineraryDTO dto) {
+        if (dto.getStartTime() != null && dto.getEndTime() != null && dto.getEndTime().isBefore(dto.getStartTime())) {
+            throw new IllegalArgumentException("End time must be after start time");
+        }
     }
 
-    public void deleteItinerary(Integer itineraryId) {
-        destRepo.deleteAll(destRepo.findByItineraryId(itineraryId));
-        eventRepo.deleteAll(eventRepo.findByItineraryId(itineraryId));
-        itineraryRepo.deleteById(itineraryId);
+    private TourItineraryDTO mapToDTO(TourItinerary entity) {
+        try {
+            TourItineraryDTO dto = new TourItineraryDTO();
+            dto.setItineraryId(entity.getItineraryId());
+            dto.setScheduleId(entity.getScheduleId());
+            dto.setTitle(entity.getTitle());
+            dto.setDescription(entity.getDescription());
+            dto.setStartTime(entity.getStartTime());
+            dto.setEndTime(entity.getEndTime());
+            dto.setType(entity.getType());
+            return dto;
+        } catch (Exception e) {
+            logger.error("Error mapping entity to DTO", e);
+            throw new RuntimeException("Failed to map entity to DTO: " + e.getMessage());
+        }
     }
 
-    public List<Destination> getTourDestinations(Integer tourId) {
-        return destinationRepo.findByTourId(tourId);
+    private TourItinerary mapToEntity(TourItineraryDTO dto) {
+        try {
+            TourItinerary entity = new TourItinerary();
+            mapToEntity(dto, entity);
+            return entity;
+        } catch (Exception e) {
+            logger.error("Error mapping DTO to entity", e);
+            throw new RuntimeException("Failed to map DTO to entity: " + e.getMessage());
+        }
     }
 
-    public List<Event> getTourEvents(Integer tourId) {
-        return eventRepository.findByTourId(tourId);
+    private void mapToEntity(TourItineraryDTO dto, TourItinerary entity) {
+        try {
+            entity.setScheduleId(dto.getScheduleId());
+            entity.setTitle(dto.getTitle());
+            entity.setDescription(dto.getDescription());
+            entity.setStartTime(dto.getStartTime());
+            entity.setEndTime(dto.getEndTime());
+            entity.setType(dto.getType());
+        } catch (Exception e) {
+            logger.error("Error mapping DTO to entity", e);
+            throw new RuntimeException("Failed to map DTO to entity: " + e.getMessage());
+        }
     }
 }

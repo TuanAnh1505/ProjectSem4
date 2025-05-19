@@ -19,8 +19,12 @@ import AddItinerary from "./itinerary/AddItinerary";
 import UpdateItinerary from "./itinerary/UpdateItinerary";
 import ItineraryIndex from "./itinerary/ItineraryIndex";
 import DetailItinerary from "./itinerary/DetailItinerary";
-import DetailBooking from "./booking/DetailBooking";
+  import DetailBooking from "./booking/DetailBooking";
 import BookingIndex from "./booking/BookingIndex";
+import AddSchedule from "./schedule/AddSchedule";
+import DetailSchedule from "./schedule/DetailSchedule";
+import UpdateSchedule from "./schedule/UpdateSchedule";
+import ScheduleIndex from "./schedule/ScheduleIndex";
 
 
 const AdminPage = () => {
@@ -79,6 +83,19 @@ const AdminPage = () => {
         return <UpdateItinerary />;
       }
       return <ItineraryIndex />;
+    }
+
+    if (pathSegments.includes('schedule') || pathSegments.includes('schedules')) {
+      if (pathSegments.includes('add')) {
+        return <AddSchedule />;
+      }
+      if (pathSegments.includes('detail')) {
+        return <DetailSchedule />;
+      }
+      if (pathSegments.includes('edit')) {
+        return <UpdateSchedule />;
+      }
+      return <ScheduleIndex />;
     }
 
     if (pathSegments.includes('booking') || pathSegments.includes('bookings')) {

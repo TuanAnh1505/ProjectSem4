@@ -12,7 +12,6 @@ public class TourStatus {
     @Column(name = "tour_status_id")
     private Integer tourStatusId;
 
-    @Column(name = "status_name",nullable = false, unique = true)
-
+    @Column(name = "status_name", unique = true)
     private String statusName;
 }   

@@ -72,11 +72,11 @@ public class BookingPassengerService {
         try {
             Booking booking = bookingRepo.findById(request.getBookingId())
                     .orElseThrow(() -> new RuntimeException("Booking not found with ID: " + request.getBookingId()));
-            User user = userRepo.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + request.getUserId()));
+            User user = userRepo.findByPublicId(request.getPublicId())
+                    .orElseThrow(() -> new RuntimeException("User not found with publicId: " + request.getPublicId()));
 
             // Luôn tạo contactPassenger cho người lớn 1
-            BookingPassengerDTO contactPassenger = createContactPassenger(request, booking.getBookingId(), user.getUserid());
+            BookingPassengerDTO contactPassenger = createContactPassenger(request, booking.getBookingId(), user.getPublicId());
             createdPassengers.add(contactPassenger);
 
             // Chỉ tạo thêm hành khách nếu có nhiều hơn 1 người lớn hoặc có trẻ em/em bé
@@ -103,7 +103,7 @@ public class BookingPassengerService {
                     log.info("Passenger detail: fullName={}, gender={}, birthDate={}, type={}", detail.getFullName(), detail.getGender(), detail.getBirthDate(), detail.getPassengerType());
                     BookingPassengerDTO passenger = BookingPassengerDTO.builder()
                             .bookingId(booking.getBookingId())
-                            .userId(user.getUserid())
+                            .publicId(user.getPublicId())
                             .fullName(detail.getFullName())
                             .passengerType(detail.getPassengerType())
                             .gender(detail.getGender())
@@ -137,7 +137,7 @@ public class BookingPassengerService {
 
     private void validateRequest(BookingPassengerRequestDTO request) {
         List<String> errors = new ArrayList<>();
-        if (request == null || request.getBookingId() == null || request.getUserId() == null || request.getContactInfo() == null) {
+        if (request == null || request.getBookingId() == null || request.getPublicId() == null || request.getContactInfo() == null) {
             throw new IllegalArgumentException("Missing required booking, user or contact info");
         }
         if (request.getContactInfo().getFullName() == null || request.getContactInfo().getFullName().trim().isEmpty()) {
@@ -157,11 +157,11 @@ public class BookingPassengerService {
         }
     }
 
-    private BookingPassengerDTO createContactPassenger(BookingPassengerRequestDTO request, Integer bookingId, Long userId) {
+    private BookingPassengerDTO createContactPassenger(BookingPassengerRequestDTO request, Integer bookingId, String publicId) {
         return create(
             BookingPassengerDTO.builder()
                 .bookingId(bookingId)
-                .userId(userId)
+                .publicId(publicId)
                 .fullName(request.getContactInfo().getFullName())
                 .phone(request.getContactInfo().getPhoneNumber())
                 .email(request.getContactInfo().getEmail())
@@ -177,7 +177,7 @@ public class BookingPassengerService {
         log.info("DTO gender={}, birthDate={}", dto.getGender(), dto.getBirthDate());
         return BookingPassenger.builder()
                 .booking(bookingRepo.findById(dto.getBookingId()).orElseThrow(() -> new RuntimeException("Booking not found")))
-                .user(userRepo.findById(dto.getUserId()).orElseThrow(() -> new RuntimeException("User not found")))
+                .user(userRepo.findByPublicId(dto.getPublicId()).orElseThrow(() -> new RuntimeException("User not found")))
                 .fullName(dto.getFullName())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
@@ -192,7 +192,7 @@ public class BookingPassengerService {
         return BookingPassengerDTO.builder()
                 .passengerId(p.getPassengerId())
                 .bookingId(p.getBooking().getBookingId())
-                .userId(p.getUser().getUserid())
+                .publicId(p.getUser().getPublicId())
                 .fullName(p.getFullName())
                 .phone(p.getPhone())
                 .email(p.getEmail())

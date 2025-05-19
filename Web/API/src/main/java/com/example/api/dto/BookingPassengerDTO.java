@@ -10,7 +10,7 @@ import lombok.*;
 public class BookingPassengerDTO {
     private Integer passengerId;
     private Integer bookingId;
-    private Long userId;
+    private String publicId;
     private String fullName;
     private String phone;
     private String email;

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/tour/TourDetailDashboard.css';
 import '../styles/booking/BookingDashboard.css';
+import { toast } from 'react-toastify';
 
 export default function TourDetailDashboard() {
   const { tourId } = useParams();
@@ -15,23 +16,10 @@ export default function TourDetailDashboard() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [relatedTours, setRelatedTours] = useState([]);
   const [itineraries, setItineraries] = useState([]);
-  const [expandedDestinations, setExpandedDestinations] = useState({});
-  const [expandedEvents, setExpandedEvents] = useState({});
+
+  const [openScheduleId, setOpenScheduleId] = useState(null);
+  const [selectedScheduleId, setSelectedScheduleId] = useState(null);
   const [selectedItineraryId, setSelectedItineraryId] = useState(null);
-
-  const toggleDestination = (destId) => {
-    setExpandedDestinations(prev => ({
-      ...prev,
-      [destId]: !prev[destId]
-    }));
-  };
-
-  const toggleEvent = (eventId) => {
-    setExpandedEvents(prev => ({
-      ...prev,
-      [eventId]: !prev[eventId]
-    }));
-  };
 
   useEffect(() => {
     const fetchTour = async () => {
@@ -84,6 +72,15 @@ export default function TourDetailDashboard() {
     if (tourId) fetchRelatedTours();
   }, [tourId]);
 
+  function formatTime(timeStr) {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':');
+    let hour = parseInt(h, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    return `${hour}:${m} ${ampm}`;
+  }
+
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
@@ -92,56 +89,26 @@ export default function TourDetailDashboard() {
           ? { headers: { Authorization: `Bearer ${token}` } }
           : {};
 
-        const res = await axios.get(
-          `http://localhost:8080/api/itineraries/tour/${tourId}`,
+        // 1. Lấy tất cả schedule của tour (chỉ của tour hiện tại)
+        const schedulesRes = await axios.get(
+          `http://localhost:8080/api/schedules/tour/${tourId}`,
           config
         );
-        
-        const itinerariesWithDetails = await Promise.all(
-          res.data.map(async (itinerary) => {
-            let destinationsWithNames = [];
-            if (itinerary.destinations) {
-              destinationsWithNames = await Promise.all(
-                itinerary.destinations.map(async (dest) => {
-                  try {
-                    const destRes = await axios.get(
-                      `http://localhost:8080/api/destinations/${dest.destinationId}`,
-                      config
-                    );
-                    return { ...dest, name: destRes.data.name };
-                  } catch {
-                    return { ...dest, name: "Unknown Destination" };
-                  }
-                })
-              );
-            }
+        const schedules = schedulesRes.data;
 
-            let eventsWithNames = [];
-            if (itinerary.events) {
-              eventsWithNames = await Promise.all(
-                itinerary.events.map(async (event) => {
-                  try {
-                    const eventRes = await axios.get(
-                      `http://localhost:8080/api/events/${event.eventId}`,
-                      config
-                    );
-                    return { ...event, name: eventRes.data.name };
-                  } catch {
-                    return { ...event, name: "Unknown Event" };
-                  }
-                })
-              );
-            }
-
-            return { 
-              ...itinerary, 
-              destinations: destinationsWithNames,
-              events: eventsWithNames 
-            };
-          })
-        );
-        
-        setItineraries(itinerariesWithDetails);
+        // 2. Lấy itinerary cho từng schedule
+        const schedulesWithItineraries = [];
+        for (const schedule of schedules) {
+          const itinerariesRes = await axios.get(
+            `http://localhost:8080/api/itineraries/schedule/${schedule.scheduleId}`,
+            config
+          );
+          schedulesWithItineraries.push({
+            ...schedule,
+            itineraries: itinerariesRes.data
+          });
+        }
+        setItineraries(schedulesWithItineraries);
       } catch (err) {
         console.error('Failed to fetch itineraries:', err);
       }
@@ -150,17 +117,21 @@ export default function TourDetailDashboard() {
     if (tourId) fetchItineraries();
   }, [tourId]);
 
+  const handleItinerarySelect = (itineraryId) => {
+    setSelectedItineraryId(itineraryId);
+  };
+
   const handleBooking = async () => {
     try {
-      const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
 
-      if (!token || !userId) {
-        setMessage('Please login to book this tour');
+      if (!userId) {
+        toast.error('Bạn cần đăng nhập để đặt tour!');
         return navigate('/login');
       }
-      if (!selectedItineraryId) {
-        setMessage('Vui lòng chọn lịch trình muốn đặt!');
+      if (!selectedScheduleId) {
+        toast.error('Vui lòng chọn lịch trình muốn đặt!');
         return;
       }
 
@@ -172,30 +143,34 @@ export default function TourDetailDashboard() {
         },
       };
 
+      const selectedSchedule = itineraries.find(sch => sch.scheduleId === selectedScheduleId);
+      const selectedItinerary = selectedSchedule?.itineraries?.[0] || null;
+
       const bookingRequest = {
         userId: parseInt(userId),
         tourId: parseInt(tourId),
-        itineraryId: selectedItineraryId,
+        scheduleId: selectedScheduleId,
         discountCode: discountCode.trim() || null
       };
+      console.log('Booking request:', bookingRequest);
 
       const res = await axios.post('http://localhost:8080/api/bookings', bookingRequest, config);
       if (res.data && res.data.bookingId) {
-        setMessage(`✅ ${res.data.message || 'Booking successful!'}`);
+        toast.success(res.data.message || 'Đặt tour thành công!');
         navigate('/booking-passenger', { 
           state: { 
             bookingId: res.data.bookingId,
             tourInfo: tour,
-            discountCode: discountCode,
-            itinerary: itineraries.find(i => i.itineraryId === selectedItineraryId)
+            selectedDate: selectedSchedule?.startDate,
+            itineraries: selectedSchedule?.itineraries || []
           }
         });
       } else {
         throw new Error('Invalid response from server');
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || '❌ Booking failed. Please try again.';
-      setMessage(`❌ ${errorMessage}`);
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi đặt tour');
+      console.error('Booking error:', err);
     } finally {
       setBookingLoading(false);
     }
@@ -234,99 +209,82 @@ export default function TourDetailDashboard() {
         <div className="itinerary-section">
           <h2 className="itinerary-title">LỊCH TRÌNH TOUR</h2>
           {itineraries.length > 0 ? (
-            <div className="space-y-4">
-              {itineraries.sort((a, b) => a.dayNumber - b.dayNumber).map((itinerary, idx) => (
-                <div key={itinerary.itineraryId} className="itinerary-card">
-                  <div className="itinerary-header">
-                    <input
-                      type="radio"
-                      name="selectedItinerary"
-                      value={itinerary.itineraryId}
-                      checked={selectedItineraryId === itinerary.itineraryId}
-                      onChange={() => setSelectedItineraryId(itinerary.itineraryId)}
-                      style={{ accentColor: '#1976d2', width: 18, height: 18 }}
-                      className="mr-2"
-                    />
-                    <h3>{itinerary.name ? itinerary.name : `Lịch trình ${idx + 1}`}</h3>
+            <div>
+              {itineraries.map((schedule, idx) => (
+                <div key={schedule.scheduleId} className="schedule-card" style={{
+                  border: '1.5px solid #1976d2',
+                  borderRadius: 12,
+                  marginBottom: 18,
+                  background: selectedScheduleId === schedule.scheduleId ? '#e3f2fd' : '#f8f9fa',
+                  boxShadow: '0 2px 8px #e3e8f0'
+                }}>
+                  <div
+                    className="schedule-summary"
+                    style={{
+                      padding: '18px 24px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                    onClick={() => setOpenScheduleId(openScheduleId === schedule.scheduleId ? null : schedule.scheduleId)}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <input
+                        type="radio"
+                        name="selectedSchedule"
+                        checked={selectedScheduleId === schedule.scheduleId}
+                        onChange={() => setSelectedScheduleId(schedule.scheduleId)}
+                        style={{ accentColor: '#1976d2', width: 18, height: 18 }}
+                        onClick={e => { e.stopPropagation(); setSelectedScheduleId(schedule.scheduleId); }}
+                      />
+                      <span>
+                        <strong>Schedule {idx + 1}:</strong> {schedule.startDate} - {schedule.endDate} ({schedule.status})
+                      </span>
+                    </div>
+                    <span style={{fontSize: 22}}>
+                      {openScheduleId === schedule.scheduleId ? '▲' : '▼'}
+                    </span>
                   </div>
-                  {(itinerary.startDate || itinerary.endDate) && (
-                    <div className="itinerary-date">
-                      {itinerary.startDate && (
-                        <span className="start">Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
-                      )}
-                      {itinerary.startDate && itinerary.endDate && <span> - </span>}
-                      {itinerary.endDate && (
-                        <span className="end">Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
-                      )}
-                    </div>
-                  )}
-                  {itinerary.destinations && itinerary.destinations.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-lg mb-2 text-blue-700">🗺️ Điểm đến:</h4>
-                      <div>
-                        {itinerary.destinations
-                          .sort((a, b) => a.visitOrder - b.visitOrder)
-                          .map((dest) => (
-                            <div
-                              key={dest.destinationId}
-                              className="itinerary-destination"
-                              onClick={() => toggleDestination(dest.destinationId)}
-                            >
-                              <span className="day-label">📅 Ngày {dest.visitOrder}</span>
-                              <span className="dest-name">- {dest.name}</span>
-                              {expandedDestinations[dest.destinationId] && (
-                                <div className="itinerary-note">
-                                  {dest.note || <span className="note-empty">Không có chi tiết</span>}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                  {itinerary.events && itinerary.events.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-lg mb-2 text-red-700">🎉 Sự kiện:</h4>
-                      <div>
-                        {itinerary.events.map((event) => (
-                          <div
-                            key={event.eventId}
-                            className="itinerary-event"
-                            onClick={() => toggleEvent(event.eventId)}
+                  {openScheduleId === schedule.scheduleId && (
+                    <div className="schedule-details" style={{padding: '16px 32px', background: '#fff'}}>
+                      {schedule.itineraries && schedule.itineraries.length > 0 ? (
+                        schedule.itineraries.map((itinerary) => (
+                          <div key={itinerary.itineraryId} className="itinerary-card" style={{
+                            border: '1px solid #e3e8f0',
+                            borderRadius: 8,
+                            marginBottom: 12,
+                            padding: 14,
+                            background: selectedItineraryId === itinerary.itineraryId ? '#e3f2fd' : '#f5faff',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => handleItinerarySelect(itinerary.itineraryId)}
                           >
-                            <span className="event-label">🎈 Sự kiện: {event.name}</span>
-                            {expandedEvents[event.eventId] && (
-                              <div className="itinerary-note">
-                                <div>
-                                  <span className="font-medium">Thời gian: </span>
-                                  {event.attendTime
-                                    ? new Date(event.attendTime).toLocaleString('vi-VN', {
-                                        weekday: 'long',
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })
-                                    : <span className="note-empty">Chưa có thời gian cụ thể</span>
-                                  }
-                                </div>
-                                <div className="mt-1">
-                                  <span className="font-medium">Chi tiết: </span>
-                                  {event.note || <span className="note-empty">Không có chi tiết</span>}
-                                </div>
-                              </div>
+                            <div><strong>Tiêu đề:</strong> {itinerary.title}</div>
+                            {itinerary.startTime && (
+                              <div><strong>Giờ bắt đầu:</strong> {formatTime(itinerary.startTime)}</div>
+                            )}
+                            {itinerary.endTime && (
+                              <div><strong>Giờ kết thúc:</strong> {formatTime(itinerary.endTime)}</div>
+                            )}
+                            {itinerary.description && (
+                              <div><strong>Mô tả:</strong> {itinerary.description}</div>
+                            )}
+                            {itinerary.type && (
+                              <div><strong>Loại:</strong> {itinerary.type}</div>
                             )}
                           </div>
-                        ))}
-                      </div>
+                        ))
+                      ) : (
+                        <div style={{color: '#888'}}>Không có lịch trình nào cho schedule này.</div>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4">Chưa có lịch trình cho tour này</p>
+            <p>Chưa có lịch trình cho tour này</p>
           )}
         </div>
 
@@ -345,12 +303,10 @@ export default function TourDetailDashboard() {
           <button
             className="btn submit-btn"
             onClick={handleBooking}
-            disabled={bookingLoading}
+            disabled={bookingLoading || !selectedScheduleId}
           >
             {bookingLoading ? 'Đang xử lý...' : '✅ Đặt ngay'}
           </button>
-
-          {message && <div className="message-box">{message}</div>}
         </div>
 
         <div className="related-tours-section">

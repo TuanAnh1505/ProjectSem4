@@ -170,26 +170,47 @@ const App = () => {
 
           {/* Itinerary */}
           <Route
-            path="/admin/itinerary"
+            path="/admin/itineraries"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
           <Route
-            path="/admin/itinerary/add"
+            path="/admin/itineraries/add"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
           <Route
-            path="/admin/itinerary/detail/:itineraryId"
+            path="/admin/itineraries/detail/:itineraryId"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
           <Route
-            path="/admin/itinerary/edit/:itineraryId"
+            path="/admin/itineraries/edit/:itineraryId"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
           <Route
-            path="/admin/itinerary/:itineraryId"
+            path="/admin/itineraries/:itineraryId"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />} 
           />
 
+          {/* Schedule */}
+          <Route
+            path="/admin/schedules"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/schedules/add"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/schedules/detail/:scheduleId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/schedules/edit/:scheduleId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/admin/schedules/:scheduleId"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
           
           {/* Booking */}
           <Route

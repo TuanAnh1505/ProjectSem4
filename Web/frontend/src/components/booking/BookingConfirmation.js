@@ -28,25 +28,7 @@ function getTypeAndAge(passenger) {
 const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bookingId, passengers, tourInfo, contactInfo, itinerary } = location.state || {};
-  const [expandedDestinationIds, setExpandedDestinationIds] = React.useState([]);
-  const [expandedEventIds, setExpandedEventIds] = React.useState([]);
-
-  const toggleDestinationNote = (destinationId) => {
-    setExpandedDestinationIds(prev =>
-      prev.includes(destinationId)
-        ? prev.filter(id => id !== destinationId)
-        : [...prev, destinationId]
-    );
-  };
-
-  const toggleEventNote = (eventId) => {
-    setExpandedEventIds(prev =>
-      prev.includes(eventId)
-        ? prev.filter(id => id !== eventId)
-        : [...prev, eventId]
-    );
-  };
+  const { bookingId, passengers, tourInfo, contactInfo, itineraries = [] } = location.state || {};
 
   if (!bookingId || !passengers || !tourInfo) {
     return (
@@ -182,7 +164,7 @@ const BookingConfirmation = () => {
               <div style={{ marginBottom: 8 }}><b>Trạng thái:</b> <span style={{ color: '#388e3c', fontWeight: 'bold' }}>{bookingStatus}</span></div>
               {/* <div style={{ marginBottom: 8 }}><b>Thông tin chuyến bay:</b> {flightInfo}</div> */}
               {/* Lịch trình đã chọn */}
-              {itinerary && (
+              {itineraries && itineraries.length > 0 && (
                 <div className="itinerary-summary" style={{
                   marginTop: '1rem',
                   padding: '1rem',
@@ -196,52 +178,42 @@ const BookingConfirmation = () => {
                   maxHeight: 300
                 }}>
                   <h4 style={{fontWeight: 'bold'}}>Lịch trình đã chọn</h4>
-                  <div><b>{itinerary.name ? itinerary.name : `Lịch trình`}</b></div>
-                  {(itinerary.startDate || itinerary.endDate) && (
-                    <div>
-                      {itinerary.startDate && (
-                        <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
+                  {itineraries.map((itinerary, idx) => (
+                    <div key={itinerary.itineraryId} style={{marginBottom: 12}}>
+                      <div><b>{itinerary.title || `Lịch trình ${idx + 1}`}</b></div>
+                      {(itinerary.startDate || itinerary.endDate) && (
+                        <div>
+                          {itinerary.startDate && (
+                            <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
+                          )}
+                          {itinerary.startDate && itinerary.endDate && ' - '}
+                          {itinerary.endDate && (
+                            <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
+                          )}
+                        </div>
                       )}
-                      {itinerary.startDate && itinerary.endDate && ' - '}
-                      {itinerary.endDate && (
-                        <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
+                      {itinerary.startTime && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Giờ bắt đầu:</b> {itinerary.startTime}</div>
+                        </div>
+                      )}
+                      {itinerary.endTime && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Giờ kết thúc:</b> {itinerary.endTime}</div>
+                        </div>
+                      )}
+                      {itinerary.description && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Mô tả:</b> {itinerary.description}</div>
+                        </div>
+                      )}
+                      {itinerary.type && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Loại:</b> {itinerary.type}</div>
+                        </div>
                       )}
                     </div>
-                  )}
-                  {itinerary.destinations && itinerary.destinations.length > 0 && (
-                    <div style={{marginTop: 8}}>
-                      <b>Điểm đến:</b>
-                      <ul style={{margin: 0, paddingLeft: 20}}>
-                        {itinerary.destinations.sort((a, b) => a.visitOrder - b.visitOrder).map(dest => (
-                          <li key={dest.destinationId} style={{cursor: 'pointer'}} onClick={() => toggleDestinationNote(dest.destinationId)}>
-                            Ngày {dest.visitOrder}: {dest.name}
-                            {expandedDestinationIds.includes(dest.destinationId) && (
-                              <div style={{marginLeft: 16, color: '#555', fontStyle: 'italic', fontSize: 14}}>
-                                {dest.note ? dest.note : 'Không có ghi chú'}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {itinerary.events && itinerary.events.length > 0 && (
-                    <div style={{marginTop: 8}}>
-                      <b>Sự kiện:</b>
-                      <ul style={{margin: 0, paddingLeft: 20}}>
-                        {itinerary.events.map(event => (
-                          <li key={event.eventId} style={{cursor: 'pointer'}} onClick={() => toggleEventNote(event.eventId)}>
-                            {event.name}
-                            {expandedEventIds.includes(event.eventId) && (
-                              <div style={{marginLeft: 16, color: '#555', fontStyle: 'italic', fontSize: 14}}>
-                                {event.note ? event.note : 'Không có ghi chú'}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  ))}
                 </div>
               )}
               <button style={{ background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 4, padding: '10px 24px', fontWeight: 'bold', marginTop: 12, cursor: 'pointer' }}>

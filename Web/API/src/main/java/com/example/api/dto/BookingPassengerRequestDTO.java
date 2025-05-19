@@ -11,7 +11,7 @@
     @AllArgsConstructor
     public class BookingPassengerRequestDTO {
         private Integer bookingId;
-        private Long userId;
+        private String publicId;
         private ContactInfo contactInfo;
         private PassengerCounts passengers;
         private List<PassengerDetailDTO> passengerDetails;

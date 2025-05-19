@@ -2,44 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const UpdateItinerary = () => {
-    const { itineraryId } = useParams();
+const UpdateSchedule = () => {
+    const { scheduleId } = useParams();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        scheduleId: '',
-        title: '',
-        description: '',
-        startTime: '',
-        endTime: '',
-        type: ''
+        tourId: '',
+        startDate: '',
+        endDate: '',
+        status: ''
     });
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchItinerary();
-    }, [itineraryId]);
+        if (scheduleId) {
+            fetchSchedule();
+        } else {
+            setError('Schedule ID is missing');
+            setLoading(false);
+        }
+    }, [scheduleId]);
 
-    const fetchItinerary = async () => {
+    const fetchSchedule = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`/api/itineraries/${itineraryId}`, {
+            const response = await axios.get(`/api/schedules/${scheduleId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            const itinerary = response.data;
-            const extractTime = (val) => val ? val.substring(0,5) : '';
+            const schedule = response.data;
             setFormData({
-                scheduleId: itinerary.scheduleId,
-                title: itinerary.title,
-                description: itinerary.description || '',
-                startTime: extractTime(itinerary.startTime),
-                endTime: extractTime(itinerary.endTime),
-                type: itinerary.type || ''
+                tourId: schedule.tourId,
+                startDate: new Date(schedule.startDate).toISOString().split('T')[0],
+                endDate: new Date(schedule.endDate).toISOString().split('T')[0],
+                status: schedule.status
             });
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching itinerary:', error);
+            console.error('Error fetching schedule:', error);
+            setError(error.response?.data?.message || 'Failed to fetch schedule');
             if (error.response && error.response.status === 401) {
                 localStorage.removeItem('token');
                 window.location.href = '/login';
@@ -60,14 +62,20 @@ const UpdateItinerary = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`/api/itineraries/${itineraryId}`, formData, {
+            const submitData = {
+                ...formData,
+                startDate: `${formData.startDate}T00:00:00`,
+                endDate: `${formData.endDate}T23:59:59`
+            };
+            await axios.put(`/api/schedules/${scheduleId}`, submitData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            navigate(`/admin/itineraries/${itineraryId}`);
+            navigate('/admin/schedules');
         } catch (error) {
-            console.error('Error updating itinerary:', error);
+            console.error('Error updating schedule:', error);
+            setError(error.response?.data?.message || 'Failed to update schedule');
             if (error.response && error.response.status === 401) {
                 localStorage.removeItem('token');
                 window.location.href = '/login';
@@ -79,94 +87,81 @@ const UpdateItinerary = () => {
         return <div className="container mt-4">Loading...</div>;
     }
 
+    if (error) {
+        return (
+            <div className="container mt-4">
+                <div className="alert alert-danger">{error}</div>
+                <button 
+                    className="btn btn-secondary"
+                    onClick={() => navigate('/admin/schedules')}
+                >
+                    Back to Schedules
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="container mt-4">
-            <h2>Edit Itinerary</h2>
+            <h2>Edit Schedule</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit} className="mt-4">
                 <div className="row">
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Schedule ID</label>
+                        <label className="form-label">Tour ID</label>
                         <input
                             type="number"
                             className="form-control"
-                            name="scheduleId"
-                            value={formData.scheduleId}
+                            name="tourId"
+                            value={formData.tourId}
                             onChange={handleChange}
                             required
                         />
                     </div>
-                    
-                </div>
-
-                <div className="mb-3">
-                    <label className="form-label">Title</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-
-                <div className="mb-3">
-                    <label className="form-label">Description</label>
-                    <textarea
-                        className="form-control"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        rows="3"
-                    />
                 </div>
 
                 <div className="row">
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Start Time</label>
+                        <label className="form-label">Start Date</label>
                         <input
-                            type="time"
+                            type="date"
                             className="form-control"
-                            name="startTime"
-                            value={formData.startTime}
+                            name="startDate"
+                            value={formData.startDate}
                             onChange={handleChange}
                             required
                         />
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">End Time</label>
+                        <label className="form-label">End Date</label>
                         <input
-                            type="time"
+                            type="date"
                             className="form-control"
-                            name="endTime"
-                            value={formData.endTime}
+                            name="endDate"
+                            value={formData.endDate}
                             onChange={handleChange}
                             required
                         />
                     </div>
                 </div>
 
-               
-
                 <div className="row">
-                    <div className="col-md-4 mb-3">
-                        <label className="form-label">Type</label>
+                    <div className="col-md-6 mb-3">
+                        <label className="form-label">Status</label>
                         <select
                             className="form-select"
-                            name="type"
-                            value={formData.type}
+                            name="status"
+                            value={formData.status}
                             onChange={handleChange}
                             required
                         >
-                            <option value="">Select Type</option>
-                            <option value="DESTINATION">Destination</option>
-                            <option value="EVENT">Event</option>
-                            <option value="ACTIVITY">Activity</option>
-                            <option value="MEAL">Meal</option>
-                            <option value="TRANSPORT">Transport</option>
+                            <option value="available">Available</option>
+                            <option value="full">Full</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
                         </select>
                     </div>
-                    
                 </div>
 
                 <div className="mt-4">
@@ -174,7 +169,7 @@ const UpdateItinerary = () => {
                     <button 
                         type="button" 
                         className="btn btn-secondary"
-                        onClick={() => navigate(`/admin/itineraries`)}
+                        onClick={() => navigate('/admin/schedules')}
                     >
                         Cancel
                     </button>
@@ -184,4 +179,4 @@ const UpdateItinerary = () => {
     );
 };
 
-export default UpdateItinerary; 
+export default UpdateSchedule; 
