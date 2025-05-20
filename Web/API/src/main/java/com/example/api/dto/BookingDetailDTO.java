@@ -8,6 +8,7 @@ public class BookingDetailDTO {
     private Integer bookingId;
     private UserDTO user;
     private TourDTO tour;
+    private Integer scheduleId;
     private LocalDateTime bookingDate;
     private BigDecimal totalPrice;
     private String statusName;
@@ -35,6 +36,14 @@ public class BookingDetailDTO {
 
     public void setTour(TourDTO tour) {
         this.tour = tour;
+    }
+
+    public Integer getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(Integer scheduleId) {
+        this.scheduleId = scheduleId;
     }
 
     public LocalDateTime getBookingDate() {

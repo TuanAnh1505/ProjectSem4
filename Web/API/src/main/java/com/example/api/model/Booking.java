@@ -24,6 +24,9 @@ public class Booking {
     @JoinColumn(name = "tour_id")
     private Tour tour;
 
+    @Column(name = "schedule_id")
+    private Integer scheduleId;
+
     @Column(name = "booking_date")
     private LocalDateTime bookingDate;
 
