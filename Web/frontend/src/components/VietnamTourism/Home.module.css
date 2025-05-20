@@ -809,6 +809,8 @@
 .thumb-custom {
   width: 100vw !important;
   height: 100vh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
   max-width: 100vw !important;
   max-height: 100vh !important;
   object-fit: cover !important;
@@ -828,9 +830,9 @@
   .wrapThumb,
   .swiper-slide img,
   .thumb-custom {
-    height: 50vh !important;
-    min-height: 250px !important;
-    max-height: 400px !important;
+    height: 60vh !important;
+    min-height: 320px !important;
+    max-height: 100vh !important;
   }
 }
 

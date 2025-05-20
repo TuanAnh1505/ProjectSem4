@@ -40,16 +40,22 @@
 .row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 7px 0;
+  justify-content: flex-start;
+  padding: 14px 0 14px 0;
+  gap: 48px;
 }
 
 .logo {
   margin: 0;
+  display: flex;
+  align-items: center;
 }
 
 .logo img {
-  height: 28px;
+  height: 48px;
+  width: auto;
+  max-width: 180px;
+  display: block;
 }
 
 .navIcon {
@@ -59,12 +65,18 @@
   text-decoration: none;
 }
 
+.mainNav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
 .mainNav ul {
   display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 2.2rem;
+  gap: 2.5rem;
   align-items: center;
 }
 
