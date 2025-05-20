@@ -33,6 +33,10 @@ public class TourGuide {
     @ColumnDefault("0.0")
     private Double rating;
 
+    @Column(name = "is_available", columnDefinition = "tinyint(1) default 1")
+    @ColumnDefault("1")
+    private Boolean isAvailable = true;
+
     @Column(name = "created_at", columnDefinition = "datetime default current_timestamp")
     @ColumnDefault("current_timestamp")
     private LocalDateTime createdAt;
@@ -41,17 +45,6 @@ public class TourGuide {
     @JoinColumn(name = "userid", insertable = false, updatable = false)
     private User user;
 
-    @ManyToMany
-    @JoinTable(
-        name = "tour_guides_assignments",
-        joinColumns = @JoinColumn(name = "guide_id", columnDefinition = "int(11)"),
-        inverseJoinColumns = @JoinColumn(name = "tour_id", columnDefinition = "int(11)")
-    )
-    private List<Tour> tours = new ArrayList<>();
-
-    @OneToMany(mappedBy = "guide", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GuideReview> reviews = new ArrayList<>();
-
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
@@ -59,6 +52,9 @@ public class TourGuide {
         }
         if (rating == null) {
             rating = 0.0;
+        }
+        if (isAvailable == null) {
+            isAvailable = true;
         }
     }
 }

@@ -23,6 +23,9 @@ public class UserDiscount {
     @Column(name = "used")
     private Boolean used;
 
+    @Column(name = "used_at")
+    private java.time.LocalDateTime usedAt;
+
     @ManyToOne
     @JoinColumn(name = "tour_id", insertable = false, updatable = false)
     private Tour tour;

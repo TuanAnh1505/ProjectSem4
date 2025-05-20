@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "tours")
@@ -20,23 +21,31 @@ public class Tour {
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
     @Column(nullable = false)
     private BigDecimal price;
 
+    @Column(nullable = false)
     private Integer duration;
 
-    @Column(name = "max_participants", columnDefinition = "INT DEFAULT 0")
+    @Column(name = "max_participants", nullable = false)
     private Integer maxParticipants;
 
-    @Column(name = "status_id")
+    @Column(name = "status_id", nullable = false)
     private Integer statusId;
 
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "created_at", columnDefinition = "datetime default current_timestamp")
+    @ColumnDefault("current_timestamp")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", columnDefinition = "datetime default current_timestamp on update current_timestamp")
+    @ColumnDefault("current_timestamp")
+    private LocalDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -45,7 +54,7 @@ public class Tour {
         inverseJoinColumns = @JoinColumn(name = "destination_id")
     )
     @JsonIgnoreProperties("tours")
-    private List<Destination> destinations;
+    private List<Destination> destinations = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -54,5 +63,20 @@ public class Tour {
         inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     @JsonIgnoreProperties("tours")
-    private List<Event> events;
+    private List<Event> events = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (updatedAt == null) {
+            updatedAt = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

@@ -28,23 +28,40 @@ public class TourGuideAssignmentService {
     @Autowired
     private TourGuideRepository tourGuideRepository;
 
-    public TourGuideAssignmentDTO createAssignment(Integer tourId, Integer guideId) {
+    public TourGuideAssignmentDTO createAssignment(TourGuideAssignmentDTO dto) {
         // Check if tour exists
-        Tour tour = tourRepository.findById(tourId)
-                .orElseThrow(() -> new EntityNotFoundException("Tour not found with id: " + tourId));
+        Tour tour = tourRepository.findById(dto.getTourId())
+                .orElseThrow(() -> new EntityNotFoundException("Tour not found with id: " + dto.getTourId()));
 
         // Check if guide exists
-        TourGuide guide = tourGuideRepository.findById(guideId.longValue())
-                .orElseThrow(() -> new EntityNotFoundException("Tour guide not found with id: " + guideId));
+        TourGuide guide = tourGuideRepository.findById(dto.getGuideId().longValue())
+                .orElseThrow(() -> new EntityNotFoundException("Tour guide not found with id: " + dto.getGuideId()));
 
-        // Check if assignment already exists
-        if (assignmentRepository.existsByTourIdAndGuideId(tourId, guideId)) {
-            throw new IllegalStateException("Assignment already exists for tour " + tourId + " and guide " + guideId);
+        // Check if guide is available
+        if (!guide.getIsAvailable()) {
+            throw new IllegalStateException("Tour guide is not available");
+        }
+
+        // Check if dates are valid
+        if (dto.getStartDate().isAfter(dto.getEndDate())) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+
+        // Check if guide has any overlapping assignments
+        if (assignmentRepository.existsOverlappingAssignment(
+                dto.getGuideId(),
+                dto.getStartDate(),
+                dto.getEndDate())) {
+            throw new IllegalStateException("Tour guide has overlapping assignments for the given dates");
         }
 
         TourGuideAssignment assignment = new TourGuideAssignment();
-        assignment.setTourId(tourId);
-        assignment.setGuideId(guideId);
+        assignment.setTourId(dto.getTourId());
+        assignment.setGuideId(dto.getGuideId());
+        assignment.setRole(dto.getRole());
+        assignment.setStartDate(dto.getStartDate());
+        assignment.setEndDate(dto.getEndDate());
+        assignment.setStatus(TourGuideAssignment.AssignmentStatus.assigned);
 
         TourGuideAssignment savedAssignment = assignmentRepository.save(assignment);
         return convertToDTO(savedAssignment);
@@ -80,18 +97,31 @@ public class TourGuideAssignmentService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteAssignment(Integer tourId, Integer guideId) {
-        if (!assignmentRepository.existsByTourIdAndGuideId(tourId, guideId)) {
-            throw new EntityNotFoundException("Assignment not found for tour " + tourId + " and guide " + guideId);
+    public TourGuideAssignmentDTO updateAssignmentStatus(Integer assignmentId, TourGuideAssignment.AssignmentStatus newStatus) {
+        TourGuideAssignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Assignment not found with id: " + assignmentId));
+
+        assignment.setStatus(newStatus);
+        TourGuideAssignment updatedAssignment = assignmentRepository.save(assignment);
+        return convertToDTO(updatedAssignment);
+    }
+
+    public void deleteAssignment(Integer assignmentId) {
+        if (!assignmentRepository.existsById(assignmentId)) {
+            throw new EntityNotFoundException("Assignment not found with id: " + assignmentId);
         }
-        assignmentRepository.deleteByTourIdAndGuideId(tourId, guideId);
+        assignmentRepository.deleteById(assignmentId);
     }
 
     private TourGuideAssignmentDTO convertToDTO(TourGuideAssignment assignment) {
         TourGuideAssignmentDTO dto = new TourGuideAssignmentDTO();
+        dto.setAssignmentId(assignment.getAssignmentId());
         dto.setTourId(assignment.getTourId());
         dto.setGuideId(assignment.getGuideId());
-        dto.setCreatedAt(assignment.getCreatedAt());
+        dto.setRole(assignment.getRole());
+        dto.setStartDate(assignment.getStartDate());
+        dto.setEndDate(assignment.getEndDate());
+        dto.setStatus(assignment.getStatus());
 
         // Set tour information if available
         if (assignment.getTour() != null) {

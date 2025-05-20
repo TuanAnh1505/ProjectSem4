@@ -11,11 +11,13 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import UserIndex from "./components/admin/user/UserIndex";
 import DashboardPage from "./components/admin/DashboardPage";
 import AdminPage from "./components/admin/AdminPage";
-
+import TourGuideList from "./components/tourguide/TourGuideList";
+import TourGuideDetail from "./components/tourguide/TourGuideDetail";
+import TourGuideForm from "./components/tourguide/TourGuideForm";
 
 import "./App.css";
 import TourDashboard from "./components/tour/TourDashboard";
-import TourDetailDashboard from "./components/tour/TourDetailDashboard ";
+import TourDetailDashboard from "./components/tour/TourDetailDashboard";
 import BookingPassenger from "./components/booking/BookingPassenger";
 import MomoPaymentPage from "./components/payment/MomoPaymentPage";
 import BookingConfirmation from "./components/booking/BookingConfirmation";
@@ -220,6 +222,24 @@ const App = () => {
           <Route
             path="/admin/booking/detail/:bookingId"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          {/* Tour Guide Routes */}
+          <Route
+            path="/tour-guides"
+            element={<ProtectedRoute element={<TourGuideList />} />}
+          />
+          <Route
+            path="/tour-guides/:id"
+            element={<ProtectedRoute element={<TourGuideDetail />} />}
+          />
+          <Route
+            path="/tour-guides/create"
+            element={<ProtectedRoute element={<TourGuideForm />} requiredRole="ADMIN" />}
+          />
+          <Route
+            path="/tour-guides/edit/:id"
+            element={<ProtectedRoute element={<TourGuideForm />} requiredRole="ADMIN" />}
           />
 
         </Routes>

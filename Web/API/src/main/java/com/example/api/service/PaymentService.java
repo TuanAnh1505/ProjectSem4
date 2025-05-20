@@ -1,10 +1,12 @@
 package com.example.api.service;
 
 import com.example.api.dto.PaymentRequestDTO;
-import com.example.api.enums.PaymentMethod;
 import com.example.api.model.Payment;
-
+import com.example.api.model.PaymentMethod;
+import com.example.api.model.PaymentStatus;
+import com.example.api.repository.PaymentMethodRepository;
 import com.example.api.repository.PaymentRepository;
+import com.example.api.repository.PaymentStatusRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,12 @@ import java.util.stream.Collectors;
 public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private PaymentStatusRepository paymentStatusRepository;
+
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
 
     private static final String PARTNER_CODE = "MOMO";
     private static final String ACCESS_KEY = "F8BBA842ECF85";
@@ -74,8 +82,15 @@ public class PaymentService {
         payment.setTransactionId(params.get("orderId"));
         payment.setAmount(new BigDecimal(params.get("amount")));
         payment.setPaymentDate(LocalDateTime.now());
-        payment.setPaymentMethod(PaymentMethod.momo);
-        payment.setStatusId("0".equals(params.get("resultCode")) ? 1 : 0);
+        
+        PaymentMethod momoMethod = paymentMethodRepository.findByMethodName("E-Wallet")
+            .orElseThrow(() -> new IllegalStateException("Payment method not found"));
+        payment.setPaymentMethod(momoMethod);
+        
+        PaymentStatus status = paymentStatusRepository.findById("0".equals(params.get("resultCode")) ? 1 : 0)
+            .orElseThrow(() -> new IllegalStateException("Payment status not found"));
+        payment.setStatus(status);
+        
         paymentRepository.save(payment);
     }
 

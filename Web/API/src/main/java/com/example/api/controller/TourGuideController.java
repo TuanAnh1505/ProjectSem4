@@ -4,6 +4,7 @@ import com.example.api.dto.TourGuideDTO;
 import com.example.api.service.TourGuideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -17,8 +18,9 @@ public class TourGuideController {
     @Autowired
     private TourGuideService tourGuideService;
 
-    // Create new tour guide
+    // Create new tour guide - only admin can create
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TourGuideDTO> createTourGuide(@Valid @RequestBody TourGuideDTO tourGuideDTO) {
         TourGuideDTO createdTourGuide = tourGuideService.createTourGuide(tourGuideDTO);
         return ResponseEntity.ok(createdTourGuide);
@@ -38,8 +40,9 @@ public class TourGuideController {
         return ResponseEntity.ok(tourGuides);
     }
 
-    // Update tour guide
+    // Update tour guide - only admin can update
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TourGuideDTO> updateTourGuide(
             @PathVariable Long id,
             @Valid @RequestBody TourGuideDTO tourGuideDTO) {
@@ -47,8 +50,9 @@ public class TourGuideController {
         return ResponseEntity.ok(updatedTourGuide);
     }
 
-    // Delete tour guide
+    // Delete tour guide - only admin can delete
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTourGuide(@PathVariable Long id) {
         tourGuideService.deleteTourGuide(id);
         return ResponseEntity.noContent().build();

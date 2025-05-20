@@ -2,23 +2,37 @@ package com.example.api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "tour_guides_assignments")
-@IdClass(TourGuideAssignment.TourGuideAssignmentId.class)
+@Table(name = "tour_guide_assignments")
 public class TourGuideAssignment {
     @Id
-    @Column(name = "tour_id", columnDefinition = "int(11)")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "assignment_id")
+    private Integer assignmentId;
+
+    @Column(name = "tour_id", nullable = false)
     private Integer tourId;
 
-    @Id
-    @Column(name = "guide_id", columnDefinition = "int(11)")
+    @Column(name = "guide_id", nullable = false)
     private Integer guideId;
 
-    @Column(name = "created_at", columnDefinition = "datetime default current_timestamp")
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private GuideRole role;
+
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDate endDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private AssignmentStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tour_id", insertable = false, updatable = false)
@@ -28,14 +42,15 @@ public class TourGuideAssignment {
     @JoinColumn(name = "guide_id", insertable = false, updatable = false)
     private TourGuide guide;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+    public enum GuideRole {
+        main_guide,
+        assistant_guide,
+        specialist
     }
 
-    @Data
-    public static class TourGuideAssignmentId implements java.io.Serializable {
-        private Integer tourId;
-        private Integer guideId;
+    public enum AssignmentStatus {
+        assigned,
+        completed,
+        cancelled
     }
 } 

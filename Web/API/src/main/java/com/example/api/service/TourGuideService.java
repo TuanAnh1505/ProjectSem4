@@ -7,6 +7,8 @@ import com.example.api.repository.TourGuideRepository;
 import com.example.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,18 @@ public class TourGuideService {
     private UserRepository userRepository;
 
     public TourGuideDTO createTourGuide(TourGuideDTO tourGuideDTO) {
+        // Check if current user has ADMIN role
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+            .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+        
+        boolean isAdmin = currentUser.getRoles().stream()
+            .anyMatch(role -> role.getRoleName().equals("ADMIN"));
+            
+        if (!isAdmin) {
+            throw new AccessDeniedException("Only administrators can create tour guides");
+        }
+
         // Check if user exists
         User user = userRepository.findById(tourGuideDTO.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + tourGuideDTO.getUserId()));
@@ -39,6 +53,7 @@ public class TourGuideService {
         tourGuide.setSpecialization(tourGuideDTO.getSpecialization());
         tourGuide.setLanguages(tourGuideDTO.getLanguages());
         tourGuide.setRating(tourGuideDTO.getRating() != null ? tourGuideDTO.getRating() : 0.0);
+        tourGuide.setIsAvailable(tourGuideDTO.getIsAvailable() != null ? tourGuideDTO.getIsAvailable() : true);
 
         TourGuide savedTourGuide = tourGuideRepository.save(tourGuide);
         return convertToDTO(savedTourGuide);
@@ -57,6 +72,18 @@ public class TourGuideService {
     }
 
     public TourGuideDTO updateTourGuide(Long id, TourGuideDTO tourGuideDTO) {
+        // Check if current user has ADMIN role
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+            .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+        
+        boolean isAdmin = currentUser.getRoles().stream()
+            .anyMatch(role -> role.getRoleName().equals("ADMIN"));
+            
+        if (!isAdmin) {
+            throw new AccessDeniedException("Only administrators can update tour guides");
+        }
+
         TourGuide tourGuide = tourGuideRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tour guide not found with id: " + id));
 
@@ -73,12 +100,27 @@ public class TourGuideService {
         if (tourGuideDTO.getRating() != null) {
             tourGuide.setRating(tourGuideDTO.getRating());
         }
+        if (tourGuideDTO.getIsAvailable() != null) {
+            tourGuide.setIsAvailable(tourGuideDTO.getIsAvailable());
+        }
 
         TourGuide updatedTourGuide = tourGuideRepository.save(tourGuide);
         return convertToDTO(updatedTourGuide);
     }
 
     public void deleteTourGuide(Long id) {
+        // Check if current user has ADMIN role
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+            .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+        
+        boolean isAdmin = currentUser.getRoles().stream()
+            .anyMatch(role -> role.getRoleName().equals("ADMIN"));
+            
+        if (!isAdmin) {
+            throw new AccessDeniedException("Only administrators can delete tour guides");
+        }
+
         if (!tourGuideRepository.existsById(id)) {
             throw new EntityNotFoundException("Tour guide not found with id: " + id);
         }
@@ -117,6 +159,7 @@ public class TourGuideService {
         dto.setSpecialization(tourGuide.getSpecialization());
         dto.setLanguages(tourGuide.getLanguages());
         dto.setRating(tourGuide.getRating());
+        dto.setIsAvailable(tourGuide.getIsAvailable());
         dto.setCreatedAt(tourGuide.getCreatedAt());
         return dto;
     }

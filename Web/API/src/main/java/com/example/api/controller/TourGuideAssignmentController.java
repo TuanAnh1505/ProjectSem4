@@ -18,10 +18,9 @@ public class TourGuideAssignmentController {
 
     @PostMapping
     public ResponseEntity<TourGuideAssignmentDTO> createAssignment(
-            @RequestParam @Valid Integer tourId,
-            @RequestParam @Valid Integer guideId) {
+            @RequestBody @Valid TourGuideAssignmentDTO dto) {
         try {
-            TourGuideAssignmentDTO assignment = assignmentService.createAssignment(tourId, guideId);
+            TourGuideAssignmentDTO assignment = assignmentService.createAssignment(dto);
             return ResponseEntity.ok(assignment);
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
@@ -64,12 +63,11 @@ public class TourGuideAssignmentController {
         return ResponseEntity.ok(assignments);
     }
 
-    @DeleteMapping("/{tourId}/{guideId}")
+    @DeleteMapping("/{assignmentId}")
     public ResponseEntity<Void> deleteAssignment(
-            @PathVariable Integer tourId,
-            @PathVariable Integer guideId) {
+            @PathVariable Integer assignmentId) {
         try {
-            assignmentService.deleteAssignment(tourId, guideId);
+            assignmentService.deleteAssignment(assignmentId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
