@@ -24,35 +24,42 @@ class AppDrawer extends StatelessWidget {
               child: Icon(Icons.person, size: 40),
             ),
             decoration: const BoxDecoration(
-              color: Colors.blue,
+              color: Colors.orange,
             ),
           ),
           ListTile(
             leading: const Icon(Icons.home),
-            title: const Text('Home'),
+            title: const Text('Trang chủ'),
             onTap: () {
               Navigator.pushReplacementNamed(context, '/home');
             },
           ),
           ListTile(
-            leading: const Icon(Icons.hotel),
-            title: const Text('Hotels'),
+            leading: const Icon(Icons.search),
+            title: const Text('Tìm kiếm'),
             onTap: () {
-              Navigator.pushReplacementNamed(context, '/hotels');
+              Navigator.pushReplacementNamed(context, '/search');
             },
           ),
           ListTile(
-            leading: const Icon(Icons.flight),
-            title: const Text('Flights'),
+            leading: const Icon(Icons.flight_takeoff),
+            title: const Text('Tour'),
             onTap: () {
-              Navigator.pushReplacementNamed(context, '/flights');
+              Navigator.pushReplacementNamed(context, '/tour');
             },
           ),
           ListTile(
-            leading: const Icon(Icons.book_online),
-            title: const Text('Bookings'),
+            leading: const Icon(Icons.favorite),
+            title: const Text('Yêu thích'),
             onTap: () {
-              Navigator.pushReplacementNamed(context, '/bookings');
+              Navigator.pushReplacementNamed(context, '/favorite');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Tài khoản'),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, '/account');
             },
           ),
           const Divider(),

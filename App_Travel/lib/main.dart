@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/forgot_password_screen.dart';
-import 'screens/reset_password_screen.dart';
-import 'screens/change_password_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/forgot_password_screen.dart';
+import 'screens/auth/reset_password_screen.dart';
+import 'screens/auth/change_password_screen.dart';
 import 'services/deep_link_handler.dart';
-// import 'widgets/app_navigation.dart';
+import 'widgets/app_navigation.dart';
+import 'screens/tour/tour_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -53,31 +54,41 @@ class _MyAppState extends State<MyApp> {
           elevation: 0,
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
-          iconTheme: IconThemeData(color: Colors.black),
+          iconTheme: IconThemeData(color: Colors.orange),
         ),
       ),
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(
+        '/home': (context) => const AppNavigation(
               userName: 'Guest',
               userRole: 'USER',
+              currentIndex: 0,
             ),
-        '/hotels': (context) => const HomeScreen(
+        '/hotels': (context) => const AppNavigation(
               userName: 'Guest',
               userRole: 'USER',
+              currentIndex: 1,
             ),
-        '/flights': (context) => const HomeScreen(
+        '/flights': (context) => const AppNavigation(
               userName: 'Guest',
               userRole: 'USER',
+              currentIndex: 2,
             ),
-        '/bookings': (context) => const HomeScreen(
+        '/destinations': (context) => const AppNavigation(
               userName: 'Guest',
               userRole: 'USER',
+              currentIndex: 3,
             ),
-        '/settings': (context) => const HomeScreen(
+        '/bookings': (context) => const AppNavigation(
               userName: 'Guest',
               userRole: 'USER',
+              currentIndex: 4,
+            ),
+        '/settings': (context) => const AppNavigation(
+              userName: 'Guest',
+              userRole: 'USER',
+              currentIndex: 0,
             ),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/reset-password': (context) => ResetPasswordScreen(
@@ -86,6 +97,7 @@ class _MyAppState extends State<MyApp> {
         '/change-password': (context) => ChangePasswordScreen(
               email: ModalRoute.of(context)!.settings.arguments as String,
             ),
+        '/tours': (context) => TourScreen(),
       },
     );
   }

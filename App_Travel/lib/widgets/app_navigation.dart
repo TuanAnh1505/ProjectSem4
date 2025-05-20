@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'app_drawer.dart';
+import '../screens/home_screen.dart';
+import '../screens/tour/tour_screen.dart';
+
 
 class AppNavigation extends StatefulWidget {
   final String userName;
@@ -19,6 +22,8 @@ class AppNavigation extends StatefulWidget {
 
 class _AppNavigationState extends State<AppNavigation> {
   late int _selectedIndex;
+  bool _showSearch = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -32,40 +37,64 @@ class _AppNavigationState extends State<AppNavigation> {
     });
   }
 
+  void _toggleSearch() {
+    setState(() {
+      _showSearch = !_showSearch;
+      if (!_showSearch) _searchController.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tour Booking'),
+      appBar: _selectedIndex == 2
+          ? null
+          : AppBar(
+              leading: null,
+              title: _selectedIndex == 0 ? const Text('Tour Booking') : null,
+              centerTitle: true,
+            ),
+      drawer: _selectedIndex == 0
+          ? AppDrawer(
+              userName: widget.userName,
+              userRole: widget.userRole,
+            )
+          : null,
+      body: Column(
+        children: [
+          if (_selectedIndex == 0) SearchBar(),
+          Expanded(child: _buildBody()),
+        ],
       ),
-      drawer: AppDrawer(
-        userName: widget.userName,
-        userRole: widget.userRole,
-      ),
-      body: _buildBody(),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Trang chủ',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.hotel),
-            label: 'Hotels',
+            icon: Icon(Icons.search),
+            label: 'Tìm kiếm',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.flight),
-            label: 'Flights',
+            icon: Icon(Icons.flight_takeoff),
+            label: 'Tour',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book_online),
-            label: 'Bookings',
+            icon: Icon(Icons.favorite),
+            label: 'Yêu thích',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Tài khoản',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Colors.orange,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
+        showUnselectedLabels: true,
       ),
     );
   }
@@ -73,15 +102,45 @@ class _AppNavigationState extends State<AppNavigation> {
   Widget _buildBody() {
     switch (_selectedIndex) {
       case 0:
-        return const Center(child: Text('Home Screen'));
+        return HomeScreen(userName: widget.userName, userRole: widget.userRole);
       case 1:
-        return const Center(child: Text('Hotels Screen'));
+        return const Center(child: Text('Tìm kiếm'));
       case 2:
-        return const Center(child: Text('Flights Screen'));
+        return TourScreen(
+          onBack: () {
+            setState(() {
+              _selectedIndex = 0;
+            });
+          },
+        );
       case 3:
-        return const Center(child: Text('Bookings Screen'));
+        return const Center(child: Text('Yêu thích'));
+      case 4:
+        return const Center(child: Text('Tài khoản'));
       default:
-        return const Center(child: Text('Home Screen'));
+        return HomeScreen(userName: widget.userName, userRole: widget.userRole);
     }
+  }
+}
+
+class SearchBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Tìm kiếm tour du lịch...',
+          prefixIcon: Icon(Icons.search, color: Colors.orange),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
   }
 }
