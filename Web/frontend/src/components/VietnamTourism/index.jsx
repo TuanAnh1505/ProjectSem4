@@ -97,8 +97,7 @@ const Home = () => {
               <div className={styles.heroBannerTitle}>{heroSlides[currentSlide].title}</div>
               <div className={styles.bannerDesc}>{heroSlides[currentSlide].description}</div>
               <div className={styles.bannerButtons}>
-                <button className={styles.sliderBtn}>Plan your trip</button>
-                <button className={styles.sliderBtn}>Learn More</button>
+                
               </div>
             </>
           )}
