@@ -6,32 +6,32 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
+
 const Home = () => {
   // Banner state and data
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = [
+  const heroSlides = [
     {
-      image: 'https://ext.same-assets.com/895005174/2387322424.jpeg',
-      title: 'LIVE FULLY IN VIETNAM',
-      description: `Vietnam opens its door widely to welcome visitors all around the world! Vietnam extends e-visa validity to 90 days and visa exemption will be valid in 45 days!
-
-We are more than happy to welcome you all here and admire our stunning landscapes, free your soul on white sandy beaches, experience our unique and beautiful culture and meet friendly people. Particularly, to indulge in our scrumptious cuisine at Michelin rated restaurants or to join us in mega events!`
+      imageUrl:
+        "https://readdy.ai/api/search-image?query=Breathtaking%20aerial%20view%20of%20Ha%20Long%20Bay%20Vietnam%20with%20emerald%20waters%20and%20limestone%20karsts%20under%20golden%20sunset%20light%2C%20dramatic%20clouds%2C%20misty%20atmosphere%2C%20natural%20wonder%20of%20the%20world%2C%20stunning%20landscape%20photography&width=1440&height=600&seq=1&orientation=landscape",
+      title: "Discover Ha Long Bay",
+      description:
+        "Explore the emerald waters and thousands of towering limestone islands",
     },
     {
-      image: 'https://ext.same-assets.com/895005174/3675205425.jpeg',
-      title: 'EXPLORE VIETNAM',
-      description: 'Discover the beauty of Vietnam through its diverse landscapes and rich culture.'
+      imageUrl:
+        "https://readdy.ai/api/search-image?query=Ancient%20Hoi%20An%20Vietnam%20at%20night%20with%20traditional%20yellow%20buildings%20reflected%20in%20water%2C%20colorful%20lanterns%20glowing%2C%20peaceful%20atmosphere%2C%20cultural%20heritage%20site%2C%20traditional%20Vietnamese%20architecture&width=1440&height=600&seq=2&orientation=landscape",
+      title: "Experience Hoi An",
+      description:
+        "Wander through ancient streets illuminated by colorful lanterns",
     },
     {
-      image: 'https://ext.same-assets.com/895005174/3297304267.jpeg',
-      title: 'CULTURAL EXPERIENCES',
-      description: 'Immerse yourself in Vietnam\'s unique traditions and festivals.'
+      imageUrl:
+        "https://readdy.ai/api/search-image?query=Terraced%20rice%20fields%20in%20Sapa%20Vietnam%20with%20dramatic%20mountain%20backdrop%2C%20early%20morning%20mist%2C%20golden%20sunlight%2C%20lush%20green%20landscape%2C%20traditional%20farming%20methods%2C%20breathtaking%20natural%20scenery&width=1440&height=600&seq=3&orientation=landscape",
+      title: "Explore Sapa",
+      description:
+        "Trek through stunning terraced rice fields and mountain villages",
     },
-    {
-      image: 'https://ext.same-assets.com/895005174/1515074473.jpeg',
-      title: 'CULINARY JOURNEY',
-      description: 'Taste the authentic flavors of Vietnamese cuisine.'
-    }
   ];
 
   // Events state
@@ -40,64 +40,67 @@ We are more than happy to welcome you all here and admire our stunning landscape
   const [error, setError] = useState(null);
 
   // Fetch events data
+  
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('/api/vnat/home/event');
-        if (!response.ok) {
-          throw new Error('Failed to fetch events');
-        }
+        const response = await fetch('http://localhost:8080/api/events');
+        if (!response.ok) throw new Error('Failed to fetch events');
         const data = await response.json();
         setEvents(data);
-        setLoading(false);
       } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
-
     fetchEvents();
   }, []);
 
   // Banner slider functions
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
   return (
     <div className={styles.home}>
       {/* Banner */}
       <div className={styles.bannerSlider}>
-        {slides.map((slide, index) => (
+        {heroSlides.map((slide, index) => (
           <div
             key={index}
             className={`${styles.bannerSlide} ${index === currentSlide ? styles.active : ''}`}
           >
-            <img
-              src={slide.image}
-              alt={slide.title}
-              className={styles.bannerImg}
-            />
+            {slide && (
+              <img
+                src={slide.imageUrl}
+                alt={slide.title}
+                className={styles.bannerImg}
+              />
+            )}
           </div>
         ))}
         <div className={styles.bannerContent}>
-          <div className={styles.bannerTitle}>{slides[currentSlide].title}</div>
-          <div className={styles.bannerDesc}>{slides[currentSlide].description}</div>
-          <div className={styles.bannerButtons}>
-            <button className={styles.sliderBtn}>Plan your trip</button>
-            <button className={styles.sliderBtn}>Learn More</button>
-          </div>
+          {heroSlides[currentSlide] && (
+            <>
+              <div className={styles.heroBannerTitle}>{heroSlides[currentSlide].title}</div>
+              <div className={styles.bannerDesc}>{heroSlides[currentSlide].description}</div>
+              <div className={styles.bannerButtons}>
+                
+              </div>
+            </>
+          )}
         </div>
         <div className={styles.sliderControls}>
           <button className={styles.sliderArrow} onClick={prevSlide}>&#10094;</button>
@@ -136,11 +139,30 @@ We are more than happy to welcome you all here and admire our stunning landscape
             ) : (
               <div className={styles.eventsGrid}>
                 {events.map((event, index) => (
-                  <div key={index} className={styles.eventCard}>
-                    <img src={event.image} alt={event.title} className={styles.eventImage} />
+                  <div key={event.eventId || index} className={styles.eventCard}>
+                    <img
+                      src={event.filePaths && event.filePaths.length > 0 ? event.filePaths[0] : '/default-event.jpg'}
+                      alt={event.name}
+                      className={styles.eventImage}
+                    />
                     <div className={styles.eventContent}>
-                      <h3 className={styles.eventTitle}>{event.title}</h3>
-                      <p className={styles.eventDate}>{event.date}</p>
+                      <h3 className={styles.eventTitle}>{event.name}</h3>
+                      <p className={styles.eventDate}>
+                        {event.startDate ? new Date(event.startDate).toLocaleString() : ''}
+                        {event.endDate ? ' - ' + new Date(event.endDate).toLocaleString() : ''}
+                      </p>
+                      {event.location && (
+                        <p className={styles.eventLocation}><b>Location:</b> {event.location}</p>
+                      )}
+                      {event.statusName && (
+                        <p className={styles.eventStatus}><b>Status:</b> {event.statusName}</p>
+                      )}
+                      {event.ticketPrice !== null && event.ticketPrice !== undefined && (
+                        <p className={styles.eventPrice}><b>Ticket Price:</b> {event.ticketPrice} VND</p>
+                      )}
+                      {event.description && (
+                        <p className={styles.eventDesc}>{event.description}</p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -165,37 +187,38 @@ We are more than happy to welcome you all here and admire our stunning landscape
         </div>
         <div className={styles.tour360List}>
           <div className={styles.tour360Item}>
-            <a href="/sites/default/files/360Tour/Hue2021/index.htm" target="_blank" rel="noopener noreferrer">
+            <a href="https://vietnam.travel/sites/default/files/360Tour/Hue2021/index.htm" target="_blank" rel="noopener noreferrer">
               <img src="//image.vietnam.travel/sites/default/files/360Tour/Hue2021/socialThumbnail.jpg" alt="Hue 360 Tour" />
             </a>
           </div>
           <div className={styles.tour360Item}>
-            <a href="/sites/default/files/360Tour/HaLong/index.htm" target="_blank" rel="noopener noreferrer">
+            <a href="https://vietnam.travel/sites/default/files/360Tour/HaLong/index.htm" target="_blank" rel="noopener noreferrer">
               <img src="//image.vietnam.travel/sites/default/files/360Tour/HaLong/socialThumbnail.jpg" alt="Ha Long 360 Tour" />
             </a>
           </div>
           <div className={styles.tour360Item}>
-            <a href="/sites/default/files/360Tour/HoiAn/index.htm" target="_blank" rel="noopener noreferrer">
+            <a href="https://vietnam.travel/sites/default/files/360Tour/HoiAn/index.htm" target="_blank" rel="noopener noreferrer">
               <img src="//image.vietnam.travel/sites/default/files/360Tour/HoiAn/socialThumbnail.jpg" alt="Hoi An 360 Tour" />
             </a>
           </div>
           <div className={styles.tour360Item}>
-            <a href="/sites/default/files/360Tour/HaNoi/index.htm" target="_blank" rel="noopener noreferrer">
+            <a href="https://vietnam.travel/sites/default/files/360Tour/HaNoi/index.htm" target="_blank" rel="noopener noreferrer">
               <img src="//image.vietnam.travel/sites/default/files/360Tour/HaNoi/socialThumbnail.jpg" alt="Ha Noi 360 Tour" />
             </a>
           </div>
           <div className={styles.tour360Item}>
-            <a href="/sites/default/files/360Tour/PhongNha/index.htm" target="_blank" rel="noopener noreferrer">
+            <a href="https://vietnam.travel/sites/default/files/360Tour/PhongNha/index.htm" target="_blank" rel="noopener noreferrer">
               <img src="//image.vietnam.travel/sites/default/files/360Tour/PhongNha/socialThumbnail.jpg" alt="Phong Nha 360 Tour" />
             </a>
           </div>
           <div className={styles.tour360Item}>
-            <a href="/sites/default/files/360Tour/MySon/index.htm" target="_blank" rel="noopener noreferrer">
+            <a href="https://vietnam.travel/sites/default/files/360Tour/MySon/index.htm" target="_blank" rel="noopener noreferrer">
               <img src="//image.vietnam.travel/sites/default/files/360Tour/MySon/socialThumbnail.jpg" alt="My Son 360 Tour" />
             </a>
           </div>
         </div>
       </section>
+
       {/* Swiper Banner Section */}
       <section className={styles.homeTopBannerSlider}>
         <Swiper
