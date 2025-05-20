@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../styles/admin/AdminDashboard.css";
-import logo from "../../assets/logo.png";
+import logo from "../Header/logo.png";
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();

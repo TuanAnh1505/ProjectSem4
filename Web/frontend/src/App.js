@@ -24,7 +24,6 @@ import MomoPaymentPage from './components/payment/MomoPaymentPage';
 import BookingConfirmation from './components/booking/BookingConfirmation';
 import './App.css';
 import PlanYourTrip from './components/PlanYourTrip/PlanYourTrip';
-import Tourbooking from './components/TourBooking/Tourbooking';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -83,14 +82,9 @@ const App = () => {
             <PlanYourTrip />
           </Layout>
         } />
-        <Route path="/tour-booking" element={
+        <Route path="/tour-detail-dashboard" element={
           <Layout>
-            <Tourbooking />
-          </Layout>
-        } />
-        <Route path="/green-travel" element={
-          <Layout>
-            <Home />
+            <TourDetailDashboard />
           </Layout>
         } />
 

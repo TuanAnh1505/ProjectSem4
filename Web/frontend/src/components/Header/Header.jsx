@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
+import logo from './logo.png'; // chỉnh path đúng thư mục chứa ảnh
+
 
 const Header = () => (
   <header className={styles.header}>
@@ -13,13 +15,15 @@ const Header = () => (
       <div className={styles.row}>
         <h1 className={styles.logo}>
           <Link to="/">
-            <img src="//image.vietnam.travel/themes/custom/vietnamtourism/images/logo.jpg" alt="Vietnam Tourism" />
+            <img src={logo} alt="Vietnam Tourism Logo" style={{width: '120px', height: 'auto'}}/>
+
+
           </Link>
         </h1>
         <nav className={styles.mainNav}>
           <ul>
-           
-            <li className={styles.hasFlyout}>
+
+          <li className={styles.hasFlyout}>
               <Link to="/live-fully" className={styles.lang}>
                 Live fully in Vietnam <span className={styles.arrow}></span>
               </Link>
@@ -162,10 +166,7 @@ const Header = () => (
               </div>
             </li>
             <li>
-              <Link to="/tour-booking">Tour booking</Link>
-            </li>
-            <li>
-              <Link to="/green-travel">Green travel</Link>
+              <Link to="/tour-detail-dashboard">Tour booking</Link>
             </li>
             <li className={styles.hasFlyout}>
               <a href="#" className={styles.lang}>
@@ -178,7 +179,6 @@ const Header = () => (
           </ul>
         </nav>
       </div>
-      {/* Đã xoá search bar */}
     </div>
   </header>
 );

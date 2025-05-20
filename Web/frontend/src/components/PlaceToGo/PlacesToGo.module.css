@@ -70,34 +70,6 @@
   line-height: 1.1;
 }
 
-.placesSectionHeading {
-  text-align: center;
-  color: #b48a1b;
-  font-size: 2.8em;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 0.42em;
-  line-height: 1.1;
-  box-shadow: none;
-  text-shadow: none;
-}
-
-.placesSectionDesc {
-  text-align: center;
-  color: #222;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  font-size: 1.45em;
-  font-weight: 400;
-  line-height: 1.3;
-  margin-bottom: 2.5em;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-  letter-spacing: 0;
-}
-
 @media only screen and (max-width: 900px) {
   .placesList {
     grid-template-columns: 1fr;
@@ -344,7 +316,7 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 20px;
 }
 
 .sectionHeading {
@@ -441,48 +413,297 @@
   }
 }
 
-.heroBanner {
+/* Hero section */
+.heroSection {
   position: relative;
-  width: 100vw;
-  min-height: 80vh;
-  height: 80vh;
-  max-height: 900px;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding-top: 64px;
+  height: 750px;
   overflow: hidden;
+  width: 100%;
 }
 
-.heroImg {
-  width: 0;
-  height: 0;
-  opacity: 0;
+.heroBackground {
   position: absolute;
-  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
 }
 
-.heroTitle {
-  color: #fff;
-  font-family: 'Pacifico', cursive;
-  font-size: 5vw;
-  font-weight: 400;
-  text-align: center;
-  text-shadow: 0 4px 32px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.25);
-  letter-spacing: 0.04em;
-  position: relative;
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
   z-index: 2;
 }
 
-@media (max-width: 900px) {
-  .heroBanner {
-    min-height: 45vh;
-    height: 45vh;
-    max-height: 400px;
+.heroContent {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+}
+
+.heroTitle {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.heroDescription {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #fff;
+  max-width: 700px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Region section */
+.regionSection {
+  padding: 80px 0;
+}
+
+.regionSection:nth-child(even) {
+  background-color: #faf9f6;
+}
+
+.regionTitle {
+  text-align: center;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 700;
+  color: #b48a1b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.42em;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.18);
+}
+
+.regionDescription {
+  text-align: center;
+  color: #222;
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 2.5em;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  text-shadow: 0 2px 8px rgba(180,138,27,0.08);
+}
+
+/* Places grid */
+.placesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 0 20px;
+}
+
+.placeCard {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.placeCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.placeImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.placeContent {
+  padding: 20px;
+}
+
+.placeName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #b48a1b;
+  margin-bottom: 8px;
+}
+
+.placeDescription {
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+/* MyVietnam section */
+.myVietnamSection {
+  padding: 80px 0;
+  background: #faf9f6;
+}
+
+.myVietnamTitle {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 3vw, 2.2rem);
+  color: #b48a1b;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5em;
+}
+
+.myVietnamDescription {
+  text-align: center;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  color: #444;
+  max-width: 800px;
+  margin: 0 auto 40px;
+}
+
+.authorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 32px;
+  padding: 0 20px;
+}
+
+.authorCard {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.authorCard:hover {
+  transform: translateY(-4px);
+}
+
+.authorThumb {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+.authorAvatar {
+  width: 60px;
+  height: 60px;
+  margin: -30px auto 0;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  object-fit: cover;
+}
+
+.authorName {
+  display: block;
+  text-align: center;
+  font-weight: 700;
+  margin-top: 8px;
+  color: #b48a1b;
+  font-size: 1.1em;
+}
+
+.authorRole {
+  display: block;
+  text-align: center;
+  color: #444;
+  font-size: 0.98em;
+  margin-bottom: 12px;
+}
+
+/* Itineraries section */
+.itinerariesSection {
+  padding: 80px 0;
+}
+
+.itinerariesTitle {
+  text-align: center;
+  font-size: clamp(1.8rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: #b48a1b;
+  margin-bottom: 40px;
+}
+
+.itinerariesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  padding: 0 20px;
+}
+
+.itineraryCard {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+}
+
+.itineraryImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.itineraryCard:hover .itineraryImage {
+  transform: scale(1.05);
+}
+
+.itineraryInfo {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .heroSection {
+    height: 600px;
   }
-  .heroTitle {
-    font-size: 2.2em;
+  
+  .regionSection,
+  .myVietnamSection,
+  .itinerariesSection {
+    padding: 60px 0;
+  }
+  
+  .placesGrid,
+  .authorGrid,
+  .itinerariesGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroSection {
+    height: 500px;
+  }
+  
+  .placeImage {
+    height: 160px;
+  }
+  
+  .authorThumb {
+    height: 120px;
   }
 }
