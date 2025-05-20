@@ -381,9 +381,6 @@ const PlanYourTrip = () => (
     <Practicalities />
     <ExploreHomeBanner />
     <ExploreFromHome />
-    <Infographics />
-    <Experiences />
-    <Itineraries />
   </div>
 );
 
