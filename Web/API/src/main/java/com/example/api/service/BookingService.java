@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,41 +27,70 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final BookingStatusRepository bookingStatusRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
+    private final TourScheduleRepository tourScheduleRepository;
 
     public Booking createBooking(TourBookingRequest request) {
         try {
             System.out.println("=== Booking Request Received ===");
             System.out.println("User ID: " + request.getUserId());
             System.out.println("Tour ID: " + request.getTourId());
+            System.out.println("Schedule ID: " + request.getScheduleId());
             System.out.println("Discount Code: " + request.getDiscountCode());
 
-            if (request.getUserId() == null || request.getTourId() == null) {
-                throw new RuntimeException("Thiếu thông tin bắt buộc để đặt tour.");
+            // Validate required fields
+            if (request.getUserId() == null) {
+                throw new RuntimeException("Thiếu thông tin người dùng.");
+            }
+            if (request.getTourId() == null) {
+                throw new RuntimeException("Thiếu thông tin tour.");
+            }
+            if (request.getScheduleId() == null) {
+                throw new RuntimeException("Vui lòng chọn lịch trình cho tour.");
             }
 
+            // Find and validate user
             User user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại."));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
 
+            // Find and validate tour
             Tour tour = tourRepository.findById(request.getTourId())
-                    .orElseThrow(() -> new RuntimeException("Tour không tồn tại."));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với ID: " + request.getTourId()));
+
+            // Find and validate schedule
+            Optional<TourSchedule> scheduleOpt = tourScheduleRepository.findById(request.getScheduleId());
+            if (!scheduleOpt.isPresent()) {
+                throw new RuntimeException("Không tìm thấy lịch trình với ID: " + request.getScheduleId());
+            }
+            TourSchedule schedule = scheduleOpt.get();
+            
+            // Validate schedule belongs to tour
+            if (!schedule.getTourId().equals(tour.getTourId())) {
+                throw new RuntimeException("Lịch trình không thuộc tour này!");
+            }
+
+            // Validate schedule status
+            if (!"available".equalsIgnoreCase(schedule.getStatus().getValue())) {
+                throw new RuntimeException("Lịch trình không ở trạng thái available!");
+            }
 
             BigDecimal price = tour.getPrice();
 
+            // Handle discount if provided
             Discount discount = null;
             if (request.getDiscountCode() != null && !request.getDiscountCode().isBlank()) {
                 discount = discountRepository.findByCode(request.getDiscountCode())
-                        .orElseThrow(() -> new RuntimeException("Mã giảm giá không hợp lệ."));
+                        .orElseThrow(() -> new RuntimeException("Mã giảm giá không hợp lệ: " + request.getDiscountCode()));
 
                 if (LocalDateTime.now().isBefore(discount.getStartDate()) ||
                         LocalDateTime.now().isAfter(discount.getEndDate())) {
-                    throw new RuntimeException("Mã giảm giá đã hết hạn.");
+                    throw new RuntimeException("Mã giảm giá đã hết hạn: " + request.getDiscountCode());
                 }
 
                 boolean used = userDiscountRepository.existsByUseridAndDiscountIdAndTourIdAndUsedTrue(
                         user.getUserid(), discount.getDiscountId(), tour.getTourId());
 
                 if (used) {
-                    throw new RuntimeException("Bạn đã sử dụng mã giảm giá này cho tour này.");
+                    throw new RuntimeException("Bạn đã sử dụng mã giảm giá này cho tour này: " + request.getDiscountCode());
                 }
 
                 BigDecimal discountAmount = price.multiply(BigDecimal.valueOf(discount.getDiscountPercent()))
@@ -68,18 +98,22 @@ public class BookingService {
                 price = price.subtract(discountAmount);
             }
 
+            // Get default status
             BookingStatus status = bookingStatusRepository.findByStatusName("PENDING")
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái đặt tour mặc định."));
 
+            // Create and save booking
             Booking booking = new Booking();
             booking.setUser(user);
             booking.setTour(tour);
+            booking.setScheduleId(request.getScheduleId());
             booking.setBookingDate(LocalDateTime.now());
             booking.setTotalPrice(price);
             booking.setStatus(status);
 
             Booking saved = bookingRepository.save(booking);
 
+            // Save discount usage if applicable
             if (discount != null) {
                 UserDiscount ud = new UserDiscount();
                 ud.setUserid(user.getUserid());
@@ -118,6 +152,20 @@ public class BookingService {
         bookingDetails.put("bookingId", booking.getBookingId());
         bookingDetails.put("bookingDate", booking.getBookingDate());
         bookingDetails.put("totalPrice", booking.getTotalPrice());
+        bookingDetails.put("scheduleId", booking.getScheduleId());
+
+        // Get schedule details if scheduleId exists
+        if (booking.getScheduleId() != null) {
+            TourSchedule schedule = tourScheduleRepository.findById(booking.getScheduleId())
+                    .orElse(null);
+            if (schedule != null) {
+                Map<String, Object> scheduleDetails = new HashMap<>();
+                scheduleDetails.put("startDate", schedule.getStartDate());
+                scheduleDetails.put("endDate", schedule.getEndDate());
+                scheduleDetails.put("status", schedule.getStatus());
+                bookingDetails.put("schedule", scheduleDetails);
+            }
+        }
 
         // User
         if (booking.getUser() != null) {

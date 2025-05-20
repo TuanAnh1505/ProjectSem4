@@ -2,7 +2,7 @@ import 'package:app_links/app_links.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import '../screens/reset_password_screen.dart';
+import '../screens/auth/reset_password_screen.dart';
 
 class DeepLinkHandler {
   AppLinks? _appLinks;

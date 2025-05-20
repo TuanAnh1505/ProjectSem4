@@ -1,5 +1,6 @@
 package com.example.api.model;
 
+
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -19,12 +20,14 @@ public class Booking {
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;
 
-    @Column(name = "booking_date", columnDefinition = "datetime default current_timestamp")
-    @ColumnDefault("current_timestamp")
+    @Column(name = "schedule_id")
+    private Integer scheduleId;
+
+    @Column(name = "booking_date")
     private LocalDateTime bookingDate;
 
     @ManyToOne
-    @JoinColumn(name = "status_id", nullable = false)
+    @JoinColumn(name = "status_id")
     private BookingStatus status;
 
     @Column(name = "total_price")

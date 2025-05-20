@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/auth_models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static const String baseUrl = 'http://10.0.2.2:8080/api/auth'; // Use 10.0.2.2 for Android emulator to access localhost
@@ -14,7 +15,16 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        return AuthResponse.fromJson(jsonDecode(response.body));
+        final data = jsonDecode(response.body);
+        final token = data['token'];
+        final userId = data['userId'];
+        
+        // Lưu token và userId vào SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        await prefs.setInt('userId', userId);
+        
+        return AuthResponse.fromJson(data);
       } else {
         throw Exception(jsonDecode(response.body)['message'] ?? 'Login failed');
       }

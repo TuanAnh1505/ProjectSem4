@@ -8,6 +8,7 @@ import lombok.Data;
 public class TourBookingRequest {
     private Long userId;
     private Integer tourId;
+    private Integer scheduleId;
     private String discountCode;
-     private LocalDate selectedDate;
+    private LocalDate selectedDate;
 }
