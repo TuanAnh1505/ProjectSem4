@@ -103,91 +103,212 @@ export default function TourDashboard() {
         <p>Explore our curated collection of Vietnam's best tours</p>
       </div>
 
-      <div className="tour-dashboard-search">
-        <div className="search-box">
-          <FaSearch className="search-icon" />
+      <div
+        className="tour-dashboard-search"
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '32px',
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          marginBottom: '32px'
+        }}
+      >
+        <div
+          className="search-box"
+          style={{
+            flex: 1,
+            minWidth: 320,
+            maxWidth: 500,
+            background: '#fff',
+            borderRadius: '16px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 24px',
+            height: 64
+          }}
+        >
+          <FaSearch className="search-icon" style={{ color: '#1976d2', fontSize: 24, marginRight: 16 }} />
           <input
             type="text"
             placeholder="Search tours by name or description..."
             value={searchTerm}
             onChange={handleSearch}
+            style={{
+              border: 'none',
+              outline: 'none',
+              fontSize: 20,
+              flex: 1,
+              background: 'transparent',
+              color: '#333'
+            }}
           />
         </div>
-
-        <div className="filter-box">
-          <div className="filter-group">
-            <FaDollarSign className="filter-icon" />
-            <select name="priceRange" value={filters.priceRange} onChange={handleFilterChange}>
-              <option value="">Price Range</option>
-              <option value="0-1000000">Under 1M VND</option>
-              <option value="1000000-3000000">1M - 3M VND</option>
-              <option value="3000000-5000000">3M - 5M VND</option>
-              <option value="5000000-10000000">5M - 10M VND</option>
-              <option value="10000000-999999999">Over 10M VND</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <FaCalendarAlt className="filter-icon" />
-            <select name="duration" value={filters.duration} onChange={handleFilterChange}>
-              <option value="">Duration</option>
-              <option value="1-3">1-3 days</option>
-              <option value="4-7">4-7 days</option>
-              <option value="8-14">8-14 days</option>
-              <option value="15-999">15+ days</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <FaMapMarkerAlt className="filter-icon" />
-            <input
-              type="text"
-              name="destination"
-              placeholder="Search by destination..."
-              value={filters.destination}
-              onChange={handleFilterChange}
-            />
-          </div>
+        <div
+          className="filter-box"
+          style={{
+            flex: 1,
+            minWidth: 220,
+            maxWidth: 350,
+            background: '#fff',
+            borderRadius: '16px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 24px',
+            height: 64
+          }}
+        >
+          <FaDollarSign className="filter-icon" style={{ color: '#1976d2', fontSize: 22, marginRight: 12 }} />
+          <select
+            name="priceRange"
+            value={filters.priceRange}
+            onChange={handleFilterChange}
+            style={{
+              border: 'none',
+              outline: 'none',
+              fontSize: 18,
+              flex: 1,
+              background: 'transparent',
+              color: '#222',
+              padding: '8px 0'
+            }}
+          >
+            <option value="">Price Range</option>
+            <option value="0-1000000">Under 1M VND</option>
+            <option value="1000000-3000000">1M - 3M VND</option>
+            <option value="3000000-5000000">3M - 5M VND</option>
+            <option value="5000000-10000000">5M - 10M VND</option>
+            <option value="10000000-999999999">Over 10M VND</option>
+          </select>
         </div>
       </div>
 
       {filteredTours.length === 0 ? (
-        <div className="no-tours-found">
-          <h3>No tours found</h3>
-          <p>Try adjusting your search or filters</p>
+        <div style={{
+          textAlign: 'center',
+          padding: '40px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          margin: '20px 0'
+        }}>
+          <h3 style={{ color: '#666', marginBottom: '10px' }}>No tours found</h3>
+          <p style={{ color: '#888' }}>Try adjusting your search or filters</p>
         </div>
       ) : (
-        <div className="tour-list">
-          {filteredTours.map(tour => (
-            <div className="tour-card" key={tour.tourId}>
-              <div className="tour-image-container">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+          gap: '20px',
+          padding: '20px 0'
+        }}>
+          {filteredTours.slice(0, 6).map(tour => (
+            <div key={tour.tourId} style={{
+              backgroundColor: '#fff',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              transition: 'transform 0.2s',
+              cursor: 'pointer',
+              ':hover': {
+                transform: 'translateY(-5px)'
+              }
+            }}>
+              <div style={{
+                position: 'relative',
+                height: '200px',
+                overflow: 'hidden'
+              }}>
                 {tour.imageUrl ? (
                   <img
                     src={`http://localhost:8080${tour.imageUrl}`}
                     alt={tour.name}
-                    className="tour-image"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
                   />
                 ) : (
-                  <div className="tour-image-placeholder">No Image</div>
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: '#f0f0f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#666'
+                  }}>No Image</div>
                 )}
-                <div className="tour-price">${tour.price.toLocaleString()}</div>
+                <div style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  color: '#fff',
+                  padding: '5px 10px',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}>{tour.price.toLocaleString()} VND</div>
               </div>
-              <div className="tour-info">
-                <h3>{tour.name}</h3>
-                <div className="tour-meta">
-                  <span className="tour-duration">
+              <div style={{
+                padding: '15px'
+              }}>
+                <h3 style={{
+                  margin: '0 0 10px 0',
+                  fontSize: '18px',
+                  color: '#333'
+                }}>{tour.name}</h3>
+                <div style={{
+                  display: 'flex',
+                  gap: '15px',
+                  marginBottom: '10px',
+                  color: '#666',
+                  fontSize: '14px'
+                }}>
+                  <span style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}>
                     <FaCalendarAlt /> {tour.duration} days
                   </span>
                   {tour.destinations?.length > 0 && (
-                    <span className="tour-destination">
+                    <span style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}>
                       <FaMapMarkerAlt /> {tour.destinations[0].name}
                     </span>
                   )}
                 </div>
-                <p className="tour-description">
+                <p style={{
+                  color: '#666',
+                  fontSize: '14px',
+                  marginBottom: '15px',
+                  lineHeight: '1.4'
+                }}>
                   {tour.description?.substring(0, 100)}...
                 </p>
-                <Link to={`/tour-dashboard/detail/${tour.tourId}`} className="btn-tour-dashboard">
+                <Link 
+                  to={`/tour-dashboard/detail/${tour.tourId}`}
+                  style={{
+                    display: 'inline-block',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'background-color 0.2s',
+                    ':hover': {
+                      backgroundColor: '#0056b3'
+                    }
+                  }}
+                >
                   View Details
                 </Link>
               </div>
