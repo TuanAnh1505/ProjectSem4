@@ -87,7 +87,14 @@ export default function UpdateTour() {
     formDataImage.append('file', selectedFile);
 
     try {
-      const res = await axios.post('http://localhost:8080/api/tours/upload', formDataImage);
+      const token = localStorage.getItem('token');
+      const config = { 
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        } 
+      };
+      const res = await axios.post('http://localhost:8080/api/tours/upload', formDataImage, config);
       return res.data; // return imageUrl
     } catch (err) {
       console.error('Upload failed:', err);
