@@ -15,28 +15,6 @@
   padding: 0 15px;
 }
 
-.toplinks {
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.headerActions {
-  display: flex;
-  justify-content: flex-end;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.headerActions li {
-  margin-left: 20px;
-}
-
-.headerActions a {
-  color: #333;
-  text-decoration: none;
-}
-
 .row {
   display: flex;
   align-items: center;
@@ -486,4 +464,20 @@
     margin: 0 0 8px 0;
     align-items: flex-start;
   }
+}
+
+.loginButton {
+  color: #a61a19 !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  border: 2px solid #a61a19 !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.loginButton:hover {
+  background-color: #a61a19 !important;
+  color: white !important;
+  border-bottom: none !important;
+  box-shadow: 0 2px 8px rgba(166,26,25,0.2) !important;
 } 

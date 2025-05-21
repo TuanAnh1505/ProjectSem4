@@ -2,93 +2,6 @@ import React, { useEffect } from 'react';
 
 const FooterScripts = () => {
   useEffect(() => {
-    // Preloader
-    setTimeout(() => {
-      const preloader = document.getElementById('preloader');
-      if (preloader) {
-        preloader.style.opacity = '0';
-        setTimeout(() => {
-          preloader.style.display = 'none';
-        }, 500);
-      }
-    }, 500);
-
-    // Newsletter functionality
-    const setCookie = (cname, cvalue, exdays, displayTime) => {
-      const d = new Date();
-      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-      const expires = "expires=" + d.toUTCString();
-      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-      document.cookie = "newsletter_display_time=" + displayTime + ";" + expires + ";path=/";
-    };
-
-    const getCookie = (cname) => {
-      const name = cname + "=";
-      const ca = document.cookie.split(';');
-      for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-          c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-          return c.substring(name.length, c.length);
-        }
-      }
-      return "";
-    };
-
-    const submit_newsletter = getCookie("submit_newsletter");
-    let displayTime = Number(getCookie("newsletter_display_time")) || 0;
-
-    if (displayTime < 2 && (submit_newsletter === "false" || submit_newsletter === "")) {
-      displayTime++;
-      // Newsletter form submission
-      const newsletterForm = document.getElementById('popup-newsletter');
-      if (newsletterForm) {
-        newsletterForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const formData = new FormData(newsletterForm);
-          
-          fetch('//vietnam.us18.list-manage.com/subscribe/post-json?u=353d79bea84aaa546cb236660&id=096b99895b&c=?', {
-            method: 'POST',
-            body: formData
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.result === 'error') {
-              const errorResponse = document.getElementById('error-response');
-              if (errorResponse) {
-                errorResponse.style.display = 'block';
-                errorResponse.innerHTML = data.msg === "0 - Please enter a value" ? 
-                  "Please type your email!" : data.msg;
-              }
-            }
-            if (data.result === 'success') {
-              setCookie("submit_newsletter", true, 365, displayTime);
-              const successResponse = document.getElementById('success-response');
-              const errorResponse = document.getElementById('error-response');
-              if (successResponse) successResponse.style.display = 'block';
-              if (errorResponse) {
-                errorResponse.style.display = 'none';
-                errorResponse.innerHTML = '';
-              }
-              setTimeout(() => {
-                const surveyModal = document.getElementById('surveyModal');
-                if (surveyModal) surveyModal.style.display = 'none';
-              }, 1000);
-            }
-          })
-          .catch(error => {
-            const errorResponse = document.getElementById('error-response');
-            if (errorResponse) {
-              errorResponse.style.display = 'block';
-              errorResponse.innerHTML = error.msg;
-            }
-          });
-        });
-      }
-    }
-
     // Instagram gallery functionality
     const instagramMore = document.getElementById('instagram-static-more');
     if (instagramMore) {
@@ -206,8 +119,6 @@ const FooterScripts = () => {
       {/*[if lte IE 8]*/}
       <script src="/sites/default/files/js/js_VtafjXmRvoUgAzqzYTA3Wrjkx9wcWhjP0G4ZnnqRamA.js" />
       {/*[endif]*/}
-
-      {/* Đã xóa Swiper JS thuần để tránh xung đột với Swiper React */}
     </>
   );
 };

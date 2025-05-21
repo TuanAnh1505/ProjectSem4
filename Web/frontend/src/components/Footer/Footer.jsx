@@ -11,25 +11,9 @@ const Footer = () => {
             <div className={`${styles.colMd4} ${styles.footerWidget} ${styles.footerWidget1}`}>
               <dl>
                 <dt>
-                  <h4>Sign up for our newsletter</h4>
+                  <h4>Stay Connected</h4>
                 </dt>
-                <dd>Receive new travel stories from Vietnam once a month in your inbox.</dd>
-                <dd>
-                  <form 
-                    action="https://vietnam.us18.list-manage.com/subscribe/post?u=353d79bea84aaa546cb236660&amp;id=096b99895b" 
-                    method="post" 
-                    id="mc-embedded-subscribe-form" 
-                    name="form-newsletter" 
-                    className={`${styles.validate} ${styles.formNewsletter}`} 
-                    target="_blank" 
-                    noValidate
-                  >
-                    <p><input type="email" name="EMAIL" placeholder=" Your email " /></p>
-                    <p><button name="sign up" className={styles.bgRedCorners}>Sign Up</button></p>
-                    <span className={`${styles.error} ${styles.response}`} id="mce-error-response" style={{ display: 'none' }}></span>
-                    <span className={`${styles.error} ${styles.response}`} id="mce-success-response" style={{ display: 'none' }}></span>
-                  </form>
-                </dd>
+                <dd>Follow us on social media for the latest travel updates and inspiration from Vietnam.</dd>
               </dl>
             </div>
 

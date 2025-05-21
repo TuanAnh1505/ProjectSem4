@@ -39,10 +39,11 @@ const Login = () => {
       localStorage.setItem("publicId", publicId);
       localStorage.setItem("role", role); 
 
-      if (response.data.role === "ADMIN") {
-        navigate("/admin-dashboard");
+      // Chuyển hướng dựa trên vai trò người dùng
+      if (role === "ADMIN") {
+        navigate("/admin/dashboard");
       } else {
-        navigate("/dashboard");
+        navigate("/");
       }
     } catch (err) {
       setError(err.response?.data?.message || "Có lỗi xảy ra!");
