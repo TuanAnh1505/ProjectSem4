@@ -20,6 +20,8 @@ import TourDetailDashboard from './components/tour/TourDetailDashboard';
 import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
 import BookingConfirmation from './components/booking/BookingConfirmation';
+import TourGuideList from './components/tourguide/TourGuideList';
+import TourGuideForm from './components/tourguide/TourGuideForm';
 import './App.css';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
@@ -93,6 +95,22 @@ const App = () => {
           <Route path="/green-travel" element={
             <Layout>
               <Home />
+            </Layout>
+          } />
+          <Route path="/booking-passenger" element={
+            <Layout>
+              <BookingPassenger />
+            </Layout>
+          } />
+          <Route path="/tour-dashboard/detail/:tourId" element={
+            <Layout>
+              <TourDetailDashboard />
+            </Layout>
+          } />
+
+          <Route path="/booking-confirmation" element={
+            <Layout>
+              <BookingConfirmation />
             </Layout>
           } />
 
@@ -260,6 +278,16 @@ const App = () => {
             <Route
               path="/admin/booking/detail/:bookingId"
               element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+            />
+
+            {/* Tour Guide */}
+            <Route
+              path="/admin/tour-guide"
+              element={<ProtectedRoute element={<TourGuideList />} requiredRole="ADMIN" />}
+            />
+            <Route
+              path="/admin/tour-guide/add"
+              element={<ProtectedRoute element={<TourGuideForm />} requiredRole="ADMIN" />}
             />
         </Routes>
       </div>

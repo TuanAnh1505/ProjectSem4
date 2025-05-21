@@ -22,7 +22,10 @@ const TourGuideList = () => {
 
     const fetchTourGuides = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/api/tour-guides');
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:8080/api/tour-guides', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setTourGuides(response.data);
             setFilteredGuides(response.data);
             setLoading(false);
@@ -85,6 +88,11 @@ const TourGuideList = () => {
 
     return (
         <Container className="mt-4">
+            <div className="d-flex justify-content-end mb-3">
+                <Button variant="success" onClick={() => window.location.href = '/admin/tour-guide/add'}>
+                    + Add Tour Guide
+                </Button>
+            </div>
             <h2 className="text-center mb-4">Our Tour Guides</h2>
             
             {/* Search Filters */}

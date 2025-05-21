@@ -88,6 +88,10 @@ const AdminDashboard = ({ children }) => {
               <span className="menu-icon">🗺️</span>
               <span className="menu-text">{t("itinerary")}</span>
             </li>
+            <li onClick={() => navigate("/admin/tour-guide")}>
+              <span className="menu-icon">🧑‍💼</span>
+              <span className="menu-text">Tour Guide</span>
+            </li>
             <li onClick={() => navigate("/admin/schedules")}>
               <span className="menu-icon">📅</span>
               <span className="menu-text">{t("schedule")}</span>
