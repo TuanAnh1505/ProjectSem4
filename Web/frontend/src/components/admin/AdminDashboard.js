@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../styles/admin/AdminDashboard.css";
-import logo from "../Header/logo.png";
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();
@@ -57,10 +56,12 @@ const AdminDashboard = ({ children }) => {
         {!isAsideCollapsed && (
           <div className="aside-header">
             <div className="logo-container">
-              <img src={logo} alt="Logo" className="logo" />
+              <h1 style={{ color: '#a61a19', fontSize: '20px', fontWeight: 'bold', margin: 0 }}>
+                Vietnam Tourism
+              </h1>
             </div>
             <button className="toggle-button" onClick={toggleAside}>
-            ✕
+              ✕
             </button>
           </div>
         )}

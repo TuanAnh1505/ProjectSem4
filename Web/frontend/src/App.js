@@ -20,7 +20,6 @@ import TourDetailDashboard from './components/tour/TourDetailDashboard';
 import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
 import BookingConfirmation from './components/booking/BookingConfirmation';
-import PlanYourTrip from './components/PlanYourTrip/PlanYourTrip';
 import './App.css';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
@@ -78,7 +77,7 @@ const App = () => {
           } />
           <Route path="/plan" element={
             <Layout>
-              <PlanYourTrip />
+              <Home />
             </Layout>
           } />
           <Route path="/tour-dashboard" element={

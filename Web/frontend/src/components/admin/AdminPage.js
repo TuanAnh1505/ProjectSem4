@@ -21,7 +21,7 @@ import ItineraryIndex from "./itinerary/ItineraryIndex";
 import DetailItinerary from "./itinerary/DetailItinerary";
   import DetailBooking from "./booking/DetailBooking";
 import BookingIndex from "./booking/BookingIndex";
-import AddSchedule from "./schedule/AddSchedule";
+// import AddSchedule from './schedule/AddSchedule';
 import DetailSchedule from "./schedule/DetailSchedule";
 import UpdateSchedule from "./schedule/UpdateSchedule";
 import ScheduleIndex from "./schedule/ScheduleIndex";
@@ -87,7 +87,7 @@ const AdminPage = () => {
 
     if (pathSegments.includes('schedule') || pathSegments.includes('schedules')) {
       if (pathSegments.includes('add')) {
-        return <AddSchedule />;
+        // return <AddSchedule />;
       }
       if (pathSegments.includes('detail')) {
         return <DetailSchedule />;

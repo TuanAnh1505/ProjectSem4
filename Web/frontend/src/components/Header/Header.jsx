@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
-import logo from './logo.png'; // chỉnh path đúng thư mục chứa ảnh
 
 const Header = () => {
   const navigate = useNavigate();
@@ -24,8 +23,8 @@ const Header = () => {
         </div>
         <div className={styles.row}>
           <h1 className={styles.logo}>
-            <Link to="/">
-              <img src={logo} alt="Vietnam Tourism Logo" style={{width: '120px', height: 'auto'}}/>
+            <Link to="/" style={{ color: '#a61a19', textDecoration: 'none', fontSize: '24px', fontWeight: 'bold' }}>
+              Vietnam Tourism
             </Link>
           </h1>
           <nav className={styles.mainNav}>
