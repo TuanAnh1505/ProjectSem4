@@ -19,13 +19,13 @@ import AddItinerary from "./itinerary/AddItinerary";
 import UpdateItinerary from "./itinerary/UpdateItinerary";
 import ItineraryIndex from "./itinerary/ItineraryIndex";
 import DetailItinerary from "./itinerary/DetailItinerary";
-  import DetailBooking from "./booking/DetailBooking";
+import DetailBooking from "./booking/DetailBooking";
 import BookingIndex from "./booking/BookingIndex";
-// import AddSchedule from './schedule/AddSchedule';
+import AddSchedule from './schedule/AddSchedule';
 import DetailSchedule from "./schedule/DetailSchedule";
 import UpdateSchedule from "./schedule/UpdateSchedule";
 import ScheduleIndex from "./schedule/ScheduleIndex";
-
+import AboutAdmin from "./AboutAdmin";
 
 const AdminPage = () => {
   const location = useLocation();
@@ -87,7 +87,7 @@ const AdminPage = () => {
 
     if (pathSegments.includes('schedule') || pathSegments.includes('schedules')) {
       if (pathSegments.includes('add')) {
-        // return <AddSchedule />;
+        return <AddSchedule />;
       }
       if (pathSegments.includes('detail')) {
         return <DetailSchedule />;
@@ -107,6 +107,10 @@ const AdminPage = () => {
 
     if (pathSegments.includes('user')) {
       return <UserIndex />;
+    }
+
+    if (pathSegments.includes('about') || pathSegments.includes('admin-about')) {
+      return <AboutAdmin />;
     }
 
     return <AdminDashboard />;

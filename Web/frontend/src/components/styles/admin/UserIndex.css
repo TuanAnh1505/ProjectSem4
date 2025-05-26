@@ -1,251 +1,297 @@
-Container chính
-.container-fluid {
-  padding: 20px;
+/* UserIndex CSS - tách biệt hoàn toàn, hiện đại, responsive */
+.userindex-main-container {
+  padding: 24px 12px;
+  background: #f8f9fb;
+  min-height: 100vh;
 }
-
-.sidebar-open {
-
-  transition: margin 0.3s ease-in-out;
-}
-
-/* Tiêu đề */
-h1 {
+.userindex-title {
   font-size: 2rem;
   font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
+  color: #4b4b6b;
+  margin-bottom: 24px;
   text-align: center;
 }
-
-/* Bảng */
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
-} 
-
-/* Tiêu đề bảng */
-.user-table thead {
-  background-color: #f8f9fa;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.user-table th {
-  padding: 15px;
-  text-align: left;
-  font-size: 0.9rem;
-  color: #555;
-  border-bottom: 2px solid #dee2e6;
-  white-space: nowrap;
-}
-
-/* Nội dung bảng */
-.user-table td {
-  padding:  15px;
-  text-align: left;
-  font-size: 0.95rem;
-  color: #333;
-  border-bottom: 1px solid #dee2e6;
-  vertical-align: middle;
-}
-
-/* Hiệu ứng hover */
-.user-table tbody tr:hover {
-  background-color: #f1f3f5;
-}
-
-/* Cột trạng thái */
-.badge {
-  font-size: 0.85rem;
-  padding: 6px 12px;
-  border-radius: 12px;
-}
-
-.badge.bg-success {
-  background-color: #28a745;
-  color: #fff;
-}
-
-.badge.bg-secondary {
-  background-color: #6c757d;
-  color: #fff;
-}
-
-/* Nút hành động */
-.btn-sm {
-  padding: 5px 10px;
-  font-size: 0.85rem;
-  border-radius: 4px;
-  transition: background-color 0.2s, transform 0.2s;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  border: none;
-  color: #fff;
-}
-
-.btn-danger:hover {
-  background-color: #c82333;
-  transform: scale(1.05);
-}
-
-/* Icon trong nút */
-.fas.fa-trash {
-  font-size: 0.9rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .user-table {
-    font-size: 0.85rem;
-  }
-
-  .user-table th,
-  .user-table td {
-    padding: 10px;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
-
-  .btn-sm {
-    padding: 4px 8px;
-    font-size: 0.8rem;
-  }
-}
-
-/* Table scroll */
-.table-responsive {
+.userindex-table-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-
-
-
-
-
-/* Pagination container */
-.pagination-container {
-  margin-top: 20px;
+.userindex-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(123,110,246,0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 18px;
 }
-
-/* Pagination button styling */
-.pagination-button {
-  background-color: #f8f9fa; /* Light gray background */
-  border: 1px solid #dee2e6; /* Border color */
-  color: #007bff; /* Bootstrap primary color */
-  padding: 5px 10px;
-  margin: 0 5px;
-  border-radius: 4px;
+.userindex-table-light th {
+  background: #f3f4f8;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #7b7b93;
+  font-size: 0.95rem;
+  padding: 14px 10px;
+  border-bottom: 2px solid #e6e6e6;
+  white-space: nowrap;
+  text-align: left;
+}
+.userindex-table td {
+  padding: 14px 10px;
+  color: #333;
+  font-size: 1rem;
+  border-bottom: 1px solid #ececec;
+  vertical-align: middle;
+}
+.userindex-table tbody tr:hover {
+  background: #f6f7fa;
+}
+.userindex-badge {
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+.userindex-badge-success {
+  background: #4fd18b;
+  color: #fff;
+}
+.userindex-badge-secondary {
+  background: #b0b3b8;
+  color: #fff;
+}
+.userindex-btn {
+  padding: 6px 12px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: none;
+  transition: background 0.2s, transform 0.2s;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  background: #f3f3f3;
+  color: #4b4b6b;
 }
-
-.pagination-button:hover {
-  background-color: #007bff; /* Bootstrap primary color */
-  color: #fff; /* White text */
+.userindex-btn-sm {
+  padding: 5px 10px;
+  font-size: 0.85rem;
 }
-
-.pagination-button.active {
-  background-color: #007bff; /* Active button background */
-  color: #fff; /* Active button text */
-  border-color: #007bff;
+.userindex-btn-danger {
+  background: #fff;
+  color: #dc3545;
 }
-
-
-/* Container chính */
-.main-container {
-  padding: 20px;
+.userindex-btn-danger:hover {
+  background: #b91c1c;
+  transform: scale(1.07);
 }
-
-/* Bộ lọc */
-.filter-container {
+.userindex-btn-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #888;
+  float: right;
+  margin-left: 10px;
+  cursor: pointer;
+}
+.userindex-alert {
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(123,110,246,0.06);
+}
+.userindex-alert-success {
+  background: #e6f9ed;
+  color: #22c55e;
+  border: 1px solid #b6e7c9;
+}
+.userindex-alert-danger {
+  background: #fff0f0;
+  color: #dc3545;
+  border: 1px solid #f5c2c7;
+}
+.userindex-alert-warning {
+  background: #fffbe6;
+  color: #b99100;
+  border: 1px solid #ffe066;
+}
+.userindex-filter-container {
   display: flex;
-  justify-content: flex-end; /* Căn phải */
-  margin-bottom: 20px;
+  justify-content: flex-end;
+  margin-bottom: 18px;
 }
-
-.filter-wrapper {
+.userindex-filter-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: flex-end; /* Căn phải các phần tử con */
+  align-items: flex-end;
 }
-
-.filter-content {
+.userindex-filter-content {
   display: flex;
   align-items: center;
-  gap: 15px; /* Khoảng cách giữa select và text */
+  gap: 16px;
 }
-
-.filter-select {
+.userindex-filter-select {
   width: 150px;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ced4da;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 1rem;
+  box-shadow: 0 1px 4px rgba(123,110,246,0.04);
+  transition: border 0.2s, box-shadow 0.2s;
 }
-
-.filter-select:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.userindex-filter-select:focus {
+  border-color: #7b6ef6;
+  box-shadow: 0 0 0 2px #e0e7ff;
   outline: none;
 }
-
-.total-users {
-  font-size: 0.9rem;
+.userindex-total-users {
+  font-size: 0.98rem;
   font-weight: 500;
-  color: #333;
-  background-color: #f1f3f5;
-  padding: 6px 12px;
-  border-radius: 5px;
+  color: #444;
+  background: #f1f3f5;
+  padding: 7px 16px;
+  border-radius: 6px;
 }
-
-/* Bảng */
-.user-table {
-  background-color: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.userindex-pagination-container {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
 }
-
-.table-light {
-  background-color: #f8f9fa;
-}
-
-.badge {
-  font-size: 0.85rem;
-  padding: 5px 10px;
-}
-
-/* Phân trang */
-.pagination-container {
-  margin-top: 20px;
-}
-
-.pagination-button {
-  margin: 0 5px;
-  padding: 8px 12px;
-  border: 1px solid #dee2e6;
-  background-color: #fff;
-  border-radius: 5px;
+.userindex-pagination-button {
+  background: #f3f4f8;
+  border: 1px solid #e6e6e6;
+  color: #7b6ef6;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
-
-.pagination-button:hover {
-  background-color: #a3a3a3;
-}
-
-.pagination-button.active {
-  background-color: #878889;
+.userindex-pagination-button:hover {
+  background: #7b6ef6;
   color: #fff;
-  border-color: #878889;
+}
+.userindex-pagination-button.active {
+  background: #7b6ef6;
+  color: #fff;
+  border-color: #7b6ef6;
+}
+@media (max-width: 900px) {
+  .userindex-main-container {
+    padding: 10px 2px;
+  }
+  .userindex-title {
+    font-size: 1.3rem;
+  }
+  .userindex-table th, .userindex-table td {
+    padding: 8px 4px;
+    font-size: 0.92rem;
+  }
+  .userindex-filter-select {
+    width: 110px;
+    font-size: 0.95rem;
+  }
+  .userindex-total-users {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+  }
+}
+@media (max-width: 600px) {
+  .userindex-title {
+    font-size: 1.1rem;
+  }
+  .userindex-table th, .userindex-table td {
+    font-size: 0.85rem;
+    padding: 6px 2px;
+  }
+  .userindex-filter-content {
+    gap: 8px;
+  }
+  .userindex-pagination-button {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+  }
+}
+.destination-alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.12);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.destination-alert-dialog {
+  background: #fff;
+  padding: 36px 32px 28px 32px;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.destination-alert-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 12px;
+}
+.destination-alert-icon {
+  color: #ff3b30;
+  font-size: 56px;
+  margin-bottom: 0;
+}
+.destination-alert-title {
+  color: #222;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+.destination-alert-message {
+  color: #666;
+  font-size: 1.08rem;
+  margin: 0 0 28px 0;
+  line-height: 1.6;
+  text-align: center;
+}
+.destination-alert-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+}
+.destination-alert-btn {
+  padding: 10px 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background 0.2s, color 0.2s;
+  min-width: 90px;
+}
+.destination-alert-btn-cancel {
+  background: #f5f6fa;
+  color: #222;
+  border: 1px solid #e0e0e0;
+}
+.destination-alert-btn-cancel:hover {
+  background: #e9ecef;
+}
+.destination-alert-btn-delete {
+  background: #ff3b30;
+  color: #fff;
+}
+.destination-alert-btn-delete:hover {
+  background: #d32f2f;
 }

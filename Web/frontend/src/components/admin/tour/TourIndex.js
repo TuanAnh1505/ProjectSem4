@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import {FaPlus, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
 import '../../styles/tour/TourIndex.css';
 
 const MAX_RETRIES = 3;
@@ -11,6 +12,7 @@ export default function TourIndex() {
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteAlert, setDeleteAlert] = useState({ show: false, tourId: null, tourName: '' });
 
   const fetchData = useCallback(async () => {
     const fetchWithRetry = async (url, config, attempt = 1) => {
@@ -55,15 +57,22 @@ export default function TourIndex() {
     return status ? status.statusName : 'N/A';
   };
 
-  const handleDelete = async (tourId) => {
-    if (!window.confirm('Are you sure you want to delete this tour?')) return;
+  const showDeleteAlert = (tourId, tourName) => {
+    setDeleteAlert({ show: true, tourId, tourName });
+  };
 
+  const hideDeleteAlert = () => {
+    setDeleteAlert({ show: false, tourId: null, tourName: '' });
+  };
+
+  const handleDelete = async () => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      await axios.delete(`http://localhost:8080/api/tours/${tourId}`, config);
-      setTours(tours.filter(tour => tour.tourId !== tourId));
+      await axios.delete(`http://localhost:8080/api/tours/${deleteAlert.tourId}`, config);
+      setTours(tours.filter(tour => tour.tourId !== deleteAlert.tourId));
+      hideDeleteAlert();
     } catch (error) {
       console.error('Delete error:', error);
       alert(error.response?.data?.message || 'Failed to delete tour');
@@ -74,7 +83,7 @@ export default function TourIndex() {
 
   return (
     <div className="tour-index-container">
-      <h1>🧭 Admin - Manage Tours</h1>
+      {/* <h1>🧭 Admin - Manage Tours</h1> */}
 
       {error && (
         <div className="error-box">
@@ -84,7 +93,12 @@ export default function TourIndex() {
       )}
 
       <div className="action-bar">
-        <Link to="/admin/tour/add" className="add-button"> Add New Tour</Link>
+        <div className="header">
+          <h2>Quản lý tour</h2>
+          <Link to="/admin/tour/add" className="add-button"> <FaPlus /> Tạo tour</Link>
+        </div>
+        
+        
       </div>
 
       {tours.length > 0 ? (
@@ -115,16 +129,16 @@ export default function TourIndex() {
                   )}
                 </td>
                 <td>{tour.name}</td>
-                <td>${tour.price}</td>
+                <td>{tour.price ? tour.price.toLocaleString() + ' VNĐ' : 'N/A'}</td>
                 <td>{getStatusName(tour.statusId)}</td>
                 <td>
                   <Link to={`/admin/tour/detail/${tour.tourId}`} className="action-link">🔍</Link>
                   <Link to={`/admin/tour/edit/${tour.tourId}`} className="action-link">✏️</Link>
                   <button 
                     className="delete-button"
-                    onClick={() => handleDelete(tour.tourId)}
+                    onClick={() => showDeleteAlert(tour.tourId, tour.name)}
                   >
-                    🗑️
+                    <FaTrash />
                   </button>
                 </td>
               </tr>
@@ -132,6 +146,33 @@ export default function TourIndex() {
           </tbody>
         </table>
       ) : !error && <p className="no-tours">No tours found.</p>}
+
+      {deleteAlert.show && (
+        <div className="tour-alert-overlay">
+          <div className="tour-alert-dialog">
+            <FaExclamationTriangle className="tour-alert-icon" />
+            <h2 className="tour-alert-title">Xác nhận xóa</h2>
+            <p className="tour-alert-message">
+              Bạn có chắc chắn muốn xóa tour "{deleteAlert.tourName}"? 
+              Hành động này không thể hoàn tác.
+            </p>
+            <div className="tour-alert-buttons">
+              <button 
+                className="tour-alert-btn tour-alert-btn-cancel"
+                onClick={hideDeleteAlert}
+              >
+                Hủy
+              </button>
+              <button 
+                className="tour-alert-btn tour-alert-btn-delete"
+                onClick={handleDelete}
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

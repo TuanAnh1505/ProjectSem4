@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useTranslation } from "react-i18next";
 import '../../styles/destination/DetailDestination.css';
 
 // Reuse MediaPreview and MediaModal components from DestinationIndex
@@ -67,7 +66,7 @@ const MediaModal = ({ media, onClose }) => {
 };
 
 const DetailDestination = () => {
-    const { t } = useTranslation();
+   
     const [destination, setDestination] = useState(null);
     const [selectedMedia, setSelectedMedia] = useState(null);
     const [error, setError] = useState(null);
@@ -130,7 +129,7 @@ const DetailDestination = () => {
     return (
         <div className="container">
             <Link to="/admin/destinations" className="back-button">
-                {t("back")}
+                Quay lại
             </Link>
             
             <div className="destination-detail">
@@ -159,28 +158,28 @@ const DetailDestination = () => {
 
                 <div className="info-grid">
                     <div className="info-item">
-                        <label>{t("name")}:</label>
+                        <label>Name:</label>
                         <span>{destination.name}</span>
                     </div>
                     <div className="info-item">
-                        <label>{t("category")}:</label>
+                        <label>Category:</label>
                         <span>{destination.category}</span>
                     </div>
                 </div>
 
                 <div className="info-grid">
                     <div className="info-item">
-                        <label>{t("location")}:</label>
+                        <label>Location:</label>
                         <span>{destination.location}</span>
                     </div>
                     <div className="info-item">
-                        <label>{t("rating")}:</label>
+                        <label>Rating:</label>
                         <span>{destination.rating}</span>
                     </div>
                 </div>
 
                 <div className="info-item-description">
-                    <label>{t("description")}:</label>
+                    <label>Description:</label>
                     <span>{destination.description}</span>
                 </div>
                 

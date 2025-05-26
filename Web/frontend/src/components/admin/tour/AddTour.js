@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import '../../styles/tour/AddTour.css';
+// FontAwesome icons
+import { FaLink, FaDollarSign, FaCalendarAlt, FaUsers, FaCamera, FaCheckCircle } from 'react-icons/fa';
 
 export default function AddTour() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '', description: '', price: '', duration: '', maxParticipants: '', statusId: '', imageUrl: '', destinationIds: [], eventIds: []
+    name: '',
+    description: '',
+    price: '',
+    duration: '',
+    maxParticipants: '',
+    statusId: '',
+    imageUrl: '',
+    destinationIds: [],
+    eventIds: []
   });
   const [destinations, setDestinations] = useState([]);
   const [events, setEvents] = useState([]);
@@ -12,6 +24,8 @@ export default function AddTour() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,12 +59,27 @@ export default function AddTour() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleMultiSelect = (name, values) => {
-    setFormData(prev => ({ ...prev, [name]: values }));
+  const handleCheckboxCard = (name, value) => {
+    setFormData(prev => {
+      const arr = prev[name];
+      if (arr.includes(value)) {
+        return { ...prev, [name]: arr.filter(v => v !== value) };
+      } else {
+        return { ...prev, [name]: [...arr, value] };
+      }
+    });
   };
 
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const uploadImage = async (file) => {
@@ -59,20 +88,20 @@ export default function AddTour() {
     formData.append('file', file);
 
     try {
-        const response = await axios.post(
-            'http://localhost:8080/api/tours/upload',
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${token}`
-                }
-            }
-        );
-        return response.data;
+      const response = await axios.post(
+        'http://localhost:8080/api/tours/upload',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      return response.data;
     } catch (error) {
-        console.error('Upload image failed:', error);
-        throw new Error(error.response?.data || 'Upload image failed');
+      console.error('Upload image failed:', error);
+      throw new Error(error.response?.data || 'Upload image failed');
     }
   };
 
@@ -96,7 +125,7 @@ export default function AddTour() {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       await axios.post('http://localhost:8080/api/tours', submitData, config);
-      alert('Tour created successfully');
+      setShowSuccess(true);
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to create tour');
       console.error('Create tour error:', error);
@@ -105,53 +134,236 @@ export default function AddTour() {
     }
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  const handleSuccessClose = () => {
+    setShowSuccess(false);
+    navigate('/admin/tour');
+  };
+
+  if (loading) return <div className="addtour-loading">Loading...</div>;
 
   return (
-    <div className="add-tour-container">
-      <h2>Add New Tour</h2>
-      {error && <div className="error-box">{error}</div>}
-      <form onSubmit={handleSubmit} className="tour-form">
-        <div className="form-row">
-          <div className="form-col">
-            <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
-            <input name="price" type="number" placeholder="Price" value={formData.price} onChange={handleChange} required />
-          </div>
-          <div className="form-col">
-            <input name="duration" type="number" placeholder="Duration (days)" value={formData.duration} onChange={handleChange} />
-            <input name="maxParticipants" type="number" placeholder="Max Participants" value={formData.maxParticipants} onChange={handleChange} />
+    <div className="addtour-container">
+      <div className="addtour-header">
+        <h2 className="addtour-title">Create New Tour</h2>
+        <p className="addtour-subtitle">Fill in the details to create a new tour package</p>
+      </div>
+
+      {error && (
+        <div className="addtour-error-box">
+          <span className="addtour-error-icon">⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="addtour-form">
+        {/* Card 1: Basic Info */}
+        <div className="addtour-card">
+          <div className="addtour-card-title">Basic Information</div>
+          <div className="addtour-grid">
+            <div className="addtour-group">
+              <label htmlFor="name" className="addtour-label">Tour Name</label>
+              <div className="addtour-input-wrapper">
+                <span className="addtour-input-icon"><FaLink /></span>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  className="addtour-input"
+                  placeholder="Enter tour name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+            <div className="addtour-group">
+              <label htmlFor="price" className="addtour-label">Price</label>
+              <div className="addtour-input-wrapper">
+                <span className="addtour-input-icon"><FaDollarSign /></span>
+                <input
+                  id="price"
+                  name="price"
+                  type="number"
+                  className="addtour-input"
+                  placeholder="Enter price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  required
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+            <div className="addtour-group">
+              <label htmlFor="duration" className="addtour-label">Duration</label>
+              <div className="addtour-input-wrapper">
+                <span className="addtour-input-icon"><FaCalendarAlt /></span>
+                <input
+                  id="duration"
+                  name="duration"
+                  type="number"
+                  className="addtour-input"
+                  placeholder="Enter duration"
+                  value={formData.duration}
+                  onChange={handleChange}
+                  required
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+            <div className="addtour-group">
+              <label htmlFor="maxParticipants" className="addtour-label">Max Participants</label>
+              <div className="addtour-input-wrapper">
+                <span className="addtour-input-icon"><FaUsers /></span>
+                <input
+                  id="maxParticipants"
+                  name="maxParticipants"
+                  type="number"
+                  className="addtour-input"
+                  placeholder="Enter max participants"
+                  value={formData.maxParticipants}
+                  onChange={handleChange}
+                  required
+                  autoComplete="off"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} />
+        {/* Card 2: Description */}
+        <div className="addtour-card">
+          <div className="addtour-card-title">Tour Details</div>
+          <div className="addtour-group">
+            <label htmlFor="description" className="addtour-label">Description</label>
+            <div className="addtour-textarea-wrapper">
+              <textarea
+                id="description"
+                name="description"
+                className="addtour-textarea"
+                placeholder="Enter tour description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+        </div>
 
-        <label>Status:</label>
-        <select name="statusId" value={formData.statusId} onChange={handleChange} required>
-          <option value="">-- Select Status --</option>
-          {statuses.map(s => (
-            <option key={s.tourStatusId} value={s.tourStatusId}>{s.statusName}</option>
-          ))}
-        </select>
+        {/* Card 3: Settings */}
+        <div className="addtour-card">
+          <div className="addtour-card-title">Tour Settings</div>
+          <div className="addtour-group">
+            <label htmlFor="statusId" className="addtour-label">Status</label>
+            <div className="addtour-select-wrapper">
+              <select
+                id="statusId"
+                name="statusId"
+                className="addtour-select"
+                value={formData.statusId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Status</option>
+                {statuses.map(s => (
+                  <option key={s.tourStatusId} value={s.tourStatusId}>
+                    {s.statusName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="addtour-checkbox-grid">
+            <div className="addtour-checkbox-col">
+              <div className="addtour-checkbox-title">Destinations</div>
+              {destinations.map(d => (
+                <label key={d.destinationId} className="addtour-checkbox-card">
+                  <input
+                    type="checkbox"
+                    checked={formData.destinationIds.includes(d.destinationId)}
+                    onChange={() => handleCheckboxCard('destinationIds', d.destinationId)}
+                  />
+                  <span className="addtour-checkbox-custom"></span>
+                  <span className="addtour-checkbox-label">{d.name}</span>
+                </label>
+              ))}
+            </div>
+            <div className="addtour-checkbox-col">
+              <div className="addtour-checkbox-title">Places</div>
+              {events.map(ev => (
+                <label key={ev.eventId} className="addtour-checkbox-card">
+                  <input
+                    type="checkbox"
+                    checked={formData.eventIds.includes(ev.eventId)}
+                    onChange={() => handleCheckboxCard('eventIds', ev.eventId)}
+                  />
+                  <span className="addtour-checkbox-custom"></span>
+                  <span className="addtour-checkbox-label">{ev.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
 
-        <label>Destinations:</label>
-        <select multiple value={formData.destinationIds} onChange={e => handleMultiSelect('destinationIds', Array.from(e.target.selectedOptions, o => parseInt(o.value)))}>
-          {destinations.map(d => (
-            <option key={d.destinationId} value={d.destinationId}>{d.name}</option>
-          ))}
-        </select>
+        {/* Card 4: Image Upload */}
+        <div className="addtour-card">
+          <div className="addtour-card-title">Tour Image</div>
+          <div className="addtour-group">
+            <div className="addtour-upload">
+              <label className="addtour-upload-area">
+                <input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  required
+                />
+                <div className="addtour-upload-placeholder">
+                  <span className="addtour-upload-icon"><FaCamera /></span>
+                  <p>Click to upload tour image</p>
+                  <p className="addtour-upload-hint">PNG, JPG up to 5MB</p>
+                </div>
+              </label>
+              {previewUrl && (
+                <div className="addtour-preview">
+                  <img src={previewUrl} alt="Preview" />
+                  <button type="button" className="addtour-remove-image" onClick={() => {
+                    setSelectedFile(null);
+                    setPreviewUrl(null);
+                  }}>
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-        <label>Events:</label>
-        <select multiple value={formData.eventIds} onChange={e => handleMultiSelect('eventIds', Array.from(e.target.selectedOptions, o => parseInt(o.value)))}>
-          {events.map(ev => (
-            <option key={ev.eventId} value={ev.eventId}>{ev.name}</option>
-          ))}
-        </select>
-
-        <label>Image:</label>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-
-        <button type="submit" className="submit-button-add-tour">Create Tour</button>
+        {/* Card 5: Submit */}
+        <div className="addtour-actions">
+          <button type="submit" className="addtour-submit-btn">
+            Create Tour
+          </button>
+        </div>
       </form>
+
+      {showSuccess && (
+        <div className="tour-success-overlay">
+          <div className="tour-success-dialog">
+            <FaCheckCircle className="tour-success-icon" />
+            <h2 className="tour-success-title">Tạo tour thành công!</h2>
+            <p className="tour-success-message">
+              Tour mới đã được tạo thành công. Bạn có thể xem danh sách tour hoặc tiếp tục tạo tour mới.
+            </p>
+            <button 
+              className="tour-success-button"
+              onClick={handleSuccessClose}
+            >
+              Xem danh sách tour
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

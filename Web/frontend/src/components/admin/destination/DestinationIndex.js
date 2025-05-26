@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useTranslation } from "react-i18next";
+import {FaPlus, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
 import '../../styles/destination/DestinationIndex.css';
 
 const MediaPreview = ({ filePath, onClick }) => {
@@ -100,12 +100,11 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 const DestinationIndex = () => {
-
-    const { t } = useTranslation();
     const [destinations, setDestinations] = useState([]);
     const [selectedMedia, setSelectedMedia] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [deleteAlert, setDeleteAlert] = useState({ show: false, destinationId: null, destinationName: '' });
 
     useEffect(() => {
         loadDestinations();
@@ -125,19 +124,26 @@ const DestinationIndex = () => {
         }
     };
 
-    const deleteDestination = async (id) => {
-        if (window.confirm('Are you sure you want to delete this destination?')) {
-            try {
-                const token = localStorage.getItem('token');
-                await axios.delete(`http://localhost:8080/api/destinations/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                loadDestinations();
-            } catch (error) {
-                console.error('Error deleting destination:', error);
-            }
+    const showDeleteAlert = (destinationId, destinationName) => {
+        setDeleteAlert({ show: true, destinationId, destinationName });
+    };
+
+    const hideDeleteAlert = () => {
+        setDeleteAlert({ show: false, destinationId: null, destinationName: '' });
+    };
+
+    const deleteDestination = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`http://localhost:8080/api/destinations/delete/${deleteAlert.destinationId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            loadDestinations();
+            hideDeleteAlert();
+        } catch (error) {
+            console.error('Error deleting destination:', error);
         }
     };
 
@@ -152,24 +158,24 @@ const DestinationIndex = () => {
     };
 
     return (
-        <div className="container">
+        <div className="destination-index-container">
             <div className="header">
-                <h2>{t("destination_title")}</h2>
+                <h2>Điểm đến</h2>
                 <Link to="/admin/destination/add" className="create-btn">
-                    {t("create")}
+                    <FaPlus /> Thêm điểm đến
                 </Link>
             </div>
-            <table className="table">
-                <thead className="table-dark">
+            <table className="destination-table">
+                <thead>
                     <tr>
                         <th>ID</th>
-                        <th>{t("file_paths")}</th>
-                        <th>{t("name")}</th>
-                        <th>{t("category")}</th>
-                        <th>{t("destinations")}</th>
-                        <th>{t("location")}</th>
-                        <th>{t("rating")}</th>
-                        <th>{t("actions")}</th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Location</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -193,26 +199,30 @@ const DestinationIndex = () => {
                             </td>
                             <td>{destination.name}</td>
                             <td>{destination.category}</td>
-                            <td>{destination.description}</td>
+                            <td class="truncate">{destination.description}</td>
                             <td>{destination.location}</td>
                             <td>{destination.rating}</td>
                             <td>
-                                <Link
-                                    to={`/admin/destination/detail/${destination.destinationId}`}
-                                    className="action-link"
-                                >
-                                    🔍  
-                                </Link>
-                                <Link
-                                    to={`/admin/destination/edit/${destination.destinationId}`}
-                                    className="action-link"
-                                >
-                                  ✏️
-                                </Link>
-                                <button className="delete-button"  onClick={() => deleteDestination(destination.destinationId)}
+                                <div className="action-group">
+                                    <Link
+                                        to={`/admin/destination/detail/${destination.destinationId}`}
+                                        className="action-link"
                                     >
-                                    🗑️
-                                </button>
+                                        🔍  
+                                    </Link>
+                                    <Link
+                                        to={`/admin/destination/edit/${destination.destinationId}`}
+                                        className="action-link"
+                                    >
+                                        ✏️
+                                    </Link>
+                                    <button 
+                                        className="delete-button"
+                                        onClick={() => showDeleteAlert(destination.destinationId, destination.name)}
+                                    >
+                                        <FaTrash />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}
@@ -230,6 +240,34 @@ const DestinationIndex = () => {
                     media={selectedMedia}
                     onClose={() => setSelectedMedia(null)}
                 />
+            )}
+
+            {deleteAlert.show && (
+                <div className="destination-alert-overlay">
+                    <div className="destination-alert-dialog">
+                        <div className="destination-alert-icon-wrapper">
+                            <FaExclamationTriangle className="destination-alert-icon" />
+                        </div>
+                        <h2 className="destination-alert-title">Xóa Điểm Đến</h2>
+                        <p className="destination-alert-message">
+                            Bạn có chắc chắn muốn xóa điểm đến "{deleteAlert.destinationName}"? Hành động này không thể hoàn tác.
+                        </p>
+                        <div className="destination-alert-buttons">
+                            <button 
+                                className="destination-alert-btn destination-alert-btn-cancel"
+                                onClick={hideDeleteAlert}
+                            >
+                                Hủy
+                            </button>
+                            <button 
+                                className="destination-alert-btn destination-alert-btn-delete"
+                                onClick={deleteDestination}
+                            >
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

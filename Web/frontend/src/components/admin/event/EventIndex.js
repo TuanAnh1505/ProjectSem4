@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useTranslation } from "react-i18next";
+import { FaPlus } from 'react-icons/fa';
 import '../../styles/event/EventIndex.css';
 import '../../styles/destination/DestinationIndex.css';
 
@@ -101,7 +101,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 const EventIndex = () => {
-    const { t } = useTranslation();
+    
     const [events, setEvents] = useState([]);
     const [selectedMedia, setSelectedMedia] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -151,7 +151,7 @@ const EventIndex = () => {
     };
 
     const deleteEvent = async (eventId) => {
-        if (window.confirm(t('confirm_delete_event'))) {
+        if (window.confirm( "Bạn có chắc chắn muốn xóa sự kiện này?")) {
             try {
                 const token = localStorage.getItem('token');
                 await axios.delete(`http://localhost:8080/api/events/${eventId}`, {
@@ -218,9 +218,9 @@ const EventIndex = () => {
     return (
         <div className="container">
             <div className="header">
-                <h2>{t("event_management")}</h2>
+                <h2>Quản lý sự kiện</h2>
                 <Link to="/admin/event/add" className="create-btn">
-                    {t("create")}
+                   <FaPlus /> Tạo sự kiện
                 </Link>
             </div>
 
@@ -229,36 +229,36 @@ const EventIndex = () => {
                     // Basic filters
                     <>
                         <div className="filter-group">
-                            <label>{t("filter_by_month")}:</label>
+                            <label>Lọc theo tháng:</label>
                             <select 
                                 value={filterMonth}
                                 onChange={(e) => setFilterMonth(e.target.value)}
                                 className="form-select"
                             >
-                                <option value="all">{t("all_months")}</option>
-                                <option value="0">{t("january")}</option>
-                                <option value="1">{t("february")}</option>
-                                <option value="2">{t("march")}</option>
-                                <option value="3">{t("april")}</option>
-                                <option value="4">{t("may")}</option>
-                                <option value="5">{t("june")}</option>
-                                <option value="6">{t("july")}</option>
-                                <option value="7">{t("august")}</option>
-                                <option value="8">{t("september")}</option>
-                                <option value="9">{t("october")}</option>
-                                <option value="10">{t("november")}</option>
-                                <option value="11">{t("december")}</option>
+                                <option value="all">Tất cả</option>
+                                <option value="0">Tháng 1</option>
+                                <option value="1">Tháng 2</option>
+                                <option value="2">Tháng 3</option>
+                                <option value="3">Tháng 4</option>
+                                <option value="4">Tháng 5</option>
+                                <option value="5">Tháng 6</option>
+                                <option value="6">Tháng 7</option>
+                                <option value="7">Tháng 8</option>
+                                <option value="8">Tháng 9</option>
+                                <option value="9">Tháng 10</option>
+                                <option value="10">Tháng 11</option>
+                                <option value="11">Tháng 12</option>
                             </select>
                         </div>
 
                         <div className="filter-group">
-                            <label>{t("filter_by_status")}:</label>
+                            <label>Lọc theo trạng thái:</label>
                             <select 
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
                                 className="form-select"
                             >
-                                <option value="all">{t("all_statuses")}</option>
+                                <option value="all">Tất cả</option>
                                 {statusOptions.map(status => (
                                     <option key={status.eventStatusId} value={status.statusName}>
                                         {status.statusName}
@@ -270,11 +270,11 @@ const EventIndex = () => {
                 ) : (
                     // Price filter
                     <div className="filter-group price-filter">
-                        <label>{t("filter_by_price")}:</label>
+                        <label>Lọc theo giá:</label>
                         <div className="price-inputs">
                             <input
                                 type="number"
-                                placeholder={t("min_price")}
+                                placeholder="Giá tối thiểu"
                                 value={filterPrice.min}
                                 onChange={(e) => setFilterPrice(prev => ({ ...prev, min: e.target.value }))}
                                 className="form-control"
@@ -282,7 +282,7 @@ const EventIndex = () => {
                             <span>-</span>
                             <input
                                 type="number"
-                                placeholder={t("max_price")}
+                                placeholder="Giá tối đa"
                                 value={filterPrice.max}
                                 onChange={(e) => setFilterPrice(prev => ({ ...prev, max: e.target.value }))}
                                 className="form-control"
@@ -294,29 +294,29 @@ const EventIndex = () => {
                 <button 
                     className="toggle-filter-btn"
                     onClick={toggleFilters}
-                    title={showAdvancedFilter ? t("show_basic_filters") : t("show_price_filter")}
+                    title={showAdvancedFilter ? "Hiển thị bộ lọc cơ bản" : "Hiển thị bộ lọc giá"}
                 >
                     {showAdvancedFilter ? '×' : '+'}
                 </button>
 
                 <div className="total-count">
-                    {t("total_events")}: {filteredEvents.length}
+                    Tổng số sự kiện: {filteredEvents.length}
                 </div>
             </div>
 
             <table className="table">
                 <thead className="table-dark">
                     <tr>
-                        <th>{t("id")}</th>
-                        <th>{t("file_paths")}</th>
-                        <th>{t("name")}</th>
-                        <th>{t("description")}</th>
-                        <th>{t("ticket_price")}</th>
-                        <th>{t("location")}</th>
-                        <th>{t("status")}</th>
-                        <th>{t("start_date")}</th>
-                        <th>{t("end_date")}</th>
-                        <th>{t("actions")}</th>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Event Name</th>
+                        <th>Description</th>
+                        {/* <th>{t("ticket_price")}</th> */}
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -340,7 +340,7 @@ const EventIndex = () => {
                             </td>
                             <td>{event.name}</td>
                             <td>{event.description}</td>
-                            <td>{event.ticketPrice}</td>
+                            {/* <td>{event.ticketPrice}</td> */}
                             <td>{event.location}</td>
                             <td>{event.statusName}</td>
                             <td>{new Date(event.startDate).toLocaleString()}</td>

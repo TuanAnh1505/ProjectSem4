@@ -11,7 +11,6 @@ import ActivateAccount from './components/auth/ActivateAccount';
 import ForgotPassword from './components/auth/ForgotPassword';
 import ResetPassword from './components/auth/ResetPassword';
 import ChangePassword from './components/auth/ChangePassword';
-import AdminDashboard from './components/admin/AdminDashboard';
 import UserIndex from './components/admin/user/UserIndex';
 import DashboardPage from './components/admin/DashboardPage';
 import AdminPage from './components/admin/AdminPage';
@@ -95,6 +94,22 @@ const App = () => {
               <Home />
             </Layout>
           } />
+          <Route path="/booking-passenger" element={
+            <Layout>
+              <BookingPassenger />
+            </Layout>
+          } />
+          <Route path="/tour-dashboard/detail/:tourId" element={
+            <Layout>
+              <TourDetailDashboard />
+            </Layout>
+          } />
+
+          <Route path="/booking-confirmation" element={
+            <Layout>
+              <BookingConfirmation />
+            </Layout>
+          } />
 
           {/* Authentication and user routes */}
           <Route path="/login" element={<Login />} />
@@ -122,8 +137,8 @@ const App = () => {
 
             {/* Admin routes */}
             <Route
-              path="/admin-dashboard"
-              element={<ProtectedRoute element={<AdminDashboard />} requiredRole="ADMIN" />}
+              path="/admin/about"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
             />
             <Route
               path="/user"

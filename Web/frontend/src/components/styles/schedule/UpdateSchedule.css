@@ -1,0 +1,349 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.schedule-update-container {
+  font-family: 'Inter', sans-serif;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.schedule-update-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+}
+
+.schedule-update-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.schedule-update-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.schedule-update-subtitle {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.schedule-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.schedule-update-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.schedule-update-label {
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.schedule-update-label::before {
+  content: '•';
+  color: #f59e42;
+  font-size: 1.2rem;
+}
+
+.schedule-update-input {
+    padding: 0.875rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
+    color: #1e293b;
+    width: 93%;  
+}
+.schedule-update-select {
+  padding: 0.875rem 1.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #f8fafc;
+  color: #1e293b;
+  width: 100%;
+}
+
+.schedule-update-input:hover,
+.schedule-update-select:hover {
+  border-color: #656cf3;
+  background-color: #f1f5f9;
+}
+
+.schedule-update-input:focus,
+.schedule-update-select:focus {
+  outline: none;
+  border-color: #656cf3;
+  box-shadow: 0 0 0 4px rgba(245, 158, 66, 0.1);
+  background-color: white;
+}
+
+.schedule-update-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fee2e2;
+}
+
+.schedule-update-btn {
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1.5rem;
+  align-self: center;
+  width: 100%;
+  max-width: 300px;
+  position: relative;
+  overflow: hidden;
+}
+
+.schedule-update-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.schedule-update-btn:hover::before {
+  left: 100%;
+}
+
+.schedule-update-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2);
+}
+
+.schedule-update-btn:disabled {
+  background: #e2e8f0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Hide default date input icon for Chrome, Safari, Edge, Opera */
+input[type="date"].schedule-update-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: none;
+}
+
+input[type="date"].schedule-update-input::-ms-clear {
+  display: none;
+}
+
+input[type="date"].schedule-update-input::-moz-calendar-picker-indicator {
+  opacity: 0;
+  display: none;
+}
+
+input[type="date"].schedule-update-input::-moz-focus-inner {
+  border: 0;
+}
+
+input[type="date"].schedule-update-input {
+  padding-right: 1.25rem !important;
+}
+
+@media (max-width: 768px) {
+  .schedule-update-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  .schedule-update-title {
+    font-size: 1.75rem;
+  }
+  .schedule-update-input,
+  .schedule-update-select {
+    padding: 0.75rem 1rem;
+  }
+  .schedule-update-btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+.schedule-update-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.schedule-update-btn-cancel {
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+  box-shadow: none !important;
+}
+
+/* Success Alert Dialog (reuse from AddSchedule) */
+.schedule-success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.schedule-success-dialog {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  animation: scaleIn 0.3s ease;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.schedule-success-dialog::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.schedule-success-icon {
+  font-size: 4.5rem;
+  margin-bottom: 1.5rem;
+  color: #10b981;
+  animation: scaleIn 0.5s ease;
+  filter: drop-shadow(0 4px 6px rgba(16, 185, 129, 0.2));
+}
+
+.schedule-success-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.schedule-success-message {
+  color: #64748b;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.schedule-success-button {
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: white;
+  min-width: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.schedule-success-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.schedule-success-button:hover::before {
+  left: 100%;
+}
+
+.schedule-success-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+
+
+

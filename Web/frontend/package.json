@@ -24,7 +24,8 @@
     "react-router-dom": "^7.5.1",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
-    "swiper": "^11.2.6",
+    "recharts": "^2.15.3",
+    "swiper": "^11.2.7",
     "web-vitals": "^4.2.4"
   },
   "scripts": {
