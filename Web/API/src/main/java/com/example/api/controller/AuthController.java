@@ -104,4 +104,28 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @PostMapping("/resend-activation")
+    public ResponseEntity<?> resendActivationEmail(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            Boolean isApp = Boolean.valueOf(request.get("isApp"));
+            
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Không tìm thấy tài khoản với email này.");
+            }
+            
+            if (user.getIsActive()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Tài khoản đã được kích hoạt.");
+            }
+
+            emailService.resendActivationEmail(user.getEmail(), user.getPublicId(), isApp);
+            return ResponseEntity.ok("Email kích hoạt đã được gửi lại thành công.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }

@@ -14,23 +14,23 @@ import TourIndex from "./tour/TourIndex";
 import DetailDestination from "./destination/DetailDestination";
 import DetailEvent from "./event/DetailEvent";
 import DetailTour from "./tour/DetailTour";
-
 import AddItinerary from "./itinerary/AddItinerary";
 import UpdateItinerary from "./itinerary/UpdateItinerary";
 import ItineraryIndex from "./itinerary/ItineraryIndex";
 import DetailItinerary from "./itinerary/DetailItinerary";
-  import DetailBooking from "./booking/DetailBooking";
+import DetailBooking from "./booking/DetailBooking";
 import BookingIndex from "./booking/BookingIndex";
-// import AddSchedule from './schedule/AddSchedule';
 import DetailSchedule from "./schedule/DetailSchedule";
 import UpdateSchedule from "./schedule/UpdateSchedule";
 import ScheduleIndex from "./schedule/ScheduleIndex";
+import TourGuideForm from "./tourguide/TourGuideForm";
+import TourGuideList from "./tourguide/TourGuideList";
 
+// import AddSchedule from './schedule/AddSchedule';
 
 const AdminPage = () => {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
-
 
   const getComponent = () => {
     if (pathSegments.includes('destination') || pathSegments.includes('destinations')) {
@@ -107,6 +107,16 @@ const AdminPage = () => {
 
     if (pathSegments.includes('user')) {
       return <UserIndex />;
+    }
+
+    if (pathSegments.includes('tour-guide')) {
+      if (pathSegments.includes('add')) {
+        return <TourGuideForm />;
+      }
+      if (pathSegments.includes('edit')) {
+        return <TourGuideForm />;
+      }
+      return <TourGuideList />;
     }
 
     return <AdminDashboard />;

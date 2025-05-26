@@ -92,4 +92,36 @@ public class EmailService {
                 "Đội ngũ TravelTour");
         emailSender.send(message);
     }
+
+    public void resendActivationEmail(String to, String publicId, boolean isApp) {
+        try {
+            String webLink = "http://localhost:3000/activate?publicId=" + publicId;
+            String appLink = "myapp://activate?publicId=" + publicId;
+
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject("Yêu cầu gửi lại email kích hoạt - TravelTour");
+
+            String htmlContent = "<p>Xin chào,</p>"
+                    + "<p>Chúng tôi nhận được yêu cầu gửi lại email kích hoạt tài khoản TravelTour của bạn.</p>"
+                    + "<p>Bạn có thể kích hoạt tài khoản bằng:</p>"
+                    + "<ul>";
+            if (isApp) {
+                htmlContent += "<li><b>Trên app:</b> <a href=\"" + appLink + "\">Kích hoạt tài khoản trên app</a></li>";
+            } else {
+                htmlContent += "<li><b>Trên web:</b> <a href=\"" + webLink + "\">Kích hoạt tài khoản trên web</a></li>";
+            }
+            htmlContent += "</ul>"
+                    + "<p>Liên kết này sẽ hết hạn sau 24 giờ.</p>"
+                    + "<p>Nếu bạn không yêu cầu gửi lại email này, vui lòng bỏ qua.</p>"
+                    + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
+
+            helper.setText(htmlContent, true);
+            emailSender.send(mimeMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Gửi lại email kích hoạt thất bại: " + e.getMessage());
+        }
+    }
 }
