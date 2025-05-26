@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useTranslation } from "react-i18next";
+
 import '../../styles/destination/DetailDestination.css';
 
 // Reuse MediaPreview and MediaModal components from DestinationIndex
@@ -67,7 +67,7 @@ const MediaModal = ({ media, onClose }) => {
 };
 
 const DetailEvent = () => {
-    const { t } = useTranslation();
+    
     const [event, setEvent] = useState(null);
     const [selectedMedia, setSelectedMedia] = useState(null);
     const [error, setError] = useState(null);
@@ -129,8 +129,8 @@ const DetailEvent = () => {
 
     return (
         <div className="container">
-            <Link to="/admin" className="back-button">
-                {t("back")}
+            <Link to="/admin/event" className="back-button">
+                Quay lại
             </Link>
             
             <div className="event-detail">
@@ -159,28 +159,28 @@ const DetailEvent = () => {
 
                 <div className="info-grid">
                     <div className="info-item">
-                        <label>{t("name")}:</label>
+                        <label>Name:</label>
                         <span>{event.name}</span>
                     </div>
                     <div className="info-item">
-                        <label>{t("ticketPrice")}:</label>
+                        <label>Ticket Price:</label>
                         <span>{event.ticketPrice}</span>
                     </div>
                 </div>
 
                 <div className="info-grid">
                     <div className="info-item">
-                        <label>{t("location")}:</label>
+                        <label>Location:</label>
                         <span>{event.location}</span>
                     </div>
                     <div className="info-item">
-                        <label>{t("statusName")}:</label>
+                        <label>Status Name:</label>
                         <span>{event.statusName}</span>
                     </div>
                 </div>
 
                 <div className="info-item-description">
-                    <label>{t("description")}:</label>
+                    <label>Description:</label>
                     <span>{event.description}</span>
                 </div>
                 

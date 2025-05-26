@@ -1,0 +1,275 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.itinerary-container {
+  font-family: 'Inter', sans-serif;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.itinerary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.itinerary-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.itinerary-add-btn {
+  background: #6392f7;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.itinerary-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  color: white;
+}
+
+.itinerary-table {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.itinerary-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.itinerary-table th {
+  background: #f8fafc;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #4b5563;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.itinerary-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+  text-align: left;
+}
+
+.itinerary-table tr:last-child td {
+  border-bottom: none;
+}
+
+.itinerary-table tr:hover {
+  background-color: #f9fafb;
+}
+
+.itinerary-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.itinerary-btn {
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.itinerary-btn-view {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.itinerary-btn-view:hover {
+  background-color: #bae6fd;
+  transform: translateY(-2px);
+}
+
+.itinerary-btn-edit {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.itinerary-btn-edit:hover {
+  background-color: #fde68a;
+  transform: translateY(-2px);
+}
+
+/* .itinerary-btn-delete {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.itinerary-btn-delete:hover {
+  background-color: #fecaca;
+  transform: translateY(-2px);
+} */
+
+/* Delete Confirmation Dialog */
+.itinerary-delete-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.itinerary-delete-dialog {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease;
+  text-align: center;
+}
+
+.itinerary-delete-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  color: #ef4444;
+  animation: scaleIn 0.5s ease;
+}
+
+.itinerary-delete-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2d3436;
+  margin-bottom: 1rem;
+}
+
+.itinerary-delete-message {
+  color: #636e72;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.itinerary-delete-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.itinerary-delete-cancel {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  background: #f3f4f6;
+  color: #4b5563;
+  min-width: 120px;
+}
+
+.itinerary-delete-cancel:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+.itinerary-delete-confirm {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  background: #ef4444;
+  color: white;
+  min-width: 120px;
+}
+
+.itinerary-delete-confirm:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Loading State */
+.itinerary-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .itinerary-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .itinerary-table {
+    overflow-x: auto;
+  }
+  .itinerary-actions {
+    flex-direction: column;
+  }
+  .itinerary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+
+
+

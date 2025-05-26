@@ -1,6 +1,6 @@
 .admin-dashboard {
   padding: 20px;
-  text-align: center;
+  /* text-align: center; */
   display: flex;
 }
 
@@ -352,56 +352,352 @@
   border: 0;
 }
 
-
-
-.charts-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Hai cột bằng nhau */
-  gap: 2rem;
-  padding: 2rem;
+.button-container {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Khoảng cách giữa các phần tử */
+  position: relative; /* Để dropdown định vị tuyệt đối */
+  margin-left: auto;
 }
 
-.chart-box {
-  height: 300px; /* Chiều cao mặc định cho biểu đồ Bar */
-  width: 100%;
-  max-width: 500px; /* Chiều rộng mặc định */
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.aside-nav-modern {
+  width: 250px;
+  background: #f8f9fb;
+  color: #22223b;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 18px 18px 18px 18px;
+  box-shadow: 0 4px 24px 0 rgba(123,110,246,0.08);
+  overflow: hidden;
+  border: none;
+  transition: width 0.3s, box-shadow 0.3s, left 0.3s;
+  z-index: 100;
+}
+.aside-nav-modern.collapsed {
+  width: 0;
+  min-width: 0;
+  box-shadow: none;
+}
+.aside-nav-modern.open {
+  left: 0;
+}
+.aside-header-modern {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 20px 12px 20px;
+  border-bottom: 1px solid #ececec;
+  background: #fff;
+}
+.logo-container-modern {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-circle {
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+  color: #fff;
+  font-weight: bold;
+  font-size: 20px;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px #e6e6e6;
+}
+.logo-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #7b6ef6;
+  margin: 0;
+}
+.toggle-button-modern {
+  background: #f3f3f3;
+  border: none;
+  border-radius: 8px;
+  font-size: 20px;
+  color: #7b6ef6;
+  cursor: pointer;
+  padding: 4px 12px;
+  transition: background 0.2s;
+}
+.toggle-button-modern:hover {
+  background: #ececec;
+}
+.aside-menu-modern {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.menu-section-modern {
+  font-size: 12px;
+  font-weight: bold;
+  color: #888;
+  padding: 18px 24px 6px 24px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.aside-menu-modern li {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  cursor: pointer;
+  border-radius: 10px;
+  margin: 0 10px 4px 10px;
+  transition: background 0.2s, color 0.2s;
+}
+.aside-menu-modern li:hover, .aside-menu-modern li.active {
+  background: linear-gradient(90deg, #ece9fc 0%, #e0f0ff 100%);
+  color: #7b6ef6;
+  font-weight: 600;
+}
+.aside-menu-modern li.active .menu-icon-circle {
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+  color: #fff;
+}
+.menu-icon-circle {
+  width: 32px;
+  height: 32px;
+  background: #ece9fc;
+  color: #7b6ef6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-right: 14px;
+  transition: background 0.2s, color 0.2s;
+}
+.menu-text-modern {
+  font-size: 15px;
+  font-weight: 500;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+.account-section-modern {
+  border-top: 1px solid #ececec;
+  margin-top: 18px;
+  padding-top: 10px;
+  padding-bottom: 18px;
+  background: #f8f9fb;
+}
+@media (max-width: 900px) {
+  .aside-nav-modern {
+    width: 0;
+    left: -260px;
+    border-radius: 0;
+    box-shadow: 0 2px 12px #e6e6e6;
+    transition: left 0.3s, width 0.3s;
+  }
+  .aside-nav-modern.open {
+    width: 220px;
+    left: 0;
+    min-width: 180px;
+    max-width: 90vw;
+    z-index: 9999;
+  }
+  .aside-header-modern {
+    padding: 16px 10px 8px 10px;
+  }
+  .aside-menu-modern li {
+    padding: 10px 12px;
+    margin: 0 4px 2px 4px;
+  }
+  .logo-title {
+    font-size: 15px;
+  }
+}
+@media (max-width: 600px) {
+  .aside-nav-modern.open {
+    width: 100vw;
+    left: 0;
+    min-width: 0;
+    max-width: 100vw;
+    border-radius: 0;
+  }
+  .aside-header-modern {
+    padding: 10px 6px 6px 6px;
+  }
+  .logo-title {
+    font-size: 13px;
+  }
+  .menu-text-modern {
+    font-size: 13px;
+  }
+}
+.aside-nav-modern.collapsed .menu-text-modern {
+  display: none;
+}
+.aside-nav-modern.collapsed {
+  width: 60px;
+  min-width: 0;
+}
+.aside-nav-modern.collapsed .logo-title {
+  display: none;
+}
+.aside-nav-modern.collapsed .menu-section-modern {
+  display: none;
+}
+.aside-nav-modern.collapsed .account-section-modern {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.has-submenu {
+  position: relative;
+  cursor: pointer;
+}
+.submenu-arrow {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #aaa;
   transition: transform 0.2s;
+}
+.submenu-modern {
+  list-style: none;
+  padding-left: 32px;
+  margin: 0;
+  background: transparent;
+  transition: padding 0.3s;
+}
+.submenu-modern li {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin: 2px 0;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.submenu-modern li:hover, .submenu-modern li.active {
+  background: linear-gradient(90deg, #ece9fc 0%, #e0f0ff 100%);
+  color: #7b6ef6;
+  font-weight: 600;
+}
+.submenu-modern .menu-icon-circle {
+  width: 28px;
+  height: 28px;
+  font-size: 15px;
+  margin-right: 10px;
+}
+
+.dashboard-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 24px;
+  max-width: 360px;
+  width: 100%;
+  background: #f5f6fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(123,110,246,0.04);
+  padding: 2px 4px 2px 10px;
+}
+.dashboard-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  padding: 10px 8px 10px 0;
+  color: #222;
+}
+.dashboard-search-input::placeholder {
+  color: #aaa;
+  font-size: 1rem;
+}
+.dashboard-search-btn {
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+  margin-left: 4px;
+}
+.dashboard-search-btn:hover {
+  background: #4a7be7;
+}
+
+.dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: 24px;
+  gap: 0;
+}
+.dashboard-search-bar {
+  max-width: 360px;
+  margin-bottom: 0;
+  margin-right: 50px;
+}
+.user-icon {
+  font-size: 2rem;
+  color: #7b6ef6;
+  cursor: pointer;
+  margin-left: 0;
+  transition: color 0.2s;
+}
+.user-icon:hover {
+  color: #4a7be7;
+}
+
+.account-dropdown {
+  min-width: 240px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(123,110,246,0.10);
+  padding: 18px 20px 16px 20px;
+  position: absolute;
+  top: 48px;
+  right: 0;
+  z-index: 1001;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: flex-start;
+  animation: fadeIn 0.18s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+.account-dropdown-label {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+.account-dropdown-email {
+  color: #7b6ef6;
+  font-weight: 700;
+  font-size: 1.08rem;
+  margin-bottom: 14px;
+  word-break: break-all;
+}
+.account-dropdown-btn {
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(123,110,246,0.08);
+}
+.account-dropdown-btn:hover {
+  background: #5c9cf5;
 }
 
-.pie-chart-box {
-  height: 300px; /* Chiều cao nhỏ hơn cho biểu đồ Pie */
-  max-width: 300px; /* Chiều rộng nhỏ hơn */
-}
 
-/* .chart-box:hover {
-  transform: translateY(-5px);
-} */
-
-.chart-box h4 {
-  color: #333;
-  text-align: center;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-}
-
-.chart-box canvas {
-  max-height: 100%;
-}
-
-@media (max-width: 768px) {
-  .charts-container {
-    grid-template-columns: 1fr; /* Một cột trên màn hình nhỏ */
-  }
-
-  .chart-box,
-  .pie-chart-box {
-    max-width: 100%; /* Đầy đủ chiều rộng trên màn hình nhỏ */
-  }
-}

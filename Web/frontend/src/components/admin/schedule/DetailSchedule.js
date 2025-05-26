@@ -1,16 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaIdBadge, FaMapMarkedAlt, FaInfoCircle, FaCheckCircle } from 'react-icons/fa';
+import '../../styles/schedule/DetailSchedule.css';
 
 const DetailSchedule = () => {
     const { scheduleId } = useParams();
     const navigate = useNavigate();
     const [schedule, setSchedule] = useState(null);
+    const [tours, setTours] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchSchedule();
-    }, [scheduleId]);
+        fetchTours();
+    }, []);
+
+    useEffect(() => {
+        if (scheduleId && tours.length > 0) {
+            fetchSchedule();
+        }
+        // eslint-disable-next-line
+    }, [scheduleId, tours]);
+
+    const fetchTours = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('/api/tours', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setTours(response.data);
+        } catch (error) {
+            setTours([]);
+        }
+    };
 
     const fetchSchedule = async () => {
         try {
@@ -34,7 +58,7 @@ const DetailSchedule = () => {
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
+        return date.toLocaleDateString('vi-VN', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -43,86 +67,108 @@ const DetailSchedule = () => {
 
     const formatTime = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', {
+        return date.toLocaleTimeString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit'
         });
     };
 
+    const getTourName = (tourId) => {
+        const tour = tours.find(t => t.tourId === tourId);
+        return tour ? `${tour.name} - $${tour.price}` : `ID: ${tourId}`;
+    };
+
     if (loading) {
-        return <div className="container mt-4">Loading...</div>;
+        return <div className="schedule-detail-container">Đang tải...</div>;
     }
 
     if (!schedule) {
-        return <div className="container mt-4">Schedule not found</div>;
+        return <div className="schedule-detail-container">Không tìm thấy lịch trình</div>;
     }
 
     return (
-        <div className="container mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Schedule Details</h2>
-                <div>
+        <div className="schedule-detail-container">
+            <div className="schedule-detail-header">
+                <h2 className="schedule-detail-title">Chi Tiết Lịch Trình</h2>
+                <div className="schedule-detail-actions">
                     <button 
-                        className="btn btn-warning me-2"
+                        className="schedule-detail-btn schedule-detail-btn-edit"
                         onClick={() => navigate(`/admin/schedules/edit/${scheduleId}`)}
                     >
-                        Edit
+                        Chỉnh Sửa
                     </button>
                     <button 
-                        className="btn btn-secondary"
+                        className="schedule-detail-btn schedule-detail-btn-back"
                         onClick={() => navigate('/admin/schedules')}
                     >
-                        Back to List
+                        Quay Lại
                     </button>
                 </div>
             </div>
 
-            <div className="card">
-                <div className="card-body">
-                    <div className="row mb-3">
-                        <div className="col-md-6">
-                            <h5 className="card-title">Basic Information</h5>
-                            <p><strong>ID:</strong> {schedule.scheduleId}</p>
-                            <p><strong>Tour ID:</strong> {schedule.tourId}</p>
-                            <p><strong>Status:</strong> <span className="text-capitalize">{schedule.status}</span></p>
+            <div className="schedule-detail-card">
+                <div className="schedule-detail-section">
+                    <div className="schedule-detail-section-title">Thông Tin Cơ Bản</div>
+                    <div className="schedule-detail-basicgrid">
+                        <div className="schedule-detail-basicitem">
+                            <FaIdBadge className="schedule-detail-basicicon" />
+                            <div>
+                                <div className="schedule-detail-basiclabel">Mã Lịch Trình</div>
+                                <div className="schedule-detail-basicvalue">{schedule.scheduleId}</div>
+                            </div>
                         </div>
-                        <div className="col-md-6">
-                            <h5 className="card-title">Timing</h5>
-                            <p><strong>Start Date:</strong> {formatDate(schedule.startDate)}</p>
-                            <p><strong>End Date:</strong> {formatDate(schedule.endDate)}</p>
+                        <div className="schedule-detail-basicitem">
+                            <FaMapMarkedAlt className="schedule-detail-basicicon" />
+                            <div>
+                                <div className="schedule-detail-basiclabel">Tour</div>
+                                <div className="schedule-detail-basicvalue">{getTourName(schedule.tourId)}</div>
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="row">
-                        <div className="col-12">
-                            <h5 className="card-title">Itineraries</h5>
-                            {schedule.itineraries && schedule.itineraries.length > 0 ? (
-                                <div className="table-responsive">
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Title</th>
-                                                <th>Start Time</th>
-                                                <th>End Time</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {schedule.itineraries.map((itinerary) => (
-                                                <tr key={itinerary.itineraryId}>
-                                                    <td>{itinerary.title}</td>
-                                                    <td>{formatTime(itinerary.startTime)}</td>
-                                                    <td>{formatTime(itinerary.endTime)}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <p>No itineraries found for this schedule.</p>
-                            )}
+                        <div className="schedule-detail-basicitem">
+                            <FaInfoCircle className="schedule-detail-basicicon" />
+                            <div>
+                                <div className="schedule-detail-basiclabel">Trạng Thái</div>
+                                <div className="schedule-detail-basicvalue" style={{textTransform: 'capitalize'}}>{schedule.status}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div className="schedule-detail-section">
+                    <div className="schedule-detail-section-title">Thời Gian</div>
+                    <div className="schedule-detail-info">
+                        <span className="schedule-detail-label">Ngày Bắt Đầu:</span> {formatDate(schedule.startDate)}
+                    </div>
+                    <div className="schedule-detail-info">
+                        <span className="schedule-detail-label">Ngày Kết Thúc:</span> {formatDate(schedule.endDate)}
+                    </div>
+                </div>
+                {/* <div className="schedule-detail-section">
+                    <div className="schedule-detail-section-title">Lịch Trình Chi Tiết</div>
+                    {schedule.itineraries && schedule.itineraries.length > 0 ? (
+                        <div style={{overflowX: 'auto'}}>
+                            <table className="schedule-detail-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tiêu Đề</th>
+                                        <th>Giờ Bắt Đầu</th>
+                                        <th>Giờ Kết Thúc</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {schedule.itineraries.map((itinerary) => (
+                                        <tr key={itinerary.itineraryId}>
+                                            <td>{itinerary.title}</td>
+                                            <td>{formatTime(itinerary.startTime)}</td>
+                                            <td>{formatTime(itinerary.endTime)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="schedule-detail-noitinerary">Không có lịch trình chi tiết cho lịch trình này.</div>
+                    )}
+                </div> */}
             </div>
         </div>
     );

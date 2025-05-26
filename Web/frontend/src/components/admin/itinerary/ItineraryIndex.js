@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { FaPlus, FaEye, FaEdit, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
+import '../../styles/itinerary/ItineraryIndex.css';
 
 const API_URL = 'http://localhost:8080';
 
@@ -8,6 +10,7 @@ const ItineraryIndex = () => {
     const [itineraries, setItineraries] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [deleteDialog, setDeleteDialog] = useState({ show: false, itineraryId: null, itineraryTitle: '' });
 
     useEffect(() => {
         fetchItineraries();
@@ -37,24 +40,32 @@ const ItineraryIndex = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this itinerary?')) {
-            try {
-                const token = localStorage.getItem('token');
-                await axios.delete(`${API_URL}/api/itineraries/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                fetchItineraries();
-            } catch (error) {
-                console.error('Error deleting itinerary:', error);
-                if (error.response && error.response.status === 401) {
-                    localStorage.removeItem('token');
-                    window.location.href = '/login';
+    const handleDeleteClick = (id, title) => {
+        setDeleteDialog({ show: true, itineraryId: id, itineraryTitle: title });
+    };
+
+    const handleDeleteConfirm = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${API_URL}/api/itineraries/${deleteDialog.itineraryId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
+            });
+            fetchItineraries();
+        } catch (error) {
+            console.error('Error deleting itinerary:', error);
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
             }
+        } finally {
+            setDeleteDialog({ show: false, itineraryId: null, itineraryTitle: '' });
         }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteDialog({ show: false, itineraryId: null, itineraryTitle: '' });
     };
 
     const formatTime = (timeString) => {
@@ -72,39 +83,31 @@ const ItineraryIndex = () => {
     };
 
     if (loading) {
-        return (
-            <div className="container mt-4">
-                <div className="d-flex justify-content-center">
-                    <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-        );
+        return <div className="itinerary-loading">Loading itineraries...</div>;
     }
 
     return (
-        <div className="container mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Tour Itineraries</h2>
-                <Link to="/admin/itineraries/add" className="btn btn-primary">
-                    Add New Itinerary
+        <div className="itinerary-container">
+            <div className="itinerary-header">
+                <h2 className="itinerary-title">Tour Itineraries</h2>
+                <Link to="/admin/itineraries/add" className="itinerary-add-btn">
+                    <FaPlus /> Tạo lịch trình chi tiết
                 </Link>
             </div>
 
             {error && (
-                <div className="alert alert-danger" role="alert">
+                <div className="itinerary-form-error" role="alert">
                     {error}
                 </div>
             )}
 
             {itineraries.length === 0 ? (
-                <div className="alert alert-info" role="alert">
+                <div className="itinerary-form-info" role="alert">
                     No itineraries found.
                 </div>
             ) : (
-                <div className="table-responsive">
-                    <table className="table table-striped">
+                <div className="itinerary-table">
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -126,29 +129,58 @@ const ItineraryIndex = () => {
                                     <td>{formatTime(itinerary.startTime)}</td>
                                     <td>{formatTime(itinerary.endTime)}</td>
                                     <td>
-                                        <Link 
-                                            to={`/admin/itineraries/detail/${itinerary.itineraryId}`}
-                                            className="btn btn-info btn-sm me-2"
-                                        >
-                                            View
-                                        </Link>
-                                        <Link 
-                                            to={`/admin/itineraries/edit/${itinerary.itineraryId}`}
-                                            className="btn btn-warning btn-sm me-2"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDelete(itinerary.itineraryId)}
-                                            className="btn btn-danger btn-sm"
-                                        >
-                                            Delete
-                                        </button>
+                                        <div className="itinerary-actions">
+                                            <Link
+                                                to={`/admin/itineraries/detail/${itinerary.itineraryId}`}
+                                                className="action-link"
+                                            >🔍
+                                                
+                                            </Link>
+                                            <Link
+                                                to={`/admin/itineraries/edit/${itinerary.itineraryId}`}
+                                                className="action-link"
+                                            >
+                                            ✏️
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDeleteClick(itinerary.itineraryId, itinerary.title)}
+                                                className="delete-button"
+                                                
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {deleteDialog.show && (
+                <div className="itinerary-delete-overlay">
+                    <div className="itinerary-delete-dialog">
+                        <FaExclamationTriangle className="itinerary-delete-icon" />
+                        <h3 className="itinerary-delete-title">Xóa Lịch Trình Tour</h3>
+                        <p className="itinerary-delete-message">
+                            Bạn có chắc chắn muốn xóa lịch trình "{deleteDialog.itineraryTitle}"? Hành động này không thể hoàn tác.
+                        </p>
+                        <div className="itinerary-delete-actions">
+                            <button
+                                className="itinerary-delete-cancel"
+                                onClick={handleDeleteCancel}
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                className="itinerary-delete-confirm"
+                                onClick={handleDeleteConfirm}
+                            >
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

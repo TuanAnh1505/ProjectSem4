@@ -41,7 +41,7 @@ const Login = () => {
 
       // Chuyển hướng dựa trên vai trò người dùng
       if (role === "ADMIN") {
-        navigate("/admin/dashboard");
+        navigate("/admin/about");
       } else {
         navigate("/");
       }

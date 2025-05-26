@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaHeading, FaRegClock, FaListAlt, FaTag, FaCheckCircle } from 'react-icons/fa';
+import '../../styles/itinerary/AddItinerary.css';
 
 const API_URL = 'http://localhost:8080';
 
@@ -19,6 +21,7 @@ const AddItinerary = () => {
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     useEffect(() => {
         fetchTours();
@@ -36,7 +39,6 @@ const AddItinerary = () => {
             });
             setTours(response.data);
         } catch (error) {
-            console.error('Error fetching tours:', error);
             setError('Failed to load tours');
             if (error.response && error.response.status === 401) {
                 localStorage.removeItem('token');
@@ -59,7 +61,6 @@ const AddItinerary = () => {
             });
             setTourSchedules(response.data);
         } catch (error) {
-            console.error('Error fetching tour schedules:', error);
             setError('Failed to load tour schedules');
             if (error.response && error.response.status === 401) {
                 localStorage.removeItem('token');
@@ -94,34 +95,24 @@ const AddItinerary = () => {
             setLoading(true);
             setError(null);
             const token = localStorage.getItem('token');
-            
-            // Validate form data
             if (!formData.scheduleId || !formData.title || !formData.startTime || !formData.endTime || !formData.type) {
                 throw new Error('Please fill in all required fields');
             }
-
-            // Validate time
             const [startHours, startMinutes] = formData.startTime.split(':').map(Number);
             const [endHours, endMinutes] = formData.endTime.split(':').map(Number);
-            
             const startTotalMinutes = startHours * 60 + startMinutes;
             const endTotalMinutes = endHours * 60 + endMinutes;
-            
             if (endTotalMinutes <= startTotalMinutes) {
                 throw new Error('End time must be after start time');
             }
-
-            const response = await axios.post(`${API_URL}/api/itineraries`, formData, {
+            await axios.post(`${API_URL}/api/itineraries`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            
-            console.log('Created itinerary:', response.data);
-            navigate('/admin/itineraries');
+            setShowSuccess(true);
         } catch (error) {
-            console.error('Error adding itinerary:', error);
             setError(error.response?.data?.message || error.message || 'Failed to add itinerary');
             if (error.response && error.response.status === 401) {
                 localStorage.removeItem('token');
@@ -132,135 +123,143 @@ const AddItinerary = () => {
         }
     };
 
+    const handleSuccessClose = () => {
+        setShowSuccess(false);
+        navigate('/admin/itineraries');
+    };
+
     if (loading) {
-        return (
-            <div className="container mt-4">
-                <div className="d-flex justify-content-center">
-                    <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-        );
+        return <div className="itinerary-add-container">Đang tải...</div>;
     }
 
     return (
-        <div className="container mt-4">
-            <h2>Add New Itinerary</h2>
-            {error && <div className="alert alert-danger">{error}</div>}
-            <form onSubmit={handleSubmit} className="mt-4">
-                <div className="row mb-4">
-                    <div className="col-md-6">
-                        <label className="form-label">Select Tour</label>
-                        <select
-                            className="form-select"
-                            value={selectedTour}
-                            onChange={handleTourChange}
-                            required
-                        >
-                            <option value="">Select a Tour</option>
-                            {tours.map(tour => (
-                                <option key={tour.tourId} value={tour.tourId}>
-                                    {tour.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+        <div className="itinerary-add-container">
+            <div className="itinerary-add-header">
+                <h2 className="itinerary-add-title">Thêm Lịch Trình Tour Mới</h2>
+            </div>
+            {error && <div className="itinerary-form-error">{error}</div>}
+            <form onSubmit={handleSubmit} className="itinerary-add-form">
+                <div className="itinerary-form-group">
+                    <label className="itinerary-form-label">Chọn Tour</label>
+                    <select
+                        className="itinerary-form-select"
+                        value={selectedTour}
+                        onChange={handleTourChange}
+                        required
+                    >
+                        <option value="">Chọn tour</option>
+                        {tours.map(tour => (
+                            <option key={tour.tourId} value={tour.tourId}>
+                                {tour.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 {selectedTour && tourSchedules.length > 0 && (
-                    <div className="row mb-4">
-                        <div className="col-12">
-                            <h4>Available Schedules for this Tour</h4>
-                            <div className="table-responsive">
-                                <table className="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Schedule ID</th>
-                                            <th>Start Date</th>
-                                            <th>End Date</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {tourSchedules.map(schedule => (
-                                            <tr key={schedule.scheduleId}>
-                                                <td>{schedule.scheduleId}</td>
-                                                <td>{new Date(schedule.startDate).toLocaleDateString('en-US', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}</td>
-                                                <td>{new Date(schedule.endDate).toLocaleDateString('en-US', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}</td>
-                                                <td>{schedule.status}</td>
-                                                <td>
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-sm btn-primary"
-                                                        onClick={() => setFormData(prev => ({
-                                                            ...prev,
-                                                            scheduleId: schedule.scheduleId
-                                                        }))}
-                                                    >
-                                                        Select
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div className="itinerary-form-group">
+                        <label className="itinerary-form-label">Chọn Lịch Trình</label>
+                        <table className="itinerary-schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>Schedule ID</th>
+                                    <th>Ngày Bắt Đầu</th>
+                                    <th>Ngày Kết Thúc</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Chọn</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tourSchedules.map(schedule => (
+                                    <tr key={schedule.scheduleId}>
+                                        <td>{schedule.scheduleId}</td>
+                                        <td>{new Date(schedule.startDate).toLocaleDateString('vi-VN', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}</td>
+                                        <td>{new Date(schedule.endDate).toLocaleDateString('vi-VN', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}</td>
+                                        <td>{schedule.status}</td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="itinerary-submit-btn"
+                                                style={{padding: '0.5rem 1rem', fontSize: '0.95rem', minWidth: 0}}
+                                                onClick={() => setFormData(prev => ({
+                                                    ...prev,
+                                                    scheduleId: schedule.scheduleId
+                                                }))}
+                                            >
+                                                Chọn
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
 
                 {formData.scheduleId && (
                     <>
-                        <div className="mb-3">
-                            <label className="form-label">Title</label>
+                        <div className="itinerary-form-group">
+                            <label className="itinerary-form-label">
+                                <FaHeading style={{ marginRight: 8 }} />Title
+                                <span className="itinerary-form-desc">Enter a short, descriptive title for this itinerary.</span>
+                            </label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={`itinerary-form-input${error && !formData.title ? ' itinerary-form-input-error' : ''}`}
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
+                                placeholder="e.g. Visit Sapa Market"
                                 required
                             />
                         </div>
 
-                        <div className="mb-3">
-                            <label className="form-label">Description</label>
+                        <div className="itinerary-form-group">
+                            <label className="itinerary-form-label">
+                                <FaListAlt style={{ marginRight: 8 }} />Description
+                                <span className="itinerary-form-desc">(Optional) Add more details for this itinerary.</span>
+                            </label>
                             <textarea
-                                className="form-control"
+                                className="itinerary-form-textarea"
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows="3"
+                                placeholder="e.g. Explore the local market, try street food, buy souvenirs..."
                             />
                         </div>
 
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label">Start Time</label>
+                        <div className="itinerary-form-group itinerary-form-row">
+                            <div className="itinerary-form-col">
+                                <label className="itinerary-form-label">
+                                    <FaRegClock style={{ marginRight: 8 }} />Start Time
+                                    <span className="itinerary-form-desc">When does this activity begin?</span>
+                                </label>
                                 <input
                                     type="time"
-                                    className="form-control"
+                                    className={`itinerary-form-input${error && !formData.startTime ? ' itinerary-form-input-error' : ''}`}
                                     name="startTime"
                                     value={formData.startTime}
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label">End Time</label>
+                            <div className="itinerary-form-col">
+                                <label className="itinerary-form-label">
+                                    <FaRegClock style={{ marginRight: 8 }} />End Time
+                                    <span className="itinerary-form-desc">When does this activity end?</span>
+                                </label>
                                 <input
                                     type="time"
-                                    className="form-control"
+                                    className={`itinerary-form-input${error && !formData.endTime ? ' itinerary-form-input-error' : ''}`}
                                     name="endTime"
                                     value={formData.endTime}
                                     onChange={handleChange}
@@ -269,46 +268,64 @@ const AddItinerary = () => {
                             </div>
                         </div>
 
-                        <div className="row">
-                            <div className="col-md-4 mb-3">
-                                <label className="form-label">Type</label>
-                                <select
-                                    className="form-select"
-                                    name="type"
-                                    value={formData.type}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Select Type</option>
-                                    <option value="DESTINATION">Destination</option>
-                                    <option value="EVENT">Event</option>
-                                    <option value="ACTIVITY">Activity</option>
-                                    <option value="MEAL">Meal</option>
-                                    <option value="TRANSPORT">Transport</option>
-                                </select>
-                            </div>
+                        <div className="itinerary-form-group">
+                            <label className="itinerary-form-label">
+                                <FaTag style={{ marginRight: 8 }} />Type
+                                <span className="itinerary-form-desc">Select the type of this itinerary item.</span>
+                            </label>
+                            <select
+                                className={`itinerary-form-select${error && !formData.type ? ' itinerary-form-input-error' : ''}`}
+                                name="type"
+                                value={formData.type}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Type</option>
+                                <option value="DESTINATION">Destination</option>
+                                <option value="EVENT">Event</option>
+                                <option value="ACTIVITY">Activity</option>
+                                <option value="MEAL">Meal</option>
+                                <option value="TRANSPORT">Transport</option>
+                            </select>
                         </div>
                     </>
                 )}
 
-                <div className="mt-4">
-                    <button 
-                        type="submit" 
-                        className="btn btn-primary me-2"
+                <div className="itinerary-submit-row">
+                    <button
+                        type="submit"
+                        className="itinerary-submit-btn"
                         disabled={!formData.scheduleId || loading}
                     >
-                        {loading ? 'Saving...' : 'Save'}
+                        {loading ? 'Đang lưu...' : 'Lưu'}
                     </button>
-                    <button 
-                        type="button" 
-                        className="btn btn-secondary"
+                    <button
+                        type="button"
+                        className="itinerary-submit-btn itinerary-cancel-btn"
                         onClick={() => navigate('/admin/itineraries')}
                         disabled={loading}
                     >
-                        Cancel
+                        Hủy
                     </button>
                 </div>
             </form>
+            {showSuccess && (
+                <div className="schedule-success-overlay">
+                    <div className="schedule-success-dialog">
+                        <FaCheckCircle className="schedule-success-icon" />
+                        <h3 className="schedule-success-title">Thêm Lịch Trình Thành Công!</h3>
+                        <p className="schedule-success-message">
+                            Lịch trình đã được thêm thành công. Bạn có thể xem danh sách lịch trình ngay bây giờ.
+                        </p>
+                        <button
+                            className="schedule-success-button"
+                            onClick={handleSuccessClose}
+                        >
+                            Xem Danh Sách
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

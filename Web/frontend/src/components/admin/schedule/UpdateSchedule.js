@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaCalendarAlt, FaMapMarkedAlt, FaInfoCircle, FaCheckCircle } from 'react-icons/fa';
+import '../../styles/schedule/UpdateSchedule.css';
 
 const UpdateSchedule = () => {
     const { scheduleId } = useParams();
@@ -11,17 +13,38 @@ const UpdateSchedule = () => {
         endDate: '',
         status: ''
     });
+    const [tours, setTours] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     useEffect(() => {
-        if (scheduleId) {
+        fetchTours();
+    }, []);
+
+    useEffect(() => {
+        if (scheduleId && tours.length > 0) {
             fetchSchedule();
-        } else {
+        } else if (!scheduleId) {
             setError('Schedule ID is missing');
             setLoading(false);
         }
-    }, [scheduleId]);
+        // eslint-disable-next-line
+    }, [scheduleId, tours]);
+
+    const fetchTours = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('/api/tours', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setTours(response.data);
+        } catch (error) {
+            setError('Không thể tải danh sách tour');
+        }
+    };
 
     const fetchSchedule = async () => {
         try {
@@ -40,12 +63,7 @@ const UpdateSchedule = () => {
             });
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching schedule:', error);
             setError(error.response?.data?.message || 'Failed to fetch schedule');
-            if (error.response && error.response.status === 401) {
-                localStorage.removeItem('token');
-                window.location.href = '/login';
-            }
             setLoading(false);
         }
     };
@@ -72,109 +90,138 @@ const UpdateSchedule = () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            navigate('/admin/schedules');
+            setShowSuccess(true);
         } catch (error) {
-            console.error('Error updating schedule:', error);
             setError(error.response?.data?.message || 'Failed to update schedule');
-            if (error.response && error.response.status === 401) {
-                localStorage.removeItem('token');
-                window.location.href = '/login';
-            }
         }
     };
 
+    const handleSuccessClose = () => {
+        setShowSuccess(false);
+        navigate('/admin/schedules');
+    };
+
     if (loading) {
-        return <div className="container mt-4">Loading...</div>;
+        return <div className="schedule-update-container">Loading...</div>;
     }
 
     if (error) {
         return (
-            <div className="container mt-4">
-                <div className="alert alert-danger">{error}</div>
+            <div className="schedule-update-container">
+                <div className="schedule-update-error"><FaInfoCircle /> {error}</div>
                 <button 
-                    className="btn btn-secondary"
+                    className="schedule-update-btn"
                     onClick={() => navigate('/admin/schedules')}
                 >
-                    Back to Schedules
+                    Quay lại danh sách
                 </button>
             </div>
         );
     }
 
     return (
-        <div className="container mt-4">
-            <h2>Edit Schedule</h2>
-            {error && <div className="alert alert-danger">{error}</div>}
-            <form onSubmit={handleSubmit} className="mt-4">
-                <div className="row">
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Tour ID</label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            name="tourId"
-                            value={formData.tourId}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+        <div className="schedule-update-container">
+            <div className="schedule-update-header">
+                <h2 className="schedule-update-title">Cập Nhật Lịch Trình</h2>
+                <p className="schedule-update-subtitle">Chỉnh sửa thông tin lịch trình tour du lịch</p>
+            </div>
+            {error && <div className="schedule-update-error"><FaInfoCircle /> {error}</div>}
+            <form onSubmit={handleSubmit} className="schedule-update-form">
+                <div className="schedule-update-group">
+                    <label className="schedule-update-label">
+                        <FaMapMarkedAlt />
+                        Chọn Tour
+                    </label>
+                    <select
+                        className="schedule-update-select"
+                        name="tourId"
+                        value={formData.tourId}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">-- Chọn Tour --</option>
+                        {tours.map(tour => (
+                            <option key={tour.tourId} value={tour.tourId}>
+                                {tour.name} - ${tour.price}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-
-                <div className="row">
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Start Date</label>
-                        <input
-                            type="date"
-                            className="form-control"
-                            name="startDate"
-                            value={formData.startDate}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">End Date</label>
-                        <input
-                            type="date"
-                            className="form-control"
-                            name="endDate"
-                            value={formData.endDate}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                <div className="schedule-update-group">
+                    <label className="schedule-update-label">
+                        <FaCalendarAlt />
+                        Ngày Bắt Đầu
+                    </label>
+                    <input
+                        type="date"
+                        className="schedule-update-input"
+                        name="startDate"
+                        value={formData.startDate}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
-
-                <div className="row">
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Status</label>
-                        <select
-                            className="form-select"
-                            name="status"
-                            value={formData.status}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="available">Available</option>
-                            <option value="full">Full</option>
-                            <option value="cancelled">Cancelled</option>
-                            <option value="pending">Pending</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div>
+                <div className="schedule-update-group">
+                    <label className="schedule-update-label">
+                        <FaCalendarAlt />
+                        Ngày Kết Thúc
+                    </label>
+                    <input
+                        type="date"
+                        className="schedule-update-input"
+                        name="endDate"
+                        value={formData.endDate}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
-
-                <div className="mt-4">
-                    <button type="submit" className="btn btn-primary me-2">Update</button>
+                <div className="schedule-update-group">
+                    <label className="schedule-update-label">
+                        <FaInfoCircle />
+                        Trạng Thái
+                    </label>
+                    <select
+                        className="schedule-update-select"
+                        name="status"
+                        value={formData.status}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="available">Available</option>
+                        <option value="full">Full</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div className="schedule-update-actions-row">
+                    <button type="submit" className="schedule-update-btn">Cập Nhật</button>
                     <button 
                         type="button" 
-                        className="btn btn-secondary"
+                        className="schedule-update-btn schedule-update-btn-cancel"
                         onClick={() => navigate('/admin/schedules')}
                     >
-                        Cancel
+                        Hủy
                     </button>
                 </div>
             </form>
+            {showSuccess && (
+                <div className="schedule-success-overlay">
+                    <div className="schedule-success-dialog">
+                        <FaCheckCircle className="schedule-success-icon" />
+                        <h3 className="schedule-success-title">Cập Nhật Thành Công!</h3>
+                        <p className="schedule-success-message">
+                            Lịch trình đã được cập nhật thành công. Bạn có thể xem danh sách lịch trình ngay bây giờ.
+                        </p>
+                        <button 
+                            className="schedule-success-button"
+                            onClick={handleSuccessClose}
+                        >
+                            Xem Danh Sách
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

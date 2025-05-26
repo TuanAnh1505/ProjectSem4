@@ -1,27 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+
 import "../styles/admin/AdminDashboard.css";
+import {FaInfo, FaChartLine, FaGlobeAsia, FaCalendarAlt, FaMapMarkedAlt, FaListAlt, FaUser, FaSignOutAlt, FaBook, FaChevronUp, FaChevronDown, FaSearch } from "react-icons/fa";
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [isAsideCollapsed, setIsAsideCollapsed] = useState(false);
-
-
-  useEffect(() => {
-    const selectContainer = document.querySelector('.custom-select');
-    selectContainer.classList.remove('flag-vi', 'flag-en');
-    selectContainer.classList.add(`flag-${i18n.language}`);
-  }, [i18n.language]);
-
-  const changeLanguage = (value) => {
-    i18n.changeLanguage(value); // Update language/currency via i18n
-    // Optional: Update price or other UI elements
-    console.log('Currency/Language selected:', value);
-  };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [tourMenuOpen, setTourMenuOpen] = useState(false);
+  const submenuRef = useRef();
+  const tourMenuRef = useRef();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
@@ -43,73 +37,184 @@ const AdminDashboard = ({ children }) => {
 
   const toggleAside = () => {
     setIsAsideCollapsed((prev) => !prev);
+    setSidebarOpen((prev) => !prev);
   };
 
-  // const changeLanguage = (lng) => {
-  //   i18n.changeLanguage(lng);
-  //   localStorage.setItem("language", lng);
-  // };
+  useEffect(() => {
+    if (["/admin/tour", "/admin/destination", "/admin/event", "/admin/itineraries", "/admin/schedules"].includes(location.pathname)) {
+      setTourMenuOpen(true);
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!tourMenuOpen) return;
+    function handleClickOutside(event) {
+      if (
+        submenuRef.current &&
+        !submenuRef.current.contains(event.target) &&
+        tourMenuRef.current &&
+        !tourMenuRef.current.contains(event.target)
+      ) {
+        setTourMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [tourMenuOpen]);
+
+  const handleDashboardSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase();
+      if (term.includes("tour") || term.includes("chuyến đi")) {
+        navigate(`/admin/tour?search=${encodeURIComponent(searchTerm)}`);
+      } else if (term.includes("event") || term.includes("sự kiện")) {
+        navigate(`/admin/event?search=${encodeURIComponent(searchTerm)}`);
+      } else if (term.includes("destination") || term.includes("điểm đến")) {
+        navigate(`/admin/destination?search=${encodeURIComponent(searchTerm)}`);
+      } else if (term.includes("itineraries") || term.includes("lịch trình")) {
+        navigate(`/admin/itineraries?search=${encodeURIComponent(searchTerm)}`);
+      } else if (term.includes("schedules") || term.includes("lịch")) {
+        navigate(`/admin/schedules?search=${encodeURIComponent(searchTerm)}`);
+      } else if (term.includes("booking") || term.includes("đặt tour")) {
+        navigate(`/admin/booking?search=${encodeURIComponent(searchTerm)}`);
+      } else if (term.includes("user") || term.includes("tài khoản")) {
+        navigate(`/admin/user?search=${encodeURIComponent(searchTerm)}`);
+      } else {
+        navigate(`/admin/dashboard?search=${encodeURIComponent(searchTerm)}`);
+      }
+    }
+  };
 
   return (
     <div className="admin-dashboard">
-      <aside className={`aside-nav ${isAsideCollapsed ? "collapsed" : ""}`}>
+      <aside className={`aside-nav-modern${isAsideCollapsed ? " collapsed" : ""}${sidebarOpen ? " open" : ""}`}>
         {!isAsideCollapsed && (
-          <div className="aside-header">
-            <div className="logo-container">
-              <h1 style={{ color: '#a61a19', fontSize: '20px', fontWeight: 'bold', margin: 0 }}>
-                Vietnam Tourism
-              </h1>
+          <div className="aside-header-modern">
+            <div className="logo-container-modern">
+              <span className="logo-circle">VT</span>
+              <h1 className="logo-title">Vietnam Tourism</h1>
             </div>
-            <button className="toggle-button" onClick={toggleAside}>
+            <button className="toggle-button-modern" onClick={toggleAside}>
               ✕
             </button>
-          </div>
+          </div>  
         )}
         {!isAsideCollapsed && (
-          <ul className="aside-menu">
-            <li className="menu-section">{t("main_pages")}</li>
-            <li onClick={() => navigate("/admin/dashboard")}>
-              <span className="menu-icon">📊</span>
-              <span className="menu-text">{t("dashboard")}</span>
+          <ul className="aside-menu-modern">
+            <li className="menu-section-modern">Trang chính</li>
+            <li onClick={() => navigate("/admin/about")}
+                className={location.pathname === "/admin/about" ? "active" : ""}>
+              <span className="menu-icon-circle"><FaInfo /></span>
+              <span className="menu-text-modern">Giới thiệu</span>
             </li>
-            <li onClick={() => navigate("/admin/destination")}>
-              <span className="menu-icon">🌍</span>
-              <span className="menu-text">{t("destination")}</span>
+            <li onClick={() => navigate("/admin/dashboard")}
+                className={location.pathname === "/admin/dashboard" ? "active" : ""}>
+              <span className="menu-icon-circle"><FaChartLine /></span>
+              <span className="menu-text-modern">Bảng điều khiển</span>
             </li>
-            <li onClick={() => navigate("/admin/event")}>
-              <span className="menu-icon">📅</span>
-              <span className="menu-text">{t("event")}</span>
+            <li
+              ref={tourMenuRef}
+              className={[
+                "/admin/tour",
+                "/admin/destination",
+                "/admin/event",
+                "/admin/itineraries",
+                "/admin/schedules"
+              ].includes(location.pathname)
+                ? "active has-submenu"
+                : "has-submenu"}
+              onClick={() => setTourMenuOpen((open) => !open)}
+              style={{ position: "relative" }}
+            >
+              <span className="menu-icon-circle"><FaMapMarkedAlt /></span>
+              <span className="menu-text-modern">Chuyến đi</span>
+              <span className="submenu-arrow">
+                {tourMenuOpen ? <FaChevronUp /> : <FaChevronDown />}
+              </span>
             </li>
-            <li onClick={() => navigate("/admin/tour")}>
-              <span className="menu-icon">🗺️</span>
-              <span className="menu-text">{t("tour")}</span>
+            <div
+              ref={submenuRef}
+              style={{
+                maxHeight: tourMenuOpen ? 500 : 0,
+                opacity: tourMenuOpen ? 1 : 0,
+                overflow: "hidden",
+                transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s"
+              }}
+            >
+              {tourMenuOpen && (
+                <ul className="submenu-modern">
+                  <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/tour"); }}
+                    className={location.pathname === "/admin/tour" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaMapMarkedAlt /></span>
+                    <span className="menu-text-modern">Chuyến đi</span>
+                  </li>
+                  <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/destination"); }}
+                    className={location.pathname === "/admin/destination" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaGlobeAsia /></span>
+                    <span className="menu-text-modern">Điểm đến</span>
+                  </li>
+                  <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/event"); }}
+                    className={location.pathname === "/admin/event" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaCalendarAlt /></span>
+                    <span className="menu-text-modern">Sự kiện</span>
+                  </li>
+                  <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/itineraries"); }}
+                    className={location.pathname === "/admin/itineraries" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaListAlt /></span>
+                    <span className="menu-text-modern">Chi tiết lịch trình</span>
+                  </li>
+                  <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/schedules"); }}
+                    className={location.pathname === "/admin/schedules" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaCalendarAlt /></span>
+                    <span className="menu-text-modern">Lịch trình</span>
+                  </li>
+                </ul>
+              )}
+            </div>
+            <li onClick={() => navigate("/admin/booking")}
+                className={location.pathname === "/admin/booking" ? "active" : ""}>
+              <span className="menu-icon-circle"><FaBook /></span>
+              <span className="menu-text-modern">Chuyến đi đã đặt</span>
             </li>
-            <li onClick={() => navigate("/admin/itineraries")}>
-              <span className="menu-icon">🗺️</span>
-              <span className="menu-text">{t("itinerary")}</span>
-            </li>
-            <li onClick={() => navigate("/admin/tour-guide")}>
-              <span className="menu-icon">👥</span>
-              <span className="menu-text">{t("tour_guide")}</span>
-            </li>
-            <li onClick={() => navigate("/admin/schedules")}>
-              <span className="menu-icon">📅</span>
-              <span className="menu-text">{t("schedule")}</span>
-            </li>
-            <li onClick={() => navigate("/admin/booking")}>
-              <span className="menu-icon">📖</span>
-              <span className="menu-text">{t("booking")}</span>
-            </li>
-            <div className="account-section">
-              <li className="menu-section">{t("account_pages")}</li>
-              <li onClick={() => navigate("/admin/user")}>
-                <span className="menu-icon">👤</span>
-                <span className="menu-text">{t("user")}</span>
+            <div className="account-section-modern">
+              <li className="menu-section-modern">Trang tài khoản</li>
+              <li
+                className={["/admin/user", "/admin/logout"].includes(location.pathname) ? "active has-submenu" : "has-submenu"}
+                onClick={() => setShowAccountMenu((prev) => !prev)}
+                style={{ position: "relative" }}
+              >
+                <span className="menu-icon-circle"><FaUser /></span>
+                <span className="menu-text-modern">Tài khoản</span>
+                <span className="submenu-arrow">{showAccountMenu ? <FaChevronUp /> : <FaChevronDown />}</span>
               </li>
-              <li onClick={handleLogout}>
-                <span className="menu-icon">🚪</span>
-                <span className="menu-text">{t("logout")}</span>
-              </li>
+              {showAccountMenu && (
+                <ul className="submenu-modern">
+                  <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/user"); setShowAccountMenu(false); }}
+                    className={location.pathname === "/admin/user" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaUser /></span>
+                    <span className="menu-text-modern">Tài khoản</span>
+                  </li>
+                  <li
+                    onClick={e => { e.stopPropagation(); handleLogout(); setShowAccountMenu(false); }}
+                  >
+                    <span className="menu-icon-circle"><FaSignOutAlt /></span>
+                    <span className="menu-text-modern">Đăng xuất</span>
+                  </li>
+                </ul>
+              )}
             </div>
           </ul>
         )}
@@ -123,38 +228,36 @@ const AdminDashboard = ({ children }) => {
           minHeight: "90vh",
         }}
       >
+        <div className="dashboard-topbar">
+          <form className="dashboard-search-bar" onSubmit={handleDashboardSearch}>
+            <input
+              type="text"
+              className="dashboard-search-input"
+              placeholder="Tìm kiếm điểm đến, tour, sự kiện..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+            <button className="dashboard-search-btn" type="submit">
+              <FaSearch />
+            </button>
+          </form>
+          <FaUser className="user-icon" onClick={toggleDropdown} />
+        </div>
         {isAsideCollapsed && (
           <button className="toggle-button-main" onClick={toggleAside}>
             ☰
           </button>
         )}
         <div className="button-container">
-          <div className="custom-select flag-vi">
-            <label htmlFor="currency-select" className="visually-hidden">
-              Select currency
-            </label>
-            <select
-              id="currency-select"
-              onChange={(e) => changeLanguage(e.target.value)}
-              value={i18n.language}
-            >
-              <option value="vi">Viet Nam</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-          <div className="user-icon" onClick={toggleDropdown}>
-            👤
-          </div>
           {showDropdown && (
-            <div className="dropdown-menu">
-              <p className="dropdown-item">
-                {t("account")}: <strong>{email}</strong>
-              </p>
+            <div className="account-dropdown">
+              <div className="account-dropdown-label">Tài khoản:</div>
+              <div className="account-dropdown-email">{email}</div>
               <button
                 onClick={() => navigate("/change-password")}
-                className="dropdown-item"
+                className="account-dropdown-btn"
               >
-                {t("change_password")}
+                Đổi mật khẩu
               </button>
             </div>
           )}
@@ -168,7 +271,7 @@ const AdminDashboard = ({ children }) => {
             fontSize: "14px",
           }}
         >
-          <p>{t("footer")}</p>
+          <p>Copyright © 2025 Vietnam Tourism. All rights reserved.</p>
         </footer>
       </main>
     </div>

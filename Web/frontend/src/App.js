@@ -11,7 +11,6 @@ import ActivateAccount from './components/auth/ActivateAccount';
 import ForgotPassword from './components/auth/ForgotPassword';
 import ResetPassword from './components/auth/ResetPassword';
 import ChangePassword from './components/auth/ChangePassword';
-import AdminDashboard from './components/admin/AdminDashboard';
 import UserIndex from './components/admin/user/UserIndex';
 import DashboardPage from './components/admin/DashboardPage';
 import AdminPage from './components/admin/AdminPage';
@@ -138,8 +137,8 @@ const App = () => {
 
             {/* Admin routes */}
             <Route
-              path="/admin-dashboard"
-              element={<ProtectedRoute element={<AdminDashboard />} requiredRole="ADMIN" />}
+              path="/admin/about"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
             />
             <Route
               path="/user"
