@@ -1,16 +1,15 @@
 package com.example.api.service;
 
 import com.example.api.dto.PaymentRequestDTO;
-import com.example.api.model.Payment;
-import com.example.api.model.PaymentMethod;
-import com.example.api.model.PaymentStatus;
-import com.example.api.repository.PaymentMethodRepository;
-import com.example.api.repository.PaymentRepository;
-import com.example.api.repository.PaymentStatusRepository;
+import com.example.api.dto.PaymentResponseDTO;
+import com.example.api.dto.PaymentHistoryDTO;
+import com.example.api.model.*;
+import com.example.api.repository.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -36,15 +35,105 @@ public class PaymentService {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
+    @Autowired
+    private PaymentHistoryRepository paymentHistoryRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private static final String PARTNER_CODE = "MOMO";
     private static final String ACCESS_KEY = "F8BBA842ECF85";
     private static final String SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
     private static final String MOMO_ENDPOINT = "https://test-payment.momo.vn/v2/gateway/api/create";
-    private static final String RETURN_URL = "http://localhost:8080/api/payment/momo-return";
-    private static final String NOTIFY_URL = "http://localhost:8080/api/payment/momo-notify";
+    private static final String RETURN_URL = "http://localhost:8080/api/payments/momo/return";
+    private static final String NOTIFY_URL = "http://localhost:8080/api/payments/momo/notify";
+
+    @Transactional
+    public PaymentResponseDTO createPayment(PaymentRequestDTO dto) {
+        // Validate booking and user
+        Booking booking = bookingRepository.findById(dto.getBookingId())
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Create payment record
+        Payment payment = new Payment();
+        payment.setBooking(booking);
+        payment.setUser(user);
+        payment.setAmount(dto.getAmount());
+        payment.setTransactionId(UUID.randomUUID().toString());
+        payment.setPaymentDate(LocalDateTime.now());
+
+        // Set initial status (pending)
+        PaymentStatus pendingStatus = paymentStatusRepository.findById(1)
+                .orElseThrow(() -> new RuntimeException("Payment status not found"));
+        payment.setStatus(pendingStatus);
+
+        // Set payment method
+        PaymentMethod method = paymentMethodRepository.findById(dto.getPaymentMethodId())
+                .orElseThrow(() -> new RuntimeException("Payment method not found"));
+        payment.setPaymentMethod(method);
+
+        // Save payment
+        payment = paymentRepository.save(payment);
+
+        // Create initial history record
+        PaymentHistory history = new PaymentHistory();
+        history.setPayment(payment);
+        history.setStatus(pendingStatus);
+        history.setNotes("Payment created");
+        paymentHistoryRepository.save(history);
+
+        return convertToDTO(payment);
+    }
+
+    public PaymentResponseDTO getPaymentById(Integer id) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        return convertToDTO(payment);
+    }
+
+    public List<PaymentResponseDTO> getPaymentsByBooking(Integer bookingId) {
+        return paymentRepository.findByBooking_BookingId(bookingId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<PaymentHistoryDTO> getPaymentHistory(Integer paymentId) {
+        return paymentHistoryRepository.findByPayment_PaymentId(paymentId).stream()
+                .map(this::convertToHistoryDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PaymentResponseDTO updatePaymentStatus(Integer paymentId, Integer statusId, String notes) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        
+        PaymentStatus newStatus = paymentStatusRepository.findById(statusId)
+                .orElseThrow(() -> new RuntimeException("Payment status not found"));
+
+        payment.setStatus(newStatus);
+        payment = paymentRepository.save(payment);
+
+        // Create history record
+        PaymentHistory history = new PaymentHistory();
+        history.setPayment(payment);
+        history.setStatus(newStatus);
+        history.setNotes(notes != null ? notes : "Status updated to " + newStatus.getStatusName());
+        paymentHistoryRepository.save(history);
+
+        return convertToDTO(payment);
+    }
 
     public String createMomoPayment(PaymentRequestDTO dto) throws IOException, InterruptedException {
-        String orderId = UUID.randomUUID().toString();
+        // First create the payment record
+        PaymentResponseDTO payment = createPayment(dto);
+
+        String orderId = payment.getTransactionId();
         String requestId = UUID.randomUUID().toString();
         String amount = dto.getAmount().toString();
 
@@ -77,21 +166,64 @@ public class PaymentService {
         return json.get("payUrl").asText();
     }
 
-    public void saveMomoPayment(Map<String, String> params) {
-        Payment payment = new Payment();
-        payment.setTransactionId(params.get("orderId"));
-        payment.setAmount(new BigDecimal(params.get("amount")));
-        payment.setPaymentDate(LocalDateTime.now());
-        
-        PaymentMethod momoMethod = paymentMethodRepository.findByMethodName("E-Wallet")
-            .orElseThrow(() -> new IllegalStateException("Payment method not found"));
-        payment.setPaymentMethod(momoMethod);
-        
-        PaymentStatus status = paymentStatusRepository.findById("0".equals(params.get("resultCode")) ? 1 : 0)
-            .orElseThrow(() -> new IllegalStateException("Payment status not found"));
-        payment.setStatus(status);
-        
-        paymentRepository.save(payment);
+    @Transactional
+    public PaymentResponseDTO handleMomoReturn(Map<String, String> params) {
+        String orderId = params.get("orderId");
+        String resultCode = params.get("resultCode");
+
+        Payment payment = paymentRepository.findByTransactionId(orderId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        // Update payment status based on MoMo response
+        PaymentStatus newStatus = paymentStatusRepository.findById(
+                "0".equals(resultCode) ? 2 : 3) // 2 = success, 3 = failed
+                .orElseThrow(() -> new RuntimeException("Payment status not found"));
+
+        return updatePaymentStatus(payment.getPaymentId(), newStatus.getPaymentStatusId(),
+                "MoMo payment " + ("0".equals(resultCode) ? "successful" : "failed"));
+    }
+
+    @Transactional
+    public void handleMomoNotify(Map<String, String> params) {
+        // Similar to handleMomoReturn but for server-to-server notification
+        handleMomoReturn(params);
+    }
+
+    public List<PaymentMethod> getAllPaymentMethods() {
+        return paymentMethodRepository.findAll();
+    }
+
+    public List<PaymentStatus> getAllPaymentStatuses() {
+        return paymentStatusRepository.findAll();
+    }
+
+    private PaymentResponseDTO convertToDTO(Payment payment) {
+        PaymentResponseDTO dto = new PaymentResponseDTO();
+        dto.setPaymentId(payment.getPaymentId());
+        dto.setBookingId(payment.getBooking().getBookingId());
+        dto.setUserId(payment.getUser().getUserid());
+        dto.setAmount(payment.getAmount());
+        dto.setPaymentMethodId(payment.getPaymentMethod().getMethodId());
+        dto.setPaymentMethod(payment.getPaymentMethod().getMethodName());
+        dto.setStatusId(payment.getStatus().getPaymentStatusId());
+        dto.setStatusName(payment.getStatus().getStatusName());
+        dto.setTransactionId(payment.getTransactionId());
+        dto.setPaymentDate(payment.getPaymentDate());
+        dto.setNotes(payment.getNotes());
+        dto.setCreatedAt(payment.getCreatedAt());
+        dto.setUpdatedAt(payment.getUpdatedAt());
+        return dto;
+    }
+
+    private PaymentHistoryDTO convertToHistoryDTO(PaymentHistory history) {
+        PaymentHistoryDTO dto = new PaymentHistoryDTO();
+        dto.setHistoryId(history.getHistoryId());
+        dto.setPaymentId(history.getPayment().getPaymentId());
+        dto.setStatusId(history.getStatus().getPaymentStatusId());
+        dto.setStatusName(history.getStatus().getStatusName());
+        dto.setNotes(history.getNotes());
+        dto.setCreatedAt(history.getCreatedAt());
+        return dto;
     }
 
     private String generateSignature(Map<String, String> data) {
@@ -115,6 +247,29 @@ public class PaymentService {
             return result.toString();
         } catch (Exception e) {
             throw new RuntimeException("Error generating HMAC SHA256 signature", e);
+        }
+    }
+
+    public String generateVietQr(String accountNo, String accountName, int amount, String phone) throws IOException, InterruptedException {
+        String url = "https://api.vietqr.io/v2/generate";
+        String json = String.format(
+            "{\"accountNo\":\"%s\",\"accountName\":\"%s\",\"acqId\":\"970423\",\"amount\":%d,\"addInfo\":\"%s\",\"format\":\"base64\"}",
+            accountNo, accountName, amount, phone
+        );
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(json))
+            .build();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("VietQR response: " + response.body());
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readTree(response.body());
+        if (node.has("data") && node.get("data").has("qrDataURL")) {
+            return node.get("data").get("qrDataURL").asText();
+        } else {
+            throw new RuntimeException("Không lấy được mã QR từ VietQR: " + response.body());
         }
     }
 }

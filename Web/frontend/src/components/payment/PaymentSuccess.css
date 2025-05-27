@@ -1,0 +1,179 @@
+.payment-success {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.payment-success-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.success-icon {
+  font-size: 64px;
+  color: #28a745;
+  margin-bottom: 20px;
+}
+
+.payment-success-header h2 {
+  color: #28a745;
+  font-size: 2rem;
+  margin: 0 0 10px 0;
+}
+
+.success-message {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.payment-success-details {
+  display: grid;
+  gap: 30px;
+}
+
+.success-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.success-section h3 {
+  color: #333;
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item span:first-child {
+  color: #666;
+}
+
+.detail-item span:last-child {
+  font-weight: 500;
+  color: #333;
+}
+
+.detail-item .amount {
+  color: #28a745;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.detail-item .status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.detail-item .status.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.success-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.download-invoice,
+.view-bookings {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.download-invoice {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.download-invoice:hover {
+  background: #0056b3;
+}
+
+.view-bookings {
+  background: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.view-bookings:hover {
+  background: #e9ecef;
+}
+
+.success-note {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fff3cd;
+  border-radius: 6px;
+  border: 1px solid #ffeeba;
+}
+
+.success-note p {
+  margin: 5px 0;
+  color: #856404;
+  font-size: 0.9rem;
+}
+
+.payment-success-loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .payment-success {
+    padding: 20px;
+  }
+
+  .success-icon {
+    font-size: 48px;
+  }
+
+  .payment-success-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .success-message {
+    font-size: 1rem;
+  }
+
+  .success-actions {
+    flex-direction: column;
+  }
+
+  .download-invoice,
+  .view-bookings {
+    width: 100%;
+  }
+} 
