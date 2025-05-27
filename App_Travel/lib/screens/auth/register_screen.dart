@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+
   @override
   void dispose() {
     _fullNameController.dispose();

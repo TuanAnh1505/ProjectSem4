@@ -3,6 +3,7 @@ import '../../models/tour_models.dart';
 import '../../services/tour_service.dart';
 import 'package:intl/intl.dart';
 import 'tour_detail_screen.dart';
+import 'package:diacritic/diacritic.dart';
 
 class TourScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -17,6 +18,31 @@ class _TourScreenState extends State<TourScreen> {
   double? minPrice;
   double? maxPrice;
   bool sortAZ = false;
+  int selectedFilter = 0;
+  final List<String> filters = ['Tất cả', 'Miền bắc', 'Miền trung', 'Miền nam'];
+
+
+  // Map từ khóa cho từng vùng
+  final Map<String, List<String>> regionKeywords = {
+    'Miền bắc': [
+      // Tỉnh/thành
+      'Hà Nội', 'Hải Phòng', 'Quảng Ninh', 'Bắc Ninh', 'Bắc Giang', 'Bắc Kạn', 'Cao Bằng', 'Điện Biên', 'Hà Giang', 'Hà Nam', 'Hải Dương', 'Hòa Bình', 'Hưng Yên', 'Lai Châu', 'Lạng Sơn', 'Lào Cai', 'Nam Định', 'Ninh Bình', 'Phú Thọ', 'Sơn La', 'Thái Bình', 'Thái Nguyên', 'Tuyên Quang', 'Vĩnh Phúc', 'Yên Bái',
+      // Điểm đến nổi bật
+      'Sapa', 'Hạ Long', 'Bái Đính', 'Tràng An', 'Tam Đảo', 'Mộc Châu', 'Fansipan', 'Cát Bà', 'Đồng Văn', 'Ba Bể', 'Mai Châu', 'Núi Đôi Quản Bạ', 'Thác Bản Giốc', 'Yên Tử', 'Chùa Hương', 'Làng cổ Đường Lâm'
+    ],
+    'Miền trung': [
+      // Tỉnh/thành
+      'Thanh Hóa', 'Nghệ An', 'Hà Tĩnh', 'Quảng Bình', 'Quảng Trị', 'Thừa Thiên Huế', 'Đà Nẵng', 'Quảng Nam', 'Quảng Ngãi', 'Bình Định', 'Phú Yên', 'Khánh Hòa', 'Ninh Thuận', 'Bình Thuận', 'Kon Tum', 'Gia Lai', 'Đắk Lắk', 'Đắk Nông', 'Lâm Đồng',
+      // Điểm đến nổi bật
+      'Huế', 'Đà Nẵng', 'Hội An', 'Phong Nha', 'Kẻ Bàng', 'Bà Nà Hills', 'Cù Lao Chàm', 'Mỹ Sơn', 'Nha Trang', 'Đà Lạt', 'Mũi Né', 'Phan Thiết', 'Tuy Hòa', 'Quy Nhơn', 'Buôn Ma Thuột', 'Pleiku', 'Đồi cát Bay', 'Tháp Chàm', 'Biển Lăng Cô', 'Đèo Hải Vân'
+    ],
+    'Miền nam': [
+      // Tỉnh/thành
+      'TP. Hồ Chí Minh', 'Bà Rịa - Vũng Tàu', 'Bình Dương', 'Bình Phước', 'Cà Mau', 'Cần Thơ', 'Đồng Nai', 'Đồng Tháp', 'Hậu Giang', 'Kiên Giang', 'Long An', 'Sóc Trăng', 'Tây Ninh', 'Tiền Giang', 'Trà Vinh', 'Vĩnh Long', 'An Giang', 'Bạc Liêu', 'Bến Tre',
+      // Điểm đến nổi bật
+      'Sài Gòn', 'Vũng Tàu', 'Phú Quốc', 'Côn Đảo', 'Cần Giờ', 'Mỹ Tho', 'Bến Tre', 'Châu Đốc', 'Sa Đéc', 'Hà Tiên', 'Rạch Giá', 'Cà Mau', 'Bạc Liêu', 'Sóc Trăng', 'Tràm Chim', 'Chợ Nổi Cái Răng', 'Núi Bà Đen', 'Đảo Nam Du', 'Đảo Thổ Chu'
+    ]
+  };
 
   String formatPrice(double? price) {
     if (price == null) return 'N/A';
@@ -27,6 +53,11 @@ class _TourScreenState extends State<TourScreen> {
   String formatDate(DateTime? date) {
     if (date == null) return '';
     return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  // Hàm loại bỏ dấu tiếng Việt
+  String removeDiacriticsVN(String str) {
+    return removeDiacritics(str.toLowerCase());
   }
 
   @override
@@ -63,40 +94,40 @@ class _TourScreenState extends State<TourScreen> {
               ),
             ),
             // Thanh filter tab
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  FilterChip(
-                    label: Text('Tất cả'),
-                    selected: true,
-                    onSelected: (_) {},
-                    selectedColor: Colors.blue[100],
-                    labelStyle: TextStyle(
-                      color: Colors.blue[900], fontWeight: FontWeight.bold),
+            SizedBox(
+              height: 38,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                itemCount: filters.length,
+                separatorBuilder: (_, __) => SizedBox(width: 10),
+                itemBuilder: (context, idx) => ChoiceChip(
+                  showCheckmark: false,
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (selectedFilter == idx) ...[
+                        Icon(Icons.check, color: Colors.white, size: 18),
+                        SizedBox(width: 4),
+                      ],
+                      Text(filters[idx]),
+                    ],
                   ),
-                  SizedBox(width: 8),
-                  FilterChip(
-                    label: Text('Trong nước'),
-                    selected: false,
-                    onSelected: (_) {},
+                  selected: selectedFilter == idx,
+                  selectedColor: Colors.orange,
+                  backgroundColor: Colors.grey[200],
+                  labelStyle: TextStyle(
+                    color: selectedFilter == idx ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.bold,
                   ),
-                  SizedBox(width: 8),
-                  FilterChip(
-                    label: Text('Nước ngoài'),
-                    selected: false,
-                    onSelected: (_) {},
-                  ),
-                  SizedBox(width: 8),
-                  FilterChip(
-                    label: Text('Mùa hè'),
-                    selected: false,
-                    onSelected: (_) {},
-                  ),
-                ],
+                  onSelected: (_) {
+                    setState(() => selectedFilter = idx);
+                  },
+                ),
               ),
             ),
             // Hàng chứa Bộ lọc và Sắp xếp
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
               child: Row(
@@ -152,6 +183,7 @@ class _TourScreenState extends State<TourScreen> {
                         },
                       );
                     },
+                    // const SizedBox(height: 32),
                     child: Row(
                       children: [
                         Icon(Icons.filter_list, size: 20, color: Colors.grey[700]),
@@ -168,6 +200,7 @@ class _TourScreenState extends State<TourScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {
                       setState(() {
@@ -191,6 +224,7 @@ class _TourScreenState extends State<TourScreen> {
               ),
             ),
             // Expanded để chứa danh sách tour
+            const SizedBox(height: 20),
             Expanded(
               child: FutureBuilder<List<Tour>>(
                 future: _tourService.fetchTours(),
@@ -198,11 +232,26 @@ class _TourScreenState extends State<TourScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Center(child: Text('No tours available'));
                   } else {
                     List<Tour> tours = snapshot.data!;
+                    
+                    // Lọc theo miền
+                    if (selectedFilter != 0) {
+                      final region = filters[selectedFilter];
+                      final keywords = regionKeywords[region] ?? [];
+                      tours = tours.where((tour) {
+                        final name = removeDiacriticsVN(tour.name);
+                        final description = removeDiacriticsVN(tour.description);
+                        return keywords.any((kw) {
+                          final keyword = removeDiacriticsVN(kw);
+                          return name.contains(keyword) || description.contains(keyword);
+                        });
+                      }).toList();
+                    }
+
                     // Lọc theo khoảng giá
                     if (minPrice != null) {
                       tours = tours.where((t) => t.price != null && t.price! >= minPrice!).toList();
@@ -214,6 +263,35 @@ class _TourScreenState extends State<TourScreen> {
                     if (sortAZ) {
                       tours.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
                     }
+
+                    if (tours.isEmpty) {
+                      return Center(
+                        child: Card(
+                          color: Colors.orange[50],
+                          margin: EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.sentiment_dissatisfied, color: Colors.orange, size: 32),
+                                SizedBox(width: 10),
+                                Flexible(
+                                  child: Text(
+                                    'Hiện không có tour nào trong mục này',
+                                    style: TextStyle(fontSize: 17, color: Colors.grey[700], fontWeight: FontWeight.w500),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    
                     return ListView.builder(
                       padding: EdgeInsets.only(top: 0),
                       itemCount: tours.length,

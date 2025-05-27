@@ -25,6 +25,7 @@ class _AppNavigationState extends State<AppNavigation> {
   bool _showSearch = false;
   final TextEditingController _searchController = TextEditingController();
 
+
   @override
   void initState() {
     super.initState();
@@ -129,16 +130,19 @@ class SearchBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: TextField(
+        
+        style: TextStyle(fontSize: 16, color: Colors.black87),
         decoration: InputDecoration(
           hintText: 'Tìm kiếm tour du lịch...',
-          prefixIcon: Icon(Icons.search, color: Colors.orange),
+          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Color(0xFFF8F9FA),
           contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
+          suffixIcon: Icon(Icons.search, color: Colors.orange),
         ),
       ),
     );

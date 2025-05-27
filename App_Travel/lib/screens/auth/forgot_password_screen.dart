@@ -20,6 +20,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
+
   Future<void> _sendResetEmail() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);

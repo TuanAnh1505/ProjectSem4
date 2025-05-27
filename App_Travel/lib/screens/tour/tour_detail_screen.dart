@@ -29,6 +29,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   String discountCode = '';
   int? userId;
 
+
   String formatPrice(num? price) {
     if (price == null) return '';
     final formatter = NumberFormat('#,###', 'vi_VN');

@@ -24,6 +24,7 @@ class AuthService {
         await prefs.setString('auth_token', token);
         await prefs.setInt('userId', userId);
         
+        
         return AuthResponse.fromJson(data);
       } else {
         throw Exception(jsonDecode(response.body)['message'] ?? 'Login failed');

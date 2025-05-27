@@ -37,3 +37,6 @@ build/
 
 ### Test Files ###
 ApiApplicationTests.java
+
+
+**/application.properties

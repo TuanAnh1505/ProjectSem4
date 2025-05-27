@@ -22,6 +22,7 @@ class Tour {
     this.createdAt,
     this.updatedAt,
   });
+  
 
   factory Tour.fromJson(Map<String, dynamic> json) {
     return Tour(

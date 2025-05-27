@@ -26,6 +26,7 @@ class RegisterRequest {
     required this.phone,
     required this.address,
   });
+  
 
   Map<String, dynamic> toJson() {
     return {

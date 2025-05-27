@@ -22,6 +22,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
 
+
   @override
   void dispose() {
     _newPasswordController.dispose();

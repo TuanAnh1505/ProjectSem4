@@ -54,7 +54,7 @@ const Header = () => {
               </li>
               {isAuthenticated && userRole === 'ADMIN' && (
                 <li>
-                  <Link to="/admin-dashboard">Admin Dashboard</Link>
+                  <Link to="/admin/about">Admin Dashboard</Link>
                 </li>
               )}
               <li className={styles.hasFlyout}>

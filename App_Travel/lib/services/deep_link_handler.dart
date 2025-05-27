@@ -18,6 +18,7 @@ class DeepLinkHandler {
     _sub?.cancel();
   }
 
+
   void _handleIncomingLinks() {
     // Listen for incoming links when app is running
     _sub = _appLinks?.uriLinkStream.listen((Uri? uri) {

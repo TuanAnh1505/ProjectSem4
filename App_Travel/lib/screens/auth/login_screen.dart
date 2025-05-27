@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+
   @override
   void dispose() {
     _emailController.dispose();
