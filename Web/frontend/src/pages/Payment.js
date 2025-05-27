@@ -14,6 +14,8 @@ const Payment = () => {
   const [error, setError] = useState(null);
   const [bankQr, setBankQr] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [confirmResult, setConfirmResult] = useState(null); // 'success' | 'failed' | null
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -75,7 +77,9 @@ const Payment = () => {
             'http://localhost:8080/api/payments/bank-transfer-qr',
             {
               amount: amount,
-              phone: userPhone
+              phone: userPhone,
+              bookingId: parseInt(bookingId),
+              userId: parseInt(userId)
             },
             {
               headers: {
@@ -84,10 +88,8 @@ const Payment = () => {
               }
             }
           );
-          console.log('Bank transfer QR response:', response.data);
           setBankQr(response.data);
         } catch (err) {
-          console.error('Error generating QR code:', err.response?.data || err);
           setError('Không thể tạo mã QR. Vui lòng thử lại sau.');
         } finally {
           setQrLoading(false);
@@ -142,6 +144,32 @@ const Payment = () => {
     }
   };
 
+  useEffect(() => {
+    let interval;
+    if (bankQr && bankQr.paymentId) {
+      interval = setInterval(async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.get(
+            `http://localhost:8080/api/payments/${bankQr.paymentId}/status`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            }
+          );
+          if (response.data.statusName && response.data.statusName.toLowerCase() === 'completed') {
+            setConfirmResult('success');
+            clearInterval(interval);
+          }
+        } catch (err) {
+          // Có thể log hoặc bỏ qua
+        }
+      }, 5000); // 5 giây kiểm tra 1 lần
+    }
+    return () => clearInterval(interval);
+  }, [bankQr]);
+
   if (loading) {
     return <div className="payment-loading">Đang tải thông tin thanh toán...</div>;
   }
@@ -184,20 +212,53 @@ const Payment = () => {
                 <div><b>Số tiền:</b> {bankQr.amount.toLocaleString()} VND</div>
                 <div><b>Nội dung chuyển khoản:</b> {bankQr.transferContent}</div>
                 <div style={{color: 'red', marginTop: 8}}>Vui lòng chuyển khoản đúng nội dung để được xác nhận tự động!</div>
-                <button onClick={() => setBankQr(null)} style={{marginTop: 12}}>Đóng</button>
               </div>
             )}
           </div>
         </div>
 
         <div className="payment-actions">
-          <button
-            className="payment-button"
-            onClick={handlePayment}
-            disabled={!selectedMethod}
-          >
-            Thanh toán ngay
-          </button>
+          {bankQr ? (
+            <button
+              className="payment-button"
+              style={{ background: '#28a745' }}
+              onClick={async () => {
+                setConfirmLoading(true);
+                setConfirmResult(null);
+                try {
+                  const token = localStorage.getItem('token');
+                  const response = await axios.get(
+                    `http://localhost:8080/api/payments/${bankQr.paymentId}/status`,
+                    {
+                      headers: {
+                        'Authorization': `Bearer ${token}`
+                      }
+                    }
+                  );
+                  if (response.data.statusName && response.data.statusName.toLowerCase() === 'completed') {
+                    setConfirmResult('success');
+                  } else {
+                    setConfirmResult('failed');
+                  }
+                } catch (err) {
+                  setConfirmResult('failed');
+                } finally {
+                  setConfirmLoading(false);
+                }
+              }}
+              disabled={confirmLoading}
+            >
+              {confirmLoading ? 'Đang xác nhận...' : 'Xác nhận đã thanh toán'}
+            </button>
+          ) : (
+            <button
+              className="payment-button"
+              onClick={handlePayment}
+              disabled={!selectedMethod}
+            >
+              Thanh toán ngay
+            </button>
+          )}
           <button
             className="cancel-button"
             onClick={() => navigate(-1)}
@@ -206,10 +267,50 @@ const Payment = () => {
           </button>
         </div>
 
-        {error && (
-          <div className="payment-error-message">
-            {error}
+        {confirmResult === 'success' && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999
+          }}>
+            <div style={{
+              background: '#fff',
+              borderRadius: 12,
+              padding: '32px 48px',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+              textAlign: 'center',
+              minWidth: 320
+            }}>
+              <div style={{ fontSize: 48, color: '#28a745', marginBottom: 16 }}>✔</div>
+              <div style={{ fontSize: 22, color: '#28a745', fontWeight: 600, marginBottom: 12 }}>Thanh toán thành công!</div>
+              <button
+                style={{
+                  marginTop: 16,
+                  padding: '10px 28px',
+                  background: '#28a745',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  fontSize: 16,
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+                onClick={() => window.location.reload()}
+              >
+                Đóng
+              </button>
+            </div>
           </div>
+        )}
+        {confirmResult === 'failed' && (
+          <div className="payment-error-message">Chưa nhận được thanh toán, vui lòng thử lại sau.</div>
         )}
       </div>
     </div>

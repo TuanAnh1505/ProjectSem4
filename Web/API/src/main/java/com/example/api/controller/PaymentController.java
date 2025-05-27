@@ -149,23 +149,45 @@ public class PaymentController {
         try {
             int amount = (int) payload.get("amount");
             String phone = (String) payload.get("phone");
+            int bookingId = (int) payload.getOrDefault("bookingId", 0);
+            int userId = (int) payload.getOrDefault("userId", 0);
+            // Tạo payment record
+            PaymentRequestDTO dto = new PaymentRequestDTO();
+            dto.setBookingId(bookingId);
+            dto.setUserId((long) userId);
+            dto.setAmount(new java.math.BigDecimal(amount));
+            dto.setPaymentMethodId(2); // Bank Transfer
+            PaymentResponseDTO payment = paymentService.createPayment(dto);
             // Gọi service để sinh QR
-            String qrDataURL = paymentService.generateVietQr("123456789", "CONG TY TNHH ABC", amount, phone);
+            String qrDataURL = paymentService.generateVietQr("9021400417865", "Pham Van Tuan Anh", amount, phone);
             System.out.println("VietQR generated qrDataURL: " + qrDataURL);
-            
             Map<String, Object> result = new HashMap<>();
             result.put("qrDataURL", qrDataURL);
-            result.put("accountNumber", "123456789");
-            result.put("accountName", "CONG TY TNHH ABC");
-            result.put("bankName", "TPBank");
+            result.put("accountNumber", "9021400417865");
+            result.put("accountName", "Pham Van Tuan Anh");
+            result.put("bankName", "Timo BVBank");
             result.put("amount", amount);
             result.put("transferContent", phone);
-            
+            result.put("paymentId", payment.getPaymentId());
             System.out.println("Sending response to frontend: " + result);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             System.err.println("Error generating QR code: " + e.getMessage());
             e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{id}/status")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getPaymentStatus(@PathVariable Integer id) {
+        try {
+            PaymentResponseDTO payment = paymentService.getPaymentById(id);
+            return ResponseEntity.ok(Map.of(
+                "statusId", payment.getStatusId(),
+                "statusName", payment.getStatusName()
+            ));
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

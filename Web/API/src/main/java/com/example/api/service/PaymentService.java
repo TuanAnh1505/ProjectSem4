@@ -253,7 +253,7 @@ public class PaymentService {
     public String generateVietQr(String accountNo, String accountName, int amount, String phone) throws IOException, InterruptedException {
         String url = "https://api.vietqr.io/v2/generate";
         String json = String.format(
-            "{\"accountNo\":\"%s\",\"accountName\":\"%s\",\"acqId\":\"970423\",\"amount\":%d,\"addInfo\":\"%s\",\"format\":\"base64\"}",
+            "{\"accountNo\":\"%s\",\"accountName\":\"%s\",\"acqId\":\"963388\",\"amount\":%d,\"addInfo\":\"%s\",\"format\":\"base64\"}",
             accountNo, accountName, amount, phone
         );
         HttpRequest request = HttpRequest.newBuilder()
