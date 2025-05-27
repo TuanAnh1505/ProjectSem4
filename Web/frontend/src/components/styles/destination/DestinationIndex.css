@@ -1,0 +1,336 @@
+.destination-index-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header h2 {
+    color: #2c3e50;
+    font-size: 24px;
+    margin: 0;
+}
+
+.create-btn {
+    background: #6392f7;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.3s;
+    font-weight: 500;
+}
+
+.create-btn:hover {
+    background: #45a049;
+}
+
+.destination-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.destination-table th {
+    background: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.destination-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+    color: #444;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.destination-table tr:hover {
+    background: #f8f9fa;
+}
+
+.action-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+    margin-right: 0;
+    padding: 0 2px;
+}
+
+.action-link:last-child {
+    margin-right: 0;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 0 2px;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.delete-button:hover {
+    color: #c82333;
+}
+
+.preview-container {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.media-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.media-preview:hover {
+    transform: scale(1.05);
+}
+
+.preview-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255, 59, 48, 0.9);
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 0 4px 0 4px;
+    font-weight: bold;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background: none;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    color: white;
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+}
+
+.modal-nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 20px 15px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.modal-nav-button:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.modal-nav-button.prev {
+    left: 20px;
+}
+
+.modal-nav-button.next {
+    right: 20px;
+}
+
+.modal-media {
+    max-width: 100%;
+    max-height: 90vh;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.pagination-btn {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    background: white;
+    color: #007bff;
+    cursor: pointer;
+    border-radius: 4px;
+    min-width: 40px;
+    transition: all 0.2s;
+}
+
+.pagination-btn:hover {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-btn:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    border-color: #dee2e6;
+}
+
+/* Delete Alert Dialog styles */
+.destination-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.12);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.destination-alert-dialog {
+    background: #fff;
+    padding: 36px 32px 28px 32px;
+    border-radius: 16px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.destination-alert-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.destination-alert-icon {
+    color: #ff3b30;
+    font-size: 56px;
+    margin-bottom: 0;
+}
+
+.destination-alert-title {
+    color: #222;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+
+.destination-alert-message {
+    color: #666;
+    font-size: 1.08rem;
+    margin: 0 0 28px 0;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.destination-alert-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+}
+
+.destination-alert-btn {
+    padding: 10px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background 0.2s, color 0.2s;
+    min-width: 90px;
+}
+
+.destination-alert-btn-cancel {
+    background: #f5f6fa;
+    color: #222;
+    border: 1px solid #e0e0e0;
+}
+
+.destination-alert-btn-cancel:hover {
+    background: #e9ecef;
+}
+
+.destination-alert-btn-delete {
+    background: #ff3b30;
+    color: #fff;
+}
+
+.destination-alert-btn-delete:hover {
+    background: #d32f2f;
+}
+
+.truncate {
+    max-width: 200px; /* Độ rộng tối đa của ô */
+    white-space: nowrap; /* Ngăn văn bản xuống dòng */
+    overflow: hidden; /* Ẩn phần văn bản vượt quá */
+    text-overflow: ellipsis; /* Hiển thị dấu ... */
+  }

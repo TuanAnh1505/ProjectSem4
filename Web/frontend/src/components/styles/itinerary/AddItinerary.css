@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.itinerary-add-container {
+  font-family: 'Inter', sans-serif;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.itinerary-add-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.itinerary-add-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.itinerary-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.itinerary-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.itinerary-form-label {
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.98rem;
+}
+
+.itinerary-form-input,
+.itinerary-form-textarea{
+    padding: 0.875rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
+    color: #1e293b;
+    width: 93%;
+}
+
+.itinerary-form-select{
+    padding: 0.875rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
+    color: #1e293b;
+    width: 100%;
+}
+
+.itinerary-form-input:focus,
+.itinerary-form-select:focus,
+.itinerary-form-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  background-color: white;
+}
+
+.itinerary-form-error {
+  color: #ef4444;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fee2e2;
+  margin-bottom: 1rem;
+}
+
+.itinerary-submit-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.itinerary-submit-btn {
+  background: linear-gradient(135deg, #7b6ef6 60%, #5c9cf5 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.itinerary-submit-btn:disabled {
+  background: #e2e8f0;
+  color: #a1a1aa;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.itinerary-cancel-btn {
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+  box-shadow: none !important;
+}
+
+.itinerary-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.04);
+  margin-bottom: 1.5rem;
+}
+
+.itinerary-schedule-table th {
+  background: #f1f5f9;
+  color: #6366f1;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.itinerary-schedule-table td {
+  padding: 0.75rem 1rem;
+  color: #1e293b;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.itinerary-schedule-table tr:last-child td {
+  border-bottom: none;
+}
+
+.itinerary-schedule-table tr:hover {
+  background-color: #f9fafb;
+}
+
+.itinerary-form-desc {
+  display: block;
+  font-size: 0.92rem;
+  color: #94a3b8;
+  font-weight: 400;
+  margin-top: 2px;
+  margin-left: 2.2rem;
+}
+
+.itinerary-form-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.itinerary-form-col {
+  flex: 1;
+  min-width: 180px;
+}
+
+.itinerary-form-input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+}
+
+@media (max-width: 768px) {
+  .itinerary-add-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  .itinerary-add-title {
+    font-size: 1.3rem;
+  }
+  .itinerary-submit-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .itinerary-submit-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+
+
+

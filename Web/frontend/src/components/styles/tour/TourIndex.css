@@ -1,0 +1,269 @@
+.tour-index-container {
+    padding: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  .tour-index-container h1 {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+    color: #1a1a1a;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .action-bar {
+    margin-bottom: 1.5rem;
+    text-align: right;
+  }
+  
+  .add-button {
+    background-color: #6392f7;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  }
+  
+  .add-button:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+  }
+  
+  .tour-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .tour-table th,
+  .tour-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tour-table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+  }
+  
+  .tour-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  
+  .tour-table tbody tr:hover {
+    background-color: #f8fafc;
+  }
+  
+  .action-link {
+    margin-right: 12px;
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 6px;
+  }
+  
+  .action-link:hover {
+    background-color: #eff6ff;
+    color: #2563eb;
+  }
+  
+  .delete-button {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+  
+  .delete-button:hover {
+    background-color: #fef2f2;
+    color: #dc2626;
+  }
+  
+  .error-box {
+    color: #991b1b;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .error-box button {
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .error-box button:hover {
+    background-color: #b91c1c;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.2rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  
+  .no-tours {
+    color: #64748b;
+    font-style: italic;
+    margin-top: 2rem;
+    text-align: center;
+    padding: 2rem;
+    background-color: #f8fafc;
+    border-radius: 8px;
+  }
+  
+  .tour-thumbnail {
+    width: 100px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    transition: transform 0.2s ease;
+  }
+  
+  .tour-thumbnail:hover {
+    transform: scale(1.05);
+  }
+  
+  .no-image {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    background-color: #f1f5f9;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  
+  .tour-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  
+  .tour-alert-dialog {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease;
+  }
+  
+  .tour-alert-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #e74c3c;
+  }
+  
+  .tour-alert-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3436;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .tour-alert-message {
+    color: #636e72;
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+  
+  .tour-alert-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .tour-alert-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    min-width: 100px;
+  }
+  
+  .tour-alert-btn-cancel {
+    background: #f1f2f6;
+    color: #2d3436;
+  }
+  
+  .tour-alert-btn-cancel:hover {
+    background: #dfe6e9;
+  }
+  
+  .tour-alert-btn-delete {
+    background: #e74c3c;
+    color: white;
+  }
+  
+  .tour-alert-btn-delete:hover {
+    background: #c0392b;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
