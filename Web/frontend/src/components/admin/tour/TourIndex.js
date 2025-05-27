@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import {FaPlus, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
+import {FaPlus, FaTrash, FaExclamationTriangle, FaSearch, FaEdit } from 'react-icons/fa';
 import '../../styles/tour/TourIndex.css';
 
 const MAX_RETRIES = 3;
@@ -132,14 +132,17 @@ export default function TourIndex() {
                 <td>{tour.price ? tour.price.toLocaleString() + ' VNĐ' : 'N/A'}</td>
                 <td>{getStatusName(tour.statusId)}</td>
                 <td>
-                  <Link to={`/admin/tour/detail/${tour.tourId}`} className="action-link">🔍</Link>
-                  <Link to={`/admin/tour/edit/${tour.tourId}`} className="action-link">✏️</Link>
-                  <button 
-                    className="delete-button"
-                    onClick={() => showDeleteAlert(tour.tourId, tour.name)}
-                  >
-                    <FaTrash />
-                  </button>
+                  <div className="tour-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
+                    <Link to={`/admin/tour/detail/${tour.tourId}`} className="action-link" title="Xem chi tiết" style={{ color: '#4a90e2', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FaSearch />
+                    </Link>
+                    <Link to={`/admin/tour/edit/${tour.tourId}`} className="action-link" title="Chỉnh sửa" style={{ color: '#ffc107', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FaEdit />
+                    </Link>
+                    <button className="delete-button" onClick={() => showDeleteAlert(tour.tourId, tour.name)} title="Xóa" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FaTrash />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
