@@ -5,6 +5,9 @@ import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { FaSearch, FaFilter, FaMapMarkerAlt, FaCalendarAlt, FaDollarSign } from 'react-icons/fa';
 
 
 const Home = () => {
@@ -35,26 +38,31 @@ const Home = () => {
   ];
 
   // Events state
-  const [events, setEvents] = useState([]);
+  const [tours, setTours] = useState([]);
+  const [filteredTours, setFilteredTours] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   // Fetch events data
-  
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchTours = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/events');
-        if (!response.ok) throw new Error('Failed to fetch events');
-        const data = await response.json();
-        setEvents(data);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: { Authorization: `Bearer ${token}` }
+        };
+        const res = await axios.get('http://localhost:8080/api/tours', config);
+        setTours(res.data);
+        setFilteredTours(res.data);
+        setError('');
       } catch (err) {
-        setError(err.message);
+        console.error('Failed to fetch tours:', err);
+        setError('Failed to load tours. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
-    fetchEvents();
+    fetchTours();
   }, []);
 
   // Banner slider functions
@@ -97,7 +105,7 @@ const Home = () => {
               <div className={styles.heroBannerTitle}>{heroSlides[currentSlide].title}</div>
               <div className={styles.bannerDesc}>{heroSlides[currentSlide].description}</div>
               <div className={styles.bannerButtons}>
-                
+
               </div>
             </>
           )}
@@ -126,56 +134,175 @@ const Home = () => {
         </div>
       </section>
 
-      {/* What's On */}
-      <section id="upcoming-events" className={styles.whatsOn}>
+      {/* Tour List Section */}
+      <section className={styles.tourSection}>
         <div className={styles.container}>
-          <div className={styles.sectionTitle}>WHAT'S ON</div>
-          <div className={styles.sectionDesc}>Check out upcoming events in Vietnam</div>
-          <div className={styles.wrapEvents} id="event-container">
-            {loading ? (
-              <div className={styles.loadingState}>Loading...</div>
-            ) : error ? (
-              <div className={styles.errorState}>{error}</div>
-            ) : (
-              <div className={styles.eventsGrid}>
-                {events.map((event, index) => (
-                  <div key={event.eventId || index} className={styles.eventCard}>
-                    <img
-                      src={event.filePaths && event.filePaths.length > 0 ? event.filePaths[0] : '/default-event.jpg'}
-                      alt={event.name}
-                      className={styles.eventImage}
-                    />
-                    <div className={styles.eventContent}>
-                      <h3 className={styles.eventTitle}>{event.name}</h3>
-                      <p className={styles.eventDate}>
-                        {event.startDate ? new Date(event.startDate).toLocaleString() : ''}
-                        {event.endDate ? ' - ' + new Date(event.endDate).toLocaleString() : ''}
-                      </p>
-                      {event.location && (
-                        <p className={styles.eventLocation}><b>Location:</b> {event.location}</p>
-                      )}
-                      {event.statusName && (
-                        <p className={styles.eventStatus}><b>Status:</b> {event.statusName}</p>
-                      )}
-                      {event.ticketPrice !== null && event.ticketPrice !== undefined && (
-                        <p className={styles.eventPrice}><b>Ticket Price:</b> {event.ticketPrice} VND</p>
-                      )}
-                      {event.description && (
-                        <p className={styles.eventDesc}>{event.description}</p>
+          <div className={styles.sectionTitle}>OUTSTANDING TOURS</div>
+          <div className={styles.sectionDesc}>Discover our curated selection of Vietnam tours</div>
+
+          {filteredTours.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '40px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              margin: '20px 0'
+            }}>
+              <h3 style={{ color: '#666', marginBottom: '10px' }}>No tours found</h3>
+              <p style={{ color: '#888' }}>Try adjusting your search or filters</p>
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '20px',
+              padding: '20px 0'
+            }}>
+              {filteredTours.map(tour => (
+                <div key={tour.tourId} style={{
+                  backgroundColor: '#fff',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  overflow: 'hidden',
+                  transition: 'transform 0.2s',
+                  cursor: 'pointer',
+                  ':hover': {
+                    transform: 'translateY(-5px)'
+                  }
+                }}>
+                  <div style={{
+                    position: 'relative',
+                    height: '200px',
+                    overflow: 'hidden'
+                  }}>
+                    {tour.imageUrl ? (
+                      <img
+                        src={`http://localhost:8080${tour.imageUrl}`}
+                        alt={tour.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: '#f0f0f0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#666'
+                      }}>No Image</div>
+                    )}
+                    <div style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      backgroundColor: 'rgba(0,0,0,0.7)',
+                      color: '#fff',
+                      padding: '5px 10px',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}>${tour.price.toLocaleString()}</div>
+                  </div>
+                  <div style={{
+                    padding: '15px'
+                  }}>
+                    <h3 style={{
+                      margin: '0 0 10px 0',
+                      fontSize: '18px',
+                      color: '#333'
+                    }}>{tour.name}</h3>
+                    <div style={{
+                      display: 'flex',
+                      gap: '15px',
+                      marginBottom: '10px',
+                      color: '#666',
+                      fontSize: '14px'
+                    }}>
+                      <span style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}>
+                        <FaCalendarAlt /> {tour.duration} days
+                      </span>
+                      {tour.destinations?.length > 0 && (
+                        <span style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}>
+                          <FaMapMarkerAlt /> {tour.destinations[0].name}
+                        </span>
                       )}
                     </div>
+                    <p style={{
+                      color: '#666',
+                      fontSize: '14px',
+                      marginBottom: '15px',
+                      lineHeight: '1.4'
+                    }}>
+                      {tour.description?.substring(0, 100)}...
+                    </p>
+                    <Link
+                      to={`/tour-dashboard/detail/${tour.tourId}`}
+                      style={{
+                        display: 'inline-block',
+                        backgroundColor: '#007bff',
+                        color: '#fff',
+                        padding: '8px 16px',
+                        borderRadius: '4px',
+                        textDecoration: 'none',
+                        fontSize: '14px',
+                        transition: 'background-color 0.2s',
+                        ':hover': {
+                          backgroundColor: '#0056b3'
+                        }
+                      }}
+                    >
+                      View Details
+                    </Link>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className={styles.wrapMore}>
-            <div className={styles.textCenter}>
-              <a href="/event" className={styles.btnViewMore}>
-                view all events
-              </a>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
+        </div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: '30px',
+          marginBottom: '40px'
+        }}>
+          <Link 
+            to="/tour-dashboard"
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#ff6b6b',
+              color: '#fff',
+              padding: '15px 40px',
+              borderRadius: '30px',
+              textDecoration: 'none',
+              fontSize: '18px',
+              fontWeight: '600',
+              boxShadow: '0 4px 15px rgba(255, 107, 107, 0.3)',
+              transition: 'all 0.3s ease',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              border: 'none',
+              cursor: 'pointer',
+              ':hover': {
+                backgroundColor: '#ff5252',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 20px rgba(255, 107, 107, 0.4)'
+              }
+            }}
+          >
+            View All Tours
+          </Link>
         </div>
       </section>
 
@@ -259,6 +386,15 @@ const Home = () => {
       </section>
     </div>
   );
+};
+
+const TourDashboard = () => {
+  const [tours, setTours] = useState([]);
+  const [filteredTours, setFilteredTours] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  return null; // Add your TourDashboard JSX here
 };
 
 export default Home;

@@ -76,11 +76,6 @@ const App = () => {
               <ThingsToDo />
             </Layout>
           } />
-          <Route path="/plan" element={
-            <Layout>
-              <Home />
-            </Layout>
-          } />
           <Route path="/tour-dashboard" element={
             <Layout>
               <TourDashboard />
