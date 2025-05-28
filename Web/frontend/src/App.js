@@ -18,9 +18,7 @@ import TourDashboard from './components/tour/TourDashboard';
 import TourDetailDashboard from './components/tour/TourDetailDashboard';
 import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
-import BookingConfirmation from './components/booking/BookingConfirmation';
 import Payment from './pages/Payment';
-import PaymentSuccess from './components/payment/PaymentSuccess';
 import './App.css';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
@@ -102,12 +100,6 @@ const App = () => {
             </Layout>
           } />
 
-          <Route path="/booking-confirmation" element={
-            <Layout>
-              <BookingConfirmation />
-            </Layout>
-          } />
-
           {/* Authentication and user routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -122,10 +114,6 @@ const App = () => {
           <Route
             path="/booking-passenger"
             element={<ProtectedRoute element={<BookingPassenger />} />}
-          />
-          <Route
-            path="/booking-confirmation"
-            element={<ProtectedRoute element={<BookingConfirmation />} />}
           />
           <Route
             path="/momo-payment"
@@ -294,14 +282,6 @@ const App = () => {
             element={
               <Layout>
                 <Payment />
-              </Layout>
-            }
-          />
-          <Route
-            path="/payment/success/:paymentId"
-            element={
-              <Layout>
-                <PaymentSuccess />
               </Layout>
             }
           />

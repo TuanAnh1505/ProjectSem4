@@ -20,7 +20,7 @@ function MomoPaymentPage() {
         return;
       }
 
-      // Tính toán tổng tiền và chuyển đổi thành số nguyên
+      
       const totalAmount = Math.round(tourInfo.price * (passengers.adult + passengers.child + passengers.infant));
 
       const paymentData = {
