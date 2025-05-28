@@ -4,6 +4,7 @@ import '../../services/tour_service.dart';
 import 'package:intl/intl.dart';
 import 'tour_detail_screen.dart';
 import 'package:diacritic/diacritic.dart';
+import '/screens/search_screen.dart';
 
 class TourScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -87,8 +88,12 @@ class _TourScreenState extends State<TourScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.search, color: Colors.black),
-                    onPressed: () {},
+                    icon: Icon(Icons.search, color: Colors.orange),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const SearchScreen()),
+                      );
+                    },
                   ),
                 ],
               ),

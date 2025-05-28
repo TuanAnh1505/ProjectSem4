@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_drawer.dart';
 import '../screens/home_screen.dart';
 import '../screens/tour/tour_screen.dart';
+import '../screens/search_screen.dart';
 
 
 class AppNavigation extends StatefulWidget {
@@ -52,8 +53,24 @@ class _AppNavigationState extends State<AppNavigation> {
           ? null
           : AppBar(
               leading: null,
-              title: _selectedIndex == 0 ? const Text('Tour Booking') : null,
+              title: _selectedIndex == 0
+                  ? const Text('Tour Booking')
+                  : _selectedIndex == 1
+                      ? const Text('Tìm kiếm tour du lịch')
+                      : null,
               centerTitle: true,
+              actions: _selectedIndex == 0
+                  ? [
+                      IconButton(
+                        icon: const Icon(Icons.search, color: Colors.orange),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const SearchScreen()),
+                          );
+                        },
+                      ),
+                    ]
+                  : null,
             ),
       drawer: _selectedIndex == 0
           ? AppDrawer(
@@ -63,7 +80,6 @@ class _AppNavigationState extends State<AppNavigation> {
           : null,
       body: Column(
         children: [
-          if (_selectedIndex == 0) SearchBar(),
           Expanded(child: _buildBody()),
         ],
       ),
@@ -105,7 +121,14 @@ class _AppNavigationState extends State<AppNavigation> {
       case 0:
         return HomeScreen(userName: widget.userName, userRole: widget.userRole);
       case 1:
-        return const Center(child: Text('Tìm kiếm'));
+        return SearchScreen(
+          onBack: () {
+            setState(() {
+              _selectedIndex = 0;
+            });
+          },
+          showAppBar: false,
+        );
       case 2:
         return TourScreen(
           onBack: () {
@@ -124,27 +147,3 @@ class _AppNavigationState extends State<AppNavigation> {
   }
 }
 
-class SearchBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: TextField(
-        
-        style: TextStyle(fontSize: 16, color: Colors.black87),
-        decoration: InputDecoration(
-          hintText: 'Tìm kiếm tour du lịch...',
-          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
-          filled: true,
-          fillColor: Color(0xFFF8F9FA),
-          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          suffixIcon: Icon(Icons.search, color: Colors.orange),
-        ),
-      ),
-    );
-  }
-}

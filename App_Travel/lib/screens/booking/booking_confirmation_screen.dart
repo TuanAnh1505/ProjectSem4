@@ -83,16 +83,7 @@ class BookingConfirmationScreen extends StatelessWidget {
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.orange.withOpacity(0.1),
-              Colors.white,
-            ],
-          ),
-        ),
+        color: Colors.white,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
