@@ -217,4 +217,20 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
     }
+
+    public User updateUserInfo(String publicId, String fullName, String phone, String address) {
+        User user = userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+        
+        user.setFullName(fullName);
+        user.setPhone(phone);
+        user.setAddress(address);
+        
+        return userRepository.save(user);
+    }
+
+    public User findByPublicId(String publicId) {
+        return userRepository.findByPublicId(publicId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + publicId));
+    }
 }

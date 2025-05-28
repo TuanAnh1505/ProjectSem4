@@ -74,31 +74,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo
-              // Container(
-              //   width: 80,
-              //   height: 80,
-              //   decoration: BoxDecoration(
-              //     color: Colors.white,
-              //     borderRadius: BorderRadius.circular(24),
-              //     boxShadow: [
-              //       BoxShadow(
-              //         color: Colors.black12,
-              //         blurRadius: 8,
-              //         offset: Offset(0, 2),
-              //       ),
-              //     ],
-              //   ),
-              //   child: Center(
-              //     child: Image.asset(
-              //       'assets/logo.png', // Đổi thành logo của bạn
-              //       width: 60,
-              //       height: 60,
-              //       fit: BoxFit.contain,
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(height: 24),
+              SizedBox(
+                width: 250,
+                height: 250,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain,
+                  color: Colors.orange,
+                  colorBlendMode: BlendMode.srcIn,
+                ),
+              ),
               // Card chứa form
               Card(
                 elevation: 8,

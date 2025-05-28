@@ -3,6 +3,7 @@ import 'app_drawer.dart';
 import '../screens/home_screen.dart';
 import '../screens/tour/tour_screen.dart';
 import '../screens/search_screen.dart';
+import '../screens/auth/personal_page_screen.dart';
 
 
 class AppNavigation extends StatefulWidget {
@@ -54,7 +55,7 @@ class _AppNavigationState extends State<AppNavigation> {
           : AppBar(
               leading: null,
               title: _selectedIndex == 0
-                  ? const Text('Tour Booking')
+                  ? const Text('Hi Vietnam')
                   : _selectedIndex == 1
                       ? const Text('Tìm kiếm tour du lịch')
                       : null,
@@ -140,7 +141,7 @@ class _AppNavigationState extends State<AppNavigation> {
       case 3:
         return const Center(child: Text('Yêu thích'));
       case 4:
-        return const Center(child: Text('Tài khoản'));
+        return const PersonalPageScreen();
       default:
         return HomeScreen(userName: widget.userName, userRole: widget.userRole);
     }
