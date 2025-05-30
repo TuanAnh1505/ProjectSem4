@@ -135,8 +135,10 @@ const Payment = () => {
         }
       );
 
-      // Chuyển hướng đến trang thanh toán thành công
-      navigate(`/payment/success/${response.data.paymentId}`);
+      // Hiển thị thông báo thành công thay vì chuyển hướng
+      setConfirmResult('success');
+      setBankQr(null);
+      setSelectedMethod(null);
     } catch (err) {
       setError('Có lỗi xảy ra khi xử lý thanh toán');
       setQrLoading(false);
@@ -163,9 +165,9 @@ const Payment = () => {
             clearInterval(interval);
           }
         } catch (err) {
-          // Có thể log hoặc bỏ qua
+          
         }
-      }, 5000); // 5 giây kiểm tra 1 lần
+      }, 5000); 
     }
     return () => clearInterval(interval);
   }, [bankQr]);
@@ -310,7 +312,49 @@ const Payment = () => {
           </div>
         )}
         {confirmResult === 'failed' && (
-          <div className="payment-error-message">Chưa nhận được thanh toán, vui lòng thử lại sau.</div>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999
+          }}>
+            <div style={{
+              background: '#fff0f0',
+              borderRadius: 12,
+              padding: '32px 48px',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+              textAlign: 'center',
+              minWidth: 320,
+              border: '1px solid #f5c2c7'
+            }}>
+              <div style={{ fontSize: 48, color: '#dc3545', marginBottom: 16 }}>✖</div>
+              <div style={{ fontSize: 20, color: '#dc3545', fontWeight: 600, marginBottom: 12 }}>
+                Chưa nhận được thanh toán, vui lòng thử lại sau.
+              </div>
+              <button
+                style={{
+                  marginTop: 16,
+                  padding: '10px 28px',
+                  background: '#dc3545',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  fontSize: 16,
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+                onClick={() => window.location.reload()}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

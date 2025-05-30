@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaCheckCircle, FaCreditCard } from 'react-icons/fa';
-import './BookingConfirmationPayment.css';
+import './BookingConfirmation.css';
 
-const BookingConfirmationPayment = () => {
+const BookingConfirmation = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState(null);
@@ -123,4 +123,4 @@ const BookingConfirmationPayment = () => {
   );
 };
 
-export default BookingConfirmationPayment; 
+export default BookingConfirmation; 
