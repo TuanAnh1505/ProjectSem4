@@ -19,6 +19,8 @@ import TourDetailDashboard from './components/tour/TourDetailDashboard';
 import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
 import BookingConfirmation from './components/booking/BookingConfirmation';
+import Payment from './pages/Payment';
+import PaymentStatusManager from './components/admin/PaymentStatusManager';
 import './App.css';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
@@ -74,11 +76,6 @@ const App = () => {
               <ThingsToDo />
             </Layout>
           } />
-          <Route path="/plan" element={
-            <Layout>
-              <Home />
-            </Layout>
-          } />
           <Route path="/tour-dashboard" element={
             <Layout>
               <TourDashboard />
@@ -125,10 +122,6 @@ const App = () => {
           <Route
             path="/booking-passenger"
             element={<ProtectedRoute element={<BookingPassenger />} />}
-          />
-          <Route
-            path="/booking-confirmation"
-            element={<ProtectedRoute element={<BookingConfirmation />} />}
           />
           <Route
             path="/momo-payment"
@@ -276,6 +269,36 @@ const App = () => {
               path="/admin/booking/detail/:bookingId"
               element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
             />
+
+            {/* Tour Guide */}
+            <Route
+              path="/admin/tour-guide"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+            />
+            <Route
+              path="/admin/tour-guide/add"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+            />
+            <Route
+              path="/admin/tour-guide/edit/:guideId"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+            />
+
+          {/* Payment routes */}
+          <Route
+            path="/payment/:bookingId"
+            element={
+              <Layout>
+                <Payment />
+              </Layout>
+            }
+          />
+
+          {/* New route for PaymentStatusManager */}
+          <Route
+            path="/admin/payments"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
         </Routes>
       </div>
     </Router>

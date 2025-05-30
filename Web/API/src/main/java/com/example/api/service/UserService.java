@@ -212,4 +212,9 @@ public class UserService {
         userTokenRepository.deleteAllByExpiryBefore(LocalDateTime.now());
         jdbcTemplate.execute("ALTER TABLE usertokens AUTO_INCREMENT = 1");
     }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+    }
 }

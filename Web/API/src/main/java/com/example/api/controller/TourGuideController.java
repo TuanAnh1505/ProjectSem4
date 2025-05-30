@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tour-guides")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class TourGuideController {
 
     @Autowired
@@ -83,6 +83,25 @@ public class TourGuideController {
     public ResponseEntity<List<TourGuideDTO>> findByLanguage(
             @RequestParam String language) {
         List<TourGuideDTO> tourGuides = tourGuideService.findByLanguage(language);
+        return ResponseEntity.ok(tourGuides);
+    }
+
+    // Thêm endpoint tìm kiếm tour guide theo trạng thái (isAvailable)
+    @GetMapping("/search/available")
+    public ResponseEntity<List<TourGuideDTO>> findByIsAvailable(@RequestParam Boolean isAvailable) {
+        List<TourGuideDTO> tourGuides = tourGuideService.findByIsAvailable(isAvailable);
+        return ResponseEntity.ok(tourGuides);
+    }
+
+    // Thêm endpoint tìm kiếm tổng hợp (ví dụ: tìm tour guide có rating >= minRating, experience >= minExperience, specialization, language, isAvailable)
+    @GetMapping("/search")
+    public ResponseEntity<List<TourGuideDTO>> searchTourGuides(
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) Integer minExperience,
+            @RequestParam(required = false) String specialization,
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) Boolean isAvailable) {
+        List<TourGuideDTO> tourGuides = tourGuideService.searchTourGuides(minRating, minExperience, specialization, language, isAvailable);
         return ResponseEntity.ok(tourGuides);
     }
 }

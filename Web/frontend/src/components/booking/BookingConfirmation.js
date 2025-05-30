@@ -68,6 +68,18 @@ const BookingConfirmation = () => {
   // const bookingNote = '(Booking từ Travel.com.vn (Tour giá chợ -500.000 đ/ khách, ))';
   const flightInfo = 'Thông tin chuyến bay';
 
+  const handlePayment = () => {
+    // Chuyển hướng đến trang lựa chọn phương thức thanh toán
+    navigate(`/payment/${bookingId}`, {
+      state: {
+        bookingId,
+        amount: calculateTotal(),
+        tourInfo,
+        passengers
+      }
+    });
+  };
+
   return (
     <div className="confirmation-container">
       <div className="confirmation-main-layout" style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
@@ -216,7 +228,22 @@ const BookingConfirmation = () => {
                   ))}
                 </div>
               )}
-              <button style={{ background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 4, padding: '10px 24px', fontWeight: 'bold', marginTop: 12, cursor: 'pointer' }}>
+              <button 
+                onClick={handlePayment}
+                style={{ 
+                  background: '#d32f2f', 
+                  color: '#fff', 
+                  border: 'none', 
+                  borderRadius: 4, 
+                  padding: '10px 24px', 
+                  fontWeight: 'bold', 
+                  marginTop: 12, 
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s ease'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#b71c1c'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#d32f2f'}
+              >
                 Thanh toán ngay
               </button>
             </div>

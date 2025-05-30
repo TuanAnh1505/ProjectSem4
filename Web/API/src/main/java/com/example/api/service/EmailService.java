@@ -1,5 +1,9 @@
 package com.example.api.service;
 
+import com.example.api.model.Booking;
+import com.example.api.model.BookingPassenger;
+import com.example.api.model.Payment;
+import com.example.api.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -7,6 +11,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
+import java.util.List;
 
 @Service
 public class EmailService {
@@ -91,5 +96,72 @@ public class EmailService {
                 "Trân trọng,\n" +
                 "Đội ngũ TravelTour");
         emailSender.send(message);
+    }
+
+    public void resendActivationEmail(String to, String publicId, boolean isApp) {
+        try {
+            String webLink = "http://localhost:3000/activate?publicId=" + publicId;
+            String appLink = "myapp://activate?publicId=" + publicId;
+
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject("Yêu cầu gửi lại email kích hoạt - TravelTour");
+
+            String htmlContent = "<p>Xin chào,</p>"
+                    + "<p>Chúng tôi nhận được yêu cầu gửi lại email kích hoạt tài khoản TravelTour của bạn.</p>"
+                    + "<p>Bạn có thể kích hoạt tài khoản bằng:</p>"
+                    + "<ul>";
+            if (isApp) {
+                htmlContent += "<li><b>Trên app:</b> <a href=\"" + appLink + "\">Kích hoạt tài khoản trên app</a></li>";
+            } else {
+                htmlContent += "<li><b>Trên web:</b> <a href=\"" + webLink + "\">Kích hoạt tài khoản trên web</a></li>";
+            }
+            htmlContent += "</ul>"
+                    + "<p>Liên kết này sẽ hết hạn sau 24 giờ.</p>"
+                    + "<p>Nếu bạn không yêu cầu gửi lại email này, vui lòng bỏ qua.</p>"
+                    + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
+
+            helper.setText(htmlContent, true);
+            emailSender.send(mimeMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Gửi lại email kích hoạt thất bại: " + e.getMessage());
+        }
+    }
+
+    public void sendPaymentSuccessEmail(User user, Booking booking, Payment payment, List<BookingPassenger> passengers) {
+        try {
+            String to = user.getEmail();
+            String subject = "Xác nhận thanh toán thành công - Đặt tour " + booking.getBookingId();
+            StringBuilder content = new StringBuilder();
+            content.append("<h2>Thanh toán thành công!</h2>");
+            content.append("<p>Cảm ơn bạn đã đặt tour: <b>").append(booking.getTour().getName()).append("</b></p>");
+            content.append("<p><b>Giá tiền:</b> ").append(payment.getAmount()).append(" VND</p>");
+            content.append("<p><b>Số lượng khách:</b> ").append(passengers.size()).append("</p>");
+            content.append("<h3>Thông tin khách:</h3>");
+            for (BookingPassenger p : passengers) {
+                content.append("<p>")
+                    .append(p.getFullName()).append(" - ")
+                    .append(p.getPhone() != null ? p.getPhone() : "")
+                    .append("</p>");
+            }
+            sendHtmlEmail(to, subject, content.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendHtmlEmail(String to, String subject, String htmlContent) {
+        try {
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+            emailSender.send(mimeMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -180,164 +180,191 @@ export default function TourDetailDashboard() {
   if (error) return <div className="error-box">{error}</div>;
   if (!tour) return <div className="error-box">Tour not found</div>;
 
+  // Gallery images (nếu có nhiều ảnh, ở đây demo chỉ lấy 1 ảnh chính)
+  const galleryImages = tour.images || (tour.imageUrl ? [tour.imageUrl] : []);
+
   return (
-    <div className="tour-detail-client">
-      <div className="tour-detail-top">
-        {tour.imageUrl && (
-          <img
-            src={`http://localhost:8080${tour.imageUrl}`}
-            alt={tour.name}
-            className="tour-detail-banner"
-          />
-        )}
-        <div className="tour-detail-info">
-          <h2>{tour.name}</h2>
-          <div className="info-row"><label>Price:</label><span>${tour.price}</span></div>
-          <div className="info-row"><label>Duration:</label><span>{tour.duration} days</span></div>
-          <div className="info-row"><label>Max Participants:</label><span>{tour.maxParticipants}</span></div>
+    <div style={{ maxWidth: 1200, margin: '0 auto', background: '#e3f2fd', borderRadius: 16, boxShadow: '0 4px 24px 0 #e3e8f0', padding: '0 0 32px 0', paddingTop: 80 }}>
+      {/* Top section: Title, Info, Banner */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, alignItems: 'center', padding: '32px 32px 0 32px', background: '#e3f2fd', borderRadius: 16, boxShadow: '0 2px 12px #e3e8f0', marginBottom: 24 }}>
+        {/* Info left */}
+        <div style={{
+          flex: 1,
+          minWidth: 380,
+          background: '#fff',
+          borderRadius: 24,
+          padding: '38px 38px 32px 38px',
+          boxShadow: '0 4px 24px #e3e8f0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 0 0 0',
+        }}>
+          <div style={{
+            color: '#1976d2',
+            fontWeight: 800,
+            fontSize: 38,
+            marginBottom: 18,
+            textAlign: 'center',
+            width: '100%',
+            letterSpacing: 1
+          }}>{tour.name}</div>
+          <div style={{
+            color: '#333',
+            fontSize: 20,
+            marginBottom: 28,
+            textAlign: 'center',
+            lineHeight: 1.5,
+            fontWeight: 400
+          }}>{tour.description}</div>
+          <div style={{
+            display: 'flex',
+            gap: 48,
+            marginBottom: 0,
+            justifyContent: 'center',
+            width: '100%'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>Thời gian</span>
+              <span style={{ color: '#333', fontSize: 18 }}>{tour.duration} ngày</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>Số lượng</span>
+              <span style={{ color: '#333', fontSize: 18 }}>{tour.maxParticipants} khách</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>Giá</span>
+              <span style={{ color: '#388e3c', fontSize: 20, fontWeight: 700 }}>{tour.price?.toLocaleString()}đ</span>
+            </div>
+          </div>
+        </div>
+        {/* Banner right */}
+        <div style={{ flex: 1, minWidth: 320, display: 'flex', justifyContent: 'center' }}>
+          {tour.imageUrl && (
+            <img
+              src={`http://localhost:8080${tour.imageUrl}`}
+              alt={tour.name}
+              style={{ width: '100%', maxWidth: 420, maxHeight: 320, objectFit: 'cover', borderRadius: 18, border: '6px solid #1976d2', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
+            />
+          )}
         </div>
       </div>
 
-      <div className="tour-detail-body">
-        <div className="info-section">
-          <div className="info-row">
-            <label>Description:</label>
-            <span>{tour.description || 'No description provided.'}</span>
+      {/* Tabs section: Lịch trình, Giới thiệu, Chuẩn bị */}
+      <div style={{ margin: '32px 0 0 0', padding: '0 32px' }}>
+        <div style={{ display: 'flex', gap: 0 }}>
+          <div style={{ background: '#1976d2', color: '#fff', padding: '12px 32px', borderTopLeftRadius: 12, borderTopRightRadius: 12, fontWeight: 700, fontSize: 18, letterSpacing: 1 }}>LỊCH TRÌNH</div>
+          {/* Có thể thêm tab Giới thiệu, Chuẩn bị nếu muốn */}
+        </div>
+        <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: 24, border: '1.5px solid #e3e8f0', borderTop: 'none', boxShadow: '0 2px 8px #e3e8f0' }}>
+          {itineraries.length > 0 ? (
+            itineraries.map((schedule, idx) => (
+              <div key={schedule.scheduleId} style={{ marginBottom: 24, background: '#e3f2fd', borderRadius: 10, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0', padding: 18 }}>
+                <div style={{ fontWeight: 600, color: '#1976d2', fontSize: 16, marginBottom: 8 }}>Lịch trình {idx + 1}: {schedule.startDate} - {schedule.endDate} ({schedule.status})</div>
+                {schedule.itineraries && schedule.itineraries.length > 0 ? (
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                    {schedule.itineraries.map((itinerary, i) => (
+                      <li key={itinerary.itineraryId} style={{ marginBottom: 10, padding: 12, background: '#fff', borderRadius: 8, border: '1px solid #e3e8f0' }}>
+                        <div style={{ fontWeight: 600, color: '#1976d2' }}>Ngày {i + 1}: {itinerary.title}</div>
+                        {itinerary.startTime && <div><b>Giờ bắt đầu:</b> {formatTime(itinerary.startTime)}</div>}
+                        {itinerary.endTime && <div><b>Giờ kết thúc:</b> {formatTime(itinerary.endTime)}</div>}
+                        {itinerary.description && <div><b>Mô tả:</b> {itinerary.description}</div>}
+                        {itinerary.type && <div><b>Loại:</b> {itinerary.type}</div>}
+                      </li>
+                    ))}
+                  </ul>
+                ) : <div style={{ color: '#888' }}>Không có lịch trình nào cho schedule này.</div>}
+              </div>
+            ))
+          ) : <div style={{ color: '#888' }}>Chưa có lịch trình cho tour này</div>}
+        </div>
+      </div>
+
+      {/* Gallery section */}
+      {galleryImages.length > 0 && (
+        <div style={{ margin: '32px 0', padding: '0 32px' }}>
+          <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 16 }}>Hình ảnh tour</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 2px 8px #e3e8f0' }}>
+            {galleryImages.map((img, idx) => (
+              <img key={idx} src={`http://localhost:8080${img}`} alt={`gallery-${idx}`} style={{ width: 180, height: 120, objectFit: 'cover', borderRadius: 10, border: '2px solid #e3e8f0' }} />
+            ))}
           </div>
         </div>
+      )}
 
-        <div className="itinerary-section">
-          <h2 className="itinerary-title">LỊCH TRÌNH TOUR</h2>
-          {itineraries.length > 0 ? (
-            <div>
-              {itineraries.map((schedule, idx) => (
-                <div key={schedule.scheduleId} className="schedule-card" style={{
-                  border: '1.5px solid #1976d2',
-                  borderRadius: 12,
-                  marginBottom: 18,
-                  background: selectedScheduleId === schedule.scheduleId ? '#e3f2fd' : '#f8f9fa',
-                  boxShadow: '0 2px 8px #e3e8f0'
-                }}>
-                  <div
-                    className="schedule-summary"
-                    style={{
-                      padding: '18px 24px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                    onClick={() => setOpenScheduleId(openScheduleId === schedule.scheduleId ? null : schedule.scheduleId)}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <input
-                        type="radio"
-                        name="selectedSchedule"
-                        checked={selectedScheduleId === schedule.scheduleId}
-                        onChange={() => setSelectedScheduleId(schedule.scheduleId)}
-                        style={{ accentColor: '#1976d2', width: 18, height: 18 }}
-                        onClick={e => { e.stopPropagation(); setSelectedScheduleId(schedule.scheduleId); }}
-                      />
-                      <span>
-                        <strong>Schedule {idx + 1}:</strong> {schedule.startDate} - {schedule.endDate} ({schedule.status})
-                      </span>
-                    </div>
-                    <span style={{fontSize: 22}}>
-                      {openScheduleId === schedule.scheduleId ? '▲' : '▼'}
-                    </span>
-                  </div>
-                  {openScheduleId === schedule.scheduleId && (
-                    <div className="schedule-details" style={{padding: '16px 32px', background: '#fff'}}>
-                      {schedule.itineraries && schedule.itineraries.length > 0 ? (
-                        schedule.itineraries.map((itinerary) => (
-                          <div key={itinerary.itineraryId} className="itinerary-card" style={{
-                            border: '1px solid #e3e8f0',
-                            borderRadius: 8,
-                            marginBottom: 12,
-                            padding: 14,
-                            background: selectedItineraryId === itinerary.itineraryId ? '#e3f2fd' : '#f5faff',
-                            cursor: 'pointer'
-                          }}
-                          onClick={() => handleItinerarySelect(itinerary.itineraryId)}
-                          >
-                            <div><strong>Tiêu đề:</strong> {itinerary.title}</div>
-                            {itinerary.startTime && (
-                              <div><strong>Giờ bắt đầu:</strong> {formatTime(itinerary.startTime)}</div>
-                            )}
-                            {itinerary.endTime && (
-                              <div><strong>Giờ kết thúc:</strong> {formatTime(itinerary.endTime)}</div>
-                            )}
-                            {itinerary.description && (
-                              <div><strong>Mô tả:</strong> {itinerary.description}</div>
-                            )}
-                            {itinerary.type && (
-                              <div><strong>Loại:</strong> {itinerary.type}</div>
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        <div style={{color: '#888'}}>Không có lịch trình nào cho schedule này.</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>Chưa có lịch trình cho tour này</p>
-          )}
-        </div>
-
-        <div className="booking-form">
-          <h3>🧾 Book This Tour</h3>
-          <div className="form-group discount">
-            <label>Mã giảm giá (nếu có):</label>
+      {/* Booking form + Điểm nổi bật + FAQ */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, margin: '32px 0', padding: '0 32px' }}>
+        {/* Booking form */}
+        <div style={{ flex: 1, minWidth: 320, background: '#e3f2fd', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0' }}>
+          <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 18, marginBottom: 16 }}>Đặt tour</div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontWeight: 600 }}>Mã giảm giá (nếu có):</label>
             <input
               type="text"
               placeholder="VD: NEWUSER10"
               value={discountCode}
               onChange={(e) => setDiscountCode(e.target.value)}
+              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #1976d2', marginTop: 6, marginBottom: 12 }}
             />
           </div>
-
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontWeight: 600 }}>Chọn lịch trình:</label>
+            <select
+              value={selectedScheduleId || ''}
+              onChange={e => setSelectedScheduleId(Number(e.target.value))}
+              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #1976d2', marginTop: 6 }}
+            >
+              <option value="">-- Chọn lịch trình --</option>
+              {itineraries.map(sch => (
+                <option key={sch.scheduleId} value={sch.scheduleId}>
+                  {sch.startDate} - {sch.endDate} ({sch.status})
+                </option>
+              ))}
+            </select>
+          </div>
           <button
-            className="btn submit-btn"
             onClick={handleBooking}
             disabled={bookingLoading || !selectedScheduleId}
+            style={{ width: '100%', padding: 12, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: bookingLoading || !selectedScheduleId ? 'not-allowed' : 'pointer', marginTop: 8 }}
           >
-            {bookingLoading ? 'Đang xử lý...' : '✅ Đặt ngay'}
+            {bookingLoading ? 'Đang xử lý...' : 'Đặt ngay'}
           </button>
         </div>
+        {/* Điểm nổi bật (demo) */}
+        <div style={{ flex: 1, minWidth: 320, background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0' }}>
+          <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 18, marginBottom: 16 }}>Điểm nổi bật</div>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'disc inside', color: '#333', fontSize: 15 }}>
+            <li>Tour an toàn, uy tín, trải nghiệm thiên nhiên tuyệt vời</li>
+            <li>Hướng dẫn viên chuyên nghiệp, hỗ trợ tận tình</li>
+            <li>Lịch trình linh hoạt, phù hợp nhiều đối tượng</li>
+            <li>Giá cả hợp lý, nhiều ưu đãi hấp dẫn</li>
+          </ul>
+        </div>
+      </div>
 
-        <div className="related-tours-section">
-          <h2>CÁC CHƯƠNG TRÌNH KHÁC</h2>
-          <div className="related-tours-grid">
-            {relatedTours.map(tour => (
-              <div key={tour.tourId} className="tour-card">
-                <div className="tour-image">
-                  <img src={`http://localhost:8080${tour.imageUrl}`} alt={tour.name} />
-                  <button 
-                    className="favorite-btn"
-                    onClick={() => navigate(`/tours/${tour.tourId}`)}
-                  >
-                    ♥
-                  </button>
-                </div>
-                <div className="tour-info">
-                  <h3>{tour.name}</h3>
-                  <div className="price-section">
-                    <span className="price">Giá từ {tour.price.toLocaleString()}đ</span>
-                    <button 
-                      className="btn-tour-detail-dashboard"
-                      onClick={() => navigate(`/tour-dashboard/detail/${tour.tourId}`)}
-                    >
-                      Xem chi tiết
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* FAQ (demo) */}
+      <div style={{ margin: '32px 0', padding: '0 32px', background: '#e3f2fd', borderRadius: 12, boxShadow: '0 2px 8px #e3e8f0' }}>
+        <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 18, marginBottom: 16 }}>FAQ về tour</div>
+        <ul style={{ margin: 0, padding: 0, listStyle: 'none', color: '#333', fontSize: 15 }}>
+          <li style={{ marginBottom: 8 }}><b>Đi một mình ổn không?</b> Hoàn toàn ổn, tour có nhiều khách đi lẻ.</li>
+          <li style={{ marginBottom: 8 }}><b>Cung đường trekking dài bao nhiêu?</b> Tùy tour, thường 10-20km/ngày.</li>
+          <li style={{ marginBottom: 8 }}><b>Không có kinh nghiệm trekking có tham gia được không?</b> Được, HDV sẽ hỗ trợ tận tình.</li>
+        </ul>
+      </div>
+
+      {/* Related tours */}
+      <div style={{ margin: '32px 0', padding: '0 32px' }}>
+        <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 16 }}>Các tour liên quan</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18 }}>
+          {relatedTours.map(tour => (
+            <div key={tour.tourId} style={{ background: '#e3f2fd', borderRadius: 12, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0', width: 260, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <img src={`http://localhost:8080${tour.imageUrl}`} alt={tour.name} style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }} />
+              <div style={{ fontWeight: 600, color: '#1976d2', fontSize: 16, marginBottom: 4 }}>{tour.name}</div>
+              <div style={{ color: '#388e3c', fontSize: 15, marginBottom: 8 }}>Giá từ {tour.price.toLocaleString()}đ</div>
+              <button onClick={() => navigate(`/tour-dashboard/detail/${tour.tourId}`)} style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Xem chi tiết</button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

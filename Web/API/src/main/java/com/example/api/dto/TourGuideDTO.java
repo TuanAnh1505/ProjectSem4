@@ -30,4 +30,7 @@ public class TourGuideDTO {
     private Boolean isAvailable = true;
 
     private LocalDateTime createdAt;
+
+    private String userFullName;
+    private String userEmail;
 }

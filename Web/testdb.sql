@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: May 19, 2025 at 04:06 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.1.25
+-- Máy chủ: 127.0.0.1
+-- Thời gian đã tạo: Th5 30, 2025 lúc 03:41 AM
+-- Phiên bản máy phục vụ: 10.4.32-MariaDB
+-- Phiên bản PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `tourismmana`
+-- Cơ sở dữ liệu: `testdb`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `audit_logs`
+-- Cấu trúc bảng cho bảng `audit_logs`
 --
 
 CREATE TABLE `audit_logs` (
@@ -38,7 +38,7 @@ CREATE TABLE `audit_logs` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `bookings`
+-- Cấu trúc bảng cho bảng `bookings`
 --
 
 CREATE TABLE `bookings` (
@@ -49,29 +49,59 @@ CREATE TABLE `bookings` (
   `total_price` decimal(38,2) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `userid` bigint(20) NOT NULL
+  `userid` bigint(20) NOT NULL,
+  `schedule_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `bookings`
+-- Đang đổ dữ liệu cho bảng `bookings`
 --
 
-INSERT INTO `bookings` (`booking_id`, `tour_id`, `booking_date`, `status_id`, `total_price`, `created_at`, `updated_at`, `userid`) VALUES
-(1, 2, '2025-05-17 17:42:43', 1, 100.00, '2025-05-17 17:42:43', '2025-05-17 17:42:43', 2),
-(2, 2, '2025-05-17 17:47:49', 1, 100.00, '2025-05-17 17:47:49', '2025-05-17 17:47:49', 2),
-(3, 2, '2025-05-17 17:52:25', 1, 100.00, '2025-05-17 17:52:25', '2025-05-17 17:52:25', 2),
-(4, 2, '2025-05-17 17:59:30', 1, 100.00, '2025-05-17 17:59:30', '2025-05-17 17:59:30', 2),
-(5, 2, '2025-05-17 18:04:24', 1, 100.00, '2025-05-17 18:04:24', '2025-05-17 18:04:24', 2),
-(6, 2, '2025-05-17 18:09:25', 1, 100.00, '2025-05-17 18:09:25', '2025-05-17 18:09:25', 2),
-(7, 2, '2025-05-17 18:11:24', 1, 100.00, '2025-05-17 18:11:24', '2025-05-17 18:11:24', 2),
-(8, 2, '2025-05-17 18:12:41', 1, 100.00, '2025-05-17 18:12:41', '2025-05-17 18:12:41', 2),
-(9, 2, '2025-05-17 18:16:20', 1, 100.00, '2025-05-17 18:16:20', '2025-05-17 18:16:20', 2),
-(10, 2, '2025-05-17 19:12:56', 1, 100.00, '2025-05-17 19:12:56', '2025-05-17 19:12:56', 2);
+INSERT INTO `bookings` (`booking_id`, `tour_id`, `booking_date`, `status_id`, `total_price`, `created_at`, `updated_at`, `userid`, `schedule_id`) VALUES
+(26, 2, '2025-05-20 14:24:28', 1, 4780000.00, '2025-05-20 14:24:28', '2025-05-20 14:24:28', 2, 3),
+(27, 2, '2025-05-20 14:24:57', 1, 4780000.00, '2025-05-20 14:24:57', '2025-05-20 14:24:57', 2, 3),
+(30, 2, '2025-05-20 14:32:59', 1, 4780000.00, '2025-05-20 14:32:59', '2025-05-20 14:32:59', 2, 3),
+(31, 2, '2025-05-20 14:42:59', 1, 4780000.00, '2025-05-20 14:42:59', '2025-05-20 14:42:59', 2, 1),
+(32, 2, '2025-05-20 14:49:34', 1, 4780000.00, '2025-05-20 14:49:34', '2025-05-20 14:49:34', 2, 1),
+(33, 2, '2025-05-20 14:55:36', 1, 4780000.00, '2025-05-20 14:55:36', '2025-05-20 14:55:36', 2, 3),
+(34, 2, '2025-05-20 14:59:06', 1, 4780000.00, '2025-05-20 14:59:06', '2025-05-20 14:59:06', 2, 3),
+(35, 2, '2025-05-20 15:04:30', 1, 4780000.00, '2025-05-20 15:04:30', '2025-05-20 15:04:30', 2, 3),
+(36, 2, '2025-05-20 15:18:28', 1, 4780000.00, '2025-05-20 15:18:28', '2025-05-20 15:18:28', 2, 1),
+(37, 2, '2025-05-20 15:41:13', 1, 4780000.00, '2025-05-20 15:41:13', '2025-05-20 15:41:13', 2, 1),
+(38, 2, '2025-05-20 15:46:29', 1, 4780000.00, '2025-05-20 15:46:29', '2025-05-20 15:46:29', 2, 1),
+(39, 2, '2025-05-20 15:47:38', 1, 4780000.00, '2025-05-20 15:47:38', '2025-05-20 15:47:38', 2, 3),
+(40, 2, '2025-05-20 15:50:48', 1, 4780000.00, '2025-05-20 15:50:48', '2025-05-20 15:50:48', 2, 3),
+(41, 2, '2025-05-20 15:51:38', 1, 4780000.00, '2025-05-20 15:51:38', '2025-05-20 15:51:38', 2, 3),
+(42, 2, '2025-05-20 15:55:37', 1, 4780000.00, '2025-05-20 15:55:37', '2025-05-20 15:55:37', 2, 3),
+(43, 2, '2025-05-20 16:00:42', 1, 4780000.00, '2025-05-20 16:00:42', '2025-05-20 16:00:42', 2, 3),
+(44, 2, '2025-05-20 16:17:53', 1, 7170000.00, '2025-05-20 16:17:53', '2025-05-20 16:19:17', 2, 1),
+(45, 2, '2025-05-20 17:03:59', 1, 7170000.00, '2025-05-20 17:03:59', '2025-05-20 17:04:57', 2, 1),
+(46, 7, '2025-05-21 09:16:07', 1, 5200000.00, '2025-05-21 09:16:07', '2025-05-21 09:16:07', 2, 7),
+(47, 7, '2025-05-21 09:23:35', 1, 5200000.00, '2025-05-21 09:23:35', '2025-05-21 09:23:35', 2, 7),
+(48, 4, '2025-05-21 09:25:11', 1, 3800000.00, '2025-05-21 09:25:11', '2025-05-21 09:25:11', 2, 4),
+(49, 2, '2025-05-21 10:02:53', 1, 4780000.00, '2025-05-21 10:02:53', '2025-05-21 10:02:53', 2, 1),
+(50, 2, '2025-05-21 10:08:38', 1, 4780000.00, '2025-05-21 10:08:38', '2025-05-21 10:08:38', 2, 1),
+(51, 2, '2025-05-26 09:29:01', 1, 4780000.00, '2025-05-26 09:29:01', '2025-05-26 09:29:01', 2, 1),
+(52, 2, '2025-05-26 09:41:42', 1, 4780000.00, '2025-05-26 09:41:42', '2025-05-26 09:41:42', 2, 3),
+(53, 2, '2025-05-26 09:45:16', 1, 4780000.00, '2025-05-26 09:45:16', '2025-05-26 09:45:16', 2, 1),
+(54, 2, '2025-05-26 09:52:13', 1, 4780000.00, '2025-05-26 09:52:13', '2025-05-26 09:52:13', 2, 1),
+(55, 4, '2025-05-26 10:48:43', 1, 3800000.00, '2025-05-26 10:48:43', '2025-05-26 10:48:43', 2, 4),
+(56, 5, '2025-05-26 11:00:52', 1, 4200000.00, '2025-05-26 11:00:52', '2025-05-26 11:00:52', 2, 5),
+(57, 2, '2025-05-26 11:19:27', 1, 4780000.00, '2025-05-26 11:19:27', '2025-05-26 11:19:27', 2, 3),
+(58, 4, '2025-05-26 11:23:26', 1, 3800000.00, '2025-05-26 11:23:26', '2025-05-26 11:23:26', 2, 4),
+(59, 2, '2025-05-26 11:29:35', 1, 4780000.00, '2025-05-26 11:29:35', '2025-05-26 11:29:35', 2, 3),
+(60, 2, '2025-05-26 11:30:24', 1, 4780000.00, '2025-05-26 11:30:24', '2025-05-26 11:30:24', 2, 3),
+(61, 2, '2025-05-26 11:32:18', 1, 4780000.00, '2025-05-26 11:32:18', '2025-05-26 11:32:18', 2, 3),
+(62, 2, '2025-05-26 11:33:49', 1, 4780000.00, '2025-05-26 11:33:49', '2025-05-26 11:33:49', 2, 3),
+(63, 2, '2025-05-27 09:51:18', 1, 4780000.00, '2025-05-27 09:51:18', '2025-05-27 09:51:18', 2, 3),
+(64, 5, '2025-05-27 10:10:41', 1, 4200000.00, '2025-05-27 10:10:41', '2025-05-27 10:10:41', 2, 5),
+(65, 4, '2025-05-27 12:42:19', 1, 3800000.00, '2025-05-27 12:42:19', '2025-05-27 12:42:19', 2, 4),
+(66, 7, '2025-05-28 08:38:39', 1, 5200000.00, '2025-05-28 08:38:39', '2025-05-28 08:38:39', 2, 7);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `booking_passengers`
+-- Cấu trúc bảng cho bảng `booking_passengers`
 --
 
 CREATE TABLE `booking_passengers` (
@@ -88,17 +118,29 @@ CREATE TABLE `booking_passengers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `booking_passengers`
+-- Đang đổ dữ liệu cho bảng `booking_passengers`
 --
 
 INSERT INTO `booking_passengers` (`passenger_id`, `booking_id`, `userid`, `full_name`, `phone`, `email`, `address`, `passenger_type`, `birth_date`, `gender`) VALUES
-(1, 9, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2005-04-07', 'Nam'),
-(2, 10, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '1991-11-11', 'Nam');
+(6, 44, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2005-04-07', 'Nam'),
+(7, 44, 2, 'aaa', NULL, NULL, NULL, 'child', '2014-10-10', 'Nam'),
+(8, 44, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2025-05-20', 'Nam'),
+(9, 44, 2, 'aaabbb', NULL, NULL, NULL, 'child', '2014-10-10', 'Nam'),
+(10, 45, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2005-04-07', 'Nam'),
+(11, 45, 2, 'hoangggg', NULL, NULL, NULL, 'child', '2014-02-02', 'Nam'),
+(12, 48, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '1991-11-11', 'Nam'),
+(13, 49, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2001-12-23', 'Nam'),
+(14, 50, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2005-04-07', 'Nam'),
+(15, 51, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2005-04-07', 'Nam'),
+(16, 52, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '1991-01-01', 'Nam'),
+(17, 53, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2002-02-02', 'Nam'),
+(18, 54, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2003-03-03', 'Nam'),
+(19, 66, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '1991-01-01', 'Nam');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `booking_status`
+-- Cấu trúc bảng cho bảng `booking_status`
 --
 
 CREATE TABLE `booking_status` (
@@ -107,7 +149,7 @@ CREATE TABLE `booking_status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `booking_status`
+-- Đang đổ dữ liệu cho bảng `booking_status`
 --
 
 INSERT INTO `booking_status` (`booking_status_id`, `status_name`) VALUES
@@ -119,7 +161,7 @@ INSERT INTO `booking_status` (`booking_status_id`, `status_name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `destinations`
+-- Cấu trúc bảng cho bảng `destinations`
 --
 
 CREATE TABLE `destinations` (
@@ -134,29 +176,22 @@ CREATE TABLE `destinations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `destinations`
+-- Đang đổ dữ liệu cho bảng `destinations`
 --
 
 INSERT INTO `destinations` (`destination_id`, `name`, `category`, `description`, `location`, `rating`, `created_at`, `updated_at`) VALUES
 (1, 'Đèo Mã Pí Lèng', 'Thiên nhiên', 'Một trong tứ đại đỉnh đèo nổi tiếng với cảnh sắc hùng vĩ.', 'Hà Giang', 5, '2025-05-17 11:10:38', '2025-05-17 11:10:38'),
-(2, 'Dinh Thự Vua Mèo', 'Lịch sử', 'Di tích kiến trúc cổ nổi bật, từng là nơi ở của Vua Mèo Vương Chính Đức.', 'Sà Phìn, Đồng Văn, Hà Giang', 4, '2025-05-17 11:11:20', '2025-05-17 11:11:20');
+(2, 'Dinh Thự Vua Mèo', 'Lịch sử', 'Di tích kiến trúc cổ nổi bật, từng là nơi ở của Vua Mèo Vương Chính Đức.', 'Sà Phìn, Đồng Văn, Hà Giang', 4, '2025-05-17 11:11:20', '2025-05-17 11:11:20'),
+(3, 'Vịnh Hạ Long', 'Thiên nhiên', 'Kỳ quan thiên nhiên thế giới, nổi bật với hàng nghìn đảo đá vôi.', 'Quảng Ninh', 5, '2025-05-20 19:33:11', '2025-05-20 19:33:11'),
+(4, 'Fansipan', 'Thiên nhiên', 'Nóc nhà Đông Dương với cáp treo hiện đại dẫn lên đỉnh.', 'Lào Cai', 5, '2025-05-20 19:36:11', '2025-05-20 19:36:11'),
+(5, 'Thung lũng Mường Hoa', 'Thiên nhiên', 'Nơi có những thửa ruộng bậc thang kỳ vĩ và di tích cổ.', 'Sapa, Lào Cai', 5, '2025-05-20 19:37:38', '2025-05-20 19:37:38'),
+(6, 'Chợ nổi Cái Răng', 'Văn hóa địa phương', 'Chợ nổi đặc trưng vùng sông nước miền Tây.', 'Cần Thơ', 4, '2025-05-20 19:39:30', '2025-05-20 19:39:30'),
+(8, 'ds', 'd', 'sd', 'sd', 5, '2025-05-25 19:51:09', '2025-05-25 19:51:09');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `destination_file_path`
---
-
-CREATE TABLE `destination_file_path` (
-  `id` int(11) NOT NULL,
-  `destination_id` int(11) DEFAULT NULL,
-  `file_path` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `destination_file_paths`
+-- Cấu trúc bảng cho bảng `destination_file_paths`
 --
 
 CREATE TABLE `destination_file_paths` (
@@ -168,19 +203,24 @@ CREATE TABLE `destination_file_paths` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `destination_file_paths`
+-- Đang đổ dữ liệu cho bảng `destination_file_paths`
 --
 
 INSERT INTO `destination_file_paths` (`file_id`, `destination_id`, `file_path`, `file_type`, `uploaded_at`) VALUES
 (1, 1, '/uploads/destinations/2097171b-a6da-4e78-b781-43bfb86f6353.jfif', 'image', '2025-05-17 11:10:38'),
 (2, 1, '/uploads/destinations/9c5c1dc2-2550-4fc0-b051-740b141b0159.jfif', 'image', '2025-05-17 11:10:38'),
 (3, 2, '/uploads/destinations/cd07ba0b-b89d-4b12-b246-cd0ff4f815a4.jpg', 'image', '2025-05-17 11:11:20'),
-(4, 2, '/uploads/destinations/d7f8d40a-3556-433f-bcc5-1e5bc48ae2d0.jpg', 'image', '2025-05-17 11:11:20');
+(4, 2, '/uploads/destinations/d7f8d40a-3556-433f-bcc5-1e5bc48ae2d0.jpg', 'image', '2025-05-17 11:11:20'),
+(5, 3, '/uploads/destinations/449992a5-0028-42a8-a689-6d1a347ce54a.jpg', NULL, '2025-05-20 19:33:11'),
+(6, 4, '/uploads/destinations/98572563-765e-47a1-a8e1-9128c0f66c53.png', NULL, '2025-05-20 19:36:11'),
+(7, 5, '/uploads/destinations/2a1bd0c2-a05f-454d-b89a-b31957e2367b.jfif', NULL, '2025-05-20 19:37:38'),
+(8, 6, '/uploads/destinations/b4bbf29a-f3d3-4ec8-8e28-642189cdbbc9.jpg', NULL, '2025-05-20 19:39:30'),
+(10, 8, '/uploads/destinations/d7812872-2574-475a-ac07-14da34039842.png', NULL, '2025-05-25 19:51:09');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `discounts`
+-- Cấu trúc bảng cho bảng `discounts`
 --
 
 CREATE TABLE `discounts` (
@@ -196,7 +236,7 @@ CREATE TABLE `discounts` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `events`
+-- Cấu trúc bảng cho bảng `events`
 --
 
 CREATE TABLE `events` (
@@ -213,28 +253,19 @@ CREATE TABLE `events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `events`
+-- Đang đổ dữ liệu cho bảng `events`
 --
 
 INSERT INTO `events` (`event_id`, `name`, `description`, `location`, `start_date`, `end_date`, `ticket_price`, `status_id`, `created_at`, `updated_at`) VALUES
-(1, '	 Lễ hội Chợ tình Khâu Vai', 'Lễ hội truyền thống độc đáo nơi tình yêu được hẹn hò mỗi năm một lần.', 'Khâu Vai, Mèo Vạc, Hà Giang', '2025-05-28 08:00:00', '2025-05-28 17:00:00', 1.00, 1, '2025-05-17 11:26:52', '2025-05-17 11:26:52');
+(1, '	 Lễ hội Chợ tình Khâu Vai', 'Lễ hội truyền thống độc đáo nơi tình yêu được hẹn hò mỗi năm một lần.', 'Khâu Vai, Mèo Vạc, Hà Giang', '2025-05-28 08:00:00', '2025-05-28 17:00:00', 1.00, 1, '2025-05-17 11:26:52', '2025-05-17 11:26:52'),
+(2, 'Lễ hội Hoa Hạ Long', 'Trưng bày hoa và các hoạt động văn hóa trên Vịnh Hạ Long.', 'Quảng Ninh', '2025-06-15 09:00:00', '2025-06-17 20:00:00', 100000.00, 2, '2025-05-20 19:42:32', '2025-05-20 19:42:32'),
+(3, 'Festival Đà Lạt Mùa Hè', 'Lễ hội hoa, âm nhạc và trình diễn ánh sáng mùa hè tại Đà Lạt.', 'Đà Lạt', '2025-07-01 10:00:00', '2025-07-03 21:00:00', 120000.00, 1, '2025-05-20 19:44:46', '2025-05-20 19:44:46'),
+(4, 'Đêm nhạc Hội An phố cổ', 'Chương trình nghệ thuật tái hiện văn hóa Hội An xưa.', 'Hội An', '2025-08-05 18:00:00', '2025-08-06 22:00:00', 80000.00, 1, '2025-05-20 19:46:59', '2025-05-20 19:46:59');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `event_file_path`
---
-
-CREATE TABLE `event_file_path` (
-  `id` int(11) NOT NULL,
-  `event_id` int(11) DEFAULT NULL,
-  `file_path` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `event_file_paths`
+-- Cấu trúc bảng cho bảng `event_file_paths`
 --
 
 CREATE TABLE `event_file_paths` (
@@ -243,16 +274,19 @@ CREATE TABLE `event_file_paths` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `event_file_paths`
+-- Đang đổ dữ liệu cho bảng `event_file_paths`
 --
 
 INSERT INTO `event_file_paths` (`event_id`, `file_path`) VALUES
-(1, '/uploads/events/1747456012005_Lễ hội Chợ tình Khâu Vai.jpeg');
+(1, '/uploads/events/1747456012005_Lễ hội Chợ tình Khâu Vai.jpeg'),
+(2, '/uploads/events/1747744952008_Lễ hội Hoa Hạ Long.jpg'),
+(3, '/uploads/events/1747745086434_Festival Đà Lạt Mùa Hè.jpg'),
+(4, '/uploads/events/1747745219719_Đêm nhạc Hội An phố cổ.jpg');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `event_status`
+-- Cấu trúc bảng cho bảng `event_status`
 --
 
 CREATE TABLE `event_status` (
@@ -261,7 +295,7 @@ CREATE TABLE `event_status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `event_status`
+-- Đang đổ dữ liệu cho bảng `event_status`
 --
 
 INSERT INTO `event_status` (`event_status_id`, `status_name`) VALUES
@@ -273,7 +307,7 @@ INSERT INTO `event_status` (`event_status_id`, `status_name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `feedbacks`
+-- Cấu trúc bảng cho bảng `feedbacks`
 --
 
 CREATE TABLE `feedbacks` (
@@ -289,7 +323,7 @@ CREATE TABLE `feedbacks` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `feedback_status`
+-- Cấu trúc bảng cho bảng `feedback_status`
 --
 
 CREATE TABLE `feedback_status` (
@@ -299,7 +333,7 @@ CREATE TABLE `feedback_status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `feedback_status`
+-- Đang đổ dữ liệu cho bảng `feedback_status`
 --
 
 INSERT INTO `feedback_status` (`status_id`, `status_name`, `description`) VALUES
@@ -310,7 +344,7 @@ INSERT INTO `feedback_status` (`status_id`, `status_name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `media`
+-- Cấu trúc bảng cho bảng `media`
 --
 
 CREATE TABLE `media` (
@@ -324,7 +358,7 @@ CREATE TABLE `media` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notifications`
+-- Cấu trúc bảng cho bảng `notifications`
 --
 
 CREATE TABLE `notifications` (
@@ -342,7 +376,7 @@ CREATE TABLE `notifications` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payments`
+-- Cấu trúc bảng cho bảng `payments`
 --
 
 CREATE TABLE `payments` (
@@ -360,10 +394,17 @@ CREATE TABLE `payments` (
   `payment_method` enum('credit_card','paypal','bank_transfer','cash','momo') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `payments`
+--
+
+INSERT INTO `payments` (`payment_id`, `booking_id`, `userid`, `amount`, `payment_method_id`, `status_id`, `transaction_id`, `payment_date`, `notes`, `created_at`, `updated_at`, `payment_method`) VALUES
+(1, 66, 2, 5200000.00, 2, 3, 'fd71db7f-c167-4803-8b9e-9356b66ff903', '2025-05-28 08:39:12', NULL, '2025-05-28 08:39:12', '2025-05-28 08:40:18', NULL);
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payment_history`
+-- Cấu trúc bảng cho bảng `payment_history`
 --
 
 CREATE TABLE `payment_history` (
@@ -374,10 +415,17 @@ CREATE TABLE `payment_history` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `payment_history`
+--
+
+INSERT INTO `payment_history` (`history_id`, `payment_id`, `status_id`, `notes`, `created_at`) VALUES
+(1, 1, 3, 'Payment created', '2025-05-28 08:39:12');
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payment_methods`
+-- Cấu trúc bảng cho bảng `payment_methods`
 --
 
 CREATE TABLE `payment_methods` (
@@ -389,7 +437,7 @@ CREATE TABLE `payment_methods` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `payment_methods`
+-- Đang đổ dữ liệu cho bảng `payment_methods`
 --
 
 INSERT INTO `payment_methods` (`method_id`, `method_name`, `description`, `is_active`, `created_at`) VALUES
@@ -402,7 +450,7 @@ INSERT INTO `payment_methods` (`method_id`, `method_name`, `description`, `is_ac
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payment_status`
+-- Cấu trúc bảng cho bảng `payment_status`
 --
 
 CREATE TABLE `payment_status` (
@@ -412,7 +460,7 @@ CREATE TABLE `payment_status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `payment_status`
+-- Đang đổ dữ liệu cho bảng `payment_status`
 --
 
 INSERT INTO `payment_status` (`payment_status_id`, `status_name`, `description`) VALUES
@@ -426,7 +474,7 @@ INSERT INTO `payment_status` (`payment_status_id`, `status_name`, `description`)
 -- --------------------------------------------------------
 
 --
--- Table structure for table `roles`
+-- Cấu trúc bảng cho bảng `roles`
 --
 
 CREATE TABLE `roles` (
@@ -436,7 +484,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `roles`
+-- Đang đổ dữ liệu cho bảng `roles`
 --
 
 INSERT INTO `roles` (`roleid`, `role_name`, `description`) VALUES
@@ -446,7 +494,7 @@ INSERT INTO `roles` (`roleid`, `role_name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tours`
+-- Cấu trúc bảng cho bảng `tours`
 --
 
 CREATE TABLE `tours` (
@@ -463,17 +511,19 @@ CREATE TABLE `tours` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tours`
+-- Đang đổ dữ liệu cho bảng `tours`
 --
 
 INSERT INTO `tours` (`tour_id`, `name`, `description`, `price`, `duration`, `max_participants`, `status_id`, `image_url`, `created_at`, `updated_at`) VALUES
-(2, 'Khám phá Hà Giang', 'Tour khám phá vùng núi đá Hà Giang, chiêm ngưỡng vẻ đẹp hùng vĩ và trải nghiệm văn hóa bản địa.', 100.00, 3, 20, 2, '/uploads/tours/c8a49fd9-fed8-4418-aa6d-3d576ccddb1a_Tour khám phá vùng núi đá Hà Giang,.jfif', '2025-05-17 12:03:12', '2025-05-17 12:04:08'),
-(3, 'abc', 'sd', 2.00, 2, 10, 3, '/uploads/tours/ff1df7e6-8e3f-49e7-b911-dcb0d2527619_snapedit_1746961093933.png', '2025-05-17 14:21:14', '2025-05-17 14:21:14');
+(2, 'Khám phá Hà Giang', 'Tour khám phá vùng núi đá Hà Giang, chiêm ngưỡng vẻ đẹp hùng vĩ và trải nghiệm văn hóa bản địa.', 4780000.00, 3, 20, 2, '/uploads/tours/42a359bb-df3b-4f1d-9db6-22cf24e24413_Tour khám phá vùng núi đá Hà Giang,.jfif', '2025-05-17 12:03:12', '2025-05-24 19:10:48'),
+(4, 'Du lịch Hạ Long', 'Tham quan Vịnh Hạ Long, hang Sửng Sốt, tắm biển Bãi Cháy.', 3800000.00, 3, 40, 3, '/uploads/tours/adaede19-66c6-45ef-af17-b0cd223df540_Hạ Long.jfif', '2025-05-20 19:50:44', '2025-05-20 19:50:44'),
+(5, 'Khám phá Sapa', 'Check-in đỉnh Fansipan, thung lũng Mường Hoa, bản Cát Cát.', 4200000.00, 3, 25, 3, '/uploads/tours/dd688e7e-9d55-4657-bf9b-fb00943c9b0b_Khám phá Sapa.jpg', '2025-05-20 19:52:00', '2025-05-20 19:52:00'),
+(7, 'Khám phá miền Trung', 'Di sản Hội An, Cố đô Huế, động Phong Nha - Kẻ Bàng.', 5200000.00, 4, 40, 3, '/uploads/tours/e453f51b-1024-47d4-a825-664b834506db_Khám phá miền Trung.jfif', '2025-05-20 19:55:25', '2025-05-24 20:16:41');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_destinations`
+-- Cấu trúc bảng cho bảng `tour_destinations`
 --
 
 CREATE TABLE `tour_destinations` (
@@ -482,18 +532,20 @@ CREATE TABLE `tour_destinations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_destinations`
+-- Đang đổ dữ liệu cho bảng `tour_destinations`
 --
 
 INSERT INTO `tour_destinations` (`tour_id`, `destination_id`) VALUES
 (2, 1),
 (2, 2),
-(3, 1);
+(4, 3),
+(5, 4),
+(5, 5);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_events`
+-- Cấu trúc bảng cho bảng `tour_events`
 --
 
 CREATE TABLE `tour_events` (
@@ -502,17 +554,18 @@ CREATE TABLE `tour_events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_events`
+-- Đang đổ dữ liệu cho bảng `tour_events`
 --
 
 INSERT INTO `tour_events` (`tour_id`, `event_id`) VALUES
 (2, 1),
-(3, 1);
+(4, 2),
+(7, 3);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_guides`
+-- Cấu trúc bảng cho bảng `tour_guides`
 --
 
 CREATE TABLE `tour_guides` (
@@ -523,13 +576,14 @@ CREATE TABLE `tour_guides` (
   `languages` varchar(255) NOT NULL,
   `rating` decimal(3,1) DEFAULT 0.0,
   `is_available` tinyint(1) DEFAULT 1,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `userid` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_guide_assignments`
+-- Cấu trúc bảng cho bảng `tour_guide_assignments`
 --
 
 CREATE TABLE `tour_guide_assignments` (
@@ -545,23 +599,7 @@ CREATE TABLE `tour_guide_assignments` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_itineraries`
---
-
-CREATE TABLE `tour_itineraries` (
-  `itinerary_id` int(11) NOT NULL,
-  `description` text DEFAULT NULL,
-  `end_time` time(6) NOT NULL,
-  `schedule_id` int(11) NOT NULL,
-  `start_time` time(6) NOT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `type` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tour_itinerary`
+-- Cấu trúc bảng cho bảng `tour_itinerary`
 --
 
 CREATE TABLE `tour_itinerary` (
@@ -575,18 +613,23 @@ CREATE TABLE `tour_itinerary` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_itinerary`
+-- Đang đổ dữ liệu cho bảng `tour_itinerary`
 --
 
 INSERT INTO `tour_itinerary` (`itinerary_id`, `schedule_id`, `title`, `description`, `start_time`, `end_time`, `type`) VALUES
 (1, 1, 'Tham quan Đèo Mã Pí Lèng', 'Chiêm ngưỡng vẻ đẹp hùng vĩ của đèo Mã Pí Lèng – một trong \"tứ đại đỉnh đèo\" của Việt Nam.', '08:00:00', '10:00:00', 'destination'),
 (2, 1, 'Khám phá Dinh Thự Vua Mèo', 'Tìm hiểu về lịch sử và kiến trúc độc đáo của dòng họ Vương tại dinh thự Vua Mèo.', '10:30:00', '12:00:00', 'DESTINATION'),
-(3, 3, 'Tham gia Lễ hội Chợ tình Khâu Vai', 'Hòa mình vào không khí văn hóa dân tộc, nơi trai gái gặp gỡ nhau trong lễ hội truyền thống vùng cao.', '19:00:00', '21:00:00', 'EVENT');
+(3, 3, 'Tham gia Lễ hội Chợ tình Khâu Vai', 'Hòa mình vào không khí văn hóa dân tộc, nơi trai gái gặp gỡ nhau trong lễ hội truyền thống vùng cao.', '19:00:00', '21:00:00', 'EVENT'),
+(4, 1, '1', '1', '10:30:00', '11:30:00', 'DESTINATION'),
+(5, 4, 'Du ngoạn Vịnh Hạ Long', 'Tham quan các hòn đảo nổi bật', '09:00:00', '12:00:00', 'DESTINATION'),
+(6, 4, 'Lễ hội Hoa Hạ Long', 'Chiêm ngưỡng không gian hoa và nghệ thuật', '13:00:00', '16:00:00', 'EVENT'),
+(8, 5, 'Khám phá thung lũng Mường Hoa', 'Tham quan ruộng bậc thang và di tích đá cổ', '13:00:00', '15:30:00', 'DESTINATION'),
+(9, 7, 'Đêm nhạc Hội An phố cổ', 'Chương trình nghệ thuật đặc sắc tái hiện văn hóa xưa', '19:00:00', '21:00:00', 'EVENT');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_schedules`
+-- Cấu trúc bảng cho bảng `tour_schedules`
 --
 
 CREATE TABLE `tour_schedules` (
@@ -600,18 +643,21 @@ CREATE TABLE `tour_schedules` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_schedules`
+-- Đang đổ dữ liệu cho bảng `tour_schedules`
 --
 
 INSERT INTO `tour_schedules` (`schedule_id`, `tour_id`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
-(1, 2, '2025-05-27', '2025-05-29', 'pending', '2025-05-17 15:02:57', '2025-05-17 15:49:24'),
-(2, 3, '2025-05-20', '2025-05-21', 'available', '2025-05-17 15:07:08', '2025-05-17 15:07:08'),
-(3, 2, '2025-06-11', '2025-06-13', 'pending', '2025-05-17 15:43:53', '2025-05-17 15:43:53');
+(1, 2, '2025-05-27', '2025-05-29', 'available', '2025-05-17 15:02:57', '2025-05-20 12:26:17'),
+(3, 2, '2025-06-11', '2025-06-13', 'available', '2025-05-17 15:43:53', '2025-05-20 12:39:50'),
+(4, 4, '2025-06-15', '2025-06-17', 'available', '2025-05-20 19:59:02', '2025-05-20 19:59:02'),
+(5, 5, '2025-06-20', '2025-06-26', 'available', '2025-05-20 19:59:22', '2025-05-20 19:59:22'),
+(7, 7, '2025-08-05', '2025-08-06', 'available', '2025-05-20 20:02:25', '2025-05-20 20:02:25'),
+(9, 5, '2025-06-06', '2025-06-08', 'available', '2025-05-24 20:02:11', '2025-05-24 20:58:05');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_status`
+-- Cấu trúc bảng cho bảng `tour_status`
 --
 
 CREATE TABLE `tour_status` (
@@ -621,7 +667,7 @@ CREATE TABLE `tour_status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_status`
+-- Đang đổ dữ liệu cho bảng `tour_status`
 --
 
 INSERT INTO `tour_status` (`tour_status_id`, `status_name`, `description`) VALUES
@@ -634,7 +680,7 @@ INSERT INTO `tour_status` (`tour_status_id`, `status_name`, `description`) VALUE
 -- --------------------------------------------------------
 
 --
--- Table structure for table `userroles`
+-- Cấu trúc bảng cho bảng `userroles`
 --
 
 CREATE TABLE `userroles` (
@@ -643,7 +689,7 @@ CREATE TABLE `userroles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `userroles`
+-- Đang đổ dữ liệu cho bảng `userroles`
 --
 
 INSERT INTO `userroles` (`userid`, `roleid`) VALUES
@@ -653,7 +699,7 @@ INSERT INTO `userroles` (`userid`, `roleid`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Cấu trúc bảng cho bảng `users`
 --
 
 CREATE TABLE `users` (
@@ -670,7 +716,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Đang đổ dữ liệu cho bảng `users`
 --
 
 INSERT INTO `users` (`userid`, `full_name`, `email`, `password_hash`, `phone`, `address`, `is_active`, `created_at`, `updated_at`, `public_id`) VALUES
@@ -680,7 +726,7 @@ INSERT INTO `users` (`userid`, `full_name`, `email`, `password_hash`, `phone`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `usertokens`
+-- Cấu trúc bảng cho bảng `usertokens`
 --
 
 CREATE TABLE `usertokens` (
@@ -694,7 +740,7 @@ CREATE TABLE `usertokens` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_discounts`
+-- Cấu trúc bảng cho bảng `user_discounts`
 --
 
 CREATE TABLE `user_discounts` (
@@ -706,18 +752,18 @@ CREATE TABLE `user_discounts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Indexes for dumped tables
+-- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Indexes for table `audit_logs`
+-- Chỉ mục cho bảng `audit_logs`
 --
 ALTER TABLE `audit_logs`
   ADD PRIMARY KEY (`log_id`),
   ADD KEY `fk_audit_user` (`userid`);
 
 --
--- Indexes for table `bookings`
+-- Chỉ mục cho bảng `bookings`
 --
 ALTER TABLE `bookings`
   ADD PRIMARY KEY (`booking_id`),
@@ -726,7 +772,7 @@ ALTER TABLE `bookings`
   ADD KEY `fk_booking_user` (`userid`);
 
 --
--- Indexes for table `booking_passengers`
+-- Chỉ mục cho bảng `booking_passengers`
 --
 ALTER TABLE `booking_passengers`
   ADD PRIMARY KEY (`passenger_id`),
@@ -734,66 +780,54 @@ ALTER TABLE `booking_passengers`
   ADD KEY `fk_passenger_user` (`userid`);
 
 --
--- Indexes for table `booking_status`
+-- Chỉ mục cho bảng `booking_status`
 --
 ALTER TABLE `booking_status`
   ADD PRIMARY KEY (`booking_status_id`),
   ADD UNIQUE KEY `uk_status_name` (`status_name`);
 
 --
--- Indexes for table `destinations`
+-- Chỉ mục cho bảng `destinations`
 --
 ALTER TABLE `destinations`
   ADD PRIMARY KEY (`destination_id`);
 
 --
--- Indexes for table `destination_file_path`
---
-ALTER TABLE `destination_file_path`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `destination_file_paths`
+-- Chỉ mục cho bảng `destination_file_paths`
 --
 ALTER TABLE `destination_file_paths`
   ADD PRIMARY KEY (`file_id`),
   ADD KEY `fk_destination_file` (`destination_id`);
 
 --
--- Indexes for table `discounts`
+-- Chỉ mục cho bảng `discounts`
 --
 ALTER TABLE `discounts`
   ADD PRIMARY KEY (`discount_id`),
   ADD UNIQUE KEY `uk_discount_code` (`code`);
 
 --
--- Indexes for table `events`
+-- Chỉ mục cho bảng `events`
 --
 ALTER TABLE `events`
   ADD PRIMARY KEY (`event_id`),
   ADD KEY `fk_event_status` (`status_id`);
 
 --
--- Indexes for table `event_file_path`
---
-ALTER TABLE `event_file_path`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `event_file_paths`
+-- Chỉ mục cho bảng `event_file_paths`
 --
 ALTER TABLE `event_file_paths`
   ADD KEY `FK7lmjuds8bmtdclfwuqrj560qy` (`event_id`);
 
 --
--- Indexes for table `event_status`
+-- Chỉ mục cho bảng `event_status`
 --
 ALTER TABLE `event_status`
   ADD PRIMARY KEY (`event_status_id`),
   ADD UNIQUE KEY `uk_status_name` (`status_name`);
 
 --
--- Indexes for table `feedbacks`
+-- Chỉ mục cho bảng `feedbacks`
 --
 ALTER TABLE `feedbacks`
   ADD PRIMARY KEY (`feedback_id`),
@@ -802,21 +836,21 @@ ALTER TABLE `feedbacks`
   ADD KEY `fk_feedback_status` (`status_id`);
 
 --
--- Indexes for table `feedback_status`
+-- Chỉ mục cho bảng `feedback_status`
 --
 ALTER TABLE `feedback_status`
   ADD PRIMARY KEY (`status_id`),
   ADD UNIQUE KEY `uk_status_name` (`status_name`);
 
 --
--- Indexes for table `media`
+-- Chỉ mục cho bảng `media`
 --
 ALTER TABLE `media`
   ADD PRIMARY KEY (`media_id`),
   ADD KEY `fk_media_user` (`userid`);
 
 --
--- Indexes for table `notifications`
+-- Chỉ mục cho bảng `notifications`
 --
 ALTER TABLE `notifications`
   ADD PRIMARY KEY (`notification_id`),
@@ -824,7 +858,7 @@ ALTER TABLE `notifications`
   ADD KEY `fk_notification_sender` (`sender_id`);
 
 --
--- Indexes for table `payments`
+-- Chỉ mục cho bảng `payments`
 --
 ALTER TABLE `payments`
   ADD PRIMARY KEY (`payment_id`),
@@ -834,7 +868,7 @@ ALTER TABLE `payments`
   ADD KEY `fk_payment_status` (`status_id`);
 
 --
--- Indexes for table `payment_history`
+-- Chỉ mục cho bảng `payment_history`
 --
 ALTER TABLE `payment_history`
   ADD PRIMARY KEY (`history_id`),
@@ -842,56 +876,57 @@ ALTER TABLE `payment_history`
   ADD KEY `fk_history_status` (`status_id`);
 
 --
--- Indexes for table `payment_methods`
+-- Chỉ mục cho bảng `payment_methods`
 --
 ALTER TABLE `payment_methods`
   ADD PRIMARY KEY (`method_id`),
   ADD UNIQUE KEY `uk_method_name` (`method_name`);
 
 --
--- Indexes for table `payment_status`
+-- Chỉ mục cho bảng `payment_status`
 --
 ALTER TABLE `payment_status`
   ADD PRIMARY KEY (`payment_status_id`),
   ADD UNIQUE KEY `uk_status_name` (`status_name`);
 
 --
--- Indexes for table `roles`
+-- Chỉ mục cho bảng `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`roleid`),
   ADD UNIQUE KEY `uk_role_name` (`role_name`);
 
 --
--- Indexes for table `tours`
+-- Chỉ mục cho bảng `tours`
 --
 ALTER TABLE `tours`
   ADD PRIMARY KEY (`tour_id`),
   ADD KEY `fk_tour_status` (`status_id`);
 
 --
--- Indexes for table `tour_destinations`
+-- Chỉ mục cho bảng `tour_destinations`
 --
 ALTER TABLE `tour_destinations`
   ADD PRIMARY KEY (`tour_id`,`destination_id`),
   ADD KEY `fk_tour_destinations_destination` (`destination_id`);
 
 --
--- Indexes for table `tour_events`
+-- Chỉ mục cho bảng `tour_events`
 --
 ALTER TABLE `tour_events`
   ADD PRIMARY KEY (`tour_id`,`event_id`),
   ADD KEY `fk_tour_events_event` (`event_id`);
 
 --
--- Indexes for table `tour_guides`
+-- Chỉ mục cho bảng `tour_guides`
 --
 ALTER TABLE `tour_guides`
   ADD PRIMARY KEY (`guide_id`),
+  ADD UNIQUE KEY `UK_heivp9fqmiwskkog40ikipns8` (`userid`),
   ADD KEY `fk_guide_user` (`user_id`);
 
 --
--- Indexes for table `tour_guide_assignments`
+-- Chỉ mục cho bảng `tour_guide_assignments`
 --
 ALTER TABLE `tour_guide_assignments`
   ADD PRIMARY KEY (`assignment_id`),
@@ -899,41 +934,35 @@ ALTER TABLE `tour_guide_assignments`
   ADD KEY `fk_assignment_guide` (`guide_id`);
 
 --
--- Indexes for table `tour_itineraries`
---
-ALTER TABLE `tour_itineraries`
-  ADD PRIMARY KEY (`itinerary_id`);
-
---
--- Indexes for table `tour_itinerary`
+-- Chỉ mục cho bảng `tour_itinerary`
 --
 ALTER TABLE `tour_itinerary`
   ADD PRIMARY KEY (`itinerary_id`),
   ADD KEY `fk_itinerary_schedule` (`schedule_id`);
 
 --
--- Indexes for table `tour_schedules`
+-- Chỉ mục cho bảng `tour_schedules`
 --
 ALTER TABLE `tour_schedules`
   ADD PRIMARY KEY (`schedule_id`),
   ADD KEY `fk_schedule_tour` (`tour_id`);
 
 --
--- Indexes for table `tour_status`
+-- Chỉ mục cho bảng `tour_status`
 --
 ALTER TABLE `tour_status`
   ADD PRIMARY KEY (`tour_status_id`),
   ADD UNIQUE KEY `uk_status_name` (`status_name`);
 
 --
--- Indexes for table `userroles`
+-- Chỉ mục cho bảng `userroles`
 --
 ALTER TABLE `userroles`
   ADD PRIMARY KEY (`userid`,`roleid`),
   ADD KEY `fk_userroles_role` (`roleid`);
 
 --
--- Indexes for table `users`
+-- Chỉ mục cho bảng `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`userid`),
@@ -941,14 +970,14 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `public_id` (`public_id`);
 
 --
--- Indexes for table `usertokens`
+-- Chỉ mục cho bảng `usertokens`
 --
 ALTER TABLE `usertokens`
   ADD PRIMARY KEY (`tokenid`),
   ADD KEY `fk_usertokens_user` (`userid`);
 
 --
--- Indexes for table `user_discounts`
+-- Chỉ mục cho bảng `user_discounts`
 --
 ALTER TABLE `user_discounts`
   ADD PRIMARY KEY (`tour_id`,`discount_id`,`userid`),
@@ -956,195 +985,177 @@ ALTER TABLE `user_discounts`
   ADD KEY `fk_user_discount_discount` (`discount_id`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT cho các bảng đã đổ
 --
 
 --
--- AUTO_INCREMENT for table `audit_logs`
+-- AUTO_INCREMENT cho bảng `audit_logs`
 --
 ALTER TABLE `audit_logs`
   MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `bookings`
+-- AUTO_INCREMENT cho bảng `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
--- AUTO_INCREMENT for table `booking_passengers`
+-- AUTO_INCREMENT cho bảng `booking_passengers`
 --
 ALTER TABLE `booking_passengers`
-  MODIFY `passenger_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `passenger_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
--- AUTO_INCREMENT for table `booking_status`
+-- AUTO_INCREMENT cho bảng `booking_status`
 --
 ALTER TABLE `booking_status`
   MODIFY `booking_status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `destinations`
+-- AUTO_INCREMENT cho bảng `destinations`
 --
 ALTER TABLE `destinations`
-  MODIFY `destination_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `destination_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `destination_file_path`
---
-ALTER TABLE `destination_file_path`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `destination_file_paths`
+-- AUTO_INCREMENT cho bảng `destination_file_paths`
 --
 ALTER TABLE `destination_file_paths`
-  MODIFY `file_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `file_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `discounts`
+-- AUTO_INCREMENT cho bảng `discounts`
 --
 ALTER TABLE `discounts`
   MODIFY `discount_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `events`
+-- AUTO_INCREMENT cho bảng `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `event_file_path`
---
-ALTER TABLE `event_file_path`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `event_status`
+-- AUTO_INCREMENT cho bảng `event_status`
 --
 ALTER TABLE `event_status`
   MODIFY `event_status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `feedbacks`
+-- AUTO_INCREMENT cho bảng `feedbacks`
 --
 ALTER TABLE `feedbacks`
   MODIFY `feedback_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `feedback_status`
+-- AUTO_INCREMENT cho bảng `feedback_status`
 --
 ALTER TABLE `feedback_status`
   MODIFY `status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `media`
+-- AUTO_INCREMENT cho bảng `media`
 --
 ALTER TABLE `media`
   MODIFY `media_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `notifications`
+-- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
   MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `payments`
+-- AUTO_INCREMENT cho bảng `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `payment_history`
+-- AUTO_INCREMENT cho bảng `payment_history`
 --
 ALTER TABLE `payment_history`
-  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `payment_methods`
+-- AUTO_INCREMENT cho bảng `payment_methods`
 --
 ALTER TABLE `payment_methods`
   MODIFY `method_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `payment_status`
+-- AUTO_INCREMENT cho bảng `payment_status`
 --
 ALTER TABLE `payment_status`
   MODIFY `payment_status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `roles`
+-- AUTO_INCREMENT cho bảng `roles`
 --
 ALTER TABLE `roles`
   MODIFY `roleid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `tours`
+-- AUTO_INCREMENT cho bảng `tours`
 --
 ALTER TABLE `tours`
-  MODIFY `tour_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `tour_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `tour_guides`
+-- AUTO_INCREMENT cho bảng `tour_guides`
 --
 ALTER TABLE `tour_guides`
   MODIFY `guide_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tour_guide_assignments`
+-- AUTO_INCREMENT cho bảng `tour_guide_assignments`
 --
 ALTER TABLE `tour_guide_assignments`
   MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tour_itineraries`
---
-ALTER TABLE `tour_itineraries`
-  MODIFY `itinerary_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tour_itinerary`
+-- AUTO_INCREMENT cho bảng `tour_itinerary`
 --
 ALTER TABLE `tour_itinerary`
-  MODIFY `itinerary_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `itinerary_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT for table `tour_schedules`
+-- AUTO_INCREMENT cho bảng `tour_schedules`
 --
 ALTER TABLE `tour_schedules`
-  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `tour_status`
+-- AUTO_INCREMENT cho bảng `tour_status`
 --
 ALTER TABLE `tour_status`
   MODIFY `tour_status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
   MODIFY `userid` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `usertokens`
+-- AUTO_INCREMENT cho bảng `usertokens`
 --
 ALTER TABLE `usertokens`
   MODIFY `tokenid` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- Constraints for dumped tables
+-- Các ràng buộc cho các bảng đã đổ
 --
 
 --
--- Constraints for table `audit_logs`
+-- Các ràng buộc cho bảng `audit_logs`
 --
 ALTER TABLE `audit_logs`
   ADD CONSTRAINT `fk_audit_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE SET NULL;
 
 --
--- Constraints for table `bookings`
+-- Các ràng buộc cho bảng `bookings`
 --
 ALTER TABLE `bookings`
   ADD CONSTRAINT `FKhpweps6it8n224l44tahx19y2` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`),
@@ -1153,32 +1164,32 @@ ALTER TABLE `bookings`
   ADD CONSTRAINT `fk_booking_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `booking_passengers`
+-- Các ràng buộc cho bảng `booking_passengers`
 --
 ALTER TABLE `booking_passengers`
   ADD CONSTRAINT `fk_passenger_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_passenger_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `destination_file_paths`
+-- Các ràng buộc cho bảng `destination_file_paths`
 --
 ALTER TABLE `destination_file_paths`
   ADD CONSTRAINT `fk_destination_file` FOREIGN KEY (`destination_id`) REFERENCES `destinations` (`destination_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `events`
+-- Các ràng buộc cho bảng `events`
 --
 ALTER TABLE `events`
   ADD CONSTRAINT `fk_event_status` FOREIGN KEY (`status_id`) REFERENCES `event_status` (`event_status_id`);
 
 --
--- Constraints for table `event_file_paths`
+-- Các ràng buộc cho bảng `event_file_paths`
 --
 ALTER TABLE `event_file_paths`
   ADD CONSTRAINT `FK7lmjuds8bmtdclfwuqrj560qy` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`);
 
 --
--- Constraints for table `feedbacks`
+-- Các ràng buộc cho bảng `feedbacks`
 --
 ALTER TABLE `feedbacks`
   ADD CONSTRAINT `fk_feedback_status` FOREIGN KEY (`status_id`) REFERENCES `feedback_status` (`status_id`),
@@ -1186,20 +1197,20 @@ ALTER TABLE `feedbacks`
   ADD CONSTRAINT `fk_feedback_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `media`
+-- Các ràng buộc cho bảng `media`
 --
 ALTER TABLE `media`
   ADD CONSTRAINT `fk_media_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `notifications`
+-- Các ràng buộc cho bảng `notifications`
 --
 ALTER TABLE `notifications`
   ADD CONSTRAINT `fk_notification_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`userid`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_notification_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `payments`
+-- Các ràng buộc cho bảng `payments`
 --
 ALTER TABLE `payments`
   ADD CONSTRAINT `fk_payment_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`) ON DELETE CASCADE,
@@ -1208,72 +1219,73 @@ ALTER TABLE `payments`
   ADD CONSTRAINT `fk_payment_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `payment_history`
+-- Các ràng buộc cho bảng `payment_history`
 --
 ALTER TABLE `payment_history`
   ADD CONSTRAINT `fk_history_payment` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`payment_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_history_status` FOREIGN KEY (`status_id`) REFERENCES `payment_status` (`payment_status_id`);
 
 --
--- Constraints for table `tours`
+-- Các ràng buộc cho bảng `tours`
 --
 ALTER TABLE `tours`
   ADD CONSTRAINT `fk_tour_status` FOREIGN KEY (`status_id`) REFERENCES `tour_status` (`tour_status_id`);
 
 --
--- Constraints for table `tour_destinations`
+-- Các ràng buộc cho bảng `tour_destinations`
 --
 ALTER TABLE `tour_destinations`
   ADD CONSTRAINT `fk_tour_destinations_destination` FOREIGN KEY (`destination_id`) REFERENCES `destinations` (`destination_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_tour_destinations_tour` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`tour_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_events`
+-- Các ràng buộc cho bảng `tour_events`
 --
 ALTER TABLE `tour_events`
   ADD CONSTRAINT `fk_tour_events_event` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_tour_events_tour` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`tour_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_guides`
+-- Các ràng buộc cho bảng `tour_guides`
 --
 ALTER TABLE `tour_guides`
+  ADD CONSTRAINT `FKe77mlqfo649eeehhwvrgmaxvy` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`),
   ADD CONSTRAINT `fk_guide_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_guide_assignments`
+-- Các ràng buộc cho bảng `tour_guide_assignments`
 --
 ALTER TABLE `tour_guide_assignments`
   ADD CONSTRAINT `fk_assignment_guide` FOREIGN KEY (`guide_id`) REFERENCES `tour_guides` (`guide_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_assignment_tour` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`tour_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_itinerary`
+-- Các ràng buộc cho bảng `tour_itinerary`
 --
 ALTER TABLE `tour_itinerary`
   ADD CONSTRAINT `fk_itinerary_schedule` FOREIGN KEY (`schedule_id`) REFERENCES `tour_schedules` (`schedule_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_schedules`
+-- Các ràng buộc cho bảng `tour_schedules`
 --
 ALTER TABLE `tour_schedules`
   ADD CONSTRAINT `fk_schedule_tour` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`tour_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `userroles`
+-- Các ràng buộc cho bảng `userroles`
 --
 ALTER TABLE `userroles`
   ADD CONSTRAINT `fk_userroles_role` FOREIGN KEY (`roleid`) REFERENCES `roles` (`roleid`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_userroles_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `usertokens`
+-- Các ràng buộc cho bảng `usertokens`
 --
 ALTER TABLE `usertokens`
   ADD CONSTRAINT `fk_usertokens_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
 
 --
--- Constraints for table `user_discounts`
+-- Các ràng buộc cho bảng `user_discounts`
 --
 ALTER TABLE `user_discounts`
   ADD CONSTRAINT `fk_user_discount_discount` FOREIGN KEY (`discount_id`) REFERENCES `discounts` (`discount_id`) ON DELETE CASCADE,

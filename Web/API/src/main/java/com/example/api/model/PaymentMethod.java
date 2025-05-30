@@ -3,7 +3,6 @@ package com.example.api.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "payment_methods")
@@ -20,21 +19,14 @@ public class PaymentMethod {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "is_active", columnDefinition = "bit(1) default 1")
-    @ColumnDefault("1")
-    private Boolean isActive;
+    @Column(name = "is_active")
+    private Boolean isActive = true;
 
-    @Column(name = "created_at", columnDefinition = "datetime default current_timestamp")
-    @ColumnDefault("current_timestamp")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        if (isActive == null) {
-            isActive = true;
-        }
+        createdAt = LocalDateTime.now();
     }
 } 

@@ -85,116 +85,335 @@ export default function TourDashboard() {
   };
 
   if (loading) return (
-    <div className="tour-dashboard">
+    <div className="tour-dashboard" style={{ background: '#e3f2fd', minHeight: '100vh', paddingBottom: 32 }}>
       <div className="loading">Loading tours...</div>
     </div>
   );
 
   if (error) return (
-    <div className="tour-dashboard">
+    <div className="tour-dashboard" style={{ background: '#e3f2fd', minHeight: '100vh', paddingBottom: 32 }}>
       <div className="error-message">{error}</div>
     </div>
   );
 
   return (
-    <div className="tour-dashboard">
-      <div className="tour-dashboard-header">
-        <h1>Discover Amazing Tours</h1>
-        <p>Explore our curated collection of Vietnam's best tours</p>
+    <div className="tour-dashboard" style={{ background: '#f6f7fb', minHeight: '100vh', padding: '0 0 48px 0' }}>
+      <div
+        style={{
+          position: 'relative',
+          height: '420px',
+          overflow: 'hidden',
+          marginTop: '32px',
+          marginBottom: '32px',
+          borderRadius: '24px',
+          boxShadow: '0 4px 24px #e3e8f0'
+        }}
+      >
+        <img
+          src="https://readdy.ai/api/search-image?query=Beautiful%20panoramic%20view%20of%20Vietnam%20landscape%20with%20emerald%20rice%20terraces%2C%20limestone%20mountains%2C%20and%20traditional%20boats%20on%20Ha%20Long%20Bay%20with%20dramatic%20clouds%20and%20sunlight%2C%20professional%20photography%2C%20high%20resolution%2C%20vibrant%20colors%2C%20serene%20atmosphere&width=1440&height=500&seq=1&orientation=landscape"
+          alt="Vietnam Tours"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(25,118,210,0.18)'
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            zIndex: 2
+          }}
+        >
+          <h1 style={{ fontSize: 48, fontWeight: 900, marginBottom: 16, color: '#fff', textShadow: '0 2px 12px #1976d2' }}>
+            Discover Amazing Tours
+          </h1>
+          <p style={{ fontSize: 24, fontWeight: 400, textAlign: 'center', maxWidth: 700, color: '#fff', textShadow: '0 2px 8px #1976d2' }}>
+            Explore our curated collection of Vietnam's best tours
+          </p>
+        </div>
       </div>
 
-      <div className="tour-dashboard-search">
-        <div className="search-box">
-          <FaSearch className="search-icon" />
+      <div
+        className="tour-dashboard-search"
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '32px',
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          marginBottom: '40px',
+          background: '#fff',
+          borderRadius: 24,
+          boxShadow: '0 4px 24px #e3e8f0',
+          padding: '24px 0',
+          maxWidth: 900,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        <div
+          className="search-box"
+          style={{
+            flex: 2,
+            minWidth: 320,
+            maxWidth: 600,
+            background: '#f6f7fb',
+            borderRadius: '18px',
+            boxShadow: '0 2px 12px #e3e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 24px',
+            height: 56
+          }}
+        >
+          <FaSearch className="search-icon" style={{ color: '#1976d2', fontSize: 26, marginRight: 16 }} />
           <input
             type="text"
             placeholder="Search tours by name or description..."
             value={searchTerm}
             onChange={handleSearch}
+            style={{
+              border: 'none',
+              outline: 'none',
+              fontSize: 20,
+              flex: 1,
+              background: 'transparent',
+              color: '#333'
+            }}
           />
         </div>
-
-        <div className="filter-box">
-          <div className="filter-group">
-            <FaDollarSign className="filter-icon" />
-            <select name="priceRange" value={filters.priceRange} onChange={handleFilterChange}>
-              <option value="">Price Range</option>
-              <option value="0-1000000">Under 1M VND</option>
-              <option value="1000000-3000000">1M - 3M VND</option>
-              <option value="3000000-5000000">3M - 5M VND</option>
-              <option value="5000000-10000000">5M - 10M VND</option>
-              <option value="10000000-999999999">Over 10M VND</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <FaCalendarAlt className="filter-icon" />
-            <select name="duration" value={filters.duration} onChange={handleFilterChange}>
-              <option value="">Duration</option>
-              <option value="1-3">1-3 days</option>
-              <option value="4-7">4-7 days</option>
-              <option value="8-14">8-14 days</option>
-              <option value="15-999">15+ days</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <FaMapMarkerAlt className="filter-icon" />
-            <input
-              type="text"
-              name="destination"
-              placeholder="Search by destination..."
-              value={filters.destination}
-              onChange={handleFilterChange}
-            />
-          </div>
+        <div
+          className="filter-price"
+          style={{
+            flex: 1,
+            minWidth: 180,
+            maxWidth: 220,
+            background: '#f6f7fb',
+            borderRadius: '18px',
+            boxShadow: '0 2px 12px #e3e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 18px',
+            height: 56
+          }}
+        >
+          <span style={{ color: '#1976d2', fontSize: 22, marginRight: 10, fontWeight: 700 }}>₫</span>
+          <select
+            name="priceRange"
+            value={filters.priceRange}
+            onChange={handleFilterChange}
+            style={{
+              border: 'none',
+              outline: 'none',
+              fontSize: 18,
+              flex: 1,
+              background: 'transparent',
+              color: '#1976d2',
+              fontWeight: 600,
+              padding: '8px 0',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="">Tất cả giá tiền</option>
+            <option value="0-1000000">Dưới 1 triệu</option>
+            <option value="1000000-3000000">1 - 3 triệu</option>
+            <option value="3000000-5000000">3 - 5 triệu</option>
+            <option value="5000000-10000000">5 - 10 triệu</option>
+            <option value="10000000-999999999">Trên 10 triệu</option>
+          </select>
         </div>
       </div>
 
       {filteredTours.length === 0 ? (
-        <div className="no-tours-found">
-          <h3>No tours found</h3>
-          <p>Try adjusting your search or filters</p>
+        <div style={{
+          textAlign: 'center',
+          padding: '40px',
+          backgroundColor: '#fff',
+          borderRadius: '16px',
+          margin: '32px 0',
+          color: '#1976d2',
+          fontWeight: 600,
+          boxShadow: '0 2px 12px #e3e8f0'
+        }}>
+          <h3 style={{ color: '#1976d2', marginBottom: '10px', fontSize: 22 }}>No tours found</h3>
+          <p style={{ color: '#1976d2' }}>Try adjusting your search or filters</p>
         </div>
       ) : (
-        <div className="tour-list">
-          {filteredTours.map(tour => (
-            <div className="tour-card" key={tour.tourId}>
-              <div className="tour-image-container">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gap: '32px',
+          padding: '0 24px',
+          maxWidth: 1200,
+          margin: '0 auto'
+        }}>
+          {filteredTours.slice(0, 6).map(tour => (
+            <div
+              key={tour.tourId}
+              className="tour-card-hover"
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: '22px',
+                boxShadow: '0 4px 24px #e3e8f0',
+                overflow: 'hidden',
+                transition: 'transform 0.22s cubic-bezier(.4,2,.3,1), box-shadow 0.22s, border 0.22s',
+                cursor: 'pointer',
+                border: '1.5px solid #e3e8f0',
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: 370,
+                position: 'relative',
+              }}
+            >
+              <div style={{
+                position: 'relative',
+                height: '180px',
+                overflow: 'hidden',
+                background: '#e3f2fd',
+                borderTopLeftRadius: 22,
+                borderTopRightRadius: 22,
+              }}>
                 {tour.imageUrl ? (
                   <img
                     src={`http://localhost:8080${tour.imageUrl}`}
                     alt={tour.name}
-                    className="tour-image"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderTopLeftRadius: 22,
+                      borderTopRightRadius: 22,
+                    }}
                   />
                 ) : (
-                  <div className="tour-image-placeholder">No Image</div>
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: '#e3f2fd',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#1976d2',
+                    fontWeight: 700
+                  }}>No Image</div>
                 )}
-                <div className="tour-price">${tour.price.toLocaleString()}</div>
+                <div style={{
+                  position: 'absolute',
+                  top: '14px',
+                  right: '14px',
+                  backgroundColor: '#fff',
+                  color: '#388e3c',
+                  padding: '7px 18px',
+                  borderRadius: '16px',
+                  fontSize: '18px',
+                  fontWeight: 800,
+                  boxShadow: '0 2px 8px #e3e8f0',
+                  border: '1.5px solid #e3e8f0',
+                  zIndex: 2
+                }}>{tour.price.toLocaleString()} <span style={{ color: '#388e3c', fontWeight: 800 }}>đ</span></div>
               </div>
-              <div className="tour-info">
-                <h3>{tour.name}</h3>
-                <div className="tour-meta">
-                  <span className="tour-duration">
+              <div style={{
+                padding: '24px 20px 18px 20px',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}>
+                <h3 style={{
+                  margin: '0 0 12px 0',
+                  fontSize: '22px',
+                  color: '#1976d2',
+                  fontWeight: 800,
+                  lineHeight: 1.3
+                }}>{tour.name}</h3>
+                <div style={{
+                  display: 'flex',
+                  gap: '18px',
+                  marginBottom: '12px',
+                  color: '#1976d2',
+                  fontSize: '15px',
+                  fontWeight: 600
+                }}>
+                  <span style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}>
                     <FaCalendarAlt /> {tour.duration} days
                   </span>
                   {tour.destinations?.length > 0 && (
-                    <span className="tour-destination">
+                    <span style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}>
                       <FaMapMarkerAlt /> {tour.destinations[0].name}
                     </span>
                   )}
                 </div>
-                <p className="tour-description">
+                <p style={{
+                  color: '#333',
+                  fontSize: '15px',
+                  marginBottom: '18px',
+                  lineHeight: '1.5',
+                  minHeight: 38,
+                  maxHeight: 44,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                }}>
                   {tour.description?.substring(0, 100)}...
                 </p>
-                <Link to={`/tour-dashboard/detail/${tour.tourId}`} className="btn-tour-dashboard">
-                  View Details
+                <Link 
+                  to={`/tour-dashboard/detail/${tour.tourId}`}
+                  style={{
+                    display: 'inline-block',
+                    backgroundColor: '#1976d2',
+                    color: '#fff',
+                    padding: '12px 0',
+                    borderRadius: '14px',
+                    textDecoration: 'none',
+                    fontSize: '16px',
+                    fontWeight: 800,
+                    transition: 'background-color 0.2s',
+                    border: 'none',
+                    width: '100%',
+                    textAlign: 'center',
+                    boxShadow: '0 2px 8px #e3e8f0',
+                  }}
+                  onMouseOver={e => e.currentTarget.style.backgroundColor = '#1565c0'}
+                  onMouseOut={e => e.currentTarget.style.backgroundColor = '#1976d2'}
+                >
+                  Xem chi tiết
                 </Link>
               </div>
             </div>
           ))}
         </div>
       )}
+      <style>{`
+        .tour-card-hover:hover {
+          transform: translateY(-8px) scale(1.025);
+          box-shadow: 0 8px 32px #1976d2cc;
+          border: 2px solid #1976d2;
+          z-index: 2;
+        }
+      `}</style>
     </div>
   );
 }

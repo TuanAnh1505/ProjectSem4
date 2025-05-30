@@ -213,4 +213,9 @@ public class BookingService {
         result.put("passengers", passengerList);
         return result;
     }
+
+    public Booking getBookingById(Integer id) {
+        return bookingRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
+    }
 }

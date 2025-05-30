@@ -50,4 +50,28 @@ public class BookingController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getBookingById(@PathVariable Integer id) {
+        try {
+            Booking booking = bookingService.getBookingById(id);
+            return ResponseEntity.ok(booking);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<?> getBookingDetailForUser(@PathVariable Integer id) {
+        try {
+            Map<String, Object> data = bookingService.getBookingDetail(id);
+            return ResponseEntity.ok(data);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
 }
