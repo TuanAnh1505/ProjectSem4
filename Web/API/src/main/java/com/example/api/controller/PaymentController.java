@@ -151,16 +151,35 @@ public class PaymentController {
             String phone = (String) payload.get("phone");
             int bookingId = (int) payload.getOrDefault("bookingId", 0);
             int userId = (int) payload.getOrDefault("userId", 0);
-            // Tạo payment record
-            PaymentRequestDTO dto = new PaymentRequestDTO();
-            dto.setBookingId(bookingId);
-            dto.setUserId((long) userId);
-            dto.setAmount(new java.math.BigDecimal(amount));
-            dto.setPaymentMethodId(2); // Bank Transfer
-            PaymentResponseDTO payment = paymentService.createPayment(dto);
+
+            // Lấy tất cả payment của booking này
+            List<PaymentResponseDTO> existingPayments = paymentService.getPaymentsByBooking(bookingId);
+
+            // Nếu đã có payment Completed cho booking này, trả về lỗi/thông báo đã thanh toán
+            boolean hasCompleted = existingPayments.stream()
+                .anyMatch(p -> "Completed".equalsIgnoreCase(p.getStatusName()));
+            if (hasCompleted) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Booking này đã thanh toán xong!"));
+            }
+
+            // Nếu đã có payment Pending/Processing, trả về payment đó
+            PaymentResponseDTO payment = existingPayments.stream()
+                .filter(p -> !"Failed".equalsIgnoreCase(p.getStatusName()))
+                .findFirst()
+                .orElse(null);
+
+            if (payment == null) {
+                // Tạo payment record mới
+                PaymentRequestDTO dto = new PaymentRequestDTO();
+                dto.setBookingId(bookingId);
+                dto.setUserId((long) userId);
+                dto.setAmount(new java.math.BigDecimal(amount));
+                dto.setPaymentMethodId(2); // Bank Transfer
+                payment = paymentService.createPayment(dto);
+            }
+
             // Gọi service để sinh QR
             String qrDataURL = paymentService.generateVietQr("9021400417865", "Pham Van Tuan Anh", amount, phone);
-            System.out.println("VietQR generated qrDataURL: " + qrDataURL);
             Map<String, Object> result = new HashMap<>();
             result.put("qrDataURL", qrDataURL);
             result.put("accountNumber", "9021400417865");
@@ -169,11 +188,8 @@ public class PaymentController {
             result.put("amount", amount);
             result.put("transferContent", phone);
             result.put("paymentId", payment.getPaymentId());
-            System.out.println("Sending response to frontend: " + result);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            System.err.println("Error generating QR code: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

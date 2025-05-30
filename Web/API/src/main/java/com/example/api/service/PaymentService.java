@@ -118,18 +118,16 @@ public class PaymentService {
     public PaymentResponseDTO updatePaymentStatus(Integer paymentId, Integer statusId, String notes) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
-        
         PaymentStatus newStatus = paymentStatusRepository.findById(statusId)
                 .orElseThrow(() -> new RuntimeException("Payment status not found"));
 
+        // Chỉ gửi email nếu trạng thái trước đó chưa phải Completed và trạng thái mới là Completed
+        boolean wasCompleted = "Completed".equalsIgnoreCase(payment.getStatus().getStatusName());
         payment.setStatus(newStatus);
         payment = paymentRepository.save(payment);
 
-        // Gửi email khi thanh toán thành công (status_id = 3)
-        if (newStatus.getPaymentStatusId() == 3) { // 3 = Completed
+        if (!wasCompleted && newStatus.getPaymentStatusId() == 3) { // 3 = Completed
             System.out.println("DEBUG: Payment completed, preparing to send email...");
-            System.out.println("DEBUG: Payment ID: " + payment.getPaymentId());
-            System.out.println("DEBUG: Payment Status: " + newStatus.getStatusName());
             try {
                 Booking booking = bookingRepository.findById(payment.getBooking().getBookingId())
                         .orElseThrow(() -> new RuntimeException("Booking not found"));
@@ -144,7 +142,7 @@ public class PaymentService {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("DEBUG: Payment status is not Completed. Current status: " + newStatus.getStatusName() + " (ID: " + newStatus.getPaymentStatusId() + ")");
+            System.out.println("DEBUG: Payment status is not Completed or was already completed. Current status: " + newStatus.getStatusName() + " (ID: " + newStatus.getPaymentStatusId() + ")");
         }
 
         // Create history record
