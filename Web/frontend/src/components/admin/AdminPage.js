@@ -26,6 +26,7 @@ import DetailSchedule from "./schedule/DetailSchedule";
 import UpdateSchedule from "./schedule/UpdateSchedule";
 import ScheduleIndex from "./schedule/ScheduleIndex";
 import AboutAdmin from "./AboutAdmin";
+import PaymentStatusManager from './PaymentStatusManager';
 
 const AdminPage = () => {
   const location = useLocation();
@@ -111,6 +112,10 @@ const AdminPage = () => {
 
     if (pathSegments.includes('about') || pathSegments.includes('admin-about')) {
       return <AboutAdmin />;
+    }
+
+    if (pathSegments.includes('payments')) {
+      return <PaymentStatusManager />;
     }
 
     return <AdminDashboard />;

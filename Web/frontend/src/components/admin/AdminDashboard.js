@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import "../styles/admin/AdminDashboard.css";
-import {FaInfo, FaChartLine, FaGlobeAsia, FaCalendarAlt, FaMapMarkedAlt, FaListAlt, FaUser, FaSignOutAlt, FaBook, FaChevronUp, FaChevronDown, FaSearch } from "react-icons/fa";
+import {FaInfo, FaChartLine, FaGlobeAsia, FaCalendarAlt, FaMapMarkedAlt, FaListAlt, FaUser, FaSignOutAlt, FaBook, FaChevronUp, FaChevronDown, FaSearch, FaDollarSign } from "react-icons/fa";
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();
@@ -186,6 +186,11 @@ const AdminDashboard = ({ children }) => {
                 className={location.pathname === "/admin/booking" ? "active" : ""}>
               <span className="menu-icon-circle"><FaBook /></span>
               <span className="menu-text-modern">Chuyến đi đã đặt</span>
+            </li>
+            <li onClick={() => navigate("/admin/payments")}
+                className={location.pathname === "/admin/payments" ? "active" : ""}>
+              <span className="menu-icon-circle"><FaDollarSign /></span>
+              <span className="menu-text-modern">Quản lý thanh toán</span>
             </li>
             <div className="account-section-modern">
               <li className="menu-section-modern">Trang tài khoản</li>

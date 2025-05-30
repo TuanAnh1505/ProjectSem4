@@ -18,7 +18,9 @@ import TourDashboard from './components/tour/TourDashboard';
 import TourDetailDashboard from './components/tour/TourDetailDashboard';
 import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
+import BookingConfirmation from './components/booking/BookingConfirmation';
 import Payment from './pages/Payment';
+import PaymentStatusManager from './components/admin/PaymentStatusManager';
 import './App.css';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
@@ -97,6 +99,12 @@ const App = () => {
           <Route path="/tour-dashboard/detail/:tourId" element={
             <Layout>
               <TourDetailDashboard />
+            </Layout>
+          } />
+
+          <Route path="/booking-confirmation" element={
+            <Layout>
+              <BookingConfirmation />
             </Layout>
           } />
 
@@ -284,6 +292,12 @@ const App = () => {
                 <Payment />
               </Layout>
             }
+          />
+
+          {/* New route for PaymentStatusManager */}
+          <Route
+            path="/admin/payments"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
         </Routes>
       </div>

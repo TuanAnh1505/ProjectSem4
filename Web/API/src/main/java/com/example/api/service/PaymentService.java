@@ -44,6 +44,12 @@ public class PaymentService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BookingPassengerRepository bookingPassengerRepository;
+
+    @Autowired
+    private EmailService emailService;
+
     private static final String PARTNER_CODE = "MOMO";
     private static final String ACCESS_KEY = "F8BBA842ECF85";
     private static final String SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
@@ -98,7 +104,7 @@ public class PaymentService {
 
     public List<PaymentResponseDTO> getPaymentsByBooking(Integer bookingId) {
         return paymentRepository.findByBooking_BookingId(bookingId).stream()
-                .map(this::convertToDTO)
+                .<PaymentResponseDTO>map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -118,6 +124,28 @@ public class PaymentService {
 
         payment.setStatus(newStatus);
         payment = paymentRepository.save(payment);
+
+        // Gửi email khi thanh toán thành công (status_id = 3)
+        if (newStatus.getPaymentStatusId() == 3) { // 3 = Completed
+            System.out.println("DEBUG: Payment completed, preparing to send email...");
+            System.out.println("DEBUG: Payment ID: " + payment.getPaymentId());
+            System.out.println("DEBUG: Payment Status: " + newStatus.getStatusName());
+            try {
+                Booking booking = bookingRepository.findById(payment.getBooking().getBookingId())
+                        .orElseThrow(() -> new RuntimeException("Booking not found"));
+                User user = userRepository.findById(payment.getUser().getUserid())
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+                List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
+                System.out.println("DEBUG: Found booking, user and passengers. Sending email to: " + user.getEmail());
+                emailService.sendPaymentSuccessEmail(user, booking, payment, passengers);
+                System.out.println("DEBUG: Email sent successfully!");
+            } catch (Exception e) {
+                System.out.println("ERROR: Failed to send email: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("DEBUG: Payment status is not Completed. Current status: " + newStatus.getStatusName() + " (ID: " + newStatus.getPaymentStatusId() + ")");
+        }
 
         // Create history record
         PaymentHistory history = new PaymentHistory();
@@ -176,7 +204,7 @@ public class PaymentService {
 
         // Update payment status based on MoMo response
         PaymentStatus newStatus = paymentStatusRepository.findById(
-                "0".equals(resultCode) ? 2 : 3) // 2 = success, 3 = failed
+                "0".equals(resultCode) ? 3 : 4) // 3 = Completed, 4 = Failed
                 .orElseThrow(() -> new RuntimeException("Payment status not found"));
 
         return updatePaymentStatus(payment.getPaymentId(), newStatus.getPaymentStatusId(),
@@ -195,6 +223,12 @@ public class PaymentService {
 
     public List<PaymentStatus> getAllPaymentStatuses() {
         return paymentStatusRepository.findAll();
+    }
+
+    public List<PaymentResponseDTO> getAllPayments() {
+        return paymentRepository.findAll().stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
     }
 
     private PaymentResponseDTO convertToDTO(Payment payment) {
