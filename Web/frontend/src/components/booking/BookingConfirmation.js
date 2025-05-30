@@ -34,7 +34,7 @@ const BookingConfirmation = () => {
     return (
       <div className="confirmation-wrapper">
         <h2>Không tìm thấy thông tin đặt chỗ</h2>
-        <button onClick={() => navigate('/tours')}>Quay lại trang Tour</button>
+        <button onClick={() => navigate('/tour-dashboard')}>Quay lại trang Tour</button>
       </div>
     );
   }

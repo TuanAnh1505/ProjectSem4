@@ -19,7 +19,9 @@ import TourDetailDashboard from './components/tour/TourDetailDashboard';
 import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
 import Payment from './pages/Payment';
+import UpdateInfoUser from './components/auth/UpdateInfoUser';
 import './App.css';
+import BookingConfirmation from './components/booking/BookingConfirmation';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -100,6 +102,19 @@ const App = () => {
             </Layout>
           } />
 
+          <Route path="/update-user-info" element={
+            <Layout>
+              <UpdateInfoUser />
+            </Layout>
+          } />
+
+          <Route path="/booking-confirmation" element={
+            <Layout>
+              <BookingConfirmation />
+            </Layout>
+          } />
+
+
           {/* Authentication and user routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -107,6 +122,7 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/update-user-info" element={<UpdateInfoUser />} />
           <Route
             path="/tour-dashboard/detail/:tourId"
             element={<ProtectedRoute element={<TourDetailDashboard />} />}
@@ -284,6 +300,10 @@ const App = () => {
                 <Payment />
               </Layout>
             }
+          />
+          <Route
+            path="/admin/payments"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
         </Routes>
       </div>
