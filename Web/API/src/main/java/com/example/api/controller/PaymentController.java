@@ -191,4 +191,15 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllPayments() {
+        try {
+            List<PaymentResponseDTO> payments = paymentService.getAllPayments();
+            return ResponseEntity.ok(payments);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
