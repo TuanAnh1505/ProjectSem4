@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data';
+import 'package:intl/intl.dart';
 
 class PaymentScreen extends StatefulWidget {
   final String bookingId;
@@ -27,6 +28,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Map<String, dynamic>? bankQr;
   bool isConfirmLoading = false;
   String? confirmResult;
+
+  Color get primaryColor => Colors.orange;
+  Color get secondaryColor => Colors.white;
 
   @override
   void initState() {
@@ -60,7 +64,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       }
     } catch (e) {
       setState(() {
-        error = 'Không thể tải thông tin đặt phòng';
+        error = 'Không thể tải thông tin đặt chuyến đi. Vui lòng thử lại sau.';
         loading = false;
       });
     }
@@ -224,30 +228,44 @@ class _PaymentScreenState extends State<PaymentScreen> {
           selectedMethod = methodId;
         });
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
         decoration: BoxDecoration(
+          color: isSelected ? primaryColor.withOpacity(0.08) : secondaryColor,
           border: Border.all(
-            color: isSelected ? Colors.orange : Colors.grey.shade300,
+            color: isSelected ? primaryColor : Colors.grey.shade300,
             width: isSelected ? 2 : 1,
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: isSelected
+              ? [BoxShadow(color: primaryColor.withOpacity(0.08), blurRadius: 8, offset: Offset(0, 2))]
+              : [],
         ),
         child: Row(
           children: [
-            Icon(icon, color: isSelected ? Colors.orange : Colors.grey),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? Colors.orange : Colors.black,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            Container(
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.all(8),
+              child: Icon(icon, color: isSelected ? Colors.white : Colors.orange, size: 28),
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: isSelected ? primaryColor : Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                ),
               ),
             ),
-            const Spacer(),
             if (isSelected)
-              const Icon(Icons.check_circle, color: Colors.orange),
+              const Icon(Icons.check_circle, color: Colors.orange, size: 28),
           ],
         ),
       ),
@@ -259,16 +277,106 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final tour = booking!['tour'] ?? booking!['booking']?['tour'];
     final total = (booking!['booking']?['totalPrice'] ?? booking!['totalAmount'] ?? widget.amount).toInt();
     return Card(
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.only(bottom: 18),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Tour: ${tour?['name'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Tổng tiền: ${total.toString()} đ', style: const TextStyle(color: Colors.red)),
+            Row(
+              children: [
+                Icon(Icons.tour, color: primaryColor, size: 28),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    tour?['name'] ?? '',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(Icons.attach_money, color: primaryColor, size: 22),
+                const SizedBox(width: 8),
+                Text('Tổng tiền:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                const SizedBox(width: 8),
+                Text(
+                  NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(total) + ' VNĐ',
+                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildQRSection() {
+    String? qrDataUrl = bankQr?['qrDataURL'];
+    Uint8List? qrBytes;
+    if (qrDataUrl != null && qrDataUrl.startsWith('data:image')) {
+      final base64Str = qrDataUrl.split(',').last;
+      qrBytes = base64Decode(base64Str);
+    }
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      margin: const EdgeInsets.only(bottom: 18),
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          children: [
+            const Text('Quét mã QR để chuyển khoản', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.orange)),
+            const SizedBox(height: 18),
+            qrBytes != null
+                ? Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.orange, width: 2),
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.white,
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    child: Image.memory(
+                      qrBytes,
+                      width: 220,
+                      height: 220,
+                      fit: BoxFit.contain,
+                    ),
+                  )
+                : const Icon(Icons.error, size: 60, color: Colors.red),
+            const SizedBox(height: 18),
+            _buildInfoRow('Ngân hàng:', bankQr!['bankName']),
+            _buildInfoRow('Số tài khoản:', bankQr!['accountNumber']),
+            _buildInfoRow('Tên tài khoản:', bankQr!['accountName']),
+            _buildInfoRow('Số tiền:', NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(bankQr!['amount']) + ' VNĐ'),
+            _buildInfoRow('Nội dung:', bankQr!['transferContent']),
+            const SizedBox(height: 10),
+            const Text('Vui lòng chuyển khoản đúng nội dung để được xác nhận tự động!', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    final isAmount = label == 'Số tiền:';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: isAmount
+                ? Text(value, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20))
+                : Text(value, style: const TextStyle(fontSize: 15)),
+          ),
+        ],
       ),
     );
   }
@@ -283,7 +391,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 16)],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -306,8 +415,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
                   onPressed: () => setState(() => confirmResult = null),
-                  child: const Text('Đóng'),
+                  child: const Text('Đóng', style: TextStyle(fontSize: 16)),
                 ),
               ],
             ),
@@ -333,25 +446,28 @@ class _PaymentScreenState extends State<PaymentScreen> {
       appBar: AppBar(
         title: const Text('Thanh toán'),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.orange,
         elevation: 0,
       ),
+      backgroundColor: const Color(0xFFF6F8FF),
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildBookingInfo(),
-                const SizedBox(height: 16),
                 Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  margin: const EdgeInsets.only(bottom: 18),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Phương thức thanh toán', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text('Phương thức thanh toán', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange)),
                         const SizedBox(height: 16),
                         _buildPaymentMethod(2, 'Chuyển khoản ngân hàng', Icons.account_balance),
                         // _buildPaymentMethod(5, 'Ví MoMo', Icons.account_balance_wallet),
@@ -359,71 +475,34 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
                 if (isQrLoading)
                   const Center(child: CircularProgressIndicator())
                 else if (bankQr != null)
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          const Text('Quét mã QR để chuyển khoản', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 16),
-                          (() {
-                            String? qrDataUrl = bankQr?['qrDataURL'];
-                            Uint8List? qrBytes;
-                            if (qrDataUrl != null && qrDataUrl.startsWith('data:image')) {
-                              final base64Str = qrDataUrl.split(',').last;
-                              qrBytes = base64Decode(base64Str);
-                            }
-                            if (qrBytes != null) {
-                              return Image.memory(
-                                qrBytes,
-                                width: 300,
-                                height: 300,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.error, size: 50);
-                                },
-                              );
-                            } else {
-                              return const Icon(Icons.error, size: 50);
-                            }
-                          })(),
-                          const SizedBox(height: 16),
-                          Text('Ngân hàng: ${bankQr!['bankName']}'),
-                          Text('Số tài khoản: ${bankQr!['accountNumber']}'),
-                          Text('Tên tài khoản: ${bankQr!['accountName']}'),
-                          Text('Số tiền: ${bankQr!['amount'].toString()} VND'),
-                          Text('Nội dung: ${bankQr!['transferContent']}'),
-                          const SizedBox(height: 8),
-                          const Text('Vui lòng chuyển khoản đúng nội dung để được xác nhận tự động!', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 16),
+                  _buildQRSection(),
+                const SizedBox(height: 10),
                 if (bankQr != null)
                   ElevatedButton(
                     onPressed: isConfirmLoading ? null : _checkPaymentStatus,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.orange,
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: Text(isConfirmLoading ? 'Đang xác nhận...' : 'Xác nhận đã thanh toán'),
+                    child: Text(isConfirmLoading ? 'Đang xác nhận...' : 'Xác nhận đã thanh toán', style: const TextStyle(fontSize: 16, color: Colors.white)),
                   )
                 else
                   ElevatedButton(
                     onPressed: selectedMethod == null ? null : _handlePayment,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                      backgroundColor: primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: const Text('Thanh toán ngay'),
+                    child: const Text('Thanh toán ngay', style: TextStyle(fontSize: 16)),
                   ),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Hủy'),
+                  child: const Text('Hủy', style: TextStyle(fontSize: 15)),
                 ),
               ],
             ),
