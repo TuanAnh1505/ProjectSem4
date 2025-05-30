@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0507ab1b-b778-4b81-8916-03ac8c0e44f5" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/payment/payment_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/payment/payment_screen.dart" afterDir="false" />
-    </list>
+    <list default="true" id="0507ab1b-b778-4b81-8916-03ac8c0e44f5" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,6 +55,7 @@
       <updated>1748395190696</updated>
       <workItem from="1748395191922" duration="1249000" />
       <workItem from="1748576983293" duration="743000" />
+      <workItem from="1748580526996" duration="33000" />
     </task>
     <servers />
   </component>
