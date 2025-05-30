@@ -354,7 +354,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         const Text('Phương thức thanh toán', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
                         _buildPaymentMethod(2, 'Chuyển khoản ngân hàng', Icons.account_balance),
-                        _buildPaymentMethod(5, 'Ví MoMo', Icons.account_balance_wallet),
+                        // _buildPaymentMethod(5, 'Ví MoMo', Icons.account_balance_wallet),
                       ],
                     ),
                   ),
