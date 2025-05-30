@@ -13,6 +13,14 @@ const PaymentStatusManager = () => {
     fetchStatuses();
   }, []);
 
+  // Tự động cập nhật danh sách payment mỗi 5 giây
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchPayments();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const fetchPayments = async () => {
     setLoading(true);
     try {
