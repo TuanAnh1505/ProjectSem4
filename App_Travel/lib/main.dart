@@ -9,6 +9,7 @@ import 'screens/tour/tour_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/auth/personal_page_screen.dart';
 import 'screens/auth/update_info_user_screen.dart';
+import 'screens/setting_screen.dart';
 
 
 void main() async {
@@ -85,6 +86,9 @@ class _MyAppState extends State<MyApp> {
         '/tours': (context) => TourScreen(),
         '/search_screen': (context) => SearchScreen(),
         '/personal_page_screen': (context) => PersonalPageScreen(),
+
+        '/update-info-user-screen': (context) => UpdateInfoUserScreen(),
+        '/setting-screen': (context) => SettingScreen(),
       },
     );
   }

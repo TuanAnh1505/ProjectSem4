@@ -3,9 +3,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'update_info_user_screen.dart';
 import 'dart:developer' as developer;
+import '/screens/setting_screen.dart';
 
 class PersonalPageScreen extends StatelessWidget {
-  const PersonalPageScreen({Key? key}) : super(key: key);
+  final bool showAppBar;
+  const PersonalPageScreen({Key? key, this.showAppBar = true}) : super(key: key);
 
   Future<void> _handleLogout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -47,23 +49,23 @@ class PersonalPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: showAppBar
+          ? AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.orange),
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                },
+              ),
+            )
+          : null,
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 16),
-            // Back Button
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.orange),
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
             // User Icon
             Container(
               decoration: const BoxDecoration(
@@ -91,7 +93,7 @@ class PersonalPageScreen extends StatelessWidget {
               'Đã xác thực tài khoản',
               style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF7B8D9E),
+                color: Colors.green,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -134,33 +136,38 @@ class PersonalPageScreen extends StatelessWidget {
                     subtitle: 'Tùy chỉnh ứng dụng',
                     icon: FontAwesomeIcons.cog,
                     iconColor: Colors.orange,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingScreen()),
+                      );
+                    },
                   ),
                   const SizedBox(height: 32),
                   // Logout Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _handleLogout(context),
-                      icon: const Icon(FontAwesomeIcons.signOutAlt, color: Colors.orange, size: 18),
-                      label: const Text(
-                        'Đăng xuất',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFF3E0),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // SizedBox(
+                  //   width: double.infinity,
+                  //   child: ElevatedButton.icon(
+                  //     onPressed: () => _handleLogout(context),
+                  //     icon: const Icon(FontAwesomeIcons.signOutAlt, color: Colors.orange, size: 18),
+                  //     label: const Text(
+                  //       'Đăng xuất',
+                  //       style: TextStyle(
+                  //         fontSize: 16,
+                  //         fontWeight: FontWeight.bold,
+                  //         color: Colors.orange,
+                  //       ),
+                  //     ),
+                  //     style: ElevatedButton.styleFrom(
+                  //       backgroundColor: const Color(0xFFFFF3E0),
+                  //       elevation: 0,
+                  //       padding: const EdgeInsets.symmetric(vertical: 16),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(18),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(height: 16),
                 ],
               ),

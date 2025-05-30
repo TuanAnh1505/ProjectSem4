@@ -55,7 +55,15 @@ class _AppNavigationState extends State<AppNavigation> {
           : AppBar(
               leading: null,
               title: _selectedIndex == 0
-                  ? const Text('Hi Vietnam')
+                  ? const Text(
+                      'Hi Vietnam',
+                      style: TextStyle(
+                        fontFamily: 'Pacifico',
+                        color: Colors.orange,
+                        fontSize: 30,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    )
                   : _selectedIndex == 1
                       ? const Text('Tìm kiếm tour du lịch')
                       : null,
@@ -68,6 +76,14 @@ class _AppNavigationState extends State<AppNavigation> {
                           Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => const SearchScreen()),
                           );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.person, color: Colors.orange),
+                        onPressed: () {
+                          setState(() {
+                            _selectedIndex = 4; // Chuyển sang tab tài khoản
+                          });
                         },
                       ),
                     ]
@@ -141,7 +157,9 @@ class _AppNavigationState extends State<AppNavigation> {
       case 3:
         return const Center(child: Text('Yêu thích'));
       case 4:
-        return const PersonalPageScreen();
+        return const PersonalPageScreen(
+          showAppBar: false,
+        );
       default:
         return HomeScreen(userName: widget.userName, userRole: widget.userRole);
     }

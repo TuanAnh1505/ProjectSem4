@@ -97,7 +97,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pop(context);
               Navigator.pushNamedAndRemoveUntil(
                 context,
-                '/settings',
+                '/setting-screen',
                 ModalRoute.withName('/home'),
               );
             },

@@ -32,7 +32,10 @@ flutter:
   assets:
     - assets/images/
     - assets/images/logo.png
-
+  fonts:
+    - family: Pacifico
+      fonts:
+        - asset: assets/fonts/Pacifico-Regular.ttf
 
   uses-material-design: true
 
