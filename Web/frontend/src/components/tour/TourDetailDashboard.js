@@ -260,8 +260,35 @@ export default function TourDetailDashboard() {
         <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: 24, border: '1.5px solid #e3e8f0', borderTop: 'none', boxShadow: '0 2px 8px #e3e8f0' }}>
           {itineraries.length > 0 ? (
             itineraries.map((schedule, idx) => (
-              <div key={schedule.scheduleId} style={{ marginBottom: 24, background: '#e3f2fd', borderRadius: 10, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0', padding: 18 }}>
-                <div style={{ fontWeight: 600, color: '#1976d2', fontSize: 16, marginBottom: 8 }}>Lịch trình {idx + 1}: {schedule.startDate} - {schedule.endDate} ({schedule.status})</div>
+              <div key={schedule.scheduleId} style={{ 
+                marginBottom: 24, 
+                background: schedule.status === 'full' ? '#fff1f0' : '#e3f2fd', 
+                borderRadius: 10, 
+                boxShadow: '0 2px 8px #e3e8f0', 
+                border: `1.5px solid ${schedule.status === 'full' ? '#ff4d4f' : '#e3e8f0'}`, 
+                padding: 18 
+              }}>
+                <div style={{ 
+                  fontWeight: 600, 
+                  color: schedule.status === 'full' ? '#ff4d4f' : '#1976d2', 
+                  fontSize: 16, 
+                  marginBottom: 8,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span>Lịch trình {idx + 1}: {schedule.startDate} - {schedule.endDate}</span>
+                  <span style={{
+                    padding: '4px 8px',
+                    borderRadius: 4,
+                    background: schedule.status === 'full' ? '#ff4d4f' : '#1976d2',
+                    color: '#fff',
+                    fontSize: 14
+                  }}>
+                    {schedule.status === 'full' ? 'Đã đủ người' : 'Còn chỗ'} 
+                    ({schedule.currentParticipants || 0}/{tour.maxParticipants})
+                  </span>
+                </div>
                 {schedule.itineraries && schedule.itineraries.length > 0 ? (
                   <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                     {schedule.itineraries.map((itinerary, i) => (
@@ -317,19 +344,68 @@ export default function TourDetailDashboard() {
             >
               <option value="">-- Chọn lịch trình --</option>
               {itineraries.map(sch => (
-                <option key={sch.scheduleId} value={sch.scheduleId}>
-                  {sch.startDate} - {sch.endDate} ({sch.status})
+                <option 
+                  key={sch.scheduleId} 
+                  value={sch.scheduleId}
+                  disabled={sch.status === 'full'}
+                  style={{ 
+                    color: sch.status === 'full' ? '#ff4d4f' : 'inherit',
+                    backgroundColor: sch.status === 'full' ? '#fff1f0' : 'inherit'
+                  }}
+                >
+                  {sch.startDate} - {sch.endDate} 
+                  {sch.status === 'full' ? ' (Đã đủ người)' : ' (Còn chỗ)'} 
+                  - {sch.currentParticipants || 0}/{tour.maxParticipants} người
                 </option>
               ))}
             </select>
           </div>
           <button
             onClick={handleBooking}
-            disabled={bookingLoading || !selectedScheduleId}
-            style={{ width: '100%', padding: 12, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: bookingLoading || !selectedScheduleId ? 'not-allowed' : 'pointer', marginTop: 8 }}
+            disabled={bookingLoading || !selectedScheduleId || 
+              (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full')}
+            style={{ 
+              width: '100%', 
+              padding: 12, 
+              background: (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full') 
+                ? '#ff4d4f' 
+                : '#1976d2', 
+              color: '#fff', 
+              border: 'none', 
+              borderRadius: 8, 
+              fontWeight: 700, 
+              fontSize: 16, 
+              cursor: (bookingLoading || !selectedScheduleId || 
+                (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full')) 
+                ? 'not-allowed' 
+                : 'pointer', 
+              marginTop: 8,
+              opacity: (bookingLoading || !selectedScheduleId || 
+                (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full')) 
+                ? 0.7 
+                : 1
+            }}
           >
-            {bookingLoading ? 'Đang xử lý...' : 'Đặt ngay'}
+            {bookingLoading ? 'Đang xử lý...' : 
+              (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full') 
+                ? 'Đã đủ người' 
+                : 'Đặt ngay'}
           </button>
+
+          {/* Thông báo khi lịch trình đã đủ người */}
+          {selectedScheduleId && itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full' && (
+            <div style={{ 
+              marginTop: 12, 
+              padding: 12, 
+              background: '#fff1f0', 
+              border: '1px solid #ff4d4f', 
+              borderRadius: 8,
+              color: '#ff4d4f',
+              fontSize: 14
+            }}>
+              ⚠️ Lịch trình này đã đủ số lượng người tham gia. Vui lòng chọn lịch trình khác.
+            </div>
+          )}
         </div>
         {/* Điểm nổi bật (demo) */}
         <div style={{ flex: 1, minWidth: 320, background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0' }}>

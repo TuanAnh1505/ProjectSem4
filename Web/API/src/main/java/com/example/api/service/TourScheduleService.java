@@ -7,7 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.example.api.dto.TourScheduleDTO;
+import com.example.api.model.Booking;
+import com.example.api.model.Tour;
 import com.example.api.model.TourSchedule;
+import com.example.api.repository.BookingRepository;
+import com.example.api.repository.TourRepository;
 import com.example.api.repository.TourScheduleRepository;
 
 import java.time.LocalDate;
@@ -20,6 +24,8 @@ import java.util.stream.Collectors;
 public class TourScheduleService {
     private static final Logger logger = LoggerFactory.getLogger(TourScheduleService.class);
     private final TourScheduleRepository repository;
+    private final BookingRepository bookingRepository;
+    private final TourRepository tourRepository;
 
     @Transactional
     public TourScheduleDTO create(TourScheduleDTO dto) {
@@ -103,6 +109,68 @@ public class TourScheduleService {
         }
     }
 
+    @Transactional
+    public void checkAndUpdateScheduleStatus(Integer bookingId) {
+        logger.info("Checking schedule status for bookingId: {}", bookingId);
+        
+        // Bước 1: Xác định lịch trình từ booking_id
+        Integer scheduleId = bookingRepository.findScheduleIdByBookingId(bookingId);
+        if (scheduleId == null) {
+            logger.warn("No schedule found for bookingId: {}", bookingId);
+            return;
+        }
+        logger.info("Found scheduleId: {}", scheduleId);
+
+        // Bước 2: Lấy danh sách booking đã xác nhận để kiểm tra
+        List<Booking> confirmedBookings = bookingRepository.findConfirmedBookingsForSchedule(scheduleId);
+        logger.info("Found {} confirmed bookings for schedule {}", confirmedBookings.size(), scheduleId);
+        
+        // Log chi tiết từng booking
+        for (Booking booking : confirmedBookings) {
+            logger.info("Booking {} - User: {} (ID: {})", 
+                booking.getBookingId(), 
+                booking.getUser().getFullName(),
+                booking.getUser().getUserid());
+        }
+
+        // Bước 3: Đếm số lượng hành khách đã thanh toán thành công
+        long confirmedPassengers = bookingRepository.countConfirmedPassengersForSchedule(scheduleId);
+        long bookingsWithoutBookerAsPassenger = bookingRepository.countBookingsWithoutBookerAsPassenger(scheduleId);
+        
+        // Tổng số người tham gia = số hành khách + số booking mà người đặt không phải là hành khách
+        long totalParticipants = confirmedPassengers + bookingsWithoutBookerAsPassenger;
+        
+        logger.info("Detailed count for schedule {}:", scheduleId);
+        logger.info("- Number of confirmed passengers (unique): {}", confirmedPassengers);
+        logger.info("- Number of bookings where booker is not a passenger: {}", bookingsWithoutBookerAsPassenger);
+        logger.info("- Total participants: {}", totalParticipants);
+
+        // Bước 4: Lấy thông tin tour và max_participants
+        TourSchedule schedule = repository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch trình"));
+        
+        Tour tour = tourRepository.findById(schedule.getTourId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tour"));
+        
+        logger.info("Tour details for schedule {}:", scheduleId);
+        logger.info("- Tour ID: {}", tour.getTourId());
+        logger.info("- Tour name: {}", tour.getName());
+        logger.info("- Max participants: {}", tour.getMaxParticipants());
+        logger.info("- Current schedule status: {}", schedule.getStatus().getValue());
+
+        // Bước 5: So sánh và cập nhật trạng thái
+        if (totalParticipants >= tour.getMaxParticipants()) {
+            logger.info("Updating schedule status to FULL. Total participants ({}) >= max participants ({})", 
+                totalParticipants, tour.getMaxParticipants());
+            schedule.setStatus(TourSchedule.Status.full);
+            repository.save(schedule);
+            logger.info("Schedule status updated successfully to FULL");
+        } else {
+            logger.info("Schedule remains available. Total participants ({}) < max participants ({})", 
+                totalParticipants, tour.getMaxParticipants());
+        }
+    }
+
     private void validateDates(TourScheduleDTO dto) {
         if (dto.getEndDate().isBefore(dto.getStartDate())) {
             throw new IllegalArgumentException("End date must be after start date");
@@ -118,7 +186,23 @@ public class TourScheduleService {
         dto.setTourId(entity.getTourId());
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
-        dto.setStatus(entity.getStatus().getValue());
+
+        // Nếu đã qua ngày bắt đầu, cập nhật trạng thái trong DB và trả về status closed
+        LocalDate today = LocalDate.now();
+        if (!today.isBefore(entity.getStartDate())) {
+            if (!"closed".equals(entity.getStatus().getValue())) {
+                entity.setStatus(TourSchedule.Status.closed); // Cần thêm giá trị closed vào enum nếu chưa có
+                repository.save(entity);
+            }
+            dto.setStatus("closed");
+        } else {
+            dto.setStatus(entity.getStatus().getValue());
+        }
+
+        long confirmedPassengers = bookingRepository.countConfirmedPassengersForSchedule(entity.getScheduleId());
+        long bookingsWithoutBookerAsPassenger = bookingRepository.countBookingsWithoutBookerAsPassenger(entity.getScheduleId());
+        int totalParticipants = (int) (confirmedPassengers + bookingsWithoutBookerAsPassenger);
+        dto.setCurrentParticipants(totalParticipants);
         return dto;
     }
 

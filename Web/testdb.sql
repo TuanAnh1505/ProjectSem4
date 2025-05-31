@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 30, 2025 lúc 03:41 AM
+-- Thời gian đã tạo: Th5 31, 2025 lúc 12:27 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -96,7 +96,14 @@ INSERT INTO `bookings` (`booking_id`, `tour_id`, `booking_date`, `status_id`, `t
 (63, 2, '2025-05-27 09:51:18', 1, 4780000.00, '2025-05-27 09:51:18', '2025-05-27 09:51:18', 2, 3),
 (64, 5, '2025-05-27 10:10:41', 1, 4200000.00, '2025-05-27 10:10:41', '2025-05-27 10:10:41', 2, 5),
 (65, 4, '2025-05-27 12:42:19', 1, 3800000.00, '2025-05-27 12:42:19', '2025-05-27 12:42:19', 2, 4),
-(66, 7, '2025-05-28 08:38:39', 1, 5200000.00, '2025-05-28 08:38:39', '2025-05-28 08:38:39', 2, 7);
+(66, 7, '2025-05-28 08:38:39', 1, 5200000.00, '2025-05-28 08:38:39', '2025-05-28 08:38:39', 2, 7),
+(67, 4, '2025-05-30 08:48:17', 1, 3800000.00, '2025-05-30 08:48:17', '2025-05-30 08:48:17', 3, 4),
+(68, 4, '2025-05-30 09:02:27', 1, 3800000.00, '2025-05-30 09:02:27', '2025-05-30 09:02:27', 3, 4),
+(69, 5, '2025-05-30 09:50:19', 1, 4200000.00, '2025-05-30 09:50:19', '2025-05-30 09:50:19', 3, 5),
+(70, 5, '2025-05-30 10:58:54', 1, 4200000.00, '2025-05-30 10:58:54', '2025-05-30 10:58:54', 3, 5),
+(71, 4, '2025-05-30 11:03:53', 1, 3800000.00, '2025-05-30 11:03:53', '2025-05-30 11:03:53', 3, 4),
+(72, 4, '2025-05-30 11:15:06', 1, 3800000.00, '2025-05-30 11:15:06', '2025-05-30 11:15:06', 3, 4),
+(73, 2, '2025-05-30 11:24:15', 1, 4780000.00, '2025-05-30 11:24:15', '2025-05-30 11:24:15', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -135,7 +142,13 @@ INSERT INTO `booking_passengers` (`passenger_id`, `booking_id`, `userid`, `full_
 (16, 52, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '1991-01-01', 'Nam'),
 (17, 53, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2002-02-02', 'Nam'),
 (18, 54, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '2003-03-03', 'Nam'),
-(19, 66, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '1991-01-01', 'Nam');
+(19, 66, 2, 'hoang', '1234567890', 'hoang@gmail.com', 'dsfg', 'adult', '1991-01-01', 'Nam'),
+(20, 67, 3, 'TuanAnh', '0931176111', 'user12@gmail.com', 'HaNoi', 'adult', '2005-12-05', 'Nam'),
+(21, 68, 3, 'TuanAnh', '0931176111', 'user12@gmail.com', 'HaNoi', 'adult', '2005-12-05', 'Nam'),
+(22, 69, 3, 'TuanAnh', '0931176111', 'user12@gmail.com', 'HaNoi', 'adult', '2005-12-05', 'Nam'),
+(23, 70, 3, 'TuanAnh', '0931176111', 'user12@gmail.com', 'HaNoi', 'adult', '2005-12-20', 'Nam'),
+(24, 71, 3, 'TuanAnh', '0931176111', 'user12@gmail.com', 'HaNoi', 'adult', '2000-12-05', 'Nam'),
+(25, 73, 3, 'TuanAnh', '0931176111', 'user12@gmail.com', 'HaNoi', 'adult', '2005-12-20', 'Nam');
 
 -- --------------------------------------------------------
 
@@ -399,7 +412,16 @@ CREATE TABLE `payments` (
 --
 
 INSERT INTO `payments` (`payment_id`, `booking_id`, `userid`, `amount`, `payment_method_id`, `status_id`, `transaction_id`, `payment_date`, `notes`, `created_at`, `updated_at`, `payment_method`) VALUES
-(1, 66, 2, 5200000.00, 2, 3, 'fd71db7f-c167-4803-8b9e-9356b66ff903', '2025-05-28 08:39:12', NULL, '2025-05-28 08:39:12', '2025-05-28 08:40:18', NULL);
+(1, 66, 2, 5200000.00, 2, 3, 'fd71db7f-c167-4803-8b9e-9356b66ff903', '2025-05-28 08:39:12', NULL, '2025-05-28 08:39:12', '2025-05-28 08:40:18', NULL),
+(2, 67, 3, 3800000.00, 2, 3, '527e5394-26ed-4e73-bf8b-391dc67f4a6c', '2025-05-30 08:48:40', NULL, '2025-05-30 08:48:40', '2025-05-30 08:49:17', NULL),
+(5, 68, 3, 3800000.00, 2, 3, 'c1594280-c106-4791-a412-714c817dc760', '2025-05-30 09:07:16', NULL, '2025-05-30 09:07:16', '2025-05-30 09:07:52', NULL),
+(6, 69, 3, 4200000.00, 2, 3, '83359ee4-f512-4b9a-9b66-1930e29e13bc', '2025-05-30 09:50:31', NULL, '2025-05-30 09:50:31', '2025-05-30 09:50:43', NULL),
+(7, 69, 3, 4200000.00, 2, 3, '0dabc97a-c5e3-4f4b-a6b4-2bebb0bd8b39', '2025-05-30 10:42:01', NULL, '2025-05-30 10:42:01', '2025-05-30 10:46:57', NULL),
+(8, 69, 3, 4200000.00, 2, 3, '9450ca6c-5ff1-40ae-aca7-541269402c3d', '2025-05-30 10:47:11', NULL, '2025-05-30 10:47:11', '2025-05-30 10:50:13', NULL),
+(9, 69, 3, 4200000.00, 2, 3, 'c0d34da8-89fd-491e-b804-fdcbc7b2c858', '2025-05-30 10:50:27', NULL, '2025-05-30 10:50:27', '2025-05-30 10:58:26', NULL),
+(10, 70, 3, 4200000.00, 2, 3, '99b91b85-a487-455e-aaa0-3751112529d1', '2025-05-30 10:59:18', NULL, '2025-05-30 10:59:18', '2025-05-30 10:59:30', NULL),
+(11, 71, 3, 3800000.00, 2, 3, '3d1a2411-76b0-4fb9-a5ca-f0117362ca0d', '2025-05-30 11:04:05', NULL, '2025-05-30 11:04:05', '2025-05-30 11:04:35', NULL),
+(12, 73, 3, 4780000.00, 2, 3, 'f17cd5fd-dac7-4a34-9591-339d842f0c91', '2025-05-30 11:24:30', NULL, '2025-05-30 11:24:30', '2025-05-30 11:25:21', NULL);
 
 -- --------------------------------------------------------
 
@@ -420,7 +442,29 @@ CREATE TABLE `payment_history` (
 --
 
 INSERT INTO `payment_history` (`history_id`, `payment_id`, `status_id`, `notes`, `created_at`) VALUES
-(1, 1, 3, 'Payment created', '2025-05-28 08:39:12');
+(1, 1, 3, 'Payment created', '2025-05-28 08:39:12'),
+(2, 2, 1, 'Payment created', '2025-05-30 08:48:40'),
+(5, 5, 1, 'Payment created', '2025-05-30 09:07:16'),
+(6, 6, 1, 'Payment created', '2025-05-30 09:50:31'),
+(7, 6, 3, 'Status updated to Completed', '2025-05-30 09:50:43'),
+(8, 6, 3, 'Status updated to Completed', '2025-05-30 09:50:50'),
+(9, 7, 1, 'Payment created', '2025-05-30 10:42:01'),
+(10, 7, 3, 'Status updated to Completed', '2025-05-30 10:46:57'),
+(11, 7, 3, 'Status updated to Completed', '2025-05-30 10:47:02'),
+(12, 8, 1, 'Payment created', '2025-05-30 10:47:11'),
+(13, 8, 3, 'Status updated to Completed', '2025-05-30 10:50:13'),
+(14, 8, 3, 'Status updated to Completed', '2025-05-30 10:50:18'),
+(15, 9, 1, 'Payment created', '2025-05-30 10:50:27'),
+(16, 9, 3, 'Status updated to Completed', '2025-05-30 10:58:26'),
+(17, 9, 3, 'Status updated to Completed', '2025-05-30 10:58:31'),
+(18, 10, 1, 'Payment created', '2025-05-30 10:59:18'),
+(19, 10, 3, 'Status updated to Completed', '2025-05-30 10:59:30'),
+(20, 10, 3, 'Status updated to Completed', '2025-05-30 10:59:34'),
+(21, 11, 1, 'Payment created', '2025-05-30 11:04:05'),
+(22, 11, 3, 'Status updated to Completed', '2025-05-30 11:04:35'),
+(23, 11, 3, 'Status updated to Completed', '2025-05-30 11:04:40'),
+(24, 12, 1, 'Payment created', '2025-05-30 11:24:30'),
+(25, 12, 3, 'Status updated to Completed', '2025-05-30 11:25:21');
 
 -- --------------------------------------------------------
 
@@ -639,20 +683,25 @@ CREATE TABLE `tour_schedules` (
   `end_date` date NOT NULL,
   `status` varchar(20) NOT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `current_participants` int(11) NOT NULL,
+  `departure_location` varchar(255) NOT NULL,
+  `max_participants` int(11) NOT NULL,
+  `price` decimal(38,2) DEFAULT NULL,
+  `return_location` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `tour_schedules`
 --
 
-INSERT INTO `tour_schedules` (`schedule_id`, `tour_id`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
-(1, 2, '2025-05-27', '2025-05-29', 'available', '2025-05-17 15:02:57', '2025-05-20 12:26:17'),
-(3, 2, '2025-06-11', '2025-06-13', 'available', '2025-05-17 15:43:53', '2025-05-20 12:39:50'),
-(4, 4, '2025-06-15', '2025-06-17', 'available', '2025-05-20 19:59:02', '2025-05-20 19:59:02'),
-(5, 5, '2025-06-20', '2025-06-26', 'available', '2025-05-20 19:59:22', '2025-05-20 19:59:22'),
-(7, 7, '2025-08-05', '2025-08-06', 'available', '2025-05-20 20:02:25', '2025-05-20 20:02:25'),
-(9, 5, '2025-06-06', '2025-06-08', 'available', '2025-05-24 20:02:11', '2025-05-24 20:58:05');
+INSERT INTO `tour_schedules` (`schedule_id`, `tour_id`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`, `current_participants`, `departure_location`, `max_participants`, `price`, `return_location`) VALUES
+(1, 2, '2025-05-27', '2025-05-29', 'AVAILABLE', '2025-05-17 15:02:57', '2025-05-20 12:26:17', 0, '', 0, NULL, ''),
+(3, 2, '2025-06-11', '2025-06-13', 'AVAILABLE', '2025-05-17 15:43:53', '2025-05-20 12:39:50', 0, '', 0, NULL, ''),
+(4, 4, '2025-06-15', '2025-06-17', 'AVAILABLE', '2025-05-20 19:59:02', '2025-05-20 19:59:02', 0, '', 0, NULL, ''),
+(5, 5, '2025-06-20', '2025-06-26', 'AVAILABLE', '2025-05-20 19:59:22', '2025-05-20 19:59:22', 0, '', 0, NULL, ''),
+(7, 7, '2025-08-05', '2025-08-06', 'AVAILABLE', '2025-05-20 20:02:25', '2025-05-20 20:02:25', 0, '', 0, NULL, ''),
+(9, 5, '2025-06-06', '2025-06-08', 'AVAILABLE', '2025-05-24 20:02:11', '2025-05-24 20:58:05', 0, '', 0, NULL, '');
 
 -- --------------------------------------------------------
 
@@ -694,7 +743,8 @@ CREATE TABLE `userroles` (
 
 INSERT INTO `userroles` (`userid`, `roleid`) VALUES
 (1, 1),
-(2, 2);
+(2, 2),
+(3, 2);
 
 -- --------------------------------------------------------
 
@@ -721,7 +771,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`userid`, `full_name`, `email`, `password_hash`, `phone`, `address`, `is_active`, `created_at`, `updated_at`, `public_id`) VALUES
 (1, 'admin', 'admin@gmail.com', '$2a$10$XB14xcxuI1SlICBxZxLMAu8Gcx.UcJK0LWgFVtinCc/GL2Q3K7EZy', '1234567890', '12345', b'1', '2025-05-17 11:07:30', '2025-05-17 11:07:44', '9be3835e-6a67-41d4-bad1-8f423ac73397'),
-(2, 'hoang', 'hoang@gmail.com', '$2a$10$pQMo0TdhZB6PGXzmkSa10eoFxUK2zGy9/BbFv6w02OiQIaApcAdlS', '1234567890', 'dsfg', b'1', '2025-05-17 17:39:03', '2025-05-17 17:39:19', '43b52f1b-3d24-438c-955f-adce2ea9ad1f');
+(2, 'hoang', 'hoang@gmail.com', '$2a$10$pQMo0TdhZB6PGXzmkSa10eoFxUK2zGy9/BbFv6w02OiQIaApcAdlS', '1234567890', 'dsfg', b'1', '2025-05-17 17:39:03', '2025-05-17 17:39:19', '43b52f1b-3d24-438c-955f-adce2ea9ad1f'),
+(3, 'TuanAnh', 'user12@gmail.com', '$2a$10$cun7KMGBJ8kSE/lw5OEF3eYuKzHlhbjNoOwRM4Tq.QL67nsRfHfRi', '0931176111', 'HaNoi', b'1', '2025-05-30 08:47:09', '2025-05-30 08:47:42', '6657561b-66b8-4647-9dad-2e7784f34a15');
 
 -- --------------------------------------------------------
 
@@ -998,13 +1049,13 @@ ALTER TABLE `audit_logs`
 -- AUTO_INCREMENT cho bảng `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_passengers`
 --
 ALTER TABLE `booking_passengers`
-  MODIFY `passenger_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `passenger_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_status`
@@ -1070,13 +1121,13 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT cho bảng `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT cho bảng `payment_history`
 --
 ALTER TABLE `payment_history`
-  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT cho bảng `payment_methods`
@@ -1136,7 +1187,7 @@ ALTER TABLE `tour_status`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `userid` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `userid` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `usertokens`

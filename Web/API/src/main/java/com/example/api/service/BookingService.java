@@ -73,6 +73,16 @@ public class BookingService {
                 throw new RuntimeException("Lịch trình không ở trạng thái available!");
             }
 
+            // Count current participants for this schedule
+            long currentParticipants = bookingRepository.countByScheduleIdAndStatus_StatusName(request.getScheduleId(), "CONFIRMED");
+            
+            // Check if schedule is full based on tour's maxParticipants
+            if (currentParticipants >= tour.getMaxParticipants()) {
+                schedule.setStatus(TourSchedule.Status.full);
+                tourScheduleRepository.save(schedule);
+                throw new RuntimeException("Lịch trình đã đủ số lượng người tham gia!");
+            }
+
             BigDecimal price = tour.getPrice();
 
             // Handle discount if provided
@@ -112,6 +122,13 @@ public class BookingService {
             booking.setStatus(status);
 
             Booking saved = bookingRepository.save(booking);
+
+            // Update schedule status if needed
+            long updatedParticipants = bookingRepository.countByScheduleIdAndStatus_StatusName(request.getScheduleId(), "CONFIRMED");
+            if (updatedParticipants >= tour.getMaxParticipants()) {
+                schedule.setStatus(TourSchedule.Status.full);
+                tourScheduleRepository.save(schedule);
+            }
 
             // Save discount usage if applicable
             if (discount != null) {
