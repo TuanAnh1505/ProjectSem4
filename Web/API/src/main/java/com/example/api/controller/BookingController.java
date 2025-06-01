@@ -74,4 +74,13 @@ public class BookingController {
         }
     }
 
+    @GetMapping("/user/{publicId}")
+    public ResponseEntity<?> getBookingsByUserPublicId(@PathVariable String publicId) {
+        try {
+            return ResponseEntity.ok(bookingService.getBookingsByUserPublicId(publicId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
 }

@@ -6,6 +6,7 @@ import com.example.api.model.*;
 import com.example.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,6 +29,8 @@ public class BookingService {
     private final BookingStatusRepository bookingStatusRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
     private final TourScheduleRepository tourScheduleRepository;
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     public Booking createBooking(TourBookingRequest request) {
         try {
@@ -234,5 +237,40 @@ public class BookingService {
     public Booking getBookingById(Integer id) {
         return bookingRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Booking not found"));
+    }
+
+    public List<Map<String, Object>> getBookingsByUserPublicId(String publicId) {
+        var user = userRepository.findByPublicId(publicId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Booking> bookings = bookingRepository.findAllByUser_Userid(user.getUserid());
+        // Sắp xếp theo bookingDate giảm dần
+        bookings.sort((a, b) -> b.getBookingDate().compareTo(a.getBookingDate()));
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        for (Booking b : bookings) {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("bookingId", b.getBookingId());
+            map.put("tourName", b.getTour() != null ? b.getTour().getName() : null);
+            // Lấy lịch trình (nếu có)
+            String scheduleInfo = null;
+            if (b.getScheduleId() != null) {
+                var scheduleOpt = tourScheduleRepository.findById(b.getScheduleId());
+                if (scheduleOpt.isPresent()) {
+                    var sch = scheduleOpt.get();
+                    scheduleInfo = sch.getStartDate() + " - " + sch.getEndDate();
+                }
+            }
+            map.put("scheduleInfo", scheduleInfo);
+            // Số người: đếm số BookingPassenger của booking này
+            int passengerCount = bookingPassengerRepository.findByBooking_BookingId(b.getBookingId()).size();
+            map.put("passengerCount", passengerCount);
+            map.put("totalPrice", b.getTotalPrice());
+            map.put("status", b.getStatus() != null ? b.getStatus().getStatusName() : null);
+            // Lấy trạng thái payment
+            var payments = paymentRepository.findByBooking_BookingId(b.getBookingId());
+            String paymentStatus = payments != null && !payments.isEmpty() && payments.get(0).getStatus() != null ? payments.get(0).getStatus().getStatusName() : "PENDING";
+            map.put("paymentStatus", paymentStatus);
+            result.add(map);
+        }
+        return result;
     }
 }

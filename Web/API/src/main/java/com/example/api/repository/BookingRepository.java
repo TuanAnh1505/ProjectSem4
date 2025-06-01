@@ -55,4 +55,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
            "AND b.status.statusName = 'CONFIRMED' " +
            "/* DEBUG: Getting all confirmed bookings for schedule */")
     List<Booking> findConfirmedBookingsForSchedule(@Param("scheduleId") Integer scheduleId);
+
+    @Query("SELECT b FROM Booking b WHERE b.user.userid = :userid")
+    List<Booking> findAllByUser_Userid(@Param("userid") Long userid);
 }

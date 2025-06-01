@@ -78,6 +78,21 @@ const Header = () => {
                   </Link>
                 </li>
               )}
+              <li>
+                <button
+                  onClick={() => {
+                    const publicId = localStorage.getItem('publicId');
+                    if (publicId) {
+                      navigate(`/account/${publicId}`);
+                    } else {
+                      navigate('/login');
+                    }
+                  }}
+                  style={{ marginLeft: 16, fontWeight: 600, color: '#1976d2', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit' }}
+                >
+                  <span role="img" aria-label="user">👤</span> Tài khoản
+                </button>
+              </li>
             </ul>
           </nav>
         </div>
