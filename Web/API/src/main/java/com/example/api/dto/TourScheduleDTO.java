@@ -23,6 +23,4 @@ public class TourScheduleDTO {
     @Pattern(regexp = "^(available|full|cancelled|pending|completed)$", 
              message = "Status must be one of: available, full, cancelled, pending, completed")
     private String status;
-
-    private int currentParticipants;
 }
