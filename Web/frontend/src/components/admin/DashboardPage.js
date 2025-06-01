@@ -298,7 +298,7 @@ const DashboardPage = () => {
           </div>
           <div>
             <div className="dashboard-summary-title">Tổng số Tour</div>
-            <div className="dashboard-summary-value">{summary.totalTours}</div>
+            <div className="dashboard-summary-value" style={{'textAlign': 'center'}}>{summary.totalTours}</div>
             <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
               Tháng này thêm: {(summary.toursThisMonth || 0)} tour
             </div>
@@ -310,7 +310,7 @@ const DashboardPage = () => {
           </div>
           <div>
             <div className="dashboard-summary-title">Tổng số Người dùng</div>
-            <div className="dashboard-summary-value">{summary.totalUsers}</div>
+            <div className="dashboard-summary-value" style={{'textAlign': 'center'}}>{summary.totalUsers}</div>
             <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
               Tháng này thêm: {(summary.usersThisMonth || 0)} người dùng
             </div>
@@ -322,7 +322,7 @@ const DashboardPage = () => {
           </div>
           <div>
             <div className="dashboard-summary-title">Tổng số Đặt tour</div>
-            <div className="dashboard-summary-value">{summary.totalBookings}</div>
+            <div className="dashboard-summary-value" style={{'textAlign': 'center'}}>{summary.totalBookings}</div>
             <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
               Tháng này thêm: {(summary.bookingsThisMonth || 0)} đặt tour
             </div>
