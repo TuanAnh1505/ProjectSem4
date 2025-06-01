@@ -187,21 +187,32 @@ public class TourScheduleService {
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
 
-        // Nếu đã qua ngày bắt đầu, cập nhật trạng thái trong DB và trả về status closed
+        // Đếm số người đã tham gia
+        long confirmedPassengers = bookingRepository.countConfirmedPassengersForSchedule(entity.getScheduleId());
+        long bookingsWithoutBookerAsPassenger = bookingRepository.countBookingsWithoutBookerAsPassenger(entity.getScheduleId());
+        int totalParticipants = (int) (confirmedPassengers + bookingsWithoutBookerAsPassenger);
+
+        // Lấy maxParticipants từ tour
+        Tour tour = tourRepository.findById(entity.getTourId()).orElse(null);
+
+        // Nếu đã qua ngày bắt đầu, cập nhật trạng thái closed
         LocalDate today = LocalDate.now();
         if (!today.isBefore(entity.getStartDate())) {
             if (!"closed".equals(entity.getStatus().getValue())) {
-                entity.setStatus(TourSchedule.Status.closed); // Cần thêm giá trị closed vào enum nếu chưa có
+                entity.setStatus(TourSchedule.Status.closed);
                 repository.save(entity);
             }
             dto.setStatus("closed");
+        } else if (tour != null && totalParticipants >= tour.getMaxParticipants()) {
+            if (!"full".equals(entity.getStatus().getValue())) {
+                entity.setStatus(TourSchedule.Status.full);
+                repository.save(entity);
+            }
+            dto.setStatus("full");
         } else {
             dto.setStatus(entity.getStatus().getValue());
         }
 
-        long confirmedPassengers = bookingRepository.countConfirmedPassengersForSchedule(entity.getScheduleId());
-        long bookingsWithoutBookerAsPassenger = bookingRepository.countBookingsWithoutBookerAsPassenger(entity.getScheduleId());
-        int totalParticipants = (int) (confirmedPassengers + bookingsWithoutBookerAsPassenger);
         dto.setCurrentParticipants(totalParticipants);
         return dto;
     }
