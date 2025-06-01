@@ -701,14 +701,14 @@
 }
 
 @font-face {
-  font-family: 'Pacifico';
-  src: url('../../../assets/fonts/Pacifico-Regular.ttf') format('truetype');
+  font-family: 'Nunito';
+  src: url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Pacifico&display=swap') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 .logo-title {
-  font-family: 'Pacifico', cursive;
+  font-family: 'Nunito', cursive;
   font-size: 32px;
   font-weight: 700;
   color: #7b6ef6;
