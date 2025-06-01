@@ -153,7 +153,9 @@ export default function TourIndex() {
       {deleteAlert.show && (
         <div className="tour-alert-overlay">
           <div className="tour-alert-dialog">
-            <FaExclamationTriangle className="tour-alert-icon" />
+            <div className="tour-alert-icon-wrapper">
+              <FaExclamationTriangle className="tour-alert-icon" />
+            </div>
             <h2 className="tour-alert-title">Xác nhận xóa</h2>
             <p className="tour-alert-message">
               Bạn có chắc chắn muốn xóa tour "{deleteAlert.tourName}"? 

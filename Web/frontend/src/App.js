@@ -115,6 +115,11 @@ const App = () => {
             </Layout>
           } />
 
+          <Route path="/account/:publicId" element={
+            <Layout>
+              <UserProfile />
+            </Layout>
+          } />
 
           {/* Authentication and user routes */}
           <Route path="/login" element={<Login />} />

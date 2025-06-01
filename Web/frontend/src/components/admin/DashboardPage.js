@@ -186,12 +186,41 @@ const DashboardPage = () => {
         const users = await usersRes.json();
         const bookings = await bookingsRes.json();
 
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+        const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
+        // Helper: Đếm số lượng theo tháng
+        const countByMonth = (arr, dateField, month, year) => {
+          return arr.filter(item => {
+            const d = new Date(item[dateField]);
+            return d.getMonth() + 1 === month && d.getFullYear() === year;
+          }).length;
+        };
+
+        const toursThisMonth = countByMonth(tours, 'createdAt', currentMonth, currentYear);
+        const toursLastMonth = countByMonth(tours, 'createdAt', prevMonth, prevYear);
+        const usersThisMonth = countByMonth(users, 'createdAt', currentMonth, currentYear);
+        const usersLastMonth = countByMonth(users, 'createdAt', prevMonth, prevYear);
+        const bookingsThisMonth = countByMonth(bookings, 'bookingDate', currentMonth, currentYear);
+        const bookingsLastMonth = countByMonth(bookings, 'bookingDate', prevMonth, prevYear);
+
+        // Tính phần trăm thay đổi
+        const calcChange = (now, last) => last === 0 ? 0 : ((now - last) / last) * 100;
+
         setSummary(prev => ({
           ...prev,
           totalTours: Array.isArray(tours) ? tours.length : 0,
           totalUsers: Array.isArray(users) ? users.length : 0,
           totalBookings: Array.isArray(bookings) ? bookings.length : 0,
-          // monthRevenue: ... // Nếu có API doanh thu thì fetch và set ở đây
+          toursThisMonth: Number(toursThisMonth) || 0,
+          toursLastMonth: Number(toursLastMonth) || 0,
+          usersThisMonth: Number(usersThisMonth) || 0,
+          usersLastMonth: Number(usersLastMonth) || 0,
+          bookingsThisMonth: Number(bookingsThisMonth) || 0,
+          bookingsLastMonth: Number(bookingsLastMonth) || 0,
         }));
       } catch (err) {
         // Có thể giữ lại fake data hoặc set về 0
@@ -270,8 +299,8 @@ const DashboardPage = () => {
           <div>
             <div className="dashboard-summary-title">Tổng số Tour</div>
             <div className="dashboard-summary-value">{summary.totalTours}</div>
-            <div className={`dashboard-summary-change ${summary.tourChange >= 0 ? 'up' : 'down'}`}>
-              {formatPercent(summary.tourChange)} so với tháng trước
+            <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
+              Tháng này thêm: {(summary.toursThisMonth || 0)} tour
             </div>
           </div>
         </div>
@@ -282,8 +311,8 @@ const DashboardPage = () => {
           <div>
             <div className="dashboard-summary-title">Tổng số Người dùng</div>
             <div className="dashboard-summary-value">{summary.totalUsers}</div>
-            <div className={`dashboard-summary-change ${summary.userChange >= 0 ? 'up' : 'down'}`}>
-              {formatPercent(summary.userChange)} so với tháng trước
+            <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
+              Tháng này thêm: {(summary.usersThisMonth || 0)} người dùng
             </div>
           </div>
         </div>
@@ -294,8 +323,8 @@ const DashboardPage = () => {
           <div>
             <div className="dashboard-summary-title">Tổng số Đặt tour</div>
             <div className="dashboard-summary-value">{summary.totalBookings}</div>
-            <div className={`dashboard-summary-change ${summary.bookingChange >= 0 ? 'up' : 'down'}`}>
-              {formatPercent(summary.bookingChange)} so với tháng trước
+            <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
+              Tháng này thêm: {(summary.bookingsThisMonth || 0)} đặt tour
             </div>
           </div>
         </div>
@@ -307,6 +336,11 @@ const DashboardPage = () => {
             <div className="dashboard-summary-title">Doanh thu tháng {summary.month}</div>
             <div className="dashboard-summary-value">{formatVND(summary.monthRevenue)}</div>
             <div className={`dashboard-summary-change ${summary.revenueChange >= 0 ? 'up' : 'down'}`}>
+              {summary.revenueChange >= 0 ? (
+                <span style={{color: '#4caf50', fontWeight: 700, marginRight: 4}}>▲</span>
+              ) : (
+                <span style={{color: '#f44336', fontWeight: 700, marginRight: 4}}>▼</span>
+              )}
               {formatPercent(summary.revenueChange)} so với tháng trước
             </div>
           </div>

@@ -6,7 +6,7 @@
 
 .admin-dashboard h1 {
   font-size: 24px;
-  color: #333;
+  /* color: #333; */
 }
 
 .admin-dashboard p {
@@ -141,11 +141,11 @@
 
 .toggle-button-main {
   background: none;
-  border: 2px solid #cbcbcb; 
+  border: 2px solid #7b6ef6; 
   border-radius: 50%; 
   font-size: 20px;
   cursor: pointer;
-  color: #cbcbcb;
+  color: #7b6ef6;
   width: 40px; 
   height: 40px; 
   display: flex;
@@ -159,7 +159,7 @@
 }
 
 .toggle-button-main:hover {
-  background-color: #616161; 
+  background-color: #7b6ef6; 
   color: #fff; 
 }
 
@@ -409,12 +409,12 @@
   justify-content: center;
   box-shadow: 0 2px 8px #e6e6e6;
 }
-.logo-title {
+/* .logo-title {
   font-size: 18px;
   font-weight: 700;
   color: #7b6ef6;
   margin: 0;
-}
+} */
 .toggle-button-modern {
   background: #f3f3f3;
   border: none;
@@ -698,6 +698,38 @@
 }
 .account-dropdown-btn:hover {
   background: #5c9cf5;
+}
+
+@font-face {
+  font-family: 'Pacifico';
+  src: url('../../../assets/fonts/Pacifico-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.logo-title {
+  font-family: 'Pacifico', cursive;
+  font-size: 32px;
+  font-weight: 700;
+  color: #7b6ef6;
+  margin: 0;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.dashboard-summary-change {
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dashboard-summary-change.up {
+  color: #4caf50; /* xanh lá */
+}
+.dashboard-summary-change.down {
+  color: #f44336; /* đỏ */
 }
 
 

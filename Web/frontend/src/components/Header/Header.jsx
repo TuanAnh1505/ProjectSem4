@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
+import logo from '../../assets/images/logo.png';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -29,9 +30,16 @@ const Header = () => {
             flexWrap: 'wrap',
           }}
         >
-          <h1 className={styles.logo} style={{ margin: 0, padding: '18px 0 8px 0', textAlign: 'center', fontSize: 28, fontWeight: 'bold', letterSpacing: 1 }}>
-            <Link to="/" style={{ color: '#a61a19', textDecoration: 'none' }}>
-              Vietnam Tourism
+          <h1 className={styles.logo} style={{ margin: 0, padding: '18px 0 8px 0', textAlign: 'center' }}>
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <img 
+                src={logo}
+                alt="Vietnam Tourism Logo" 
+                style={{ 
+                  height: '40px',
+                  width: 'auto'
+                }}
+              />
             </Link>
           </h1>
           <nav className={styles.mainNav} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: 'auto', flex: 1 }}>

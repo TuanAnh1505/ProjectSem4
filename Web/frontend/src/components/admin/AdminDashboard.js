@@ -92,8 +92,8 @@ const AdminDashboard = ({ children }) => {
         {!isAsideCollapsed && (
           <div className="aside-header-modern">
             <div className="logo-container-modern">
-              <span className="logo-circle">VT</span>
-              <h1 className="logo-title">Vietnam Tourism</h1>
+              {/* <span className="logo-circle">VT</span> */}
+              <h1 className="logo-title">Hi VietNam</h1>
             </div>
             <button className="toggle-button-modern" onClick={toggleAside}>
               ✕
