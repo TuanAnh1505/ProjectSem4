@@ -50,6 +50,12 @@ public class PaymentService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private TourScheduleService tourScheduleService;
+
+    @Autowired
+    private BookingStatusRepository bookingStatusRepository;
+
     private static final String PARTNER_CODE = "MOMO";
     private static final String ACCESS_KEY = "F8BBA842ECF85";
     private static final String SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
@@ -126,17 +132,19 @@ public class PaymentService {
         payment.setStatus(newStatus);
         payment = paymentRepository.save(payment);
 
+        // Nếu thanh toán thành công (status_id = 3), cập nhật trạng thái booking sang CONFIRMED
         if (!wasCompleted && newStatus.getPaymentStatusId() == 3) { // 3 = Completed
-            System.out.println("DEBUG: Payment completed, preparing to send email...");
+            Booking booking = bookingRepository.findById(payment.getBooking().getBookingId())
+                    .orElseThrow(() -> new RuntimeException("Booking not found"));
+            BookingStatus confirmedStatus = bookingStatusRepository.findByStatusName("CONFIRMED")
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái CONFIRMED"));
+            booking.setStatus(confirmedStatus);
+            bookingRepository.save(booking);
             try {
-                Booking booking = bookingRepository.findById(payment.getBooking().getBookingId())
-                        .orElseThrow(() -> new RuntimeException("Booking not found"));
                 User user = userRepository.findById(payment.getUser().getUserid())
                         .orElseThrow(() -> new RuntimeException("User not found"));
                 List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
-                System.out.println("DEBUG: Found booking, user and passengers. Sending email to: " + user.getEmail());
                 emailService.sendPaymentSuccessEmail(user, booking, payment, passengers);
-                System.out.println("DEBUG: Email sent successfully!");
             } catch (Exception e) {
                 System.out.println("ERROR: Failed to send email: " + e.getMessage());
                 e.printStackTrace();
@@ -151,6 +159,11 @@ public class PaymentService {
         history.setStatus(newStatus);
         history.setNotes(notes != null ? notes : "Status updated to " + newStatus.getStatusName());
         paymentHistoryRepository.save(history);
+
+        // Nếu thanh toán thành công (status_id = 3), kiểm tra và cập nhật trạng thái lịch trình
+        if (newStatus.getPaymentStatusId() == 3) { // 3 = Completed
+            tourScheduleService.checkAndUpdateScheduleStatus(payment.getBooking().getBookingId());
+        }
 
         return convertToDTO(payment);
     }

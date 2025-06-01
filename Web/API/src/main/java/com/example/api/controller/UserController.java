@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.api.dto.UserInfoDTO;
 import com.example.api.service.UserService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +25,26 @@ public class UserController {
             return ResponseEntity.ok(userInfo);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        String email = userDetails.getUsername();
+        try {
+            var user = userService.findByEmail(email);
+            return ResponseEntity.ok(new com.example.api.dto.UserInfoDTO(
+                user.getPublicId(),
+                user.getFullName(),
+                user.getPhone(),
+                user.getEmail(),
+                user.getAddress()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body("User not found");
         }
     }
 }

@@ -38,7 +38,8 @@ public class TourSchedule {
         full("full"),
         cancelled("cancelled"),
         pending("pending"),
-        completed("completed");
+        completed("completed"),
+        closed("closed");
 
         private final String value;
 
