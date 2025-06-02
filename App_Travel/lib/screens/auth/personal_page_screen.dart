@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'update_info_user_screen.dart';
 import 'dart:developer' as developer;
 import '/screens/setting_screen.dart';
+import '/screens/booking/history_user_booking_tour_screen.dart';
 
 class PersonalPageScreen extends StatelessWidget {
   final bool showAppBar;
@@ -44,6 +45,8 @@ class PersonalPageScreen extends StatelessWidget {
         ),
       );
     }
+
+
   }
 
   @override
@@ -92,7 +95,7 @@ class PersonalPageScreen extends StatelessWidget {
             const Text(
               'Đã xác thực tài khoản',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 18,
                 color: Colors.green,
                 fontWeight: FontWeight.w400,
               ),
@@ -118,7 +121,14 @@ class PersonalPageScreen extends StatelessWidget {
                     subtitle: 'Xem các tour đã đặt',
                     icon: FontAwesomeIcons.history,
                     iconColor: Colors.orange,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HistoryUserBookingTourScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   _buildMenuCard(
