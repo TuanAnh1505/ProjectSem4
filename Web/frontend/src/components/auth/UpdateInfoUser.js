@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import {
     Box,
     Button,
@@ -16,12 +17,29 @@ import {
     InputAdornment,
     Divider,
     Card,
-    CardContent
+    CardContent,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Tabs,
+    Tab,
+    Card as MUICard,
+    CardContent as MUICardContent,
+    Chip,
+    Stack
 } from '@mui/material';
-import { FaUser, FaPhone, FaMapMarkerAlt, FaEnvelope, FaEdit, FaCheck, FaTimes, FaUserCircle } from 'react-icons/fa';
+import { FaUser, FaPhone, FaMapMarkerAlt, FaEnvelope, FaEdit, FaCheck, FaTimes, FaUserCircle, FaHistory, FaEye, FaBan, FaRegCalendarAlt, FaUsers, FaMoneyBill, FaCheckCircle, FaTimesCircle, FaDownload, FaClock, FaInfoCircle } from 'react-icons/fa';
 
 const UpdateInfoUser = () => {
     const navigate = useNavigate();
+    const { publicId } = useParams();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -32,24 +50,38 @@ const UpdateInfoUser = () => {
         phone: '',
         address: ''
     });
+    // Booking states
+    const [bookings, setBookings] = useState([]);
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [showBookingDetail, setShowBookingDetail] = useState(false);
+    const [tabIndex, setTabIndex] = useState(0);
+    const [createdAt, setCreatedAt] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        const publicId = localStorage.getItem('publicId');
+        const storedPublicId = localStorage.getItem('publicId');
 
-        if (!token || !publicId) {
+        if (!token || !storedPublicId) {
             setError('Vui lòng đăng nhập để xem thông tin');
             setTimeout(() => navigate('/login'), 2000);
             return;
         }
 
-        fetchUserInfo(publicId, token);
-    }, [navigate]);
+        // Verify if the user is accessing their own profile
+        if (publicId !== storedPublicId) {
+            setError('Không có quyền truy cập thông tin này');
+            setTimeout(() => navigate('/'), 2000);
+            return;
+        }
+
+        fetchUserInfo(storedPublicId, token);
+        fetchBookings(storedPublicId, token);
+    }, [navigate, publicId]);
 
     const fetchUserInfo = async (publicId, token) => {
         try {
             setLoading(true);
-            const response = await axios.get(`/api/auth/user-info?publicId=${publicId}`, {
+            const response = await axios.get(`http://localhost:8080/api/users/${publicId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -60,21 +92,40 @@ const UpdateInfoUser = () => {
                     phone: response.data.phone || '',
                     address: response.data.address || ''
                 });
+                setCreatedAt(response.data.createdAt || response.data.created_at || '');
             }
         } catch (error) {
             console.error('Error fetching user info:', error);
-            if (error.response?.status === 401) {
-                setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-                setTimeout(() => {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('publicId');
-                    navigate('/login');
-                }, 2000);
-            } else {
-                setError('Không thể tải thông tin người dùng. Vui lòng thử lại sau.');
-            }
+            handleApiError(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchBookings = async (publicId, token) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/bookings/user/${publicId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const sortedBookings = Array.isArray(response.data) ? response.data : [];
+            sortedBookings.sort((a, b) => (new Date(b.bookingDate) - new Date(a.bookingDate)));
+            setBookings(sortedBookings);
+        } catch (error) {
+            console.error('Error fetching bookings:', error);
+            toast.error('Không thể tải lịch sử đặt tour!');
+        }
+    };
+
+    const handleApiError = (error) => {
+        if (error.response?.status === 401) {
+            setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            setTimeout(() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('publicId');
+                navigate('/login');
+            }, 2000);
+        } else {
+            setError('Có lỗi xảy ra. Vui lòng thử lại sau.');
         }
     };
 
@@ -93,36 +144,59 @@ const UpdateInfoUser = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const publicId = localStorage.getItem('publicId');
+            const storedPublicId = localStorage.getItem('publicId');
 
-            if (!token || !publicId) {
-                throw new Error('Không tìm thấy thông tin xác thực');
+            if (!token || !storedPublicId) {
+                setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+                return;
             }
 
-            await axios.put(`/api/auth/update-info?publicId=${publicId}`, {
+            await axios.put(`http://localhost:8080/api/users/${storedPublicId}`, {
                 fullName: formData.fullName,
                 phone: formData.phone,
                 address: formData.address
             }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
+            toast.success('Cập nhật thông tin thành công!');
             setSuccess('Cập nhật thông tin thành công!');
             setIsEditing(false);
         } catch (error) {
-            console.error('Error updating user info:', error);
+            console.error('Error updating user info:', error, error.response);
             if (error.response?.status === 401) {
-                setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-                setTimeout(() => {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('publicId');
-                    navigate('/login');
-                }, 2000);
+                setError('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại!');
             } else {
                 setError('Không thể cập nhật thông tin. Vui lòng thử lại sau.');
             }
         }
     };
+
+    const handleShowBookingDetail = (booking) => {
+        setSelectedBooking(booking);
+        setShowBookingDetail(true);
+    };
+
+    const handleCancelBooking = async (bookingId) => {
+        if (!window.confirm('Bạn chắc chắn muốn hủy booking này?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:8080/api/bookings/${bookingId}/cancel`, {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            toast.success('Đã hủy booking!');
+            setBookings(bookings => bookings.map(b => 
+                b.bookingId === bookingId ? { ...b, status: 'CANCELLED' } : b
+            ));
+        } catch (error) {
+            toast.error('Hủy booking thất bại!');
+        }
+    };
+
+    // Thống kê booking
+    const totalBooked = bookings.length;
+    const totalCompleted = bookings.filter(b => b.status === 'COMPLETED').length;
+    const totalPending = bookings.filter(b => b.status === 'CONFIRMED').length;
+    const totalCancelled = bookings.filter(b => b.status === 'CANCELLED').length;
 
     if (loading) {
         return (
@@ -145,16 +219,17 @@ const UpdateInfoUser = () => {
             py: 4,
             px: 2
         }}>
-            <Container maxWidth="lg">
-                <Grid container spacing={4}>
-                    {/* Left Side - Profile Card */}
-                    <Grid item xs={12} md={4}>
-                        <Card sx={{ 
+            <Container maxWidth="xl" sx={{ px: { xs: 0, md: 2 } }}>
+                <Grid container spacing={2}>
+                    {/* Card trái */}
+                    <Grid item xs={12} md={3} sx={{ pl: 0 }}>
+                        <Card sx={{
                             height: '100%',
                             borderRadius: '20px',
                             background: 'rgba(255, 255, 255, 0.95)',
                             backdropFilter: 'blur(10px)',
-                            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.1)'
+                            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+                            ml: 0
                         }}>
                             <CardContent sx={{ textAlign: 'center', py: 4 }}>
                                 <Avatar
@@ -168,44 +243,75 @@ const UpdateInfoUser = () => {
                                 >
                                     <FaUserCircle size={80} style={{ color: '#666' }} />
                                 </Avatar>
-                                <Typography variant="h5" sx={{ 
-                                    fontWeight: 600,
-                                    color: '#2c3e50',
-                                    mb: 1
-                                }}>
+                                <Typography variant="h5" sx={{ fontWeight: 600, color: '#2c3e50', mb: 1 }}>
                                     {formData.fullName}
                                 </Typography>
-                                <Typography variant="body1" sx={{ 
-                                    color: '#7f8c8d',
-                                    mb: 3
-                                }}>
-                                    {formData.email}
-                                </Typography>
                                 <Divider sx={{ my: 2 }} />
-                                <Box sx={{ mt: 2 }}>
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => setIsEditing(!isEditing)}
-                                        startIcon={isEditing ? <FaTimes /> : <FaEdit />}
-                                        sx={{
-                                            borderRadius: '25px',
-                                            px: 4,
-                                            py: 1,
-                                            background: isEditing ? '#e74c3c' : '#34495e',
-                                            '&:hover': {
-                                                background: isEditing ? '#c0392b' : '#2c3e50'
-                                            }
-                                        }}
-                                    >
-                                        {isEditing ? 'Hủy' : 'Chỉnh sửa'}
-                                    </Button>
+                                <Box sx={{ textAlign: 'left', mb: 3 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                        <FaEnvelope style={{ color: '#1976d2', marginRight: 8 }} />
+                                        <Typography variant="body2">{formData.email}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                        <FaPhone style={{ color: '#1976d2', marginRight: 8 }} />
+                                        <Typography variant="body2">{formData.phone}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                        <FaMapMarkerAlt style={{ color: '#1976d2', marginRight: 8 }} />
+                                        <Typography variant="body2">{formData.address}</Typography>
+                                    </Box>
                                 </Box>
+                                {/* Thống kê */}
+                                <Box sx={{ mb: 3 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2c3e50', mb: 1 }}>Thống kê</Typography>
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={6}>
+                                            <Box sx={{ background: '#f0f4ff', borderRadius: 2, py: 1.5, textAlign: 'center' }}>
+                                                <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 700 }}>{totalBooked}</Typography>
+                                                <Typography variant="caption" sx={{ color: '#1976d2' }}>Tour đã đặt</Typography>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Box sx={{ background: '#e8f5e9', borderRadius: 2, py: 1.5, textAlign: 'center' }}>
+                                                <Typography variant="h6" sx={{ color: '#43a047', fontWeight: 700 }}>{totalCompleted}</Typography>
+                                                <Typography variant="caption" sx={{ color: '#43a047' }}>Tour đã đi</Typography>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Box sx={{ background: '#fffde7', borderRadius: 2, py: 1.5, textAlign: 'center', mt: 1 }}>
+                                                <Typography variant="h6" sx={{ color: '#fbc02d', fontWeight: 700 }}>{totalPending}</Typography>
+                                                <Typography variant="caption" sx={{ color: '#fbc02d' }}>Đang chờ</Typography>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Box sx={{ background: '#ffebee', borderRadius: 2, py: 1.5, textAlign: 'center', mt: 1 }}>
+                                                <Typography variant="h6" sx={{ color: '#e53935', fontWeight: 700 }}>{totalCancelled}</Typography>
+                                                <Typography variant="caption" sx={{ color: '#e53935' }}>Đã huỷ</Typography>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => setIsEditing(!isEditing)}
+                                    startIcon={isEditing ? <FaTimes /> : <FaEdit />}
+                                    sx={{
+                                        borderRadius: '25px',
+                                        px: 4,
+                                        py: 1,
+                                        background: isEditing ? '#e74c3c' : '#34495e',
+                                        '&:hover': {
+                                            background: isEditing ? '#c0392b' : '#2c3e50'
+                                        }
+                                    }}
+                                >
+                                    {isEditing ? 'Hủy' : 'Chỉnh sửa thông tin'}
+                                </Button>
                             </CardContent>
                         </Card>
                     </Grid>
-
-                    {/* Right Side - Form */}
-                    <Grid item xs={12} md={8}>
+                    {/* Card phải */}
+                    <Grid item xs={12} md={9}>
                         <Card sx={{ 
                             borderRadius: '20px',
                             background: 'rgba(255, 255, 255, 0.95)',
@@ -213,167 +319,326 @@ const UpdateInfoUser = () => {
                             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.1)'
                         }}>
                             <CardContent sx={{ p: 4 }}>
-                                <Typography variant="h5" sx={{ 
-                                    fontWeight: 600,
-                                    color: '#2c3e50',
-                                    mb: 3
-                                }}>
-                                    Thông tin chi tiết
-                                </Typography>
-
-                                {error && (
-                                    <Alert 
-                                        severity="error" 
-                                        sx={{ 
-                                            mb: 3,
-                                            borderRadius: '10px'
-                                        }}
-                                    >
-                                        {error}
-                                    </Alert>
-                                )}
-
-                                {success && (
-                                    <Alert 
-                                        severity="success" 
-                                        sx={{ 
-                                            mb: 3,
-                                            borderRadius: '10px'
-                                        }}
-                                    >
-                                        {success}
-                                    </Alert>
-                                )}
-
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            fullWidth
-                                            label="Email"
-                                            name="email"
-                                            value={formData.email}
-                                            disabled
-                                            variant="outlined"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <FaEnvelope style={{ color: '#666' }} />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    borderRadius: '12px',
-                                                    backgroundColor: '#f8f9fa'
-                                                }
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            fullWidth
-                                            label="Họ và tên"
-                                            name="fullName"
-                                            value={formData.fullName}
-                                            onChange={handleChange}
-                                            disabled={!isEditing}
-                                            required
-                                            variant="outlined"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <FaUser style={{ color: '#666' }} />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    borderRadius: '12px',
-                                                    backgroundColor: '#f8f9fa'
-                                                }
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            fullWidth
-                                            label="Số điện thoại"
-                                            name="phone"
-                                            value={formData.phone}
-                                            onChange={handleChange}
-                                            disabled={!isEditing}
-                                            required
-                                            variant="outlined"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <FaPhone style={{ color: '#666' }} />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    borderRadius: '12px',
-                                                    backgroundColor: '#f8f9fa'
-                                                }
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            fullWidth
-                                            label="Địa chỉ"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleChange}
-                                            disabled={!isEditing}
-                                            required
-                                            multiline
-                                            rows={3}
-                                            variant="outlined"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <FaMapMarkerAlt style={{ color: '#666', marginTop: 8 }} />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    borderRadius: '12px',
-                                                    backgroundColor: '#f8f9fa'
-                                                }
-                                            }}
-                                        />
-                                    </Grid>
-                                    {isEditing && (
+                                <Tabs
+                                    value={tabIndex}
+                                    onChange={(e, newValue) => setTabIndex(newValue)}
+                                    indicatorColor="primary"
+                                    textColor="primary"
+                                    sx={{ mb: 3 }}
+                                >
+                                    <Tab label="Thông tin chi tiết" />
+                                    <Tab label="Lịch sử đặt tour" />
+                                </Tabs>
+                                {tabIndex === 0 && (
+                                    <Grid container spacing={3}>
                                         <Grid item xs={12}>
-                                            <Button
+                                            <TextField
                                                 fullWidth
-                                                variant="contained"
-                                                onClick={handleSubmit}
-                                                startIcon={<FaCheck />}
+                                                label="Email"
+                                                name="email"
+                                                value={formData.email}
+                                                disabled
+                                                variant="outlined"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <FaEnvelope style={{ color: '#666' }} />
+                                                        </InputAdornment>
+                                                    )
+                                                }}
                                                 sx={{
-                                                    mt: 2,
-                                                    py: 1.5,
-                                                    borderRadius: '12px',
-                                                    background: '#34495e',
-                                                    boxShadow: '0 3px 5px 2px rgba(0, 0, 0, 0.1)',
-                                                    '&:hover': {
-                                                        background: '#2c3e50'
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '12px',
+                                                        backgroundColor: '#f8f9fa'
                                                     }
                                                 }}
-                                            >
-                                                Lưu thay đổi
-                                            </Button>
+                                            />
                                         </Grid>
-                                    )}
-                                </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                label="Họ và tên"
+                                                name="fullName"
+                                                value={formData.fullName}
+                                                onChange={handleChange}
+                                                disabled={!isEditing}
+                                                required
+                                                variant="outlined"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <FaUser style={{ color: '#666' }} />
+                                                        </InputAdornment>
+                                                    )
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '12px',
+                                                        backgroundColor: '#f8f9fa'
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                label="Số điện thoại"
+                                                name="phone"
+                                                value={formData.phone}
+                                                onChange={handleChange}
+                                                disabled={!isEditing}
+                                                required
+                                                variant="outlined"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <FaPhone style={{ color: '#666' }} />
+                                                        </InputAdornment>
+                                                    )
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '12px',
+                                                        backgroundColor: '#f8f9fa'
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                label="Địa chỉ"
+                                                name="address"
+                                                value={formData.address}
+                                                onChange={handleChange}
+                                                disabled={!isEditing}
+                                                required
+                                                multiline
+                                                rows={3}
+                                                variant="outlined"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <FaMapMarkerAlt style={{ color: '#666', marginTop: 8 }} />
+                                                        </InputAdornment>
+                                                    )
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '12px',
+                                                        backgroundColor: '#f8f9fa'
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                        {isEditing && (
+                                            <Grid item xs={12}>
+                                                <Button
+                                                    fullWidth
+                                                    variant="contained"
+                                                    onClick={handleSubmit}
+                                                    startIcon={<FaCheck />}
+                                                    sx={{
+                                                        mt: 2,
+                                                        py: 1.5,
+                                                        borderRadius: '12px',
+                                                        background: '#34495e',
+                                                        boxShadow: '0 3px 5px 2px rgba(0, 0, 0, 0.1)',
+                                                        '&:hover': {
+                                                            background: '#2c3e50'
+                                                        }
+                                                    }}
+                                                >
+                                                    Lưu thay đổi
+                                                </Button>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                )}
+                                {tabIndex === 1 && (
+                                    <Box>
+                                        <Typography variant="h5" sx={{ fontWeight: 600, color: '#2c3e50', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <FaHistory /> Lịch sử đặt tour
+                                        </Typography>
+                                        <Stack spacing={2}>
+                                            {bookings.length === 0 ? (
+                                                <MUICard sx={{ p: 3, textAlign: 'center', color: '#888' }}>Chưa có booking nào</MUICard>
+                                            ) : (
+                                                bookings.map((booking, idx) => {
+                                                    // Tính thời gian còn lại để hủy tour (giả sử có trường deadline hoặc startDate)
+                                                    let cancelDeadline = null;
+                                                    let daysLeft = null;
+                                                    if (booking.schedule && booking.schedule.startDate) {
+                                                        // Giả sử hạn chót hủy là 3 ngày trước ngày khởi hành
+                                                        cancelDeadline = new Date(booking.schedule.startDate);
+                                                        cancelDeadline.setDate(cancelDeadline.getDate() - 3);
+                                                        const now = new Date();
+                                                        daysLeft = Math.ceil((cancelDeadline - now) / (1000 * 60 * 60 * 24));
+                                                    }
+                                                    return (
+                                                        <MUICard key={booking.bookingId} sx={{ p: 2, borderRadius: 3, boxShadow: '0 2px 12px #e3e8f0', border: '1px solid #e3e8f0' }}>
+                                                            <MUICardContent sx={{ p: 0 }}>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                                                                    <Box>
+                                                                        <Typography variant="h6" sx={{ fontWeight: 700 }}>{booking.tourName || booking.tour?.name}</Typography>
+                                                                        <Typography variant="body2" sx={{ color: '#888' }}>Mã đặt tour: {booking.bookingCode || booking.bookingId}</Typography>
+                                                                    </Box>
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                        <Chip label={booking.status === 'CONFIRMED' ? 'Đã xác nhận' : booking.status === 'CANCELLED' ? 'Đã hủy' : booking.status} color={booking.status === 'CONFIRMED' ? 'success' : booking.status === 'CANCELLED' ? 'error' : 'info'} size="small" sx={{ fontWeight: 600 }}/>
+                                                                        <Button size="small" variant="text" startIcon={<FaInfoCircle />} onClick={() => handleShowBookingDetail(booking)} sx={{ color: '#1976d2', fontWeight: 600 }}>Xem chi tiết</Button>
+                                                                    </Box>
+                                                                </Box>
+                                                                <Grid container spacing={2} sx={{ mb: 1 }}>
+                                                                    <Grid item xs={12} sm={6} md={3}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <FaRegCalendarAlt style={{ color: '#1976d2' }} />
+                                                                            <Typography variant="body2">{booking.schedule?.startDate}</Typography>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={6} md={3}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <FaUsers style={{ color: '#1976d2' }} />
+                                                                            <Typography variant="body2">{booking.passengerCount || booking.numPassengers || booking.totalPassengers || 1} khách</Typography>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={6} md={3}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <FaMoneyBill style={{ color: '#1976d2' }} />
+                                                                            <Typography variant="body2">{(booking.totalPrice || booking.totalAmount || 0).toLocaleString()} VNĐ</Typography>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={6} md={3}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            {(booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? <FaCheckCircle style={{ color: '#43a047' }} /> : <FaTimesCircle style={{ color: '#e53935' }} />}
+                                                                            <Typography variant="body2" sx={{ color: (booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? '#43a047' : '#e53935', fontWeight: 600 }}>
+                                                                                {(booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                </Grid>
+                                                                {daysLeft !== null && daysLeft >= 0 && booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, color: '#1976d2', fontWeight: 500 }}>
+                                                                        <FaClock style={{ marginRight: 6 }} />
+                                                                        Thời gian còn lại để hủy tour: Còn {daysLeft} ngày (hạn chót: {cancelDeadline.toLocaleDateString('vi-VN')})
+                                                                    </Box>
+                                                                )}
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                                                                    <Button variant="outlined" startIcon={<FaDownload />} sx={{ borderRadius: 2 }} disabled>Tải về</Button>
+                                                                    {booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
+                                                                        <Button variant="outlined" color="error" startIcon={<FaTimesCircle />} sx={{ borderRadius: 2 }} onClick={() => handleCancelBooking(booking.bookingId)}>
+                                                                            Hủy tour
+                                                                        </Button>
+                                                                    )}
+                                                                </Box>
+                                                            </MUICardContent>
+                                                        </MUICard>
+                                                    );
+                                                })
+                                            )}
+                                        </Stack>
+                                    </Box>
+                                )}
                             </CardContent>
                         </Card>
                     </Grid>
                 </Grid>
             </Container>
+
+            {/* Booking Detail Dialog */}
+            <Dialog 
+                open={showBookingDetail} 
+                onClose={() => setShowBookingDetail(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                {selectedBooking && (
+                    <>
+                        <DialogTitle sx={{ 
+                            background: '#1976d2',
+                            color: 'white',
+                            fontWeight: 600
+                        }}>
+                            Chi tiết booking
+                        </DialogTitle>
+                        <DialogContent sx={{ mt: 2 }}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                        Tên tour:
+                                    </Typography>
+                                    <Typography>
+                                        {selectedBooking.tourName || selectedBooking.tour?.name}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                        Lịch trình:
+                                    </Typography>
+                                    <Typography>
+                                        {selectedBooking.scheduleInfo || 
+                                         (selectedBooking.schedule && 
+                                          `${selectedBooking.schedule.startDate} - ${selectedBooking.schedule.endDate}`)}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                        Số người:
+                                    </Typography>
+                                    <Typography>
+                                        {selectedBooking.passengerCount || 
+                                         selectedBooking.numPassengers || 
+                                         selectedBooking.totalPassengers || 1}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                        Tổng tiền:
+                                    </Typography>
+                                    <Typography>
+                                        {(selectedBooking.totalPrice || 
+                                          selectedBooking.totalAmount || 0).toLocaleString()}đ
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                        Trạng thái booking:
+                                    </Typography>
+                                    <Typography sx={{
+                                        color: selectedBooking.status === 'CONFIRMED' ? '#388e3c' :
+                                               selectedBooking.status === 'CANCELLED' ? '#ff4d4f' : '#1976d2',
+                                        fontWeight: 600
+                                    }}>
+                                        {selectedBooking.status}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                        Trạng thái thanh toán:
+                                    </Typography>
+                                    <Typography sx={{
+                                        color: selectedBooking.paymentStatus === 'COMPLETED' ? '#388e3c' :
+                                               selectedBooking.paymentStatus === 'FAILED' ? '#ff4d4f' : '#1976d2',
+                                        fontWeight: 600
+                                    }}>
+                                        {selectedBooking.paymentStatus}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button 
+                                onClick={() => setShowBookingDetail(false)}
+                                sx={{ 
+                                    color: '#1976d2',
+                                    fontWeight: 600
+                                }}
+                            >
+                                Đóng
+                            </Button>
+                        </DialogActions>
+                    </>
+                )}
+            </Dialog>
         </Box>
     );
 };
