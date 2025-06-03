@@ -47,4 +47,27 @@ public class UserController {
             return ResponseEntity.status(404).body("User not found");
         }
     }
+
+    @PutMapping("/{publicId}")
+    public ResponseEntity<?> updateUser(
+            @PathVariable String publicId,
+            @RequestBody UserInfoDTO userInfoDTO,
+            @AuthenticationPrincipal com.example.api.model.User user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        // Nếu muốn chỉ cho phép user tự update, có thể kiểm tra:
+        // if (!userService.isOwnerOrAdmin(user, publicId)) return ResponseEntity.status(403).body("Forbidden");
+        try {
+            userService.updateUserInfo(
+                publicId,
+                userInfoDTO.getFullName(),
+                userInfoDTO.getPhone(),
+                userInfoDTO.getAddress()
+            );
+            return ResponseEntity.ok("Cập nhật thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Cập nhật thất bại: " + e.getMessage());
+        }
+    }
 }

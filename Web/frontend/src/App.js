@@ -22,7 +22,6 @@ import Payment from './pages/Payment';
 import UpdateInfoUser from './components/auth/UpdateInfoUser';
 import './App.css';
 import BookingConfirmation from './components/booking/BookingConfirmation';
-import UserProfile from './components/account/UserProfile';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -128,7 +127,14 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/change-password" element={<ChangePassword />} />
-          <Route path="/update-user-info" element={<UpdateInfoUser />} />
+          <Route 
+            path="/account/:publicId" 
+            element={
+              <Layout>
+                <ProtectedRoute element={<UpdateInfoUser />} />
+              </Layout>
+            } 
+          />
           <Route
             path="/tour-dashboard/detail/:tourId"
             element={<ProtectedRoute element={<TourDetailDashboard />} />}
@@ -311,7 +317,6 @@ const App = () => {
             path="/admin/payments"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
-          <Route path="/account/:publicId" element={<ProtectedRoute element={<UserProfile />} />} />
         </Routes>
       </div>
     </Router>
