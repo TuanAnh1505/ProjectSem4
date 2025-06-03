@@ -145,6 +145,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
         MaterialPageRoute(
           builder: (context) => BookingPassengerScreen(
             bookingId: booking['bookingId'],
+            bookingCode: booking['bookingCode'] ?? '',
             tour: tour!,
             selectedDate: selectedSchedule['startDate'] ?? '',
             itineraries: selectedItineraries,

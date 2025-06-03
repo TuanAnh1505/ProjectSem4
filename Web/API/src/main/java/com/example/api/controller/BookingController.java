@@ -23,6 +23,7 @@ public class BookingController {
             Booking booking = bookingService.createBooking(request);
             Map<String, Object> response = new HashMap<>();
             response.put("bookingId", booking.getBookingId());
+            response.put("bookingCode", booking.getBookingCode());
             response.put("message", "Booking successful");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {

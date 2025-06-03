@@ -206,7 +206,7 @@ public class UserService {
                 .build();
     }
 
-   @Scheduled(fixedRate = 36000000)
+    @Scheduled(fixedRate = 36000000)
     public void deleteExpiredTokens() {
         userTokenRepository.deleteAllByExpiryBefore(LocalDateTime.now());
         jdbcTemplate.execute("ALTER TABLE usertokens AUTO_INCREMENT = 1");
@@ -220,16 +220,16 @@ public class UserService {
     public User updateUserInfo(String publicId, String fullName, String phone, String address) {
         User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
-        
+
         user.setFullName(fullName);
         user.setPhone(phone);
         user.setAddress(address);
-        
+
         return userRepository.save(user);
     }
 
     public User findByPublicId(String publicId) {
         return userRepository.findByPublicId(publicId)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + publicId));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + publicId));
     }
 }

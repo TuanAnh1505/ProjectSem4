@@ -4,6 +4,7 @@ import '../payment/payment_screen.dart';
 
 class BookingConfirmationScreen extends StatefulWidget {
   final String bookingId;
+  final String bookingCode;
   final List<Map<String, dynamic>> passengers;
   final Map<String, dynamic> tourInfo;
   final Map<String, dynamic>? contactInfo;
@@ -12,6 +13,7 @@ class BookingConfirmationScreen extends StatefulWidget {
   const BookingConfirmationScreen({
     Key? key,
     required this.bookingId,
+    required this.bookingCode,
     required this.passengers,
     required this.tourInfo,
     this.contactInfo,
@@ -111,7 +113,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 'CHI TIẾT BOOKING',
                 Icons.confirmation_number,
                 [
-                  _buildInfoRow('Mã đặt chỗ:', widget.bookingId, Icons.qr_code, valueColor: Colors.red),
+                  _buildInfoRow('Mã đặt chỗ:', widget.bookingCode.isNotEmpty ? widget.bookingCode : widget.bookingId, Icons.qr_code, valueColor: Colors.red),
                   _buildInfoRow('Ngày đặt:', DateFormat('dd/MM/yyyy').format(DateTime.now()), Icons.calendar_today),
                   _buildInfoRow('Số khách:', widget.passengers.length.toString(), Icons.people),
                   _buildInfoRow('Tổng cộng:', currencyFormat.format(calculateTotal()),
@@ -367,7 +369,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          _buildInfoRow('Mã booking:', widget.bookingId, Icons.qr_code, valueColor: Colors.red),
+          _buildInfoRow('Mã booking:', widget.bookingCode.isNotEmpty ? widget.bookingCode : widget.bookingId, Icons.qr_code, valueColor: Colors.red),
           _buildInfoRow('Trạng thái:', 'Đã xác nhận',
               Icons.check_circle, valueColor: const Color(0xFF388e3c), isBold: true),
           if (widget.itineraries.isNotEmpty) ...[

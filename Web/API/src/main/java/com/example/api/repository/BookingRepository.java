@@ -58,4 +58,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     @Query("SELECT b FROM Booking b WHERE b.user.userid = :userid")
     List<Booking> findAllByUser_Userid(@Param("userid") Long userid);
+
+    boolean existsByBookingCode(String bookingCode);
 }

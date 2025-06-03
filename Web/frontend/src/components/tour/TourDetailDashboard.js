@@ -171,6 +171,7 @@ export default function TourDetailDashboard() {
         navigate('/booking-passenger', { 
           state: { 
             bookingId: res.data.bookingId,
+            bookingCode: res.data.bookingCode,
             tourInfo: tour,
             selectedDate: selectedSchedule?.startDate,
             itineraries: selectedSchedule?.itineraries || []

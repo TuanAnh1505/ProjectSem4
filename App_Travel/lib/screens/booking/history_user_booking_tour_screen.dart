@@ -167,6 +167,39 @@ class _HistoryUserBookingTourScreenState extends State<HistoryUserBookingTourScr
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
                                               ),
+                                              if (b['bookingCode'] != null && b['bookingCode'].toString().isNotEmpty)
+                                                Container(
+                                                  margin: EdgeInsets.only(left: 8),
+                                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.orange.shade100,
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    border: Border.all(color: Colors.orange, width: 1.2),
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.qr_code, color: Colors.orange[800], size: 16),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        b['bookingCode'],
+                                                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange[800], fontSize: 14),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )
+                                              else
+                                                Container(
+                                                  margin: EdgeInsets.only(left: 8),
+                                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade100,
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Text(
+                                                    b['bookingId']?.toString() ?? '',
+                                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700], fontSize: 13),
+                                                  ),
+                                                ),
                                               Icon(Icons.info_outline, color: Colors.grey[400], size: 18),
                                             ],
                                           ),
@@ -324,6 +357,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final paymentStatus = booking['paymentStatus'] ?? booking['payment_status'] ?? '';
     final bookingStatus = booking['status'] ?? '';
 
+    // Sửa logic hiển thị mã đặt chỗ
+    final code = (booking['bookingCode']?.toString() ?? '').trim();
+    final displayCode = code.isNotEmpty ? code : (booking['bookingId']?.toString() ?? '');
+
     return Scaffold(
       appBar: AppBar(title: const Text('Chi tiết booking')),
       body: loading
@@ -358,6 +395,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             style: TextStyle(fontSize: 15, color: Colors.grey[800]),
                           ),
                         ),
+
+                       _infoRow(Icons.qr_code, 'Mã đặt chỗ', displayCode, valueColor: Colors.deepOrange, fontWeight: FontWeight.bold, fontSize: 18),
                       Divider(height: 32, thickness: 1.2),
                       Text('Thông tin lịch trình', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange[800])),
                       const SizedBox(height: 8),
@@ -399,13 +438,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ),
                         ],
                       ),
+                     
                     ],
                   ),
                 ),
     );
   }
 
-  Widget _infoRow(IconData icon, String label, String value, {Color? valueColor}) {
+  Widget _infoRow(IconData icon, String label, String value, {Color? valueColor, FontWeight? fontWeight, double? fontSize}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -417,9 +457,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             child: Text(
               value,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: fontSize ?? 15,
                 color: valueColor ?? Colors.black87,
-                fontWeight: FontWeight.w500,
+                fontWeight: fontWeight ?? FontWeight.w500,
               ),
               overflow: TextOverflow.ellipsis,
             ),

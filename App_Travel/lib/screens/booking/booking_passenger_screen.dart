@@ -7,6 +7,7 @@ import 'booking_confirmation_screen.dart';
 
 class BookingPassengerScreen extends StatefulWidget {
   final int bookingId;
+  final String bookingCode;
   final Tour tour;
   final String selectedDate;
   final List<dynamic> itineraries;
@@ -14,6 +15,7 @@ class BookingPassengerScreen extends StatefulWidget {
   const BookingPassengerScreen({
     Key? key,
     required this.bookingId,
+    required this.bookingCode,
     required this.tour,
     required this.selectedDate,
     required this.itineraries,
@@ -289,6 +291,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
           MaterialPageRoute(
             builder: (context) => BookingConfirmationScreen(
               bookingId: widget.bookingId.toString(),
+              bookingCode: widget.bookingCode,
               passengers: convertedResponse,
               tourInfo: tourInfo,
               contactInfo: contactInfo,

@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -124,6 +126,13 @@ public class BookingService {
             booking.setTotalPrice(price);
             booking.setStatus(status);
 
+            // Generate unique booking code
+            String bookingCode;
+            do {
+                bookingCode = generateBookingCode();
+            } while (bookingRepository.existsByBookingCode(bookingCode));
+            booking.setBookingCode(bookingCode);
+
             Booking saved = bookingRepository.save(booking);
 
             // Update schedule status if needed
@@ -154,6 +163,7 @@ public class BookingService {
         List<Booking> bookings = bookingRepository.findAllWithUserAndTourAndStatus();
         return bookings.stream().map(b -> new BookingDTO(
                 b.getBookingId(),
+                b.getBookingCode(),
                 b.getUser() != null ? b.getUser().getFullName() : null,
                 b.getTour() != null ? b.getTour().getName() : null,
                 b.getBookingDate() != null ? b.getBookingDate().toString() : null,
@@ -249,6 +259,7 @@ public class BookingService {
         for (Booking b : bookings) {
             Map<String, Object> map = new java.util.HashMap<>();
             map.put("bookingId", b.getBookingId());
+            map.put("bookingCode", b.getBookingCode());
             map.put("tourName", b.getTour() != null ? b.getTour().getName() : null);
             // Lấy lịch trình (nếu có)
             String scheduleInfo = null;
@@ -272,5 +283,12 @@ public class BookingService {
             result.add(map);
         }
         return result;
+    }
+
+    // Generate booking code: BKyyyyMMddHHmmssSSS + 3 random digits
+    private String generateBookingCode() {
+        String timestamp = java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        int random = new Random().nextInt(900) + 100; // 3 random digits
+        return "BK" + timestamp + random;
     }
 }

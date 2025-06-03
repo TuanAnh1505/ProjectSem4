@@ -9,7 +9,8 @@ import { toast } from 'react-toastify';
 const BookingPassenger = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bookingId, tourInfo, selectedDate, itineraries = [] } = location.state || {};
+  console.log('BookingPassenger location.state:', location.state);
+  const { bookingId, bookingCode, tourInfo, selectedDate, itineraries = [] } = location.state || {};
 
   // State cho thông tin người đặt tour
   const [useLoggedInInfo, setUseLoggedInInfo] = useState(true);
@@ -331,7 +332,13 @@ const BookingPassenger = () => {
       
       toast.success('Đăng ký thông tin hành khách thành công!');
       navigate('/booking-confirmation', {
-        state: { bookingId, passengers: res.data, tourInfo: bookedTour, itineraries }
+        state: {
+          bookingId,
+          bookingCode: location.state.bookingCode,
+          passengers: res.data,
+          tourInfo: bookedTour,
+          itineraries
+        }
       });
     } catch (err) {
       const msg = err.response?.data?.message || 'Đã có lỗi xảy ra khi đăng ký thông tin hành khách';
@@ -578,7 +585,7 @@ const BookingPassenger = () => {
                 <h3>{bookedTour.name}</h3>
                 <p>Ngày khởi hành: {new Date(selectedDate).toLocaleDateString('vi-VN')}</p>
                 <p>Giá: {bookedTour.price.toLocaleString()}đ</p>
-                <p>Mã đặt tour: {bookingId}</p>
+                <p>Mã đặt tour: {bookingCode}</p>
               </div>
             </div>
             <div>
