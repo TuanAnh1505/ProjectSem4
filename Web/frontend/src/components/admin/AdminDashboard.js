@@ -151,6 +151,20 @@ const AdminDashboard = ({ children }) => {
                     <span className="menu-icon-circle"><FaMapMarkedAlt /></span>
                     <span className="menu-text-modern">Chuyến đi</span>
                   </li>
+                   <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/schedules"); }}
+                    className={location.pathname === "/admin/schedules" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaCalendarAlt /></span>
+                    <span className="menu-text-modern">Lịch trình</span>
+                  </li>
+                  <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/itineraries"); }}
+                    className={location.pathname === "/admin/itineraries" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaListAlt /></span>
+                    <span className="menu-text-modern">Chi tiết lịch trình</span>
+                  </li>
                   <li
                     onClick={e => { e.stopPropagation(); navigate("/admin/destination"); }}
                     className={location.pathname === "/admin/destination" ? "active" : ""}
@@ -164,20 +178,6 @@ const AdminDashboard = ({ children }) => {
                   >
                     <span className="menu-icon-circle"><FaCalendarAlt /></span>
                     <span className="menu-text-modern">Sự kiện</span>
-                  </li>
-                  <li
-                    onClick={e => { e.stopPropagation(); navigate("/admin/itineraries"); }}
-                    className={location.pathname === "/admin/itineraries" ? "active" : ""}
-                  >
-                    <span className="menu-icon-circle"><FaListAlt /></span>
-                    <span className="menu-text-modern">Chi tiết lịch trình</span>
-                  </li>
-                  <li
-                    onClick={e => { e.stopPropagation(); navigate("/admin/schedules"); }}
-                    className={location.pathname === "/admin/schedules" ? "active" : ""}
-                  >
-                    <span className="menu-icon-circle"><FaCalendarAlt /></span>
-                    <span className="menu-text-modern">Lịch trình</span>
                   </li>
                 </ul>
               )}

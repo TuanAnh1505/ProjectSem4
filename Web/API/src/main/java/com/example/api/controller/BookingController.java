@@ -82,5 +82,6 @@ public class BookingController {
             return ResponseEntity.status(404).body(e.getMessage());
         }
     }
+    
 
 }
