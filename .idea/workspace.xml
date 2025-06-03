@@ -5,8 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0507ab1b-b778-4b81-8916-03ac8c0e44f5" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/BookingRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/BookingRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/PaymentHistoryDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/PaymentHistoryDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/PaymentResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/PaymentResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/filter/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/filter/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/Payment.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/Payment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/PaymentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/PaymentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/auth/ResetPassword.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/auth/ResetPassword.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDetailDashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDetailDashboard.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,6 +69,7 @@
       <workItem from="1748580526996" duration="33000" />
       <workItem from="1748681140345" duration="917000" />
       <workItem from="1748770906228" duration="397000" />
+      <workItem from="1748914514712" duration="741000" />
     </task>
     <servers />
   </component>

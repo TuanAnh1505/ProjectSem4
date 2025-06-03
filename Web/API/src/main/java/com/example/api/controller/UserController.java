@@ -37,12 +37,11 @@ public class UserController {
         try {
             var user = userService.findByEmail(email);
             return ResponseEntity.ok(new com.example.api.dto.UserInfoDTO(
-                user.getPublicId(),
-                user.getFullName(),
-                user.getPhone(),
-                user.getEmail(),
-                user.getAddress()
-            ));
+                    user.getPublicId(),
+                    user.getFullName(),
+                    user.getPhone(),
+                    user.getEmail(),
+                    user.getAddress()));
         } catch (Exception e) {
             return ResponseEntity.status(404).body("User not found");
         }
@@ -52,19 +51,20 @@ public class UserController {
     public ResponseEntity<?> updateUser(
             @PathVariable String publicId,
             @RequestBody UserInfoDTO userInfoDTO,
-            @AuthenticationPrincipal com.example.api.model.User user) {
-        if (user == null) {
+            @AuthenticationPrincipal String email) {
+        if (email == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
-        // Nếu muốn chỉ cho phép user tự update, có thể kiểm tra:
-        // if (!userService.isOwnerOrAdmin(user, publicId)) return ResponseEntity.status(403).body("Forbidden");
+        var user = userService.findByEmail(email);
+        if (!user.getPublicId().equals(publicId)) {
+            return ResponseEntity.status(403).body("Forbidden");
+        }
         try {
             userService.updateUserInfo(
-                publicId,
-                userInfoDTO.getFullName(),
-                userInfoDTO.getPhone(),
-                userInfoDTO.getAddress()
-            );
+                    publicId,
+                    userInfoDTO.getFullName(),
+                    userInfoDTO.getPhone(),
+                    userInfoDTO.getAddress());
             return ResponseEntity.ok("Cập nhật thành công");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("Cập nhật thất bại: " + e.getMessage());

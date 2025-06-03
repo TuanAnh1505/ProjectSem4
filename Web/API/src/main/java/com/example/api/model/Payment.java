@@ -37,9 +37,6 @@ public class Payment {
     @ColumnDefault("current_timestamp")
     private LocalDateTime paymentDate;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
-
     @Column(name = "created_at", columnDefinition = "datetime default current_timestamp")
     @ColumnDefault("current_timestamp")
     private LocalDateTime createdAt;

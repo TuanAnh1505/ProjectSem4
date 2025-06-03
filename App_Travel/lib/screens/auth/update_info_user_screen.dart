@@ -406,7 +406,7 @@ class _UpdateInfoUserScreenState extends State<UpdateInfoUserScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3E0),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(

@@ -254,7 +254,6 @@ public class PaymentService {
         dto.setStatusName(payment.getStatus().getStatusName());
         dto.setTransactionId(payment.getTransactionId());
         dto.setPaymentDate(payment.getPaymentDate());
-        dto.setNotes(payment.getNotes());
         dto.setCreatedAt(payment.getCreatedAt());
         dto.setUpdatedAt(payment.getUpdatedAt());
         return dto;
@@ -266,7 +265,6 @@ public class PaymentService {
         dto.setPaymentId(history.getPayment().getPaymentId());
         dto.setStatusId(history.getStatus().getPaymentStatusId());
         dto.setStatusName(history.getStatus().getStatusName());
-        dto.setNotes(history.getNotes());
         dto.setCreatedAt(history.getCreatedAt());
         return dto;
     }

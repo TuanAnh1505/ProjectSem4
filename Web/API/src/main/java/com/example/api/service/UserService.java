@@ -180,10 +180,9 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void sendPasswordResetEmail(String email) {
+    public void sendPasswordResetEmail(String email, boolean isApp) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-
-        emailService.sendPasswordResetEmail(user.getEmail(), user.getPublicId());
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getPublicId(), isApp);
     }
 
     public void resetPassword(String publicId, String newPassword) {

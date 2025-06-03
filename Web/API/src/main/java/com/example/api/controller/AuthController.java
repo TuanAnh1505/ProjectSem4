@@ -72,9 +72,9 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<?> forgotPassword(@RequestParam String email, @RequestParam(defaultValue = "false") boolean isApp) {
         try {
-            userService.sendPasswordResetEmail(email);
+            userService.sendPasswordResetEmail(email, isApp);
             return ResponseEntity.ok("Email đặt lại mật khẩu đã được gửi.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
