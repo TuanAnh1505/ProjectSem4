@@ -112,7 +112,7 @@ public class TourScheduleService {
     @Transactional
     public void checkAndUpdateScheduleStatus(Integer bookingId) {
         logger.info("Checking schedule status for bookingId: {}", bookingId);
-        
+
         // Bước 1: Xác định lịch trình từ booking_id
         Integer scheduleId = bookingRepository.findScheduleIdByBookingId(bookingId);
         if (scheduleId == null) {
@@ -124,22 +124,23 @@ public class TourScheduleService {
         // Bước 2: Lấy danh sách booking đã xác nhận để kiểm tra
         List<Booking> confirmedBookings = bookingRepository.findConfirmedBookingsForSchedule(scheduleId);
         logger.info("Found {} confirmed bookings for schedule {}", confirmedBookings.size(), scheduleId);
-        
+
         // Log chi tiết từng booking
         for (Booking booking : confirmedBookings) {
-            logger.info("Booking {} - User: {} (ID: {})", 
-                booking.getBookingId(), 
-                booking.getUser().getFullName(),
-                booking.getUser().getUserid());
+            logger.info("Booking {} - User: {} (ID: {})",
+                    booking.getBookingId(),
+                    booking.getUser().getFullName(),
+                    booking.getUser().getUserid());
         }
 
         // Bước 3: Đếm số lượng hành khách đã thanh toán thành công
         long confirmedPassengers = bookingRepository.countConfirmedPassengersForSchedule(scheduleId);
         long bookingsWithoutBookerAsPassenger = bookingRepository.countBookingsWithoutBookerAsPassenger(scheduleId);
-        
-        // Tổng số người tham gia = số hành khách + số booking mà người đặt không phải là hành khách
+
+        // Tổng số người tham gia = số hành khách + số booking mà người đặt không phải
+        // là hành khách
         long totalParticipants = confirmedPassengers + bookingsWithoutBookerAsPassenger;
-        
+
         logger.info("Detailed count for schedule {}:", scheduleId);
         logger.info("- Number of confirmed passengers (unique): {}", confirmedPassengers);
         logger.info("- Number of bookings where booker is not a passenger: {}", bookingsWithoutBookerAsPassenger);
@@ -148,10 +149,10 @@ public class TourScheduleService {
         // Bước 4: Lấy thông tin tour và max_participants
         TourSchedule schedule = repository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch trình"));
-        
+
         Tour tour = tourRepository.findById(schedule.getTourId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour"));
-        
+
         logger.info("Tour details for schedule {}:", scheduleId);
         logger.info("- Tour ID: {}", tour.getTourId());
         logger.info("- Tour name: {}", tour.getName());
@@ -160,14 +161,14 @@ public class TourScheduleService {
 
         // Bước 5: So sánh và cập nhật trạng thái
         if (totalParticipants >= tour.getMaxParticipants()) {
-            logger.info("Updating schedule status to FULL. Total participants ({}) >= max participants ({})", 
-                totalParticipants, tour.getMaxParticipants());
+            logger.info("Updating schedule status to FULL. Total participants ({}) >= max participants ({})",
+                    totalParticipants, tour.getMaxParticipants());
             schedule.setStatus(TourSchedule.Status.full);
             repository.save(schedule);
             logger.info("Schedule status updated successfully to FULL");
         } else {
-            logger.info("Schedule remains available. Total participants ({}) < max participants ({})", 
-                totalParticipants, tour.getMaxParticipants());
+            logger.info("Schedule remains available. Total participants ({}) < max participants ({})",
+                    totalParticipants, tour.getMaxParticipants());
         }
     }
 
@@ -189,7 +190,8 @@ public class TourScheduleService {
 
         // Đếm số người đã tham gia
         long confirmedPassengers = bookingRepository.countConfirmedPassengersForSchedule(entity.getScheduleId());
-        long bookingsWithoutBookerAsPassenger = bookingRepository.countBookingsWithoutBookerAsPassenger(entity.getScheduleId());
+        long bookingsWithoutBookerAsPassenger = bookingRepository
+                .countBookingsWithoutBookerAsPassenger(entity.getScheduleId());
         int totalParticipants = (int) (confirmedPassengers + bookingsWithoutBookerAsPassenger);
 
         // Lấy maxParticipants từ tour

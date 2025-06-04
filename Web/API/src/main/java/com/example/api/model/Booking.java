@@ -1,6 +1,5 @@
 package com.example.api.model;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -45,7 +44,7 @@ public class Booking {
     @JoinColumn(name = "userid", nullable = false)
     private User user;
 
-    @Column(name = "booking_code", unique = true, length = 50)
+    @Column(name = "booking_code", unique = true, length = 20)
     private String bookingCode;
 
     @PrePersist
@@ -66,4 +65,3 @@ public class Booking {
         updatedAt = LocalDateTime.now();
     }
 }
-
