@@ -273,7 +273,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 16px;
 }
 .event-action-link {
   color: #007bff;

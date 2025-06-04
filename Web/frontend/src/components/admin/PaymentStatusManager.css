@@ -1,0 +1,191 @@
+.payment-table-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 24px 24px 12px 24px;
+  margin: 32px auto;
+  max-width: 1200px;
+}
+.payment-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.payment-table-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #222;
+}
+.payment-table-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.payment-table-search {
+  background: #f7f8fa;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 1rem;
+  outline: none;
+  min-width: 220px;
+}
+.payment-table-select {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.payment-table-filter-btn:hover {
+  background: #1253a2;
+}
+.payment-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 12px;
+}
+.payment-table th, .payment-table td {
+  padding: 14px 10px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 1rem;
+}
+.payment-table th {
+  background: #f7f8fa;
+  font-weight: 700;
+  color: #222;
+  text-transform: none;
+}
+.payment-table tbody tr:hover {
+  background: #f8fafc;
+}
+.payment-badge {
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 16px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  background: #e6f9ed;
+  color: #1abc60;
+  vertical-align: middle;
+}
+.payment-badge.pending {
+  background: #fffbe6;
+  color: #bfa700;
+}
+.payment-badge.completed {
+  background: #e6f9ed;
+  color: #1abc60;
+}
+.payment-table-btn {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.payment-table-btn:hover {
+  background: #1253a2;
+}
+.payment-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+.payment-table-pagination-btn {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  color: #222;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.payment-table-pagination-btn.active, .payment-table-pagination-btn:hover {
+  background: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+}
+.payment-table-info {
+  color: #666;
+  font-size: 0.98rem;
+  margin-top: 8px;
+}
+.payment-table-select option[value*="Pending"], .payment-table-select option[value="1"] {
+  background: #fffbe6;
+  color: #bfa700;
+}
+.payment-table-select option[value*="Processing"], .payment-table-select option[value="2"] {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+.payment-table-select option[value*="Completed"], .payment-table-select option[value="3"] {
+  background: #e6f9ed;
+  color: #1abc60;
+}
+.payment-table-select option[value*="Failed"], .payment-table-select option[value="4"] {
+  background: #fde8e8;
+  color: #e74c3c;
+}
+.payment-table-select option[value*="Refunded"], .payment-table-select option[value="5"] {
+  background: #f3f4f6;
+  color: #888;
+}
+.payment-table-select option[value*="Cancelled"], .payment-table-select option[value="6"] {
+  background: #e0e0e0;
+  color: #444;
+}
+.select-completed {
+  background: #e6f9ed !important;
+  color: #1abc60 !important;
+  font-weight: 600;
+}
+.select-pending {
+  background: #fffbe6 !important;
+  color: #bfa700 !important;
+  font-weight: 600;
+}
+.select-processing {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  font-weight: 600;
+}
+.select-failed {
+  background: #fde8e8 !important;
+  color: #e74c3c !important;
+  font-weight: 600;
+}
+.select-refunded {
+  background: #f3f4f6 !important;
+  color: #888 !important;
+  font-weight: 600;
+}
+.select-cancelled {
+  background: #e0e0e0 !important;
+  color: #444 !important;
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  .payment-table-container {
+    padding: 10px 2px 2px 2px;
+  }
+  .payment-table th, .payment-table td {
+    padding: 10px 4px;
+    font-size: 0.95rem;
+  }
+} 
