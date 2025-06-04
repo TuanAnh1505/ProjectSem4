@@ -345,45 +345,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Swiper Banner Section */}
-      <section className={styles.homeTopBannerSlider}>
-        <Swiper
-          modules={[Autoplay, Navigation, Pagination]}
-          className={`home-top-slider ${styles.homeTopSlider}`}
-          spaceBetween={30}
-          slidesPerView={1}
-          loop={true}
-          autoplay={{ delay: 4000, disableOnInteraction: false }}
-          navigation
-          pagination={{ clickable: true }}
-        >
-          <SwiperSlide>
-            <div className={styles.wrapThumb}>
-              <a rel="noopener noreferrer" href="/things-to-do/the-best-ways-to-explore-the-ancient-town-of-hoi-an">
-                <img src="//image.vietnam.travel/sites/default/files/styles/top_banner/public/2025-04/169-B%E1%BA%A1c%20Li%C3%AAu-ankhuong993%40gmail.com-nang%20luong%20sach.jpg?itok=YhpGY_qD" className="thumb thumb-custom" alt="" />
-                <h2 className={`${styles.title} ${styles.textCenter} ${styles.en}`}></h2>
-              </a>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className={styles.wrapThumb}>
-              <a rel="noopener noreferrer" href="/things-to-do/hoi-ans-top-5-most-instagrammable-spots">
-                <img src="//image.vietnam.travel/sites/default/files/styles/top_banner/public/2025-04/275-L%C3%A0o%20Cai-lechitrung89%40gmail.com-xuan%20ve%20tren%20doi%20che%20o%20long.jpg?itok=zN2QYYAM" className="thumb thumb-custom" alt="" />
-                <h2 className={`${styles.title} ${styles.textCenter} ${styles.en}`}></h2>
-              </a>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className={styles.wrapThumb}>
-              <a rel="noopener noreferrer" href="/things-to-do/the-best-ways-to-explore-the-ancient-town-of-hoi-an">
-                <img src="//image.vietnam.travel/sites/default/files/styles/top_banner/public/2025-04/453-B%C3%ACnh%20Thu%E1%BA%ADn-leminhquoc.pt%40gmail.com-mua%20reu%20co%20thach.jpg?itok=dA-Rm72e" className="thumb thumb-custom" alt="" />
-                <h2 className={`${styles.title} ${styles.textCenter} ${styles.en}`}></h2>
-              </a>
-            </div>
-          </SwiperSlide>
-        </Swiper>
-      </section>
     </div>
   );
 };
