@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaEye } from 'react-icons/fa';
+import { FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 import './BookingIndex.css';
 
-const BookingTable = ({ bookings }) => (
+const BookingTable = ({ bookings, handleDeleteClick }) => (
   <div className="booking-table-wrapper">
     <table className="booking-table">
       <thead>
@@ -29,10 +29,31 @@ const BookingTable = ({ bookings }) => (
               <span className={`status-badge status-${(b.statusName || '').toLowerCase()}`}>{b.statusName || 'N/A'}</span>
             </td>
             <td>{b.totalPrice ? parseFloat(b.totalPrice).toLocaleString() + 'đ' : 'N/A'}</td>
-            <td>
-              <Link className="detail-link" to={`/admin/booking/detail/${b.bookingId}`} title="Xem chi tiết">
-                <FaEye size={20} />
+            <td className="booking-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+              <Link
+                to={`/admin/booking/detail/${b.bookingId}`}
+                className="action-link"
+                title="Xem chi tiết"
+                style={{ color: '#4a90e2', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <FaEye />
               </Link>
+              <Link
+                to={`/admin/booking/edit/${b.bookingId}`}
+                className="action-link"
+                title="Chỉnh sửa"
+                style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <FaEdit />
+              </Link>
+              <button
+                onClick={() => handleDeleteClick(b.bookingId, b.customerName)}
+                className="delete-button"
+                title="Xóa"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <FaTrash />
+              </button>
             </td>
           </tr>
         ))}
@@ -80,6 +101,15 @@ const BookingIndex = () => {
     fetchBookings();
   }, [navigate]);
 
+  const handleDeleteClick = (bookingId, customerName) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa booking của ${customerName || 'người dùng'}?`)) {
+      // TODO: Thêm logic xóa booking ở đây (gọi API, reload danh sách...)
+      // Ví dụ:
+      // await axios.delete(`/api/bookings/${bookingId}`)
+      // Sau đó load lại danh sách booking nếu cần
+    }
+  };
+
   return (
     <div className="booking-index-container">
       <h2 className="booking-title">Quản lý Đơn Đặt Tour</h2>
@@ -90,7 +120,7 @@ const BookingIndex = () => {
       ) : bookings.length === 0 ? (
         <p className="booking-empty">No bookings found</p>
       ) : (
-        <BookingTable bookings={bookings} />
+        <BookingTable bookings={bookings} handleDeleteClick={handleDeleteClick} />
       )}
     </div>
   );

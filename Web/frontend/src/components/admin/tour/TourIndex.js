@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { FaPlus, FaTrash, FaExclamationTriangle, FaSearch, FaEdit } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaExclamationTriangle, FaEye, FaEdit } from 'react-icons/fa';
 import '../../styles/tour/TourIndex.css';
 
 const MAX_RETRIES = 3;
@@ -69,7 +69,7 @@ export default function TourIndex() {
     }
     if (status.statusName === 'Cancelled') {
       return (
-        <span className="status-label status-cancelled">
+        <span className="status-label status-cancelled-tour">
           <span className="status-dot status-dot-cancelled"></span> Cancelled
         </span>
       );
@@ -148,9 +148,9 @@ export default function TourIndex() {
                 <td>{tour.price ? tour.price.toLocaleString() + ' VND' : 'N/A'}</td>
                 <td>{getStatusLabel(tour.statusId)}</td>
                 <td>
-                  <div className="tour-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+                  <div className="tour-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                     <Link to={`/admin/tour/detail/${tour.tourId}`} className="action-link" title="Xem chi tiết" style={{ color: '#4a90e2', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <FaSearch />
+                      <FaEye />
                     </Link>
                     <Link to={`/admin/tour/edit/${tour.tourId}`} className="action-link" title="Chỉnh sửa" style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FaEdit />

@@ -128,23 +128,28 @@ const ScheduleIndex = () => {
                                 <td>{new Date(schedule.endDate).toLocaleDateString()}</td>
                                 <td>{schedule.status}</td>
                                 <td>
-                                    <div className="schedule-actions">
+                                    <div className="schedule-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                                         <Link 
                                             to={`/admin/schedules/detail/${schedule.scheduleId}`}
                                             className="action-link"
-                                        >🔍
-                                            
+                                            title="Xem chi tiết"
+                                            style={{ color: '#4a90e2', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                        >
+                                            <FaEye />
                                         </Link>
                                         <Link 
                                             to={`/admin/schedules/edit/${schedule.scheduleId}`}
                                             className="action-link"
+                                            title="Chỉnh sửa"
+                                            style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
-                                           ✏️
+                                            <FaEdit />
                                         </Link>
                                         <button
                                             onClick={() => handleDeleteClick(schedule.scheduleId, tours[schedule.tourId])}
                                             className="delete-button"
-                                            
+                                            title="Xóa"
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
                                             <FaTrash />
                                         </button>
