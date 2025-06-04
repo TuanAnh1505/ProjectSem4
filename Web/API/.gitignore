@@ -4,7 +4,9 @@ uploads/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-application.properties
+# Ignore Spring Boot application properties
+**/application.properties
+
 ### STS ###
 .apt_generated
 .classpath
@@ -35,3 +37,6 @@ build/
 
 ### Test Files ###
 ApiApplicationTests.java
+
+
+**/application.properties

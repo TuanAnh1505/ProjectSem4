@@ -21,6 +21,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   final BookingService _bookingService = BookingService();
   Tour? tour;
   List<dynamic> schedules = [];
+  List<dynamic> relatedTours = [];
   Map<int, List<dynamic>> itineraries = {};
   int? selectedScheduleId;
   bool loading = true;
@@ -64,6 +65,15 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     try {
       tour = await _tourService.fetchTourDetail(widget.tourId);
       schedules = await _tourService.fetchSchedules(widget.tourId);
+      // Fetch related tours
+      relatedTours = await _tourService.fetchRelatedTours(
+        count: 3,
+        excludeTourId: widget.tourId,
+      );
+      // Fetch itineraries for each schedule
+      for (var schedule in schedules) {
+        await fetchItineraries(schedule['scheduleId']);
+      }
     } catch (e) {
       error = e.toString();
     } finally {
@@ -72,69 +82,82 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   }
 
   Future<void> fetchItineraries(int scheduleId) async {
-    itineraries[scheduleId] = await _tourService.fetchItineraries(scheduleId);
-    setState(() {});
+    try {
+      final itinerariesList = await _tourService.fetchItineraries(scheduleId);
+      setState(() {
+        itineraries[scheduleId] = itinerariesList;
+      });
+    } catch (e) {
+      // ignore error for individual itinerary
+    }
   }
 
   void onSelectSchedule(int scheduleId) async {
+    final selected = schedules.firstWhere(
+      (sch) => sch['scheduleId'] == scheduleId,
+      orElse: () => {'status': 'unknown'},
+    );
+    if (selected['status'] == 'full') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lịch trình này đã hết chỗ!')),
+      );
+      return;
+    }
     setState(() { selectedScheduleId = scheduleId; });
     await fetchItineraries(scheduleId);
   }
 
   Future<void> handleBooking() async {
-    if (selectedScheduleId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn lịch trình')),
-      );
-      return;
-    }
-
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng đăng nhập để đặt tour')),
       );
       return;
     }
-
+    if (selectedScheduleId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng chọn lịch trình muốn đặt!')),
+      );
+      return;
+    }
     setState(() {
       bookingLoading = true;
       error = '';
     });
-
     try {
       final booking = await _bookingService.createBooking(
         userId: userId!,
         tourId: widget.tourId,
         scheduleId: selectedScheduleId!,
+        discountCode: discountCode.trim().isEmpty ? null : discountCode.trim(),
       );
-
       if (!mounted) return;
-
-      // Tìm lịch trình đã chọn
+      // Find selected schedule
       final selectedSchedule = schedules.firstWhere(
         (schedule) => schedule['scheduleId'] == selectedScheduleId,
         orElse: () => {'startDate': 'Unknown date'},
       );
-
-      // Lấy danh sách hành trình của lịch trình đã chọn
+      // Get itineraries for selected schedule
       final selectedItineraries = itineraries[selectedScheduleId] ?? [];
-
       // Navigate to BookingPassengerScreen
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => BookingPassengerScreen(
             bookingId: booking['bookingId'],
+            bookingCode: booking['bookingCode'] ?? '',
             tour: tour!,
             selectedDate: selectedSchedule['startDate'] ?? '',
             itineraries: selectedItineraries,
           ),
         ),
       );
+      // Refresh data after booking
+      await fetchAll();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+          SnackBar(content: Text('Có lỗi xảy ra khi đặt tour: ${e.toString()}')),
         );
       }
     } finally {
@@ -265,7 +288,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                         SizedBox(width: 18),
                         Icon(Icons.group, size: 18, color: Colors.blue[700]),
                         SizedBox(width: 4),
-                        Text('Tối đa ${tour?.maxParticipants ?? ''} người', style: TextStyle(fontSize: 14)),
+                        Text('Tối đa ${tour?.maxParticipants ?? 0} người', style: TextStyle(fontSize: 14)),
                       ],
                     ),
                   ],
@@ -293,54 +316,66 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                     else
                       Column(
                         children: schedules.map((sch) {
+                          String status = sch['status'] ?? 'unknown';
+                          int currentParticipants = sch['currentParticipants'] ?? 0;
+                          int maxParticipants = tour?.maxParticipants ?? 0;
+                          int slotsLeft = maxParticipants - currentParticipants;
+                          String badgeText = '';
+                          Color badgeColor = Colors.blue;
+                          if (status == 'full' || slotsLeft <= 0) {
+                            badgeText = 'Đã đủ người';
+                            badgeColor = Colors.red;
+                          } else if (status == 'closed') {
+                            badgeText = 'Đã đóng';
+                            badgeColor = Colors.grey;
+                          } else {
+                            badgeText = 'Còn $slotsLeft chỗ';
+                            badgeColor = Colors.blue;
+                          }
                           bool isSelected = selectedScheduleId == sch['scheduleId'];
-                          return Card(
-                            color: isSelected ? Colors.blue[50] : Colors.grey[100],
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            child: ListTile(
-                              onTap: () {
-                                onSelectSchedule(sch['scheduleId']);
-                              },
-                              leading: Radio<int>(
-                                value: sch['scheduleId'],
-                                groupValue: selectedScheduleId,
-                                onChanged: (val) {
-                                  if (val != null) onSelectSchedule(val);
-                                },
-                              ),
-                              title: Text(
-                                sch['startDate'] != null && sch['endDate'] != null
-                                  ? '${DateFormat('dd/MM/yyyy').format(DateTime.parse(sch['startDate']))} - ${DateFormat('dd/MM/yyyy').format(DateTime.parse(sch['endDate']))}'
-                                  : 'Schedule: ${sch['startDate']} - ${sch['endDate']}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Row(
-                                children: [
-                                  if (sch['status'] == 'pending')
+                          return GestureDetector(
+                            onTap: (status == 'full' || status == 'closed') ? null : () => onSelectSchedule(sch['scheduleId']),
+                            child: Card(
+                              color: isSelected ? Colors.blue[50] : (status == 'full' ? Colors.red[50] : status == 'closed' ? Colors.grey[200] : Colors.grey[100]),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              margin: EdgeInsets.only(bottom: 10),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      sch['startDate'] != null && sch['endDate'] != null
+                                          ? '${DateFormat('dd/MM/yyyy').format(DateTime.parse(sch['startDate']))} - ${DateFormat('dd/MM/yyyy').format(DateTime.parse(sch['endDate']))}'
+                                          : 'Schedule: ${sch['startDate']} - ${sch['endDate']}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        color: status == 'full'
+                                            ? Colors.red[900]
+                                            : status == 'closed'
+                                                ? Colors.grey[700]
+                                                : Colors.black,
+                                      ),
+                                    ),
                                     Container(
-                                      margin: EdgeInsets.only(right: 8),
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                       decoration: BoxDecoration(
-                                        color: Colors.orange[100],
+                                        color: badgeColor,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: Text('Đang chờ', style: TextStyle(color: Colors.orange[900], fontSize: 12)),
-                                    ),
-                                  if (sch['status'] == 'available')
-                                    Container(
-                                      margin: EdgeInsets.only(right: 8),
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green[100],
-                                        borderRadius: BorderRadius.circular(8),
+                                      child: Text(
+                                        badgeText,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
                                       ),
-                                      child: Text('Còn chỗ', style: TextStyle(color: Colors.green[900], fontSize: 12)),
                                     ),
-                                  if (sch['availableSlots'] != null)
-                                    Text('Còn ${sch['availableSlots']} chỗ trống', style: TextStyle(fontSize: 12, color: Colors.grey[700])),
-                                ],
+                                  ],
+                                ),
                               ),
-                              trailing: Icon(Icons.chevron_right),
                             ),
                           );
                         }).toList(),
@@ -435,6 +470,93 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                   ],
                 ),
               ),
+              if (relatedTours.isNotEmpty)
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  padding: EdgeInsets.all(16),
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Các tour liên quan',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[900],
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: relatedTours.map((tour) => Container(
+                            width: 260,
+                            margin: EdgeInsets.only(right: 16),
+                            child: Card(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (tour['imageUrl'] != null)
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+                                      child: Image.network(
+                                        'http://10.0.2.2:8080${tour['imageUrl']}',
+                                        height: 120,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          tour['name'] ?? '',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'Giá từ ${formatPrice(tour['price'])}đ',
+                                          style: TextStyle(
+                                            color: Colors.green[700],
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => TourDetailScreen(
+                                                  tourId: tour['tourId'],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Text('Xem chi tiết'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.orange,
+                                            foregroundColor: Colors.white,  
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),

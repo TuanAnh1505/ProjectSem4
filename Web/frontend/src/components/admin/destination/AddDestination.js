@@ -210,133 +210,143 @@ const AddDestination = () => {
     };
 
     return (
-        <div className="add-destination-container">
-            <h2 className="form-title">Add New Destination</h2>
-            {error && <div className="error-message">{error}</div>}
-            <form onSubmit={handleSubmit}>
-                <div className="destination-form-row">
-                    <div className="destination-form-group">
-                        <label htmlFor="name" className="form-label">Name</label>
-                        <input
-                            id="name"
-                            type="text"
-                            className={`destination-form-input ${fieldErrors.name ? 'error' : ''}`}
-                            name="name"
-                            value={destination.name}
-                            onChange={handleChange}
-                            required
-                        />
-                        {fieldErrors.name && <div className="error-message">{fieldErrors.name}</div>}
-                    </div>
-                    <div className="destination-form-group">
-                        <label htmlFor="category" className="form-label">Category</label>
-                        <input
-                            id="category"
-                            type="text"
-                            className={`destination-form-input ${fieldErrors.category ? 'error' : ''}`}
-                            name="category"
-                            value={destination.category}
-                            onChange={handleChange}
-                            required
-                        />
-                        {fieldErrors.category && <div className="error-message">{fieldErrors.category}</div>}
-                    </div>
-                </div>
-
-                <div className="destination-form-row">
-                    <div className="destination-form-group">
-                        <label htmlFor="location" className="form-label">Location</label>
-                        <input
-                            id="location"
-                            type="text"
-                            className={`destination-form-input ${fieldErrors.location ? 'error' : ''}`}
-                            name="location"
-                            value={destination.location}
-                            onChange={handleChange}
-                            required
-                        />
-                        {fieldErrors.location && <div className="error-message">{fieldErrors.location}</div>}
-                    </div>
-                    <div className="destination-form-group">
-                        <label htmlFor="rating" className="form-label">Rating</label>
-                        <StarRating 
-                            rating={Number(destination.rating)} 
-                            onRatingChange={handleRatingChange}
-                        />
-                        {fieldErrors.rating && <div className="error-message">{fieldErrors.rating}</div>}
-                    </div>
-                </div>
-
-                <div className="form-group full-width">
-                    <label htmlFor="description" className="form-label">Description</label>
-                    <textarea
-                        id="description"
-                        className={`destination-form-input ${fieldErrors.description ? 'error' : ''}`}
-                        name="description"
-                        value={destination.description}
-                        onChange={handleChange}
-                        required
-                        style={{
-                            whiteSpace: 'pre-wrap',
-                            wordWrap: 'break-word'
-                        }}
-                    />
-                    {fieldErrors.description && <div className="error-message">{fieldErrors.description}</div>}
-                </div>
-
-                
-
-                <div className="form-group">
-                    <div className="file-input-container">
-                        <label htmlFor="files" className="file-input-label">
-                            Choose Images/Videos
-                        </label>
-                        <input
-                            id="files"
-                            type="file"
-                            className="file-input"
-                            onChange={handleFileChange}
-                            multiple
-                            accept="image/jpeg,image/jpg,image/png,video/mp4,video/quicktime"
-                        />
-                    </div>
-                    {fieldErrors.filePaths && <div className="error-message">{fieldErrors.filePaths}</div>}
-                </div>
-                {previewUrls.length > 0 && (
-                    <div className="preview-container-add">
-                        {previewUrls.map((url, index) => (
-                            <div key={index} className="preview-item">
-                                <button 
-                                    type="button"
-                                    className="delete-preview"
-                                    onClick={() => handleDeleteFile(index)}
-                                >
-                                    ×
-                                </button>
-                                {files[index].type.startsWith('image/') ? (
-                                    <img src={url} alt={`Preview ${index + 1}`} />
-                                ) : (
-                                    <video src={url} controls />
-                                )}
+        <div className="add-destination-wrapper">
+            <div className="add-destination-card">
+                <h2 className="section-title">Add New Destination</h2>
+                {error && <div className="error-message">{error}</div>}
+                <form onSubmit={handleSubmit}>
+                    <div className="form-section">
+                        <div className="section-subtitle">Basic Information</div>
+                        <div className="form-row">
+                            <div>
+                                <label htmlFor="name" className="form-label">Name</label>
+                                <input
+                                    id="name"
+                                    type="text"
+                                    className={`form-input${fieldErrors.name ? ' error' : ''}`}
+                                    name="name"
+                                    value={destination.name}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Enter destination name"
+                                />
+                                {fieldErrors.name && <div className="error-message">{fieldErrors.name}</div>}
                             </div>
-                        ))}
+                            <div>
+                                <label htmlFor="category" className="form-label">Category</label>
+                                <input
+                                    id="category"
+                                    type="text"
+                                    className={`form-input${fieldErrors.category ? ' error' : ''}`}
+                                    name="category"
+                                    value={destination.category}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Enter category"
+                                />
+                                {fieldErrors.category && <div className="error-message">{fieldErrors.category}</div>}
+                            </div>
+                        </div>
+                        <div className="form-row">
+                            <div>
+                                <label htmlFor="location" className="form-label">Location</label>
+                                <input
+                                    id="location"
+                                    type="text"
+                                    className={`form-input${fieldErrors.location ? ' error' : ''}`}
+                                    name="location"
+                                    value={destination.location}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Enter location"
+                                />
+                                {fieldErrors.location && <div className="error-message">{fieldErrors.location}</div>}
+                            </div>
+                            <div>
+                                <label htmlFor="rating" className="form-label">Rating</label>
+                                <StarRating 
+                                    rating={Number(destination.rating)} 
+                                    onRatingChange={handleRatingChange}
+                                />
+                                {fieldErrors.rating && <div className="error-message">{fieldErrors.rating}</div>}
+                            </div>
+                        </div>
                     </div>
-                )}
-                <button
-                    type="submit"
-                    className="submit-button"
-                    disabled={isLoading}
-                >
-                    {isLoading ? (
-                        <>
-                            Adding...
-                            <span className="loading-spinner"></span>
-                        </>
-                    ) : (
-                        'Add Destination'
-                    )}
-                </button>
-            </form>
+                    <div className="form-section">
+                        <div className="section-subtitle">Destination Details</div>
+                        <label htmlFor="description" className="form-label">Description</label>
+                        <textarea
+                            id="description"
+                            className={`description-form-input${fieldErrors.description ? ' error' : ''}`}
+                            name="description"
+                            value={destination.description}
+                            onChange={handleChange}
+                            required
+                            placeholder="Enter destination description"
+                            style={{whiteSpace: 'pre-wrap', wordWrap: 'break-word'}}
+                        />
+                        {fieldErrors.description && <div className="error-message">{fieldErrors.description}</div>}
+                    </div>
+                    <div className="form-section file-upload-section">
+                        <div className="section-subtitle">Destination Image/Video</div>
+                        <div
+                            className="upload-box"
+                            onClick={() => document.getElementById('files').click()}
+                        >
+                            <div className="upload-icon">
+                                {/* SVG camera icon */}
+                                <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-2.586-2.586A2 2 0 0 0 11.172 4H8a2 2 0 0 0-2 2v2m0 0H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-1M6 6v2m0 0h12" /></svg>
+                            </div>
+                            <div className="upload-text">Click to upload tour image</div>
+                            <div className="upload-note">PNG, JPG up to 5MB</div>
+                            <input
+                                id="files"
+                                type="file"
+                                className="form-input"
+                                onChange={handleFileChange}
+                                multiple
+                                accept="image/jpeg,image/jpg,image/png,video/mp4,video/quicktime"
+                                style={{ display: 'none' }}
+                            />
+                        </div>
+                        {fieldErrors.filePaths && <div className="error-message">{fieldErrors.filePaths}</div>}
+                        {previewUrls.length > 0 && (
+                            <div className="preview-list">
+                                {previewUrls.map((url, index) => (
+                                    <div key={index} style={{position: 'relative'}}>
+                                        <button 
+                                            type="button"
+                                            className="delete-preview"
+                                            onClick={() => handleDeleteFile(index)}
+                                        >
+                                            ×
+                                        </button>
+                                        {files[index].type.startsWith('image/') ? (
+                                            <img src={url} alt={`Preview ${index + 1}`} />
+                                        ) : (
+                                            <video src={url} controls />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        type="submit"
+                        className="submit-btn"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <>
+                                Adding...
+                                <span className="loading-spinner"></span>
+                            </>
+                        ) : (
+                            'Add Destination'
+                        )}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };

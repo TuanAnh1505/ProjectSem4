@@ -201,10 +201,13 @@
     animation: slideIn 0.3s ease;
   }
   
-  .tour-alert-icon {
+  .tour-alert-icon-wrapper {
     font-size: 3rem;
     margin-bottom: 1rem;
     color: #e74c3c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   .tour-alert-title {
@@ -265,5 +268,55 @@
       transform: translateY(0);
       opacity: 1;
     }
+  }
+  
+  .tour-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  
+  .tour-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #222;
+    margin: 0;
+  }
+  
+  .status-label {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.3em 1em;
+    border-radius: 16px;
+    gap: 0.5em;
+  }
+  
+  .status-published {
+    background: #e6f9ed;
+    color: #1abc60;
+  }
+  
+  .status-cancelled {
+    background: #fde8e8;
+    color: #e74c3c;
+  }
+  
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5em;
+  }
+  
+  .status-dot-published {
+    background: #1abc60;
+  }
+  
+  .status-dot-cancelled {
+    background: #e74c3c;
   }
   

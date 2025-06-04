@@ -22,10 +22,10 @@ const ResetPassword = () => {
     }
 
     
-    const userId = searchParams.get("userId");
+    const publicId = searchParams.get("publicId");
     try {
       const response = await axios.post("http://localhost:8080/api/auth/reset-password", {
-        userId,
+        publicId,
         newPassword,
       });
       setMessage(response.data || "Mật khẩu đã được đặt lại thành công.");

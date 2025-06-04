@@ -27,10 +27,6 @@ public class Payment {
     private BigDecimal amount;
 
     @ManyToOne
-    @JoinColumn(name = "payment_method_id", nullable = false)
-    private PaymentMethod paymentMethod;
-
-    @ManyToOne
     @JoinColumn(name = "status_id", nullable = false)
     private PaymentStatus status;
 
@@ -41,9 +37,6 @@ public class Payment {
     @ColumnDefault("current_timestamp")
     private LocalDateTime paymentDate;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
-
     @Column(name = "created_at", columnDefinition = "datetime default current_timestamp")
     @ColumnDefault("current_timestamp")
     private LocalDateTime createdAt;
@@ -51,6 +44,10 @@ public class Payment {
     @Column(name = "updated_at", columnDefinition = "datetime default current_timestamp on update current_timestamp")
     @ColumnDefault("current_timestamp")
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "payment_method_id", nullable = false)
+    private PaymentMethod paymentMethod;
 
     @PrePersist
     protected void onCreate() {

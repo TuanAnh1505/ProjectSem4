@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -91,31 +92,17 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Logo
-              // const SizedBox(height: 16),
-              // Container(
-              //   width: 80,
-              //   height: 80,
-              //   decoration: BoxDecoration(
-              //     color: Colors.white,
-              //     borderRadius: BorderRadius.circular(24),
-              //     boxShadow: [
-              //       BoxShadow(
-              //         color: Colors.black12,
-              //         blurRadius: 8,
-              //         offset: Offset(0, 2),
-              //       ),
-              //     ],
-              //   ),
-              //   child: Center(
-              //     child: Image.asset(
-              //       'assets/logo.png', // Đổi thành logo của bạn
-              //       width: 60,
-              //       height: 60,
-              //       fit: BoxFit.contain,
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(height: 24),
+              SizedBox(
+                width: 250,
+                height: 250,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain,
+                  color: Colors.orange,
+                  colorBlendMode: BlendMode.srcIn,
+                ),
+              ),
+              // const SizedBox(height: 28),
               // Card chứa form
               Card(
                 elevation: 8,

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaPlaneDeparture, FaEnvelope, FaLock, FaGoogle, FaFacebook } from 'react-icons/fa';
 import axios from "axios";
+import { toast } from "react-toastify";
 import "../styles/user/Login.css";
 
 const Login = () => {
@@ -46,7 +47,9 @@ const Login = () => {
         navigate("/");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Có lỗi xảy ra!");
+      const errorMsg = err.response?.data?.message || "Có lỗi xảy ra!";
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 

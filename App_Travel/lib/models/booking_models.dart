@@ -24,6 +24,7 @@ class ContactInfo {
   final String gender;
   final String birthDate;
 
+
   ContactInfo({
     required this.fullName,
     required this.phoneNumber,

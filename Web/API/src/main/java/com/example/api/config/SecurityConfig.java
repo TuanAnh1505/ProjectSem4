@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/uploads/**").permitAll()
+                        .requestMatchers("/favicon.ico", "/manifest.json").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tour-status").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated())

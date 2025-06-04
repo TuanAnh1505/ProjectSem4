@@ -2,10 +2,12 @@ package com.example.api.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class RegisterRequest {
     @NotBlank(message = "Họ và tên không được để trống")
+    @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Họ và tên chỉ được chứa chữ cái và khoảng trắng")
     private String fullName;
 
     @NotBlank(message = "Email không được để trống")
@@ -13,7 +15,9 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
+    @Pattern(regexp = "^(?=.*[A-Z!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?])[^\\s]{8,}$", 
+             message = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 ký tự in hoa hoặc ký tự đặc biệt (!@#$%^&*()_+-=[]{};':\"\\|,.<>/?) và không được chứa khoảng trắng")
     private String password;
 
     private String phone;

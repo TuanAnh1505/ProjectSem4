@@ -21,6 +21,7 @@ class TourService {
       },
     );
 
+
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((json) => Tour.fromJson(json)).toList();
@@ -79,6 +80,28 @@ class TourService {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to load itineraries');
+    }
+  }
+
+  Future<List<dynamic>> fetchRelatedTours({
+    required int count,
+    required int excludeTourId,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    
+    final response = await http.get(
+      Uri.parse('$baseUrl/random?count=$count&excludeTourId=$excludeTourId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load related tours');
     }
   }
 }

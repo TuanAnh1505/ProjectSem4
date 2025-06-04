@@ -5,6 +5,8 @@ import com.example.api.model.TourGuide;
 import com.example.api.model.User;
 import com.example.api.repository.TourGuideRepository;
 import com.example.api.repository.UserRepository;
+import com.example.api.repository.RoleRepository;
+import com.example.api.model.Role;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,6 +26,9 @@ public class TourGuideService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     public TourGuideDTO createTourGuide(TourGuideDTO tourGuideDTO) {
         // Check if current user has ADMIN role
@@ -56,6 +61,14 @@ public class TourGuideService {
         tourGuide.setIsAvailable(tourGuideDTO.getIsAvailable() != null ? tourGuideDTO.getIsAvailable() : true);
 
         TourGuide savedTourGuide = tourGuideRepository.save(tourGuide);
+
+        // Gán role hướng dẫn viên nếu chưa có
+        Role guideRole = roleRepository.findByRoleName("ROLE_TOUR_GUIDE");
+        if (guideRole != null && !user.getRoles().contains(guideRole)) {
+            user.getRoles().add(guideRole);
+            userRepository.save(user);
+        }
+
         return convertToDTO(savedTourGuide);
     }
 
@@ -66,7 +79,8 @@ public class TourGuideService {
     }
 
     public List<TourGuideDTO> getAllTourGuides() {
-        return tourGuideRepository.findAll().stream()
+        // Chỉ lấy các hướng dẫn viên có role là ROLE_TOUR_GUIDE
+        return tourGuideRepository.findAllTourGuidesWithRole().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -151,6 +165,24 @@ public class TourGuideService {
                 .collect(Collectors.toList());
     }
 
+    public List<TourGuideDTO> findByIsAvailable(Boolean isAvailable) {
+        return tourGuideRepository.findByIsAvailable(isAvailable).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<TourGuideDTO> searchTourGuides(Double minRating, Integer minExperience, String specialization, String language, Boolean isAvailable) {
+        List<TourGuide> tourGuides = tourGuideRepository.findAll();
+        return tourGuides.stream()
+                .filter(tg -> (minRating == null || tg.getRating() >= minRating))
+                .filter(tg -> (minExperience == null || tg.getExperienceYears() >= minExperience))
+                .filter(tg -> (specialization == null || tg.getSpecialization().equals(specialization)))
+                .filter(tg -> (language == null || tg.getLanguages().contains(language)))
+                .filter(tg -> (isAvailable == null || tg.getIsAvailable() == isAvailable))
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     private TourGuideDTO convertToDTO(TourGuide tourGuide) {
         TourGuideDTO dto = new TourGuideDTO();
         dto.setGuideId(tourGuide.getGuideId());
@@ -161,6 +193,10 @@ public class TourGuideService {
         dto.setRating(tourGuide.getRating());
         dto.setIsAvailable(tourGuide.getIsAvailable());
         dto.setCreatedAt(tourGuide.getCreatedAt());
+        if (tourGuide.getUser() != null) {
+            dto.setUserFullName(tourGuide.getUser().getFullName());
+            dto.setUserEmail(tourGuide.getUser().getEmail());
+        }
         return dto;
     }
 }

@@ -3,9 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/tour_models.dart';
 import '../../services/booking_passenger_service.dart';
+import 'booking_confirmation_screen.dart';
 
 class BookingPassengerScreen extends StatefulWidget {
   final int bookingId;
+  final String bookingCode;
   final Tour tour;
   final String selectedDate;
   final List<dynamic> itineraries;
@@ -13,6 +15,7 @@ class BookingPassengerScreen extends StatefulWidget {
   const BookingPassengerScreen({
     Key? key,
     required this.bookingId,
+    required this.bookingCode,
     required this.tour,
     required this.selectedDate,
     required this.itineraries,
@@ -27,6 +30,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
   final _bookingPassengerService = BookingPassengerService();
   bool _useLoggedInInfo = true;
   bool _isSubmitting = false;
+  
   
   // Controllers cho các trường thông tin liên hệ
   final _fullNameController = TextEditingController();
@@ -186,75 +190,127 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+    });
 
     try {
+      // Lấy token và publicId từ SharedPreferences
       final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
       final publicId = prefs.getString('public_id');
-      if (publicId == null) {
-        throw Exception('User not logged in');
+
+      if (token == null || publicId == null) {
+        throw Exception('Vui lòng đăng nhập để đặt tour');
       }
 
-      // Prepare passenger details
-      final passengerDetails = [
-        ..._additionalPassengers['adult']!.map((p) => {
-              'fullName': p['fullName']!.trim(),
-              'gender': p['gender'],
-              'birthDate': p['birthDate'],
-              'passengerType': 'adult'
-            }),
-        ..._additionalPassengers['child']!.map((p) => {
-              'fullName': p['fullName']!.trim(),
-              'gender': p['gender'],
-              'birthDate': p['birthDate'],
-              'passengerType': 'child'
-            }),
-        ..._additionalPassengers['infant']!.map((p) => {
-              'fullName': p['fullName']!.trim(),
-              'gender': p['gender'],
-              'birthDate': p['birthDate'],
-              'passengerType': 'infant'
-            }),
-      ];
+      // Tạo danh sách hành khách
+      final List<Map<String, dynamic>> allPassengers = [];
+      
+      // Thêm thông tin người liên hệ vào danh sách hành khách
+      allPassengers.add({
+        'fullName': _fullNameController.text.trim(),
+        'gender': _gender,
+        'birthDate': _birthDate,
+        'passengerType': 'adult',
+        'phone': _phoneController.text.trim(),
+        'email': _emailController.text.trim(),
+        'address': _addressController.text.trim(),
+      });
 
+      // Thêm các hành khách bổ sung
+      for (var type in ['adult', 'child', 'infant']) {
+        for (var passenger in _additionalPassengers[type]!) {
+          if (passenger['fullName']?.isNotEmpty == true) {
+            allPassengers.add({
+              'fullName': passenger['fullName'].trim(),
+              'gender': passenger['gender'],
+              'birthDate': passenger['birthDate'],
+              'passengerType': type,
+            });
+          }
+        }
+      }
+
+      // Tạo thông tin liên lạc
+      final contactInfo = {
+        'fullName': _fullNameController.text.trim(),
+        'phoneNumber': _phoneController.text.trim(),
+        'email': _emailController.text.trim(),
+        'address': _addressController.text.trim(),
+        'gender': _gender,
+        'birthDate': _birthDate,
+      };
+
+      // Tạo payload cho API
       final payload = {
         'bookingId': widget.bookingId,
         'publicId': publicId,
-        'contactInfo': {
-          'fullName': _fullNameController.text.trim(),
-          'phoneNumber': _phoneController.text.trim(),
-          'email': _emailController.text.trim(),
-          'address': _addressController.text.trim(),
-          'gender': _gender,
-          'birthDate': _birthDate
-        },
+        'contactInfo': contactInfo,
         'passengers': _passengerCounts,
-        'passengerDetails': passengerDetails
+        'passengerDetails': allPassengers.skip(1).toList(), // Bỏ qua người liên hệ đầu tiên
       };
 
-      final result = await _bookingPassengerService.submitPassengers(payload);
-      
+      print('Submitting payload: $payload'); // Debug print
+
+      // Gọi API để lưu thông tin hành khách
+      final response = await _bookingPassengerService.submitPassengers(payload);
+
+      // Chuyển đổi response thành List<Map<String, dynamic>>
+      final List<Map<String, dynamic>> convertedResponse = (response as List)
+          .map((item) => item is Map<String, dynamic> 
+              ? item 
+              : Map<String, dynamic>.from(item as Map))
+          .toList();
+
+      // Chuyển đổi Tour object thành Map
+      final tourInfo = {
+        'tourId': widget.tour.tourId,
+        'name': widget.tour.name,
+        'description': widget.tour.description,
+        'price': widget.tour.price,
+        'duration': widget.tour.duration,
+        'maxParticipants': widget.tour.maxParticipants,
+        'statusId': widget.tour.statusId,
+        'imageUrl': widget.tour.imageUrl,
+        'createdAt': widget.tour.createdAt?.toIso8601String(),
+        'updatedAt': widget.tour.updatedAt?.toIso8601String(),
+      };
+
+      // Chuyển đổi itineraries thành List<Map<String, dynamic>>
+      final List<Map<String, dynamic>> convertedItineraries = widget.itineraries
+          .map((itinerary) => itinerary is Map<String, dynamic>
+              ? itinerary
+              : Map<String, dynamic>.from(itinerary as Map))
+          .toList();
+
+      // Chuyển sang màn hình xác nhận
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đăng ký thông tin hành khách thành công!')),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BookingConfirmationScreen(
+              bookingId: widget.bookingId.toString(),
+              bookingCode: widget.bookingCode,
+              passengers: convertedResponse,
+              tourInfo: tourInfo,
+              contactInfo: contactInfo,
+              itineraries: convertedItineraries,
+            ),
+          ),
         );
-        // Navigate to confirmation screen
-        Navigator.pushReplacementNamed(context, '/booking-confirmation', arguments: {
-          'bookingId': widget.bookingId,
-          'passengers': result,
-          'tourInfo': widget.tour,
-          'itineraries': widget.itineraries,
-        });
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+          SnackBar(content: Text('Có lỗi xảy ra: $e')),
         );
       }
     } finally {
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        setState(() {
+          _isSubmitting = false;
+        });
       }
     }
   }
@@ -264,8 +320,14 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Thông tin hành khách'),
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.orange),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -319,7 +381,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.calendar_today, size: 16, color: Colors.blue[900]),
+                                Icon(Icons.calendar_today, size: 16, color: Colors.orange),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Ngày khởi hành: ${widget.selectedDate}',
@@ -330,7 +392,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.timer, size: 16, color: Colors.blue[900]),
+                                Icon(Icons.timer, size: 16, color: Colors.orange),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Thời gian: ${widget.tour.duration} ngày',
@@ -341,11 +403,11 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.attach_money, size: 16, color: Colors.blue[900]),
+                                Icon(Icons.attach_money, size: 25, color: Colors.orange),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Giá: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(widget.tour.price)}',
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.orange),
                                 ),
                               ],
                             ),
@@ -361,6 +423,9 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                 SwitchListTile(
                   title: const Text('Sử dụng thông tin tài khoản đang đăng nhập'),
                   value: _useLoggedInInfo,
+                  activeColor: Colors.orange,
+                  inactiveTrackColor: Colors.orange.shade100,
+                  inactiveThumbColor: Colors.orange.shade200,
                   onChanged: (bool value) {
                     setState(() {
                       _useLoggedInInfo = value;
@@ -381,119 +446,276 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                 const SizedBox(height: 10),
                 
                 // Contact information section
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Thông tin liên hệ',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _fullNameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Họ và tên',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Vui lòng nhập họ và tên';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _phoneController,
-                          decoration: const InputDecoration(
-                            labelText: 'Số điện thoại',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Vui lòng nhập số điện thoại';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Vui lòng nhập email';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Email không hợp lệ';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _addressController,
-                          decoration: const InputDecoration(
-                            labelText: 'Địa chỉ',
-                            border: OutlineInputBorder(),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Row(
+                        child: Row(
                           children: [
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: _gender,
-                                decoration: const InputDecoration(
-                                  labelText: 'Giới tính',
-                                  border: OutlineInputBorder(),
-                                ),
-                                items: const [
-                                  DropdownMenuItem(value: 'Nam', child: Text('Nam')),
-                                  DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
-                                ],
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => _gender = value);
-                                  }
-                                },
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade100,
+                                borderRadius: BorderRadius.circular(8),
                               ),
+                              child: Icon(Icons.person_outline, color: Colors.orange.shade800, size: 24),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _birthDateController,
-                                readOnly: true,
-                                decoration: const InputDecoration(
-                                  labelText: 'Ngày sinh',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onTap: () async {
-                                  final date = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.tryParse(_birthDateController.text) ?? DateTime.now(),
-                                    firstDate: DateTime(1900),
-                                    lastDate: DateTime.now(),
-                                  );
-                                  if (date != null) {
-                                    setState(() {
-                                      _birthDate = date.toString().split(' ')[0];
-                                      _birthDateController.text = _birthDate;
-                                    });
-                                  }
-                                },
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Thông tin liên hệ',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _fullNameController,
+                              style: const TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                labelText: 'Họ và tên',
+                                labelStyle: TextStyle(color: Colors.grey.shade600),
+                                prefixIcon: Icon(Icons.person, color: Colors.orange.shade400, size: 20),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Vui lòng nhập họ và tên';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _phoneController,
+                              style: const TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                labelText: 'Số điện thoại',
+                                labelStyle: TextStyle(color: Colors.grey.shade600),
+                                prefixIcon: Icon(Icons.phone, color: Colors.orange.shade400, size: 20),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Vui lòng nhập số điện thoại';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _emailController,
+                              style: const TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                labelText: 'Email',
+                                labelStyle: TextStyle(color: Colors.grey.shade600),
+                                prefixIcon: Icon(Icons.email, color: Colors.orange.shade400, size: 20),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Vui lòng nhập email';
+                                }
+                                if (!value.contains('@')) {
+                                  return 'Email không hợp lệ';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _addressController,
+                              style: const TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                labelText: 'Địa chỉ',
+                                labelStyle: TextStyle(color: Colors.grey.shade600),
+                                prefixIcon: Icon(Icons.location_on, color: Colors.orange.shade400, size: 20),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: DropdownButtonFormField<String>(
+                                    value: _gender,
+                                    style: const TextStyle(fontSize: 15, color: Colors.black87),
+                                    decoration: InputDecoration(
+                                      labelText: 'Giới tính',
+                                      labelStyle: TextStyle(color: Colors.grey.shade600),
+                                      prefixIcon: Icon(Icons.people, color: Colors.orange.shade400, size: 20),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Colors.grey.shade300),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Colors.grey.shade300),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey.shade50,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                    ),
+                                    items: const [
+                                      DropdownMenuItem(value: 'Nam', child: Text('Nam')),
+                                      DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
+                                    ],
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setState(() => _gender = value);
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _birthDateController,
+                                    readOnly: true,
+                                    style: const TextStyle(fontSize: 15),
+                                    decoration: InputDecoration(
+                                      labelText: 'Ngày sinh',
+                                      labelStyle: TextStyle(color: Colors.grey.shade600),
+                                      prefixIcon: Icon(Icons.calendar_today, color: Colors.orange.shade400, size: 20),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Colors.grey.shade300),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Colors.grey.shade300),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey.shade50,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                    ),
+                                    onTap: () async {
+                                      final date = await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.tryParse(_birthDateController.text) ?? DateTime.now(),
+                                        firstDate: DateTime(1900),
+                                        lastDate: DateTime.now(),
+                                        builder: (context, child) {
+                                          return Theme(
+                                            data: Theme.of(context).copyWith(
+                                              colorScheme: ColorScheme.light(
+                                                primary: Colors.orange.shade400,
+                                                onPrimary: Colors.white,
+                                                surface: Colors.white,
+                                                onSurface: Colors.black87,
+                                              ),
+                                            ),
+                                            child: child!,
+                                          );
+                                        },
+                                      );
+                                      if (date != null) {
+                                        setState(() {
+                                          _birthDate = date.toString().split(' ')[0];
+                                          _birthDateController.text = _birthDate;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -523,20 +745,61 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
 
                 // Additional passengers section
                 if (_additionalPassengers.values.any((list) => list.isNotEmpty))
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Thông tin hành khách bổ sung',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          spreadRadius: 1,
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
                           ),
-                          const SizedBox(height: 16),
-                          ..._buildAdditionalPassengerFields(),
-                        ],
-                      ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade100,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(Icons.group, color: Colors.orange.shade800, size: 24),
+                              ),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Thông tin hành khách bổ sung',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: _buildAdditionalPassengerFields(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 const SizedBox(height: 20),
@@ -642,95 +905,184 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
       if (passengers.isEmpty) return;
       
       widgets.add(
-        Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...List.generate(passengers.length, (i) {
+                final passenger = passengers[i];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          type == 'adult' ? 'Người lớn ${i + 2}' : '${type == 'child' ? 'Trẻ em' : 'Em bé'} ${i + 1}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        initialValue: passenger['fullName'],
+                        style: const TextStyle(fontSize: 15),
+                        decoration: InputDecoration(
+                          labelText: 'Họ và tên',
+                          labelStyle: TextStyle(color: Colors.grey.shade600),
+                          prefixIcon: Icon(Icons.person, color: Colors.orange.shade400, size: 20),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Vui lòng nhập họ và tên';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) => passenger['fullName'] = value,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: passenger['gender'],
+                              style: const TextStyle(fontSize: 15, color: Colors.black87),
+                              decoration: InputDecoration(
+                                labelText: 'Giới tính',
+                                labelStyle: TextStyle(color: Colors.grey.shade600),
+                                prefixIcon: Icon(Icons.people, color: Colors.orange.shade400, size: 20),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              ),
+                              items: const [
+                                DropdownMenuItem(value: 'Nam', child: Text('Nam')),
+                                DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() => passenger['gender'] = value);
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: TextFormField(
+                              controller: passenger['birthDateController'],
+                              readOnly: true,
+                              style: const TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                labelText: 'Ngày sinh',
+                                labelStyle: TextStyle(color: Colors.grey.shade600),
+                                prefixIcon: Icon(Icons.calendar_today, color: Colors.orange.shade400, size: 20),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              ),
+                              onTap: () async {
+                                final date = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.tryParse(passenger['birthDateController'].text) ?? DateTime.now(),
+                                  firstDate: DateTime(1900),
+                                  lastDate: DateTime.now(),
+                                  builder: (context, child) {
+                                    return Theme(
+                                      data: Theme.of(context).copyWith(
+                                        colorScheme: ColorScheme.light(
+                                          primary: Colors.orange.shade400,
+                                          onPrimary: Colors.white,
+                                          surface: Colors.white,
+                                          onSurface: Colors.black87,
+                                        ),
+                                      ),
+                                      child: child!,
+                                    );
+                                  },
+                                );
+                                if (date != null) {
+                                  setState(() {
+                                    passenger['birthDate'] = date.toString().split(' ')[0];
+                                    passenger['birthDateController'].text = passenger['birthDate'];
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
           ),
         ),
       );
-
-      for (var i = 0; i < passengers.length; i++) {
-        final passenger = passengers[i];
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  type == 'adult' ? 'Người lớn ${i + 2}' : '${type == 'child' ? 'Trẻ em' : 'Em bé'} ${i + 1}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  initialValue: passenger['fullName'],
-                  decoration: const InputDecoration(
-                    labelText: 'Họ và tên',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Vui lòng nhập họ và tên';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) => passenger['fullName'] = value,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: passenger['gender'],
-                        decoration: const InputDecoration(
-                          labelText: 'Giới tính',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 'Nam', child: Text('Nam')),
-                          DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => passenger['gender'] = value);
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextFormField(
-                        controller: passenger['birthDateController'],
-                        readOnly: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Ngày sinh',
-                          border: OutlineInputBorder(),
-                        ),
-                        onTap: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.tryParse(passenger['birthDateController'].text) ?? DateTime.now(),
-                            firstDate: DateTime(1900),
-                            lastDate: DateTime.now(),
-                          );
-                          if (date != null) {
-                            setState(() {
-                              passenger['birthDate'] = date.toString().split(' ')[0];
-                              passenger['birthDateController'].text = passenger['birthDate'];
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      }
     }
 
     addPassengerFields('adult', 'Người lớn bổ sung', _additionalPassengers['adult']!);

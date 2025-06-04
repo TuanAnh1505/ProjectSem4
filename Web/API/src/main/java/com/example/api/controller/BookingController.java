@@ -23,6 +23,7 @@ public class BookingController {
             Booking booking = bookingService.createBooking(request);
             Map<String, Object> response = new HashMap<>();
             response.put("bookingId", booking.getBookingId());
+            response.put("bookingCode", booking.getBookingCode());
             response.put("message", "Booking successful");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -49,5 +50,39 @@ public class BookingController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getBookingById(@PathVariable Integer id) {
+        try {
+            Booking booking = bookingService.getBookingById(id);
+            return ResponseEntity.ok(booking);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<?> getBookingDetailForUser(@PathVariable Integer id) {
+        try {
+            Map<String, Object> data = bookingService.getBookingDetail(id);
+            return ResponseEntity.ok(data);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/user/{publicId}")
+    public ResponseEntity<?> getBookingsByUserPublicId(@PathVariable String publicId) {
+        try {
+            return ResponseEntity.ok(bookingService.getBookingsByUserPublicId(publicId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+    
 
 }

@@ -26,6 +26,11 @@ public interface TourGuideRepository extends JpaRepository<TourGuide, Long> {
     
     @Query("SELECT tg FROM TourGuide tg WHERE LOWER(tg.languages) LIKE LOWER(CONCAT('%', :language, '%'))")
     List<TourGuide> findByLanguageContaining(@Param("language") String language);
+
+    List<TourGuide> findByIsAvailable(Boolean isAvailable);
+
+    @Query("SELECT tg FROM TourGuide tg JOIN tg.user u JOIN u.roles r WHERE r.roleName = 'ROLE_TOUR_GUIDE'")
+    List<TourGuide> findAllTourGuidesWithRole();
 }
 
 

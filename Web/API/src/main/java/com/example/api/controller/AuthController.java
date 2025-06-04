@@ -2,6 +2,7 @@ package com.example.api.controller;
 
 import com.example.api.dto.RegisterRequest;
 import com.example.api.dto.LoginRequest;
+import com.example.api.dto.UpdateUserRequest;
 import com.example.api.model.User;
 import com.example.api.service.UserService;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import com.example.api.service.EmailService;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -70,9 +72,9 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<?> forgotPassword(@RequestParam String email, @RequestParam(defaultValue = "false") boolean isApp) {
         try {
-            userService.sendPasswordResetEmail(email);
+            userService.sendPasswordResetEmail(email, isApp);
             return ResponseEntity.ok("Email đặt lại mật khẩu đã được gửi.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -102,6 +104,76 @@ public class AuthController {
             return ResponseEntity.ok("Mật khẩu đã được thay đổi thành công.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/resend-activation")
+    public ResponseEntity<?> resendActivationEmail(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            Boolean isApp = Boolean.valueOf(request.get("isApp"));
+            
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Không tìm thấy tài khoản với email này.");
+            }
+            
+            if (user.getIsActive()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Tài khoản đã được kích hoạt.");
+            }
+
+            emailService.resendActivationEmail(user.getEmail(), user.getPublicId(), isApp);
+            return ResponseEntity.ok("Email kích hoạt đã được gửi lại thành công.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/update-info")
+    public ResponseEntity<?> updateUserInfo(@RequestParam String publicId, @Valid @RequestBody UpdateUserRequest updateRequest) {
+        try {
+            User updatedUser = userService.updateUserInfo(
+                publicId,
+                updateRequest.getFullName(),
+                updateRequest.getPhone(),
+                updateRequest.getAddress()
+            );
+            
+            return ResponseEntity.ok("Thông tin tài khoản đã được cập nhật thành công.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/user-info")
+    public ResponseEntity<?> getUserInfo(@RequestParam String publicId) {
+        try {
+            User user = userService.findByPublicId(publicId);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Không tìm thấy thông tin người dùng");
+            }
+            
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("publicId", user.getPublicId());
+            userInfo.put("email", user.getEmail());
+            userInfo.put("fullName", user.getFullName());
+            userInfo.put("phone", user.getPhone());
+            userInfo.put("address", user.getAddress());
+            
+            // Lấy role đầu tiên của user (thường là role chính)
+            String role = user.getRoles().stream()
+                .findFirst()
+                .map(r -> r.getRoleName())
+                .orElse("USER");
+            userInfo.put("role", role);
+            
+            return ResponseEntity.ok(userInfo);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi lấy thông tin người dùng: " + e.getMessage());
         }
     }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
+import logo from '../../assets/images/logo.png';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -44,9 +45,16 @@ const Header = () => {
             flexWrap: 'wrap',
           }}
         >
-          <h1 className={styles.logo} style={{ margin: 0, padding: '18px 0 8px 0', textAlign: 'center', fontSize: 28, fontWeight: 'bold', letterSpacing: 1 }}>
-            <Link to="/" style={{ color: '#a61a19', textDecoration: 'none' }}>
-              Vietnam Tourism
+          <h1 className={styles.logo} style={{ margin: 0, padding: '18px 0 8px 0', textAlign: 'center' }}>
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <img 
+                src={logo}
+                alt="Vietnam Tourism Logo" 
+                style={{ 
+                  height: '40px',
+                  width: 'auto'
+                }}
+              />
             </Link>
           </h1>
           <nav className={styles.mainNav} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: 'auto', flex: 1 }}>
@@ -71,7 +79,7 @@ const Header = () => {
               </li>
               {isAuthenticated && userRole === 'ADMIN' && (
                 <li>
-                  <Link to="/admin-dashboard">Admin Dashboard</Link>
+                  <Link to="/admin/about">Admin Dashboard</Link>
                 </li>
               )}
               <li className={styles.hasFlyout}>
@@ -212,6 +220,21 @@ const Header = () => {
                   </Link>
                 </li>
               )}
+              <li>
+                <button
+                  onClick={() => {
+                    const publicId = localStorage.getItem('publicId');
+                    if (publicId) {
+                      navigate(`/account/${publicId}`);
+                    } else {
+                      navigate('/login');
+                    }
+                  }}
+                  style={{ marginLeft: 16, fontWeight: 600, color: '#1976d2', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit' }}
+                >
+                  <span role="img" aria-label="user">👤</span> Tài khoản
+                </button>
+              </li>
             </ul>
           </nav>
         </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
+import { FiSearch, FiEdit, FiTrash2 } from 'react-icons/fi';
 import '../../styles/event/EventIndex.css';
 import '../../styles/destination/DestinationIndex.css';
 
@@ -304,14 +305,13 @@ const EventIndex = () => {
                 </div>
             </div>
 
-            <table className="table">
-                <thead className="table-dark">
+            <table className="event-table">
+                <thead>
                     <tr>
                         <th>ID</th>
                         <th>Image</th>
                         <th>Event Name</th>
                         <th>Description</th>
-                        {/* <th>{t("ticket_price")}</th> */}
                         <th>Location</th>
                         <th>Status</th>
                         <th>Start Date</th>
@@ -325,13 +325,14 @@ const EventIndex = () => {
                             <td>{event.eventId}</td>
                             <td>
                                 {event.filePaths.length > 0 && (
-                                    <div className="preview-container">
+                                    <div className="event-preview-container">
                                         <MediaPreview
                                             filePath={event.filePaths[0]}
                                             onClick={() => setSelectedMedia(event.filePaths)}
+                                            className="event-media-preview"
                                         />
                                         {event.filePaths.length > 1 && (
-                                            <span className="preview-count">
+                                            <span className="event-preview-count">
                                                 {event.filePaths.length - 1}
                                             </span>
                                         )}
@@ -340,31 +341,37 @@ const EventIndex = () => {
                             </td>
                             <td>{event.name}</td>
                             <td>{event.description}</td>
-                            {/* <td>{event.ticketPrice}</td> */}
                             <td>{event.location}</td>
                             <td>{event.statusName}</td>
                             <td>{new Date(event.startDate).toLocaleString()}</td>
                             <td>{new Date(event.endDate).toLocaleString()}</td>
-                            
                             <td>
-                                <Link
-                                    to={`/admin/event/detail/${event.eventId}`}
-                                    className="action-link"
-                                >
-                                     🔍  
-                                </Link>
-                                <Link
-                                    to={`/admin/event/edit/${event.eventId}`}
-                                   className="action-link"
-                                >
-                                    ✏️
-                                </Link>
-                                <button className="delete-button"
-                                    onClick={() => deleteEvent(event.eventId)}
-                                    
-                                >
-                                    🗑️
-                                </button>
+                                <div className="event-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
+                                    <Link
+                                        to={`/admin/event/detail/${event.eventId}`}
+                                        className="event-action-link"
+                                        title="Xem chi tiết"
+                                        style={{ color: '#4a90e2', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                        <FaSearch />
+                                    </Link>
+                                    <Link
+                                        to={`/admin/event/edit/${event.eventId}`}
+                                        className="event-action-link"
+                                        title="Chỉnh sửa"
+                                        style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                        <FaEdit />
+                                    </Link>
+                                    <button
+                                        className="event-delete-btn"
+                                        onClick={() => deleteEvent(event.eventId)}
+                                        title="Xóa"
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                        <FaTrash />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}

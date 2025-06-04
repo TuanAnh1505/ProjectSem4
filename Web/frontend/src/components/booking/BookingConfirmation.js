@@ -28,13 +28,14 @@ function getTypeAndAge(passenger) {
 const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bookingId, passengers, tourInfo, contactInfo, itineraries = [] } = location.state || {};
+  console.log('BookingConfirmation location.state:', location.state);
+  const { bookingId, bookingCode, passengers, tourInfo, contactInfo, itineraries = [] } = location.state || {};
 
-  if (!bookingId || !passengers || !tourInfo) {
+  if (!bookingCode && !bookingId) {
     return (
       <div className="confirmation-wrapper">
         <h2>Không tìm thấy thông tin đặt chỗ</h2>
-        <button onClick={() => navigate('/tours')}>Quay lại trang Tour</button>
+        <button onClick={() => navigate('/tour-dashboard')}>Quay lại trang Tour</button>
       </div>
     );
   }
@@ -68,6 +69,18 @@ const BookingConfirmation = () => {
   // const bookingNote = '(Booking từ Travel.com.vn (Tour giá chợ -500.000 đ/ khách, ))';
   const flightInfo = 'Thông tin chuyến bay';
 
+  const handlePayment = () => {
+    // Chuyển hướng đến trang lựa chọn phương thức thanh toán
+    navigate(`/payment/${bookingId}`, {
+      state: {
+        bookingId,
+        amount: calculateTotal(),
+        tourInfo,
+        passengers
+      }
+    });
+  };
+
   return (
     <div className="confirmation-container">
       <div className="confirmation-main-layout" style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
@@ -85,7 +98,7 @@ const BookingConfirmation = () => {
           {/* Chi tiết booking */}
           <div className="confirmation-box" style={{ border: '1px solid #bbbbbb', background: '#fff', borderRadius: 8, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px #eee' }}>
             <h4 style={{ marginBottom: 12, color: '#1976d2' }}>CHI TIẾT BOOKING</h4>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Mã đặt chỗ:</b> <span style={{ color: 'red', flex: 1 }}>{bookingId}</span></div>
+            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Mã đặt chỗ:</b> <span style={{ color: 'red', flex: 1 }}>{bookingCode}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Ngày đặt:</b> <span style={{ flex: 1 }}>{new Date().toLocaleString('vi-VN')}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Số khách:</b> <span style={{ flex: 1 }}>{passengers.length}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold', flex: 1 }}>{calculateTotal().toLocaleString()} đ</span></div>
@@ -160,7 +173,7 @@ const BookingConfirmation = () => {
                   {tourInfo.name}
                 </div>
               </div>
-              <div style={{ marginBottom: 8 }}><b>Mã booking:</b> <span style={{ color: 'red' }}>{bookingId}</span></div>
+              <div style={{ marginBottom: 8 }}><b>Mã booking:</b> <span style={{ color: 'red' }}>{bookingCode}</span></div>
               <div style={{ marginBottom: 8 }}><b>Trạng thái:</b> <span style={{ color: '#388e3c', fontWeight: 'bold' }}>{bookingStatus}</span></div>
               {/* <div style={{ marginBottom: 8 }}><b>Thông tin chuyến bay:</b> {flightInfo}</div> */}
               {/* Lịch trình đã chọn */}
@@ -216,7 +229,22 @@ const BookingConfirmation = () => {
                   ))}
                 </div>
               )}
-              <button style={{ background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 4, padding: '10px 24px', fontWeight: 'bold', marginTop: 12, cursor: 'pointer' }}>
+              <button 
+                onClick={handlePayment}
+                style={{ 
+                  background: '#d32f2f', 
+                  color: '#fff', 
+                  border: 'none', 
+                  borderRadius: 4, 
+                  padding: '10px 24px', 
+                  fontWeight: 'bold', 
+                  marginTop: 12, 
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s ease'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#b71c1c'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#d32f2f'}
+              >
                 Thanh toán ngay
               </button>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../../styles/destination/UpdateDestination.css';
 
@@ -117,134 +117,134 @@ const UpdateDestination = () => {
             setIsLoading(false);
         }
     };
-
+    
     return (
-        <div className="add-destination-container">
-            <h2 className="form-title">Update Destination</h2>
-            {error && <div className="error-message">{error}</div>}
-            <form onSubmit={handleSubmit}>
-                <div className="update-destination-form-row">
-                    <div className="update-destination-form-group">
-                        <label className="form-label">Name</label>
-                        <input
-                            type="text"
-                            className={`update-destination-form-input ${fieldErrors.name ? 'error' : ''}`}
-                            name="name"
-                            value={destination.name}
-                            onChange={(e) => setDestination({ ...destination, name: e.target.value })}
-                            required
-                        />
-                    </div>
-                    <div className="update-destination-form-group">
-                        <label className="form-label">Category</label>
-                        <input
-                            type="text"
-                            className="update-destination-form-control"
-                            name="category"
-                            value={destination.category}
-                            onChange={(e) => setDestination({ ...destination, category: e.target.value })}
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div className="update-destination-form-row">
-                    <div className="update-destination-form-group">
-                        <label className="form-label">Location</label>
-                        <input
-                            type="text"
-                            className="update-destination-form-control"
-                            name="location"
-                            value={destination.location}
-                            onChange={(e) => setDestination({ ...destination, location: e.target.value })}
-                            required
-                        />
-                    </div>
-                    <div className="update-destination-form-group">
-                        <label className="form-label">Rating</label>
-                        <input
-                            type="number"
-                            className="update-destination-form-control"
-                            name="rating"
-                            value={destination.rating}
-                            onChange={(e) => setDestination({ ...destination, rating: e.target.value })}
-                            min="0"
-                            max="5"
-                            step="0.1"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div className="update-destination-form-group full-width">
-                    <label htmlFor="description" className="form-label">Description</label>
-                    <textarea
-                        id="description"
-                        className={`update-destination-form-input ${fieldErrors.description ? 'error' : ''}`}
-                        name="description"
-                        value={destination.description}
-                        onChange={handleChange}
-                        required
-                        style={{
-                            whiteSpace: 'pre-wrap',
-                            wordWrap: 'break-word'
-                        }}
-                    />
-                    {fieldErrors.description && <div className="error-message">{fieldErrors.description}</div>}
-                </div>
-
-                <div className="update-destination-form-group">
-                    <div className="file-input-container">
-                        <label htmlFor="files" className="file-input-label">
-                            Choose Images/Videos
-                        </label>
-                        <input
-                            id="files"
-                            type="file"
-                            className="file-input"
-                            onChange={handleFileChange}
-                            multiple
-                            accept="image/jpeg,image/jpg,image/png,video/mp4,video/quicktime"
-                        />
-                    </div>
-                </div>
-
-                {previewUrls.length > 0 && (
-                    <div className="preview-container-add">
-                        {previewUrls.map((url, index) => (
-                            <div key={index} className="preview-item">
-                                <button 
-                                    type="button"
-                                    className="delete-preview"
-                                    onClick={() => handleDeleteFile(index)}
-                                >
-                                    ×
-                                </button>
-                                {files[index]?.type.startsWith('image/') || url.match(/\.(jpg|jpeg|png)$/i) ? (
-                                    <img src={url} alt={`Preview ${index + 1}`} />
-                                ) : (
-                                    <video src={url} controls />
-                                )}
+        <div style={{ background: '#f6f7fb', minHeight: '100vh', padding: '32px 0' }}>
+            <div className="container" style={{ maxWidth: 900, margin: '0 auto', background: 'transparent', boxShadow: 'none' }}>
+                <Link to="/admin/destination" className="back-button" style={{ marginBottom: 24, display: 'inline-block' }}>
+                    Quay lại
+                </Link>
+                <div style={{ background: '#fff', borderRadius: 18, boxShadow: '0 2px 16px rgba(25,118,210,0.08)', padding: '32px 32px 24px 32px', marginBottom: 32 }}>
+                    <h2 className="form-title" style={{ textAlign: 'center', fontWeight: 700, fontSize: 28, color: '#222', marginBottom: 32 }}>Cập nhật điểm đến</h2>
+                    {error && <div className="error-message">{error}</div>}
+                    <form onSubmit={handleSubmit}>
+                        <div className="update-destination-form-row">
+                            <div className="update-destination-form-group">
+                                <label className="form-label">Name</label>
+                                <input
+                                    type="text"
+                                    className={`update-destination-form-input ${fieldErrors.name ? 'error' : ''}`}
+                                    name="name"
+                                    value={destination.name}
+                                    onChange={(e) => setDestination({ ...destination, name: e.target.value })}
+                                    required
+                                />
                             </div>
-                        ))}
-                    </div>
-                )}
-
-                <button
-                    type="submit"
-                    className="submit-button"
-                    disabled={isLoading}
-                >
-                    {isLoading ? (
-                        <>
-                            Updating...
-                            <span className="loading-spinner"></span>
-                        </>
-                    ) : (
-                        'Update Destination'
-                    )}
-                </button>
-            </form>
+                            <div className="update-destination-form-group">
+                                <label className="form-label">Category</label>
+                                <input
+                                    type="text"
+                                    className="update-destination-form-control"
+                                    name="category"
+                                    value={destination.category}
+                                    onChange={(e) => setDestination({ ...destination, category: e.target.value })}
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="update-destination-form-row">
+                            <div className="update-destination-form-group">
+                                <label className="form-label">Location</label>
+                                <input
+                                    type="text"
+                                    className="update-destination-form-control"
+                                    name="location"
+                                    value={destination.location}
+                                    onChange={(e) => setDestination({ ...destination, location: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="update-destination-form-group">
+                                <label className="form-label">Rating</label>
+                                <input
+                                    type="number"
+                                    className="update-destination-form-control"
+                                    name="rating"
+                                    value={destination.rating}
+                                    onChange={(e) => setDestination({ ...destination, rating: e.target.value })}
+                                    min="0"
+                                    max="5"
+                                    step="0.1"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="update-destination-form-group full-width">
+                            <label htmlFor="description" className="form-label">Description</label>
+                            <textarea
+                                id="description"
+                                className={`update-destination-form-input ${fieldErrors.description ? 'error' : ''}`}
+                                name="description"
+                                value={destination.description}
+                                onChange={handleChange}
+                                required
+                                style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                            />
+                            {fieldErrors.description && <div className="error-message">{fieldErrors.description}</div>}
+                        </div>
+                        <div className="update-destination-form-group">
+                            <div className="file-input-container">
+                                <label htmlFor="files" className="file-input-label">
+                                    Choose Images/Videos
+                                </label>
+                                <input
+                                    id="files"
+                                    type="file"
+                                    className="file-input"
+                                    onChange={handleFileChange}
+                                    multiple
+                                    accept="image/jpeg,image/jpg,image/png,video/mp4,video/quicktime"
+                                />
+                            </div>
+                        </div>
+                        {previewUrls.length > 0 && (
+                            <div className="preview-container-add">
+                                {previewUrls.map((url, index) => (
+                                    <div key={index} className="preview-item">
+                                        <button 
+                                            type="button"
+                                            className="delete-preview"
+                                            onClick={() => handleDeleteFile(index)}
+                                        >
+                                            ×
+                                        </button>
+                                        {files[index]?.type.startsWith('image/') || url.match(/\.(jpg|jpeg|png)$/i) ? (
+                                            <img src={url} alt={`Preview ${index + 1}`} />
+                                        ) : (
+                                            <video src={url} controls />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <button
+                            type="submit"
+                            className="submit-button"
+                            disabled={isLoading}
+                            style={{ marginTop: 24 }}
+                        >
+                            {isLoading ? (
+                                <>
+                                    Updating...
+                                    <span className="loading-spinner"></span>
+                                </>
+                            ) : (
+                                'Update Destination'
+                            )}
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     );
 };

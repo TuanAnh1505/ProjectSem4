@@ -24,6 +24,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
 
+
   @override
   void dispose() {
     _currentPasswordController.dispose();
@@ -64,7 +65,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FF),
       appBar: AppBar(
-        title: const Text('Đổi mật khẩu'),
+        // title: const Text('Đổi mật khẩu'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -76,22 +77,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Icon(Icons.lock, size: 48, color: Colors.orange),
+              SizedBox(
+                width: 250,
+                height: 250,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain,
+                  color: Colors.orange,
+                  colorBlendMode: BlendMode.srcIn,
                 ),
               ),
               const SizedBox(height: 24),

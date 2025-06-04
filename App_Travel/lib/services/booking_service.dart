@@ -24,6 +24,7 @@ class BookingService {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
+      
       body: json.encode({
         'userId': userId,
         'tourId': tourId,
