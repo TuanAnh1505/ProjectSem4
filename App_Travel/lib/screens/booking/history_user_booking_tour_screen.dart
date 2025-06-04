@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:app_travel/services/tour_service.dart';
 import 'package:app_travel/models/tour_models.dart';
+import 'package:intl/intl.dart';
 
 class HistoryUserBookingTourScreen extends StatefulWidget {
   const HistoryUserBookingTourScreen({Key? key}) : super(key: key);
@@ -22,6 +23,8 @@ class _HistoryUserBookingTourScreenState extends State<HistoryUserBookingTourScr
     {'label': 'Đã xác nhận', 'value': 'CONFIRMED'},
     {'label': 'Đã hủy', 'value': 'CANCELLED'},
     {'label': 'Đang chờ', 'value': 'PENDING'},
+    {'label': 'Đã thanh toán', 'value': 'COMPLETED'},
+    {'label': 'Thanh toán thất bại', 'value': 'FAILED'},
   ];
 
   @override
@@ -80,23 +83,44 @@ class _HistoryUserBookingTourScreenState extends State<HistoryUserBookingTourScr
 
   List<dynamic> get filteredBookings {
     if (filterStatus == 'ALL') return bookings;
-    return bookings.where((b) => b['status'] == filterStatus).toList();
+    return bookings.where((b) => 
+      b['status']?.toString().toUpperCase() == filterStatus ||
+      b['bookingStatus']?.toString().toUpperCase() == filterStatus
+    ).toList();
   }
 
   Color statusColor(String? status) {
-    switch (status) {
+    switch (status?.toUpperCase()) {
       case 'CONFIRMED': return Colors.green;
       case 'CANCELLED': return Colors.red;
       case 'PENDING': return Colors.orange;
+      case 'COMPLETED': return Colors.green;
+      case 'FAILED': return Colors.red;
+      case 'PROCESSING': return Colors.blue;
       default: return Colors.blueGrey;
     }
   }
 
+  String getStatusText(String? status) {
+    switch (status?.toUpperCase()) {
+      case 'CONFIRMED': return 'Đã xác nhận';
+      case 'CANCELLED': return 'Đã hủy';
+      case 'PENDING': return 'Đang chờ';
+      case 'COMPLETED': return 'Đã thanh toán';
+      case 'FAILED': return 'Thanh toán thất bại';
+      case 'PROCESSING': return 'Đang xử lý';
+      default: return status ?? 'Không xác định';
+    }
+  }
+
   IconData statusIcon(String? status) {
-    switch (status) {
+    switch (status?.toUpperCase()) {
       case 'CONFIRMED': return Icons.check_circle;
       case 'CANCELLED': return Icons.cancel;
       case 'PENDING': return Icons.hourglass_top;
+      case 'COMPLETED': return Icons.check_circle;
+      case 'FAILED': return Icons.error;
+      case 'PROCESSING': return Icons.sync;
       default: return Icons.info;
     }
   }
@@ -106,6 +130,12 @@ class _HistoryUserBookingTourScreenState extends State<HistoryUserBookingTourScr
     return Scaffold(
       appBar: AppBar(
         title: const Text('Lịch sử đặt tour'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: fetchBookings,
+          ),
+        ],
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
@@ -122,9 +152,16 @@ class _HistoryUserBookingTourScreenState extends State<HistoryUserBookingTourScr
                           children: statusFilters.map((f) => Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: ChoiceChip(
-                              label: Text(f['label']),
+                              label: Text(
+                                f['label'],
+                                style: TextStyle(
+                                  color: filterStatus == f['value'] ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                               selected: filterStatus == f['value'],
                               selectedColor: Colors.orange,
+                              checkmarkColor: Colors.white,
                               onSelected: (_) {
                                 setState(() { filterStatus = f['value']; });
                               },
@@ -213,12 +250,15 @@ class _HistoryUserBookingTourScreenState extends State<HistoryUserBookingTourScr
                                           _bookingInfoRow(
                                             Icons.payment,
                                             'Thanh toán',
-                                            b['paymentStatus'] ?? '',
-                                            valueColor: (b['paymentStatus'] == 'COMPLETED')
-                                                ? Colors.green
-                                                : (b['paymentStatus'] == 'FAILED')
-                                                    ? Colors.red
-                                                    : Colors.orange,
+                                            getStatusText(b['paymentStatus']),
+                                            valueColor: statusColor(b['paymentStatus']),
+                                          ),
+                                          SizedBox(height: 4),
+                                          _bookingInfoRow(
+                                            Icons.info,
+                                            'Trạng thái',
+                                            getStatusText(b['status']),
+                                            valueColor: statusColor(b['status']),
                                           ),
                                         ],
                                       ),
@@ -323,19 +363,37 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   Color statusColor(String? status) {
-    switch (status) {
+    switch (status?.toUpperCase()) {
       case 'CONFIRMED': return Colors.green;
       case 'CANCELLED': return Colors.red;
       case 'PENDING': return Colors.orange;
+      case 'COMPLETED': return Colors.green;
+      case 'FAILED': return Colors.red;
+      case 'PROCESSING': return Colors.blue;
       default: return Colors.blueGrey;
     }
   }
 
+  String getStatusText(String? status) {
+    switch (status?.toUpperCase()) {
+      case 'CONFIRMED': return 'Đã xác nhận';
+      case 'CANCELLED': return 'Đã hủy';
+      case 'PENDING': return 'Đang chờ';
+      case 'COMPLETED': return 'Đã thanh toán';
+      case 'FAILED': return 'Thanh toán thất bại';
+      case 'PROCESSING': return 'Đang xử lý';
+      default: return status ?? 'Không xác định';
+    }
+  }
+
   IconData statusIcon(String? status) {
-    switch (status) {
+    switch (status?.toUpperCase()) {
       case 'CONFIRMED': return Icons.check_circle;
       case 'CANCELLED': return Icons.cancel;
       case 'PENDING': return Icons.hourglass_top;
+      case 'COMPLETED': return Icons.check_circle;
+      case 'FAILED': return Icons.error;
+      case 'PROCESSING': return Icons.sync;
       default: return Icons.info;
     }
   }
@@ -396,9 +454,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ),
                         ),
 
-                       _infoRow(Icons.qr_code, 'Mã đặt chỗ', displayCode, valueColor: Colors.deepOrange, fontWeight: FontWeight.bold, fontSize: 18),
+                       _infoRow(Icons.qr_code, 'Mã đặt chỗ', displayCode, valueColor: Colors.orange, fontWeight: FontWeight.bold, fontSize: 18),
                       Divider(height: 32, thickness: 1.2),
-                      Text('Thông tin lịch trình', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange[800])),
+                      Text('Thông tin lịch trình', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange)),
                       const SizedBox(height: 8),
                       if (destination.isNotEmpty)
                         _infoRow(Icons.location_on, 'Điểm đến', destination),
@@ -412,15 +470,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         _infoRow(Icons.date_range, 'Ngày đi - Ngày về', '$startDate - $endDate'),
                       _infoRow(Icons.people, 'Số người', '$passengerCount'),
                       Divider(height: 32, thickness: 1.2),
-                      Text('Thông tin thanh toán', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green[800])),
+                      Text('Thông tin thanh toán', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange)),
                       const SizedBox(height: 8),
-                      _infoRow(Icons.attach_money, 'Tổng tiền', '${totalPrice.toString()}đ', valueColor: Colors.green[700]),
-                      _infoRow(Icons.payment, 'Thanh toán', paymentStatus,
-                        valueColor: paymentStatus.toString().toUpperCase() == 'COMPLETED'
-                            ? Colors.green
-                            : paymentStatus.toString().toUpperCase() == 'FAILED'
-                                ? Colors.red
-                                : Colors.blue),
+                      _infoRow(Icons.attach_money, 'Tổng tiền', formatCurrency(totalPrice), valueColor: Colors.orange, fontSize: 18),
+                      _infoRow(Icons.payment, 'Thanh toán', getStatusText(paymentStatus),
+                        valueColor: statusColor(paymentStatus)),
                       Divider(height: 32, thickness: 1.2),
                       Text('Trạng thái', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.blueGrey[700])),
                       const SizedBox(height: 8),
@@ -429,7 +483,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           Icon(statusIcon(bookingStatus), size: 22, color: statusColor(bookingStatus)),
                           const SizedBox(width: 8),
                           Text(
-                            bookingStatus,
+                            getStatusText(bookingStatus),
                             style: TextStyle(
                               color: statusColor(bookingStatus),
                               fontWeight: FontWeight.bold,
@@ -467,6 +521,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         ],
       ),
     );
+  }
+
+  String formatCurrency(dynamic amount) {
+    if (amount == null) return '0 ₫';
+    final number = amount is String ? double.tryParse(amount) ?? 0 : amount.toDouble();
+    final formatter = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: '₫',
+      decimalDigits: 0,
+    );
+    return formatter.format(number);
   }
 }
 

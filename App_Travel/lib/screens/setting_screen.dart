@@ -220,7 +220,11 @@ class _SettingScreenState extends State<SettingScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
             onPressed: () {
-              // TODO: Xử lý đăng xuất
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
+              );
             },
             child: const Text('Đăng xuất'),
           ),
