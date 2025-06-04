@@ -342,7 +342,14 @@ const Payment = () => {
                   fontWeight: 500,
                   cursor: 'pointer'
                 }}
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  const publicId = localStorage.getItem('publicId');
+                  if (publicId) {
+                    navigate(`/account/${publicId}`);
+                  } else {
+                    navigate('/login');
+                  }
+                }}
               >
                 Đóng
               </button>

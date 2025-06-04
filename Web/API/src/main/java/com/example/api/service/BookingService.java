@@ -287,8 +287,22 @@ public class BookingService {
 
     // Generate booking code: BKyyyyMMddHHmmssSSS + 3 random digits
     private String generateBookingCode() {
-        String timestamp = java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-        int random = new Random().nextInt(900) + 100; // 3 random digits
-        return "BK" + timestamp + random;
+        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String numbers = "0123456789";
+        StringBuilder code = new StringBuilder("BK");
+        Random random = new Random();
+
+        // Generate 18 random mixed characters
+        for (int i = 0; i < 18; i++) {
+            // Randomly decide whether to add a letter or number
+            if (random.nextBoolean()) {
+                code.append(letters.charAt(random.nextInt(letters.length())));
+            } else {
+                code.append(numbers.charAt(random.nextInt(numbers.length())));
+            }
+        }
+
+        return code.toString();
     }
 }
+

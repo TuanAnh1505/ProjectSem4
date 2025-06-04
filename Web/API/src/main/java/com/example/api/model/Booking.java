@@ -45,7 +45,7 @@ public class Booking {
     @JoinColumn(name = "userid", nullable = false)
     private User user;
 
-    @Column(name = "booking_code", unique = true, length = 50)
+    @Column(name = "booking_code", unique = true, length = 20)
     private String bookingCode;
 
     @PrePersist

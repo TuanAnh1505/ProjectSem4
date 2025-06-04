@@ -56,6 +56,10 @@ const UpdateInfoUser = () => {
     const [showBookingDetail, setShowBookingDetail] = useState(false);
     const [tabIndex, setTabIndex] = useState(0);
     const [createdAt, setCreatedAt] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const bookingsPerPage = 3;
+    const totalPages = Math.ceil(bookings.length / bookingsPerPage);
+    const pagedBookings = bookings.slice((currentPage - 1) * bookingsPerPage, currentPage * bookingsPerPage);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -192,6 +196,23 @@ const UpdateInfoUser = () => {
         }
     };
 
+    const handleRequestRefund = async (bookingId) => {
+        if (!window.confirm('Bạn chắc chắn muốn yêu cầu hoàn tiền cho booking này?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            // TODO: Gọi API request refund khi backend đã có
+            // await axios.put(`http://localhost:8080/api/payments/{paymentId}/status?statusId=7`, {}, {
+            //     headers: { 'Authorization': `Bearer ${token}` }
+            // });
+            toast.success('Đã gửi yêu cầu hoàn tiền!');
+            setBookings(bookings => bookings.map(b => 
+                b.bookingId === bookingId ? { ...b, status: 'Request Refund' } : b
+            ));
+        } catch (error) {
+            toast.error('Yêu cầu hoàn tiền thất bại!');
+        }
+    };
+
     // Thống kê booking
     const totalBooked = bookings.length;
     const totalCompleted = bookings.filter(b => b.status === 'COMPLETED').length;
@@ -224,24 +245,29 @@ const UpdateInfoUser = () => {
                     {/* Card trái */}
                     <Grid item xs={12} md={3} sx={{ pl: 0 }}>
                         <Card sx={{
-                            height: '100%',
                             borderRadius: '20px',
                             background: 'rgba(255, 255, 255, 0.95)',
                             backdropFilter: 'blur(10px)',
                             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
-                            ml: 0
+                            ml: 0,
+                            maxWidth: 300,
+                            minWidth: 220,
+                            px: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'flex-start'
                         }}>
-                            <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                            <CardContent sx={{ textAlign: 'center', py: 2, px: 1 }}>
                                 <Avatar
                                     sx={{
-                                        width: 120,
-                                        height: 120,
-                                        margin: '0 auto 20px',
+                                        width: 90,
+                                        height: 90,
+                                        margin: '0 auto 12px',
                                         background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
                                         boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                                     }}
                                 >
-                                    <FaUserCircle size={80} style={{ color: '#666' }} />
+                                    <FaUserCircle size={60} style={{ color: '#666' }} />
                                 </Avatar>
                                 <Typography variant="h5" sx={{ fontWeight: 600, color: '#2c3e50', mb: 1 }}>
                                     {formData.fullName}
@@ -261,6 +287,23 @@ const UpdateInfoUser = () => {
                                         <Typography variant="body2">{formData.address}</Typography>
                                     </Box>
                                 </Box>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => setIsEditing(!isEditing)}
+                                    startIcon={isEditing ? <FaTimes /> : <FaEdit />}
+                                    sx={{
+                                        borderRadius: '25px',
+                                        px: 4,
+                                        py: 1,
+                                        background: isEditing ? '#e74c3c' : '#34495e',
+                                        '&:hover': {
+                                            background: isEditing ? '#c0392b' : '#2c3e50'
+                                        },
+                                        mb: 3
+                                    }}
+                                >
+                                    {isEditing ? 'Hủy' : 'Chỉnh sửa thông tin'}
+                                </Button>
                                 {/* Thống kê */}
                                 <Box sx={{ mb: 3 }}>
                                     <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2c3e50', mb: 1 }}>Thống kê</Typography>
@@ -291,22 +334,6 @@ const UpdateInfoUser = () => {
                                         </Grid>
                                     </Grid>
                                 </Box>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => setIsEditing(!isEditing)}
-                                    startIcon={isEditing ? <FaTimes /> : <FaEdit />}
-                                    sx={{
-                                        borderRadius: '25px',
-                                        px: 4,
-                                        py: 1,
-                                        background: isEditing ? '#e74c3c' : '#34495e',
-                                        '&:hover': {
-                                            background: isEditing ? '#c0392b' : '#2c3e50'
-                                        }
-                                    }}
-                                >
-                                    {isEditing ? 'Hủy' : 'Chỉnh sửa thông tin'}
-                                </Button>
                             </CardContent>
                         </Card>
                     </Grid>
@@ -326,10 +353,124 @@ const UpdateInfoUser = () => {
                                     textColor="primary"
                                     sx={{ mb: 3 }}
                                 >
-                                    <Tab label="Thông tin chi tiết" />
                                     <Tab label="Lịch sử đặt tour" />
+                                    <Tab label="Thông tin chi tiết" />
                                 </Tabs>
                                 {tabIndex === 0 && (
+                                    <Box>
+                                        <Typography variant="h5" sx={{ fontWeight: 600, color: '#2c3e50', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <FaHistory /> Lịch sử đặt tour
+                                        </Typography>
+                                        <Stack spacing={2}>
+                                            {pagedBookings.length === 0 ? (
+                                                <MUICard sx={{ p: 3, textAlign: 'center', color: '#888' }}>Chưa có booking nào</MUICard>
+                                            ) : (
+                                                pagedBookings.map((booking, idx) => {
+                                                    // Tính thời gian còn lại để hủy tour (giả sử có trường deadline hoặc startDate)
+                                                    let cancelDeadline = null;
+                                                    let daysLeft = null;
+                                                    if (booking.schedule && booking.schedule.startDate) {
+                                                        // Giả sử hạn chót hủy là 3 ngày trước ngày khởi hành
+                                                        cancelDeadline = new Date(booking.schedule.startDate);
+                                                        cancelDeadline.setDate(cancelDeadline.getDate() - 3);
+                                                        const now = new Date();
+                                                        daysLeft = Math.ceil((cancelDeadline - now) / (1000 * 60 * 60 * 24));
+                                                    }
+                                                    return (
+                                                        <MUICard key={booking.bookingId} sx={{ p: 2, borderRadius: 3, boxShadow: '0 2px 12px #e3e8f0', border: '1px solid #e3e8f0' }}>
+                                                            <MUICardContent sx={{ p: 0 }}>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                                                                    <Box>
+                                                                        <Typography variant="h6" sx={{ fontWeight: 700 }}>{booking.tourName || booking.tour?.name}</Typography>
+                                                                        <Typography variant="body2" sx={{ color: '#888' }}>Mã đặt tour: {booking.bookingCode || booking.bookingId}</Typography>
+                                                                    </Box>
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                        <Chip label={booking.status === 'CONFIRMED' ? 'Đã xác nhận' : booking.status === 'CANCELLED' ? 'Đã hủy' : booking.status} color={booking.status === 'CONFIRMED' ? 'success' : booking.status === 'CANCELLED' ? 'error' : 'info'} size="small" sx={{ fontWeight: 600 }}/>
+                                                                        <Button size="small" variant="text" startIcon={<FaInfoCircle />} onClick={() => handleShowBookingDetail(booking)} sx={{ color: '#1976d2', fontWeight: 600 }}>Xem chi tiết</Button>
+                                                                    </Box>
+                                                                </Box>
+                                                                <Grid container spacing={2} sx={{ mb: 1 }}>
+                                                                    <Grid item xs={12} sm={6} md={3}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <FaRegCalendarAlt style={{ color: '#1976d2' }} />
+                                                                            <Typography variant="body2">{booking.schedule?.startDate}</Typography>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={6} md={3}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <FaUsers style={{ color: '#1976d2' }} />
+                                                                            <Typography variant="body2">{booking.passengerCount || booking.numPassengers || booking.totalPassengers || 1} khách</Typography>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={6} md={3}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <FaMoneyBill style={{ color: '#1976d2' }} />
+                                                                            <Typography variant="body2">{(booking.totalPrice || booking.totalAmount || 0).toLocaleString()} VNĐ</Typography>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={6} md={3}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            {(booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? <FaCheckCircle style={{ color: '#43a047' }} /> : <FaTimesCircle style={{ color: '#e53935' }} />}
+                                                                            <Typography variant="body2" sx={{ color: (booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? '#43a047' : '#e53935', fontWeight: 600 }}>
+                                                                                {(booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                </Grid>
+                                                                {daysLeft !== null && daysLeft >= 0 && booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, color: '#1976d2', fontWeight: 500 }}>
+                                                                        <FaClock style={{ marginRight: 6 }} />
+                                                                        Thời gian còn lại để hủy tour: Còn {daysLeft} ngày (hạn chót: {cancelDeadline.toLocaleDateString('vi-VN')})
+                                                                    </Box>
+                                                                )}
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                                                                    <Button variant="outlined" startIcon={<FaDownload />} sx={{ borderRadius: 2 }} disabled>Tải về</Button>
+                                                                    {booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && booking.status !== 'Request Refund' && (
+                                                                        <Button variant="outlined" color="warning" startIcon={<FaTimesCircle />} sx={{ borderRadius: 2 }} onClick={() => handleRequestRefund(booking.bookingId)}>
+                                                                            Yêu cầu hoàn tiền
+                                                                        </Button>
+                                                                    )}
+                                                                </Box>
+                                                            </MUICardContent>
+                                                        </MUICard>
+                                                    );
+                                                })
+                                            )}
+                                        </Stack>
+                                        {/* Pagination */}
+                                        {totalPages > 1 && (
+                                            <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 2 }}>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    disabled={currentPage === 1}
+                                                    onClick={() => setCurrentPage(currentPage - 1)}
+                                                >
+                                                    Trước
+                                                </Button>
+                                                {[...Array(totalPages)].map((_, idx) => (
+                                                    <Button
+                                                        key={idx}
+                                                        variant={currentPage === idx + 1 ? "contained" : "outlined"}
+                                                        size="small"
+                                                        onClick={() => setCurrentPage(idx + 1)}
+                                                    >
+                                                        {idx + 1}
+                                                    </Button>
+                                                ))}
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    disabled={currentPage === totalPages}
+                                                    onClick={() => setCurrentPage(currentPage + 1)}
+                                                >
+                                                    Sau
+                                                </Button>
+                                            </Stack>
+                                        )}
+                                    </Box>
+                                )}
+                                {tabIndex === 1 && (
                                     <Grid container spacing={3}>
                                         <Grid item xs={12}>
                                             <TextField
@@ -454,89 +595,6 @@ const UpdateInfoUser = () => {
                                             </Grid>
                                         )}
                                     </Grid>
-                                )}
-                                {tabIndex === 1 && (
-                                    <Box>
-                                        <Typography variant="h5" sx={{ fontWeight: 600, color: '#2c3e50', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <FaHistory /> Lịch sử đặt tour
-                                        </Typography>
-                                        <Stack spacing={2}>
-                                            {bookings.length === 0 ? (
-                                                <MUICard sx={{ p: 3, textAlign: 'center', color: '#888' }}>Chưa có booking nào</MUICard>
-                                            ) : (
-                                                bookings.map((booking, idx) => {
-                                                    // Tính thời gian còn lại để hủy tour (giả sử có trường deadline hoặc startDate)
-                                                    let cancelDeadline = null;
-                                                    let daysLeft = null;
-                                                    if (booking.schedule && booking.schedule.startDate) {
-                                                        // Giả sử hạn chót hủy là 3 ngày trước ngày khởi hành
-                                                        cancelDeadline = new Date(booking.schedule.startDate);
-                                                        cancelDeadline.setDate(cancelDeadline.getDate() - 3);
-                                                        const now = new Date();
-                                                        daysLeft = Math.ceil((cancelDeadline - now) / (1000 * 60 * 60 * 24));
-                                                    }
-                                                    return (
-                                                        <MUICard key={booking.bookingId} sx={{ p: 2, borderRadius: 3, boxShadow: '0 2px 12px #e3e8f0', border: '1px solid #e3e8f0' }}>
-                                                            <MUICardContent sx={{ p: 0 }}>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                                                                    <Box>
-                                                                        <Typography variant="h6" sx={{ fontWeight: 700 }}>{booking.tourName || booking.tour?.name}</Typography>
-                                                                        <Typography variant="body2" sx={{ color: '#888' }}>Mã đặt tour: {booking.bookingCode || booking.bookingId}</Typography>
-                                                                    </Box>
-                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                        <Chip label={booking.status === 'CONFIRMED' ? 'Đã xác nhận' : booking.status === 'CANCELLED' ? 'Đã hủy' : booking.status} color={booking.status === 'CONFIRMED' ? 'success' : booking.status === 'CANCELLED' ? 'error' : 'info'} size="small" sx={{ fontWeight: 600 }}/>
-                                                                        <Button size="small" variant="text" startIcon={<FaInfoCircle />} onClick={() => handleShowBookingDetail(booking)} sx={{ color: '#1976d2', fontWeight: 600 }}>Xem chi tiết</Button>
-                                                                    </Box>
-                                                                </Box>
-                                                                <Grid container spacing={2} sx={{ mb: 1 }}>
-                                                                    <Grid item xs={12} sm={6} md={3}>
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                            <FaRegCalendarAlt style={{ color: '#1976d2' }} />
-                                                                            <Typography variant="body2">{booking.schedule?.startDate}</Typography>
-                                                                        </Box>
-                                                                    </Grid>
-                                                                    <Grid item xs={12} sm={6} md={3}>
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                            <FaUsers style={{ color: '#1976d2' }} />
-                                                                            <Typography variant="body2">{booking.passengerCount || booking.numPassengers || booking.totalPassengers || 1} khách</Typography>
-                                                                        </Box>
-                                                                    </Grid>
-                                                                    <Grid item xs={12} sm={6} md={3}>
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                            <FaMoneyBill style={{ color: '#1976d2' }} />
-                                                                            <Typography variant="body2">{(booking.totalPrice || booking.totalAmount || 0).toLocaleString()} VNĐ</Typography>
-                                                                        </Box>
-                                                                    </Grid>
-                                                                    <Grid item xs={12} sm={6} md={3}>
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                            {(booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? <FaCheckCircle style={{ color: '#43a047' }} /> : <FaTimesCircle style={{ color: '#e53935' }} />}
-                                                                            <Typography variant="body2" sx={{ color: (booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? '#43a047' : '#e53935', fontWeight: 600 }}>
-                                                                                {(booking.paymentStatus || '').trim().toUpperCase() === 'COMPLETED' ? 'Đã thanh toán' : 'Chưa thanh toán'}
-                                                                            </Typography>
-                                                                        </Box>
-                                                                    </Grid>
-                                                                </Grid>
-                                                                {daysLeft !== null && daysLeft >= 0 && booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
-                                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, color: '#1976d2', fontWeight: 500 }}>
-                                                                        <FaClock style={{ marginRight: 6 }} />
-                                                                        Thời gian còn lại để hủy tour: Còn {daysLeft} ngày (hạn chót: {cancelDeadline.toLocaleDateString('vi-VN')})
-                                                                    </Box>
-                                                                )}
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                                                                    <Button variant="outlined" startIcon={<FaDownload />} sx={{ borderRadius: 2 }} disabled>Tải về</Button>
-                                                                    {booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
-                                                                        <Button variant="outlined" color="error" startIcon={<FaTimesCircle />} sx={{ borderRadius: 2 }} onClick={() => handleCancelBooking(booking.bookingId)}>
-                                                                            Hủy tour
-                                                                        </Button>
-                                                                    )}
-                                                                </Box>
-                                                            </MUICardContent>
-                                                        </MUICard>
-                                                    );
-                                                })
-                                            )}
-                                        </Stack>
-                                    </Box>
                                 )}
                             </CardContent>
                         </Card>
