@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaArrowLeft } from 'react-icons/fa';
 
 import '../../styles/destination/DetailDestination.css';
 
@@ -128,56 +129,69 @@ const DetailEvent = () => {
     }
 
     return (
-        <div className="event-detail-container" style={{ maxWidth: 600, margin: '32px auto', background: '#fff', borderRadius: 14, boxShadow: '0 2px 16px rgba(0,0,0,0.10)', overflow: 'hidden' }}>
-            {/* Ảnh lớn trên cùng */}
-            {event.filePaths && event.filePaths.length > 0 && (
-                <div style={{ width: '100%', height: 260, overflow: 'hidden', background: '#eee' }}>
-                    <MediaPreview
-                        filePath={event.filePaths[0]}
-                        onClick={() => setSelectedMedia(event.filePaths)}
+        <div style={{ background: '#f6f7fb', minHeight: '100vh', padding: '32px 0' }}>
+            <button
+                className="back-button-green"
+                onClick={() => navigate('/admin/event')}
+                style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 10, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 28px', fontWeight: 600, fontSize: 18, margin: '0 0 24px 48px', boxShadow: '0 2px 8px rgba(25,118,210,0.10)', cursor: 'pointer', transition: 'background 0.2s',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = '#1253a2'}
+                onMouseOut={e => e.currentTarget.style.background = '#1976d2'}
+            >
+                <FaArrowLeft style={{ fontSize: 20 }} /> Quay lại
+            </button>
+            <div className="event-detail-container" style={{ maxWidth: 600, margin: '32px auto', background: '#fff', borderRadius: 14, boxShadow: '0 2px 16px rgba(0,0,0,0.10)', overflow: 'hidden' }}>
+                {/* Ảnh lớn trên cùng */}
+                {event.filePaths && event.filePaths.length > 0 && (
+                    <div style={{ width: '100%', height: 260, overflow: 'hidden', background: '#eee' }}>
+                        <MediaPreview
+                            filePath={event.filePaths[0]}
+                            onClick={() => setSelectedMedia(event.filePaths)}
+                        />
+                    </div>
+                )}
+                <div style={{ padding: '32px 32px 20px 32px' }}>
+                    <h2 style={{ fontWeight: 700, fontSize: 32, marginBottom: 8, fontFamily: 'serif', color: '#222' }}>Event Detail</h2>
+                    <hr style={{ margin: '0 0 18px 0', border: 0, borderTop: '1.5px solid #eee' }} />
+                    <h3 style={{ fontWeight: 700, fontSize: 26, marginBottom: 24, fontFamily: 'serif', color: '#222' }}>{event.name}</h3>
+                    {/* Thông tin 2 cột */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 18 }}>
+                        <div style={{ flex: 1, minWidth: 220 }}>
+                            <div style={{ display: 'flex', marginBottom: 10 }}>
+                                <span style={{ minWidth: 110, fontWeight: 600, color: '#555' }}>Name:</span>
+                                <span style={{ color: '#222' }}>{event.name}</span>
+                            </div>
+                            <div style={{ display: 'flex', marginBottom: 10 }}>
+                                <span style={{ minWidth: 110, fontWeight: 600, color: '#555' }}>Location:</span>
+                                <span style={{ color: '#222' }}>{event.location}</span>
+                            </div>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 220 }}>
+                            <div style={{ display: 'flex', marginBottom: 10 }}>
+                                <span style={{ minWidth: 110, fontWeight: 600, color: '#555' }}>Ticket Price:</span>
+                                <span style={{ color: '#222' }}>{event.ticketPrice}</span>
+                            </div>
+                            <div style={{ display: 'flex', marginBottom: 10 }}>
+                                <span style={{ minWidth: 110, fontWeight: 600, color: '#555' }}>Status Name:</span>
+                                <span style={{ color: event.statusName === 'Active' ? '#388e3c' : '#bfa700', fontWeight: 600 }}>{event.statusName}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr style={{ margin: '0 0 18px 0', border: 0, borderTop: '1.5px solid #eee' }} />
+                    {/* Mô tả */}
+                    <div>
+                        <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 18, color: '#222' }}>Description:</div>
+                        <div style={{ color: '#222', lineHeight: 1.7 }}>{event.description}</div>
+                    </div>
+                </div>
+                {selectedMedia && (
+                    <MediaModal
+                        media={selectedMedia}
+                        onClose={() => setSelectedMedia(null)}
                     />
-                </div>
-            )}
-            <div style={{ padding: '32px 32px 20px 32px' }}>
-                <h2 style={{ fontWeight: 700, fontSize: 32, marginBottom: 8, fontFamily: 'serif', color: '#222' }}>Event Detail</h2>
-                <hr style={{ margin: '0 0 18px 0', border: 0, borderTop: '1.5px solid #eee' }} />
-                <h3 style={{ fontWeight: 700, fontSize: 26, marginBottom: 24, fontFamily: 'serif', color: '#222' }}>{event.name}</h3>
-                {/* Thông tin 2 cột */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 18 }}>
-                    <div style={{ flex: 1, minWidth: 220 }}>
-                        <div style={{ display: 'flex', marginBottom: 10 }}>
-                            <span style={{ minWidth: 110, fontWeight: 600, color: '#555' }}>Name:</span>
-                            <span style={{ color: '#222' }}>{event.name}</span>
-                        </div>
-                        <div style={{ display: 'flex', marginBottom: 10 }}>
-                            <span style={{ minWidth: 110, fontWeight: 600, color: '#555' }}>Location:</span>
-                            <span style={{ color: '#222' }}>{event.location}</span>
-                        </div>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 220 }}>
-                        <div style={{ display: 'flex', marginBottom: 10 }}>
-                            <span style={{ minWidth: 110, fontWeight: 600, color: '#555' }}>Ticket Price:</span>
-                            <span style={{ color: '#222' }}>{event.ticketPrice}</span>
-                        </div>
-                        <div style={{ display: 'flex', marginBottom: 10 }}>
-                            <span style={{ minWidth: 110, fontWeight: 600, color: '#555' }}>Status Name:</span>
-                            <span style={{ color: event.statusName === 'Active' ? '#388e3c' : '#bfa700', fontWeight: 600 }}>{event.statusName}</span>
-                        </div>
-                    </div>
-                </div>
-                <hr style={{ margin: '0 0 18px 0', border: 0, borderTop: '1.5px solid #eee' }} />
-                {/* Mô tả */}
-                <div>
-                    <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 18, color: '#222' }}>Description:</div>
-                    <div style={{ color: '#222', lineHeight: 1.7 }}>{event.description}</div>
-                </div>
+                )}
             </div>
-            {selectedMedia && (
-                <MediaModal
-                    media={selectedMedia}
-                    onClose={() => setSelectedMedia(null)}
-                />
-            )}
         </div>
     );
 };

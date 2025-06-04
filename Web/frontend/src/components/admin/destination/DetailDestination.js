@@ -128,7 +128,7 @@ const DetailDestination = () => {
 
     return (
         <div className="container">
-            <Link to="/admin/destinations" className="back-button">
+            <Link to="/admin/destination" className="back-button">
                 Quay lại
             </Link>
             

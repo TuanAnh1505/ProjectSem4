@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import {FaPlus, FaTrash, FaExclamationTriangle, FaSearch, FaEdit } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaExclamationTriangle, FaSearch, FaEdit } from 'react-icons/fa';
 import '../../styles/tour/TourIndex.css';
 
 const MAX_RETRIES = 3;
@@ -57,6 +57,26 @@ export default function TourIndex() {
     return status ? status.statusName : 'N/A';
   };
 
+  const getStatusLabel = (statusId) => {
+    const status = statuses.find(s => s.tourStatusId === statusId);
+    if (!status) return <span className="status-label status-unknown">N/A</span>;
+    if (status.statusName === 'Published') {
+      return (
+        <span className="status-label status-published">
+          <span className="status-dot status-dot-published"></span> Published
+        </span>
+      );
+    }
+    if (status.statusName === 'Cancelled') {
+      return (
+        <span className="status-label status-cancelled">
+          <span className="status-dot status-dot-cancelled"></span> Cancelled
+        </span>
+      );
+    }
+    return <span className="status-label status-unknown">{status.statusName}</span>;
+  };
+
   const showDeleteAlert = (tourId, tourName) => {
     setDeleteAlert({ show: true, tourId, tourName });
   };
@@ -92,13 +112,9 @@ export default function TourIndex() {
         </div>
       )}
 
-      <div className="action-bar">
-        <div className="header">
-          <h2>Quản lý tour</h2>
-          <Link to="/admin/tour/add" className="add-button"> <FaPlus /> Tạo tour</Link>
-        </div>
-        
-        
+      <div className="tour-header-bar">
+        <h2 className="tour-title">Quản lý tour</h2>
+        <Link to="/admin/tour/add" className="add-button"> <FaPlus /> Tạo tour</Link>
       </div>
 
       {tours.length > 0 ? (
@@ -106,11 +122,11 @@ export default function TourIndex() {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Image</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>IMAGE</th>
+              <th>NAME</th>
+              <th>PRICE</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
@@ -129,17 +145,17 @@ export default function TourIndex() {
                   )}
                 </td>
                 <td>{tour.name}</td>
-                <td>{tour.price ? tour.price.toLocaleString() + ' VNĐ' : 'N/A'}</td>
-                <td>{getStatusName(tour.statusId)}</td>
+                <td>{tour.price ? tour.price.toLocaleString() + ' VND' : 'N/A'}</td>
+                <td>{getStatusLabel(tour.statusId)}</td>
                 <td>
-                  <div className="tour-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
-                    <Link to={`/admin/tour/detail/${tour.tourId}`} className="action-link" title="Xem chi tiết" style={{ color: '#4a90e2', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="tour-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+                    <Link to={`/admin/tour/detail/${tour.tourId}`} className="action-link" title="Xem chi tiết" style={{ color: '#4a90e2', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FaSearch />
                     </Link>
-                    <Link to={`/admin/tour/edit/${tour.tourId}`} className="action-link" title="Chỉnh sửa" style={{ color: '#ffc107', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Link to={`/admin/tour/edit/${tour.tourId}`} className="action-link" title="Chỉnh sửa" style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FaEdit />
                     </Link>
-                    <button className="delete-button" onClick={() => showDeleteAlert(tour.tourId, tour.name)} title="Xóa" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <button className="delete-button" onClick={() => showDeleteAlert(tour.tourId, tour.name)} title="Xóa" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FaTrash />
                     </button>
                   </div>

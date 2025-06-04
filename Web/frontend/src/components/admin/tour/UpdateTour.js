@@ -166,8 +166,8 @@ export default function UpdateTour() {
   return (
     <div className="update-tour-form-container">
       <div className="update-tour-header">
-        <h2 className="update-tour-title">Edit Tour</h2>
-        <p className="update-tour-subtitle">Update the details of your tour package</p>
+        <h2 className="update-tour-title">Cập nhật tour</h2>
+        <p className="update-tour-subtitle">Cập nhật thông tin tour</p>
       </div>
 
       {error && (
@@ -184,10 +184,10 @@ export default function UpdateTour() {
         <form onSubmit={handleSubmit} className="update-tour-form">
           {/* Card 1: Basic Info */}
           <div className="update-tour-card">
-            <div className="update-tour-card-title">Basic Information</div>
+            <div className="update-tour-card-title">Thông tin tour</div>
             <div className="update-tour-grid">
               <div className="update-tour-group">
-                <label htmlFor="name" className="update-tour-label">Tour Name</label>
+                <label htmlFor="name" className="update-tour-label">Tên tour</label>
                 <div className="update-tour-input-wrapper">
                   <span className="update-tour-input-icon"><FaLink /></span>
                   <input
@@ -204,7 +204,7 @@ export default function UpdateTour() {
                 </div>
               </div>
               <div className="update-tour-group">
-                <label htmlFor="price" className="update-tour-label">Price</label>
+                <label htmlFor="price" className="update-tour-label">Giá</label>
                 <div className="update-tour-input-wrapper">
                   <span className="update-tour-input-icon"><FaDollarSign /></span>
                   <input
@@ -221,7 +221,7 @@ export default function UpdateTour() {
                 </div>
               </div>
               <div className="update-tour-group">
-                <label htmlFor="duration" className="update-tour-label">Duration</label>
+                <label htmlFor="duration" className="update-tour-label">Thời gian</label>
                 <div className="update-tour-input-wrapper">
                   <span className="update-tour-input-icon"><FaCalendarAlt /></span>
                   <input
@@ -238,7 +238,7 @@ export default function UpdateTour() {
                 </div>
               </div>
               <div className="update-tour-group">
-                <label htmlFor="maxParticipants" className="update-tour-label">Max Participants</label>
+                <label htmlFor="maxParticipants" className="update-tour-label">Số lượng người tham gia</label>
                 <div className="update-tour-input-wrapper">
                   <span className="update-tour-input-icon"><FaUsers /></span>
                   <input
@@ -259,9 +259,9 @@ export default function UpdateTour() {
 
           {/* Card 2: Description */}
           <div className="update-tour-card">
-            <div className="update-tour-card-title">Tour Details</div>
+            <div className="update-tour-card-title">Thông tin chi tiết</div>
             <div className="update-tour-group">
-              <label htmlFor="description" className="update-tour-label">Description</label>
+              <label htmlFor="description" className="update-tour-label">Mô tả</label>
               <div className="update-tour-textarea-wrapper">
                 <textarea
                   id="description"
@@ -278,9 +278,9 @@ export default function UpdateTour() {
 
           {/* Card 3: Settings */}
           <div className="update-tour-card">
-            <div className="update-tour-card-title">Tour Settings</div>
+            <div className="update-tour-card-title">Cài đặt</div>
             <div className="update-tour-group">
-              <label htmlFor="statusId" className="update-tour-label">Status</label>
+              <label htmlFor="statusId" className="update-tour-label">Trạng thái</label>
               <div className="update-tour-select-wrapper">
                 <select
                   id="statusId"
@@ -290,7 +290,7 @@ export default function UpdateTour() {
                   onChange={handleChange}
                   required
                 >
-                  <option value="">Select Status</option>
+                  <option value="">Chọn trạng thái</option>
                   {statuses.map(s => (
                     <option key={s.tourStatusId} value={s.tourStatusId}>
                       {s.statusName}
@@ -301,7 +301,7 @@ export default function UpdateTour() {
             </div>
             <div className="update-tour-checkbox-grid">
               <div className="update-tour-checkbox-col">
-                <div className="update-tour-checkbox-title">Destinations</div>
+                <div className="update-tour-checkbox-title">Điểm đến</div>
                 {destinations.map(d => (
                   <label key={d.destinationId} className="update-tour-checkbox-card">
                     <input
@@ -315,7 +315,7 @@ export default function UpdateTour() {
                 ))}
               </div>
               <div className="update-tour-checkbox-col">
-                <div className="update-tour-checkbox-title">Places</div>
+                <div className="update-tour-checkbox-title">Sự kiện</div>
                 {events.map(ev => (
                   <label key={ev.eventId} className="update-tour-checkbox-card">
                     <input
@@ -333,7 +333,7 @@ export default function UpdateTour() {
 
           {/* Card 4: Image Upload */}
           <div className="update-tour-card">
-            <div className="update-tour-card-title">Tour Image</div>
+            <div className="update-tour-card-title">Hình ảnh tour</div>
             <div className="update-tour-group">
               <div className="update-tour-upload">
                 <label className="update-tour-upload-area">
