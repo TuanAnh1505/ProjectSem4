@@ -149,6 +149,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
             tour: tour!,
             selectedDate: selectedSchedule['startDate'] ?? '',
             itineraries: selectedItineraries,
+            finalPrice: booking['finalPrice'] ?? tour!.price, // Thêm finalPrice
           ),
         ),
       );

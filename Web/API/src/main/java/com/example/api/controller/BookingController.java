@@ -24,6 +24,7 @@ public class BookingController {
             Map<String, Object> response = new HashMap<>();
             response.put("bookingId", booking.getBookingId());
             response.put("bookingCode", booking.getBookingCode());
+            response.put("finalPrice", booking.getTotalPrice());
             response.put("message", "Booking successful");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -32,7 +33,6 @@ public class BookingController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
-
 
     @GetMapping("/admin-bookings")
     public ResponseEntity<?> getAllBookings() {
@@ -83,6 +83,5 @@ public class BookingController {
             return ResponseEntity.status(404).body(e.getMessage());
         }
     }
-    
 
 }

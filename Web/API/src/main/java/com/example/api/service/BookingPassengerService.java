@@ -76,7 +76,8 @@ public class BookingPassengerService {
                     .orElseThrow(() -> new RuntimeException("User not found with publicId: " + request.getPublicId()));
 
             // Luôn tạo contactPassenger cho người lớn 1
-            BookingPassengerDTO contactPassenger = createContactPassenger(request, booking.getBookingId(), user.getPublicId());
+            BookingPassengerDTO contactPassenger = createContactPassenger(request, booking.getBookingId(),
+                    user.getPublicId());
             createdPassengers.add(contactPassenger);
 
             // Chỉ tạo thêm hành khách nếu có nhiều hơn 1 người lớn hoặc có trẻ em/em bé
@@ -84,7 +85,8 @@ public class BookingPassengerService {
             int numChildren = request.getPassengers().getChild();
             int numInfants = request.getPassengers().getInfant();
             if ((numAdults > 1 || numChildren > 0 || numInfants > 0) && request.getPassengerDetails() != null) {
-                // Nếu có nhiều hơn 1 người lớn, chỉ lấy các người lớn 2 trở đi từ passengerDetails
+                // Nếu có nhiều hơn 1 người lớn, chỉ lấy các người lớn 2 trở đi từ
+                // passengerDetails
                 List<PassengerDetailDTO> filteredDetails = new ArrayList<>();
                 int expectedAdults = numAdults > 1 ? numAdults - 1 : 0;
                 int countAdults = 0;
@@ -100,7 +102,8 @@ public class BookingPassengerService {
                 }
                 // Tạo các hành khách bổ sung
                 for (PassengerDetailDTO detail : filteredDetails) {
-                    log.info("Passenger detail: fullName={}, gender={}, birthDate={}, type={}", detail.getFullName(), detail.getGender(), detail.getBirthDate(), detail.getPassengerType());
+                    log.info("Passenger detail: fullName={}, gender={}, birthDate={}, type={}", detail.getFullName(),
+                            detail.getGender(), detail.getBirthDate(), detail.getPassengerType());
                     BookingPassengerDTO passenger = BookingPassengerDTO.builder()
                             .bookingId(booking.getBookingId())
                             .publicId(user.getPublicId())
@@ -113,16 +116,26 @@ public class BookingPassengerService {
                 }
             }
 
-            Tour tour = tourRepo.findById(booking.getTour().getTourId())
-                    .orElseThrow(() -> new RuntimeException("Tour not found for booking"));
-            BigDecimal basePrice = tour.getPrice();
+            // Lấy giá đã được giảm từ booking hiện tại
+            BigDecimal discountedBasePrice = booking.getTotalPrice();
             int adults = request.getPassengers().getAdult();
             int children = request.getPassengers().getChild();
             int infants = request.getPassengers().getInfant();
 
-            BigDecimal totalPrice = basePrice.multiply(BigDecimal.valueOf(adults))
-                .add(basePrice.multiply(BigDecimal.valueOf(0.5)).multiply(BigDecimal.valueOf(children)))
-                .add(basePrice.multiply(BigDecimal.valueOf(0.25)).multiply(BigDecimal.valueOf(infants)));
+            // Tính toán lại tổng giá dựa trên giá đã giảm
+            BigDecimal totalPrice = discountedBasePrice
+                    .multiply(BigDecimal.valueOf(adults))
+                    .add(discountedBasePrice.multiply(BigDecimal.valueOf(0.5)).multiply(BigDecimal.valueOf(children)))
+                    .add(discountedBasePrice.multiply(BigDecimal.valueOf(0.25)).multiply(BigDecimal.valueOf(infants)));
+
+            log.info("Calculating total price:");
+            log.info("Discounted base price: {}", discountedBasePrice);
+            log.info("Adults ({}): {}", adults, discountedBasePrice.multiply(BigDecimal.valueOf(adults)));
+            log.info("Children ({}): {}", children,
+                    discountedBasePrice.multiply(BigDecimal.valueOf(0.5)).multiply(BigDecimal.valueOf(children)));
+            log.info("Infants ({}): {}", infants,
+                    discountedBasePrice.multiply(BigDecimal.valueOf(0.25)).multiply(BigDecimal.valueOf(infants)));
+            log.info("Total price: {}", totalPrice);
 
             booking.setTotalPrice(totalPrice);
             bookingRepo.save(booking);
@@ -137,7 +150,8 @@ public class BookingPassengerService {
 
     private void validateRequest(BookingPassengerRequestDTO request) {
         List<String> errors = new ArrayList<>();
-        if (request == null || request.getBookingId() == null || request.getPublicId() == null || request.getContactInfo() == null) {
+        if (request == null || request.getBookingId() == null || request.getPublicId() == null
+                || request.getContactInfo() == null) {
             throw new IllegalArgumentException("Missing required booking, user or contact info");
         }
         if (request.getContactInfo().getFullName() == null || request.getContactInfo().getFullName().trim().isEmpty()) {
@@ -146,7 +160,8 @@ public class BookingPassengerService {
         if (request.getContactInfo().getEmail() == null || request.getContactInfo().getEmail().trim().isEmpty()) {
             errors.add("Contact email is required");
         }
-        if (request.getContactInfo().getPhoneNumber() == null || request.getContactInfo().getPhoneNumber().trim().isEmpty()) {
+        if (request.getContactInfo().getPhoneNumber() == null
+                || request.getContactInfo().getPhoneNumber().trim().isEmpty()) {
             errors.add("Contact phone number is required");
         }
         if (request.getPassengers() == null || request.getPassengers().getAdult() < 1) {
@@ -157,27 +172,29 @@ public class BookingPassengerService {
         }
     }
 
-    private BookingPassengerDTO createContactPassenger(BookingPassengerRequestDTO request, Integer bookingId, String publicId) {
+    private BookingPassengerDTO createContactPassenger(BookingPassengerRequestDTO request, Integer bookingId,
+            String publicId) {
         return create(
-            BookingPassengerDTO.builder()
-                .bookingId(bookingId)
-                .publicId(publicId)
-                .fullName(request.getContactInfo().getFullName())
-                .phone(request.getContactInfo().getPhoneNumber())
-                .email(request.getContactInfo().getEmail())
-                .address(request.getContactInfo().getAddress())
-                .gender(request.getContactInfo().getGender())
-                .birthDate(request.getContactInfo().getBirthDate())
-                .passengerType("adult")
-                .build()
-        );
+                BookingPassengerDTO.builder()
+                        .bookingId(bookingId)
+                        .publicId(publicId)
+                        .fullName(request.getContactInfo().getFullName())
+                        .phone(request.getContactInfo().getPhoneNumber())
+                        .email(request.getContactInfo().getEmail())
+                        .address(request.getContactInfo().getAddress())
+                        .gender(request.getContactInfo().getGender())
+                        .birthDate(request.getContactInfo().getBirthDate())
+                        .passengerType("adult")
+                        .build());
     }
 
     private BookingPassenger mapToEntity(BookingPassengerDTO dto) {
         log.info("DTO gender={}, birthDate={}", dto.getGender(), dto.getBirthDate());
         return BookingPassenger.builder()
-                .booking(bookingRepo.findById(dto.getBookingId()).orElseThrow(() -> new RuntimeException("Booking not found")))
-                .user(userRepo.findByPublicId(dto.getPublicId()).orElseThrow(() -> new RuntimeException("User not found")))
+                .booking(bookingRepo.findById(dto.getBookingId())
+                        .orElseThrow(() -> new RuntimeException("Booking not found")))
+                .user(userRepo.findByPublicId(dto.getPublicId())
+                        .orElseThrow(() -> new RuntimeException("User not found")))
                 .fullName(dto.getFullName())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())

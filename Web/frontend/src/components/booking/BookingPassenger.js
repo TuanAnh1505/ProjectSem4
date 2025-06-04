@@ -10,7 +10,7 @@ const BookingPassenger = () => {
   const location = useLocation();
   const navigate = useNavigate();
   console.log('BookingPassenger location.state:', location.state);
-  const { bookingId, bookingCode, tourInfo, selectedDate, itineraries = [] } = location.state || {};
+  const { bookingId, bookingCode, tourInfo, selectedDate, itineraries = [], finalPrice } = location.state || {};
 
   // State cho thông tin người đặt tour
   const [useLoggedInInfo, setUseLoggedInInfo] = useState(true);
@@ -113,17 +113,18 @@ const BookingPassenger = () => {
 
   // Tính toán tổng giá
   useEffect(() => {
-    if (bookedTour) {
-      const adultPrice = bookedTour.price;
-      const childPrice = bookedTour.price * 0.5;
-      const infantPrice = bookedTour.price * 0.25;
+    if (bookedTour && location.state?.finalPrice) {
+      const basePrice = location.state.finalPrice; // Sử dụng giá sau khi áp dụng mã giảm giá
+      const adultPrice = basePrice;
+      const childPrice = basePrice * 0.5;
+      const infantPrice = basePrice * 0.25;
 
       const total = (passengerCounts.adult * adultPrice) +
         (passengerCounts.child * childPrice) +
         (passengerCounts.infant * infantPrice);
       setTotalPrice(total);
     }
-  }, [passengerCounts, bookedTour]);
+  }, [passengerCounts, bookedTour, location.state?.finalPrice]);
 
   // Xử lý thay đổi thông tin liên hệ
   const handleContactChange = (e) => {
@@ -337,6 +338,8 @@ const BookingPassenger = () => {
           bookingCode: location.state.bookingCode,
           passengers: res.data,
           tourInfo: bookedTour,
+          finalPrice: location.state.finalPrice, // Thêm giá đã giảm
+          basePrice: bookedTour.price, // Thêm giá gốc
           itineraries
         }
       });
@@ -584,7 +587,7 @@ const BookingPassenger = () => {
               <div className="tour-details">
                 <h3>{bookedTour.name}</h3>
                 <p>Ngày khởi hành: {new Date(selectedDate).toLocaleDateString('vi-VN')}</p>
-                <p>Giá: {bookedTour.price.toLocaleString()}đ</p>
+                <p>Giá: {location.state.finalPrice.toLocaleString()}đ</p>
                 <p>Mã đặt tour: {bookingCode}</p>
               </div>
             </div>
@@ -655,19 +658,19 @@ const BookingPassenger = () => {
                   {passengerCounts.adult > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Người lớn</span>
-                      <span>{passengerCounts.adult} x {bookedTour.price.toLocaleString()} đ</span>
+                      <span>{passengerCounts.adult} x {location.state.finalPrice.toLocaleString()} đ</span>
                     </div>
                   )}
                   {passengerCounts.child > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Trẻ em</span>
-                      <span>{passengerCounts.child} x {(bookedTour.price * 0.5).toLocaleString()} đ</span>
+                      <span>{passengerCounts.child} x {(location.state.finalPrice * 0.5).toLocaleString()} đ</span>
                     </div>
                   )}
                   {passengerCounts.infant > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Em bé</span>
-                      <span>{passengerCounts.infant} x {(bookedTour.price * 0.25).toLocaleString()} đ</span>
+                      <span>{passengerCounts.infant} x {(location.state.finalPrice * 0.25).toLocaleString()} đ</span>
                     </div>
                   )}
                 </div>

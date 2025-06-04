@@ -11,6 +11,7 @@ class BookingPassengerScreen extends StatefulWidget {
   final Tour tour;
   final String selectedDate;
   final List<dynamic> itineraries;
+  final double finalPrice; // Add this line
 
   const BookingPassengerScreen({
     Key? key,
@@ -19,6 +20,7 @@ class BookingPassengerScreen extends StatefulWidget {
     required this.tour,
     required this.selectedDate,
     required this.itineraries,
+    required this.finalPrice, // Add this line
   }) : super(key: key);
 
   @override
@@ -128,16 +130,27 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     }
   }
 
+  // Thay đổi hàm _calculateTotalPrice()
   void _calculateTotalPrice() {
-    final adultPrice = widget.tour.price ?? 0;
-    final childPrice = adultPrice * 0.5;
-    final infantPrice = adultPrice * 0.25;
+    // Use finalPrice instead of tour.price
+    final basePrice = widget.finalPrice;
+    final adultPrice = basePrice;
+    final childPrice = basePrice * 0.5;  // Trẻ em 50% giá người lớn
+    final infantPrice = basePrice * 0.25;  // Em bé miễn phí
 
     setState(() {
       _totalPrice = (_passengerCounts['adult']! * adultPrice) +
-          (_passengerCounts['child']! * childPrice) +
-          (_passengerCounts['infant']! * infantPrice);
+                   (_passengerCounts['child']! * childPrice) +
+                   (_passengerCounts['infant']! * infantPrice);
     });
+
+    // Log để debug
+    print('Price calculation:');
+    print('Base price (after discount): $basePrice');
+    print('Adult count: ${_passengerCounts['adult']}');
+    print('Child count: ${_passengerCounts['child']}');
+    print('Infant count: ${_passengerCounts['infant']}');
+    print('Total price: $_totalPrice');
   }
 
   void _handlePassengerCountChange(String type, String operation) {
@@ -293,7 +306,10 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
               bookingId: widget.bookingId.toString(),
               bookingCode: widget.bookingCode,
               passengers: convertedResponse,
-              tourInfo: tourInfo,
+              tourInfo: {
+                ...tourInfo,
+                'price': widget.finalPrice, // Thay đổi ở đây: sử dụng giá đã giảm
+              },
               contactInfo: contactInfo,
               itineraries: convertedItineraries,
             ),
@@ -1092,4 +1108,3 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     return widgets;
   }
 }
-  
