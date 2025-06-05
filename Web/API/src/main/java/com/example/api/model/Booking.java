@@ -1,6 +1,5 @@
 package com.example.api.model;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -66,4 +65,3 @@ public class Booking {
         updatedAt = LocalDateTime.now();
     }
 }
-

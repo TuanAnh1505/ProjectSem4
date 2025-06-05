@@ -51,22 +51,48 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     return '$type (${age.isNotEmpty ? '$age Tuổi' : ''})';
   }
 
+  // Thay đổi hàm calculateTotal()
   double calculateTotal() {
-    double total = 0;
+    if (widget.tourInfo.isEmpty) return 0;
+    
+    // Lấy giá đã giảm từ tourInfo
     final basePrice = widget.tourInfo['price'] as double;
-    for (var p in widget.passengers) {
-      switch (p['passengerType']) {
+    
+    // Khởi tạo biến đếm số lượng từng loại hành khách
+    int adultCount = 0;
+    int childCount = 0;
+    int infantCount = 0;
+
+    // Đếm số lượng từng loại hành khách
+    for (var passenger in widget.passengers) {
+      switch (passenger['passengerType']) {
         case 'adult':
-          total += basePrice;
+          adultCount++;
           break;
         case 'child':
-          total += basePrice * 0.5;
+          childCount++;
           break;
         case 'infant':
-          total += basePrice * 0.25;
+          infantCount++;
           break;
       }
     }
+
+    // Tính giá cho từng loại
+    final adultTotal = adultCount * basePrice;
+    final childTotal = childCount * (basePrice * 0.5);  // Trẻ em 50% giá
+    final infantTotal = infantCount * (basePrice * 0.25);  // Em bé miễn phí - Sửa từ 0.25 thành 0.0
+
+    final total = adultTotal + childTotal + infantTotal;
+
+    // Log để debug
+    print('Price calculation details:');
+    print('Base price per adult: $basePrice');
+    print('Adult count: $adultCount x $basePrice = $adultTotal');
+    print('Child count: $childCount x ${basePrice * 0.5} = $childTotal');
+    print('Infant count: $infantCount x ${basePrice * 0.25} = $infantTotal');
+    print('Total price: $total');
+
     return total;
   }
 

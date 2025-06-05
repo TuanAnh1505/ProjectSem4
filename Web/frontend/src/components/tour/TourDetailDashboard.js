@@ -16,6 +16,7 @@ export default function TourDetailDashboard() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [relatedTours, setRelatedTours] = useState([]);
   const [itineraries, setItineraries] = useState([]);
+  const [finalPrice, setFinalPrice] = useState(0); // Add new state for final price
 
   const [openScheduleId, setOpenScheduleId] = useState(null);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
@@ -168,13 +169,18 @@ export default function TourDetailDashboard() {
       if (res.data && res.data.bookingId) {
         toast.success(res.data.message || 'Đặt tour thành công!');
         await fetchItineraries();
+
+        // Đảm bảo lấy finalPrice từ response
+        const finalPrice = res.data.finalPrice;
+        
         navigate('/booking-passenger', { 
           state: { 
             bookingId: res.data.bookingId,
             bookingCode: res.data.bookingCode,
             tourInfo: tour,
             selectedDate: selectedSchedule?.startDate,
-            itineraries: selectedSchedule?.itineraries || []
+            itineraries: selectedSchedule?.itineraries || [],
+            finalPrice: finalPrice // Truyền finalPrice từ response
           }
         });
       } else {

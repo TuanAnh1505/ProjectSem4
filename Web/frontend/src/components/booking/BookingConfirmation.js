@@ -44,23 +44,41 @@ const BookingConfirmation = () => {
   const contact = contactInfo || passengers[0] || {};
 
   const calculateTotal = () => {
-    let total = 0;
-    const basePrice = tourInfo.price;
-    passengers.forEach(p => {
-      switch (p.passengerType) {
-        case 'adult':
-          total += basePrice;
-          break;
-        case 'child':
-          total += basePrice * 0.5;
-          break;
-        case 'infant':
-          total += basePrice * 0.25;
-          break;
-        default:
-          break;
-      }
+    if (!tourInfo || !passengers) return 0;
+    
+    // Lấy giá đã giảm từ state, nếu không có thì lấy giá gốc
+    const basePrice = location.state?.finalPrice || location.state?.basePrice || tourInfo.price;
+    
+    // Đếm số lượng từng loại hành khách
+    const counts = passengers.reduce((acc, p) => {
+      acc[p.passengerType] = (acc[p.passengerType] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Tính tổng tiền cho từng loại khách
+    const adultPrice = basePrice;
+    const childPrice = basePrice * 0.5; // Trẻ em 50% giá người lớn
+    const infantPrice = 0; // Em bé miễn phí
+
+    const adultTotal = (counts.adult || 0) * adultPrice;
+    const childTotal = (counts.child || 0) * childPrice;
+    const infantTotal = (counts.infant || 0) * infantPrice;
+
+    const total = adultTotal + childTotal + infantTotal;
+
+    // Log để debug
+    console.log('Price calculation:', {
+      basePrice,
+      counts,
+      adultPrice,
+      childPrice,
+      infantPrice,
+      adultTotal,
+      childTotal,
+      infantTotal,
+      total
     });
+
     return total;
   };
 
