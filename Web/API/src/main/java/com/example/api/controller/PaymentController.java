@@ -218,4 +218,19 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    // Cho phép user yêu cầu hoàn tiền (chỉ cho payment của chính mình)
+    @PutMapping("/{id}/request-refund")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> requestRefund(
+            @PathVariable Integer id,
+            @RequestParam(required = false) String notes,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
+        try {
+            PaymentResponseDTO updated = paymentService.requestRefund(id, notes, userDetails.getUsername());
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

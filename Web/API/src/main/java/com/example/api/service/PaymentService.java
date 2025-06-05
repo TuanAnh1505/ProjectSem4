@@ -242,6 +242,29 @@ public class PaymentService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
+    public PaymentResponseDTO requestRefund(Integer paymentId, String notes, String email) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        // Kiểm tra user có quyền (email phải trùng với payment.user.email)
+        if (!payment.getUser().getEmail().equalsIgnoreCase(email)) {
+            throw new RuntimeException("Bạn không có quyền yêu cầu hoàn tiền cho payment này!");
+        }
+        PaymentStatus refundStatus = paymentStatusRepository.findById(7)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái Request Refund"));
+        payment.setStatus(refundStatus);
+        payment = paymentRepository.save(payment);
+
+        // Lưu lịch sử
+        PaymentHistory history = new PaymentHistory();
+        history.setPayment(payment);
+        history.setStatus(refundStatus);
+        history.setNotes(notes != null ? notes : "User requested refund");
+        paymentHistoryRepository.save(history);
+
+        return convertToDTO(payment);
+    }
+
     private PaymentResponseDTO convertToDTO(Payment payment) {
         PaymentResponseDTO dto = new PaymentResponseDTO();
         dto.setPaymentId(payment.getPaymentId());
