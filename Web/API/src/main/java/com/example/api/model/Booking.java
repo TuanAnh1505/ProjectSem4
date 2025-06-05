@@ -47,6 +47,12 @@ public class Booking {
     @Column(name = "booking_code", unique = true, length = 20)
     private String bookingCode;
 
+    @Column(name = "discount_code")
+    private String discountCode;
+
+    @Column(name = "discount_id")
+    private Integer discountId;
+
     @PrePersist
     protected void onCreate() {
         if (bookingDate == null) {

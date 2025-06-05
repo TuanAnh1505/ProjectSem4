@@ -11,7 +11,6 @@ export default function TourDetailDashboard() {
   const [tour, setTour] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [discountCode, setDiscountCode] = useState('');
   const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [relatedTours, setRelatedTours] = useState([]);
@@ -161,7 +160,6 @@ export default function TourDetailDashboard() {
         userId: parseInt(userId),
         tourId: parseInt(tourId),
         scheduleId: selectedScheduleId,
-        discountCode: discountCode.trim() || null
       };
       console.log('Booking request:', bookingRequest);
 
@@ -348,16 +346,6 @@ export default function TourDetailDashboard() {
         {/* Booking form */}
         <div style={{ flex: 1, minWidth: 320, background: '#e3f2fd', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0' }}>
           <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 18, marginBottom: 16 }}>Đặt tour</div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontWeight: 600 }}>Mã giảm giá (nếu có):</label>
-            <input
-              type="text"
-              placeholder="VD: NEWUSER10"
-              value={discountCode}
-              onChange={(e) => setDiscountCode(e.target.value)}
-              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #1976d2', marginTop: 6, marginBottom: 12 }}
-            />
-          </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ fontWeight: 600 }}>Chọn lịch trình:</label>
             <select

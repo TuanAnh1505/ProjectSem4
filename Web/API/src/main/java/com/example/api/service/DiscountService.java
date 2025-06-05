@@ -25,4 +25,8 @@ public class DiscountService {
 
         emailService.sendDiscountCodeEmail(user.getEmail(), discount.getCode(), discount.getDescription());
     }
+
+    public java.util.Optional<Discount> getDiscountByCode(String code) {
+        return discountRepository.findByCode(code);
+    }
 }

@@ -42,16 +42,28 @@ CREATE TABLE `audit_logs` (
 --
 
 CREATE TABLE `bookings` (
-  `booking_id` int(11) NOT NULL,
-  `booking_code` varchar(20) DEFAULT NULL,
+  `booking_id` int(11) NOT NULL AUTO_INCREMENT,
   `tour_id` int(11) NOT NULL,
-  `booking_date` datetime DEFAULT current_timestamp(),
-  `status_id` int(11) NOT NULL,
+  `schedule_id` int(11) DEFAULT NULL,
+  `booking_date` datetime DEFAULT NULL,
+  `status_id` int(11) DEFAULT NULL,
   `total_price` decimal(38,2) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `userid` bigint(20) NOT NULL,
-  `schedule_id` int(11) DEFAULT NULL
+  `booking_code` varchar(20) NOT NULL,
+  `discount_code` varchar(50) DEFAULT NULL,
+  `discount_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`booking_id`),
+  UNIQUE KEY `booking_code` (`booking_code`),
+  KEY `tour_id` (`tour_id`),
+  KEY `status_id` (`status_id`),
+  KEY `userid` (`userid`),
+  KEY `discount_id` (`discount_id`),
+  CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`tour_id`),
+  CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `booking_statuses` (`status_id`),
+  CONSTRAINT `bookings_ibfk_3` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`),
+  CONSTRAINT `bookings_ibfk_4` FOREIGN KEY (`discount_id`) REFERENCES `discounts` (`discount_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

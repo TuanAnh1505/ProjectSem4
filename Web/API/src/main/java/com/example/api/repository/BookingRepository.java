@@ -60,4 +60,8 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findAllByUser_Userid(@Param("userid") Long userid);
 
     boolean existsByBookingCode(String bookingCode);
+
+    Optional<Booking> findByUser_UseridAndTour_TourIdAndScheduleIdAndStatus_StatusName(Long userId, Integer tourId, Integer scheduleId, String statusName);
+
+    List<Booking> findByStatus_StatusName(String statusName);
 }

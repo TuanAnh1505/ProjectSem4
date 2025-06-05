@@ -117,22 +117,65 @@ public class BookingService {
             BookingStatus status = bookingStatusRepository.findByStatusName("PENDING")
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái đặt tour mặc định."));
 
-            // Create and save booking
-            Booking booking = new Booking();
+            // Kiểm tra booking PENDING đã tồn tại cho user/tour/schedule
+            Optional<Booking> existingPending = bookingRepository
+                .findByUser_UseridAndTour_TourIdAndScheduleIdAndStatus_StatusName(
+                    request.getUserId(), request.getTourId(), request.getScheduleId(), "PENDING"
+                );
+
+            Booking booking;
+            if (existingPending.isPresent()) {
+                Booking pending = existingPending.get();
+                // Kiểm tra xem booking này có payment nào chưa
+                List<Payment> payments = paymentRepository.findByBooking_BookingId(pending.getBookingId());
+                if (payments == null || payments.isEmpty()) {
+                    // Nếu chưa có payment nào, xóa booking này để user có thể đặt lại
+                    bookingRepository.delete(pending);
+                    // Sau đó tạo booking mới như bình thường
+                    booking = new Booking();
+                    booking.setUser(user);
+                    booking.setTour(tour);
+                    booking.setScheduleId(request.getScheduleId());
+                    booking.setBookingDate(LocalDateTime.now());
+                    booking.setTotalPrice(price);
+                    booking.setStatus(status);
+                    if (discount != null) {
+                        booking.setDiscountCode(discount.getCode());
+                        booking.setDiscountId(discount.getDiscountId());
+                    }
+                    String bookingCode;
+                    do {
+                        bookingCode = generateBookingCode();
+                    } while (bookingRepository.existsByBookingCode(bookingCode));
+                    booking.setBookingCode(bookingCode);
+                } else {
+                    // Nếu đã có payment, cập nhật lại booking như logic hiện tại
+                    booking = pending;
+                    booking.setBookingDate(LocalDateTime.now());
+                    booking.setTotalPrice(price);
+                    booking.setStatus(status);
+                    booking.setDiscountCode(discount != null ? discount.getCode() : null);
+                    booking.setDiscountId(discount != null ? discount.getDiscountId() : null);
+                }
+            } else {
+                // Tạo booking mới như hiện tại
+                booking = new Booking();
             booking.setUser(user);
             booking.setTour(tour);
             booking.setScheduleId(request.getScheduleId());
             booking.setBookingDate(LocalDateTime.now());
             booking.setTotalPrice(price);
             booking.setStatus(status);
-
-            // Generate unique booking code
+                if (discount != null) {
+                    booking.setDiscountCode(discount.getCode());
+                    booking.setDiscountId(discount.getDiscountId());
+                }
             String bookingCode;
             do {
                 bookingCode = generateBookingCode();
             } while (bookingRepository.existsByBookingCode(bookingCode));
             booking.setBookingCode(bookingCode);
-
+            }
             Booking saved = bookingRepository.save(booking);
 
             // Update schedule status if needed
@@ -142,16 +185,7 @@ public class BookingService {
                 tourScheduleRepository.save(schedule);
             }
 
-            // Save discount usage if applicable
-            if (discount != null) {
-                UserDiscount ud = new UserDiscount();
-                ud.setUserid(user.getUserid());
-                ud.setTourId(tour.getTourId());
-                ud.setDiscountId(discount.getDiscountId());
-                ud.setUsed(true);
-                userDiscountRepository.save(ud);
-            }
-
+            // Xóa phần lưu UserDiscount ở đây vì sẽ chuyển sang PaymentService
             return saved;
         } catch (Exception e) {
             System.err.println("Lỗi khi đặt tour: " + e.getMessage());

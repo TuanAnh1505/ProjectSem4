@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './BookingConfirmation.css';
 
 // Hàm tính tuổi từ ngày sinh
@@ -30,6 +31,20 @@ const BookingConfirmation = () => {
   const navigate = useNavigate();
   console.log('BookingConfirmation location.state:', location.state);
   const { bookingId, bookingCode, passengers, tourInfo, contactInfo, itineraries = [] } = location.state || {};
+
+  // Thêm state để lưu booking lấy từ backend
+  const [bookingFromApi, setBookingFromApi] = React.useState(null);
+
+  React.useEffect(() => {
+    if (bookingId) {
+      const token = localStorage.getItem('token');
+      axios.get(`http://localhost:8080/api/bookings/${bookingId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => setBookingFromApi(res.data))
+      .catch(err => console.error('Lỗi lấy booking:', err));
+    }
+  }, [bookingId]);
 
   if (!bookingCode && !bookingId) {
     return (
@@ -119,7 +134,7 @@ const BookingConfirmation = () => {
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Mã đặt chỗ:</b> <span style={{ color: 'red', flex: 1 }}>{bookingCode}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Ngày đặt:</b> <span style={{ flex: 1 }}>{new Date().toLocaleString('vi-VN')}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Số khách:</b> <span style={{ flex: 1 }}>{passengers.length}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold', flex: 1 }}>{calculateTotal().toLocaleString()} đ</span></div>
+            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold', flex: 1 }}>{(bookingFromApi?.totalPrice || calculateTotal()).toLocaleString()} đ</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Trạng thái:</b> <span style={{ color: '#388e3c', fontWeight: 'bold', flex: 1 }}>{bookingStatus}</span></div>
             {/* <div><b>Ghi chú:</b> {bookingNote}</div> */}
           </div>
@@ -149,7 +164,7 @@ const BookingConfirmation = () => {
             </table>
             <hr/>
             <div style={{ textAlign: 'right', fontWeight: 'bold', color: 'red', fontSize: 20 }}>
-              Tổng cộng: {calculateTotal().toLocaleString()} đ
+              Tổng cộng: {(bookingFromApi?.totalPrice || calculateTotal()).toLocaleString()} đ
             </div>
           </div>
         </div>

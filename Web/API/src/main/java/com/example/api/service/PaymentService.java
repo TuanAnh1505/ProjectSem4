@@ -56,6 +56,9 @@ public class PaymentService {
     @Autowired
     private BookingStatusRepository bookingStatusRepository;
 
+    @Autowired
+    private UserDiscountRepository userDiscountRepository;
+
     private static final String PARTNER_CODE = "MOMO";
     private static final String ACCESS_KEY = "F8BBA842ECF85";
     private static final String SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
@@ -140,6 +143,17 @@ public class PaymentService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái CONFIRMED"));
             booking.setStatus(confirmedStatus);
             bookingRepository.save(booking);
+
+            // Đánh dấu mã giảm giá đã sử dụng nếu có
+            if (booking.getDiscountId() != null) {
+                UserDiscount ud = new UserDiscount();
+                ud.setUserid(booking.getUser().getUserid());
+                ud.setTourId(booking.getTour().getTourId());
+                ud.setDiscountId(booking.getDiscountId());
+                ud.setUsed(true);
+                userDiscountRepository.save(ud);
+            }
+
             try {
                 User user = userRepository.findById(payment.getUser().getUserid())
                         .orElseThrow(() -> new RuntimeException("User not found"));

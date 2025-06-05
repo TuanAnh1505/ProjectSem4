@@ -15,6 +15,8 @@
         private ContactInfo contactInfo;
         private PassengerCounts passengers;
         private List<PassengerDetailDTO> passengerDetails;
+        private String discountCode;
+        private Double discountedPrice;
 
 
 

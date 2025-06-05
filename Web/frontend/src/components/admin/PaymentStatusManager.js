@@ -119,9 +119,12 @@ const PaymentStatusManager = () => {
       statuses.find(s => s.paymentStatusId === p.statusId)?.statusName === filterStatus;
     return matchSearch && matchStatus;
   });
-  const total = filteredPayments.length;
+
+  // Sắp xếp payments theo ngày mới nhất lên đầu
+  const sortedPayments = filteredPayments.slice().sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
+  const total = sortedPayments.length;
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const pagedPayments = filteredPayments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pagedPayments = sortedPayments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (loading) return <div>Đang tải dữ liệu...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;

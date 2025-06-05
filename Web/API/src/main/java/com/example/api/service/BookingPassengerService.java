@@ -15,6 +15,8 @@ import com.example.api.repository.BookingPassengerRepository;
 import com.example.api.repository.BookingRepository;
 import com.example.api.repository.TourRepository;
 import com.example.api.repository.UserRepository;
+import com.example.api.repository.DiscountRepository;
+import com.example.api.model.Discount;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,6 +32,7 @@ public class BookingPassengerService {
     private final BookingRepository bookingRepo;
     private final UserRepository userRepo;
     private final TourRepository tourRepo;
+    private final DiscountRepository discountRepo;
 
     public BookingPassengerDTO create(BookingPassengerDTO dto) {
         BookingPassenger passenger = mapToEntity(dto);
@@ -137,7 +140,20 @@ public class BookingPassengerService {
                     discountedBasePrice.multiply(BigDecimal.valueOf(0.25)).multiply(BigDecimal.valueOf(infants)));
             log.info("Total price: {}", totalPrice);
 
-            booking.setTotalPrice(totalPrice);
+            // Nếu có discountedPrice từ request, ưu tiên cập nhật giá booking bằng giá đã giảm
+            if (request.getDiscountedPrice() != null && request.getDiscountedPrice() > 0) {
+                booking.setTotalPrice(BigDecimal.valueOf(request.getDiscountedPrice()));
+                // Cập nhật discount_code và discount_id nếu có
+                if (request.getDiscountCode() != null && !request.getDiscountCode().isBlank()) {
+                    Discount discount = discountRepo.findByCode(request.getDiscountCode()).orElse(null);
+                    if (discount != null) {
+                        booking.setDiscountCode(discount.getCode());
+                        booking.setDiscountId(discount.getDiscountId());
+                    }
+                }
+            } else {
+                booking.setTotalPrice(totalPrice);
+            }
             bookingRepo.save(booking);
 
             return createdPassengers;
