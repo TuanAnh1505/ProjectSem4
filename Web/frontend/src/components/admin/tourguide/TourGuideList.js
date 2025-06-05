@@ -241,6 +241,7 @@ const TourGuideList = () => {
                     className="btn btn-sm btn-outline-primary me-2"
                     onClick={() => handleEdit(tourGuide)}
                     title="Chỉnh sửa"
+                    style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0 }}
                   >
                     <FaEdit />
                   </button>
@@ -248,6 +249,7 @@ const TourGuideList = () => {
                     className="btn btn-sm btn-outline-danger"
                     onClick={() => handleDelete(tourGuide)}
                     title="Xóa"
+                    style={{ color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0 }}
                   >
                     <FaTrash />
                   </button>

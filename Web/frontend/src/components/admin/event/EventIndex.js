@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { FaPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 import { FiSearch, FiEdit, FiTrash2 } from 'react-icons/fi';
 import '../../styles/event/EventIndex.css';
 import '../../styles/destination/DestinationIndex.css';
@@ -218,10 +218,10 @@ const EventIndex = () => {
 
     return (
         <div className="container">
-            <div className="header">
-                <h2>Quản lý sự kiện</h2>
-                <Link to="/admin/event/add" className="create-btn">
-                   <FaPlus /> Tạo sự kiện
+            <div className="event-header">
+                <h2 className="event-title">Quản lý sự kiện</h2>
+                <Link to="/admin/event/add" className="event-add-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#4a90e2', fontSize: 22 }}>
+                    <FaPlus /> Tạo sự kiện
                 </Link>
             </div>
 
@@ -346,14 +346,14 @@ const EventIndex = () => {
                             <td>{new Date(event.startDate).toLocaleString()}</td>
                             <td>{new Date(event.endDate).toLocaleString()}</td>
                             <td>
-                                <div className="event-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
+                                <div className="event-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                                     <Link
                                         to={`/admin/event/detail/${event.eventId}`}
                                         className="event-action-link"
                                         title="Xem chi tiết"
                                         style={{ color: '#4a90e2', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >
-                                        <FaSearch />
+                                        <FaEye />
                                     </Link>
                                     <Link
                                         to={`/admin/event/edit/${event.eventId}`}
@@ -377,13 +377,11 @@ const EventIndex = () => {
                     ))}
                 </tbody>
             </table>
-            
             <Pagination 
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
             />
-            
             {selectedMedia && (
                 <MediaModal
                     media={selectedMedia}

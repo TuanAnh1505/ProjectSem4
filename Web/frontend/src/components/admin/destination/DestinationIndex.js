@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import {FaPlus, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
+import {FaPlus, FaTrash, FaExclamationTriangle, FaEye, FaEdit } from 'react-icons/fa';
 import '../../styles/destination/DestinationIndex.css';
 
 const MediaPreview = ({ filePath, onClick }) => {
@@ -203,22 +203,28 @@ const DestinationIndex = () => {
                             <td>{destination.location}</td>
                             <td>{destination.rating}</td>
                             <td>
-                                <div className="action-group">
+                                <div className="action-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                                     <Link
                                         to={`/admin/destination/detail/${destination.destinationId}`}
                                         className="action-link"
+                                        title="Xem chi tiết"
+                                        style={{ color: '#4a90e2', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >
-                                        🔍  
+                                        <FaEye />
                                     </Link>
                                     <Link
                                         to={`/admin/destination/edit/${destination.destinationId}`}
                                         className="action-link"
+                                        title="Chỉnh sửa"
+                                        style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >
-                                        ✏️
+                                        <FaEdit />
                                     </Link>
-                                    <button 
+                                    <button
                                         className="delete-button"
                                         onClick={() => showDeleteAlert(destination.destinationId, destination.name)}
+                                        title="Xóa"
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >
                                         <FaTrash />
                                     </button>
@@ -228,47 +234,7 @@ const DestinationIndex = () => {
                     ))}
                 </tbody>
             </table>
-            
-            <Pagination 
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-            />
-            
-            {selectedMedia && (
-                <MediaModal
-                    media={selectedMedia}
-                    onClose={() => setSelectedMedia(null)}
-                />
-            )}
-
-            {deleteAlert.show && (
-                <div className="destination-alert-overlay">
-                    <div className="destination-alert-dialog">
-                        <div className="destination-alert-icon-wrapper">
-                            <FaExclamationTriangle className="destination-alert-icon" />
-                        </div>
-                        <h2 className="destination-alert-title">Xóa Điểm Đến</h2>
-                        <p className="destination-alert-message">
-                            Bạn có chắc chắn muốn xóa điểm đến "{deleteAlert.destinationName}"? Hành động này không thể hoàn tác.
-                        </p>
-                        <div className="destination-alert-buttons">
-                            <button 
-                                className="destination-alert-btn destination-alert-btn-cancel"
-                                onClick={hideDeleteAlert}
-                            >
-                                Hủy
-                            </button>
-                            <button 
-                                className="destination-alert-btn destination-alert-btn-delete"
-                                onClick={deleteDestination}
-                            >
-                                Xóa
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
         </div>
     );
 };

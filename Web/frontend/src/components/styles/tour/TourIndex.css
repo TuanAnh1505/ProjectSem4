@@ -295,13 +295,13 @@
   }
   
   .status-published {
-    background: #e6f9ed;
-    color: #1abc60;
+    background: #f6f6f7;
+    color: #035c32;
   }
   
-  .status-cancelled {
-    background: #fde8e8;
-    color: #e74c3c;
+  .status-cancelled-tour {
+    background: #f4f1f1;
+    color: #a60314;
   }
   
   .status-dot {

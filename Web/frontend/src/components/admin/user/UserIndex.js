@@ -190,6 +190,7 @@ const UserIndex = () => {
                       className="userindex-btn userindex-btn-danger userindex-btn-sm"
                       onClick={() => handleDeleteUser(user.userid, user.fullName)}
                       title="Xóa tài khoản"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                       <FaTrash />
                     </button>
