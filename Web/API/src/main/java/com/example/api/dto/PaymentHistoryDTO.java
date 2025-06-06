@@ -9,6 +9,5 @@ public class PaymentHistoryDTO {
     private Integer paymentId;
     private Integer statusId;
     private String statusName;
-    private String notes;
     private LocalDateTime createdAt;
 } 

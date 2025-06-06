@@ -18,10 +18,10 @@ import TourDashboard from './components/tour/TourDashboard';
 import TourDetailDashboard from './components/tour/TourDetailDashboard';
 import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
-import BookingConfirmation from './components/booking/BookingConfirmation';
 import Payment from './pages/Payment';
-import PaymentStatusManager from './components/admin/PaymentStatusManager';
+import UpdateInfoUser from './components/auth/UpdateInfoUser';
 import './App.css';
+import BookingConfirmation from './components/booking/BookingConfirmation';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -102,11 +102,23 @@ const App = () => {
             </Layout>
           } />
 
+          <Route path="/update-user-info" element={
+            <Layout>
+              <UpdateInfoUser />
+            </Layout>
+          } />
+
           <Route path="/booking-confirmation" element={
             <Layout>
               <BookingConfirmation />
             </Layout>
           } />
+
+          {/* <Route path="/account/:publicId" element={
+            <Layout>
+              <UserProfile />
+            </Layout>
+          } /> */}
 
           {/* Authentication and user routes */}
           <Route path="/login" element={<Login />} />
@@ -115,6 +127,14 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route 
+            path="/account/:publicId" 
+            element={
+              <Layout>
+                <ProtectedRoute element={<UpdateInfoUser />} />
+              </Layout>
+            } 
+          />
           <Route
             path="/tour-dashboard/detail/:tourId"
             element={<ProtectedRoute element={<TourDetailDashboard />} />}
@@ -293,8 +313,6 @@ const App = () => {
               </Layout>
             }
           />
-
-          {/* New route for PaymentStatusManager */}
           <Route
             path="/admin/payments"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}

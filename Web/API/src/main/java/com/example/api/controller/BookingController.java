@@ -23,6 +23,8 @@ public class BookingController {
             Booking booking = bookingService.createBooking(request);
             Map<String, Object> response = new HashMap<>();
             response.put("bookingId", booking.getBookingId());
+            response.put("bookingCode", booking.getBookingCode());
+            response.put("finalPrice", booking.getTotalPrice());
             response.put("message", "Booking successful");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -31,7 +33,6 @@ public class BookingController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
-
 
     @GetMapping("/admin-bookings")
     public ResponseEntity<?> getAllBookings() {
@@ -71,6 +72,15 @@ public class BookingController {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/user/{publicId}")
+    public ResponseEntity<?> getBookingsByUserPublicId(@PathVariable String publicId) {
+        try {
+            return ResponseEntity.ok(bookingService.getBookingsByUserPublicId(publicId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
         }
     }
 

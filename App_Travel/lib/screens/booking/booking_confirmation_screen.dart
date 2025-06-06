@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../payment/payment_screen.dart';
 
-class BookingConfirmationScreen extends StatelessWidget {
+class BookingConfirmationScreen extends StatefulWidget {
   final String bookingId;
+  final String bookingCode;
   final List<Map<String, dynamic>> passengers;
   final Map<String, dynamic> tourInfo;
   final Map<String, dynamic>? contactInfo;
@@ -11,12 +13,18 @@ class BookingConfirmationScreen extends StatelessWidget {
   const BookingConfirmationScreen({
     Key? key,
     required this.bookingId,
+    required this.bookingCode,
     required this.passengers,
     required this.tourInfo,
     this.contactInfo,
     this.itineraries = const [],
   }) : super(key: key);
 
+  @override
+  State<BookingConfirmationScreen> createState() => _BookingConfirmationScreenState();
+}
+
+class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   // Hàm tính tuổi từ ngày sinh
   String getAge(String? birthDate) {
     if (birthDate == null) return '';
@@ -28,7 +36,6 @@ class BookingConfirmationScreen extends StatelessWidget {
     }
     return age.toString();
   }
-
 
   // Hàm hiển thị loại khách + tuổi
   String getTypeAndAge(Map<String, dynamic> passenger) {
@@ -44,28 +51,54 @@ class BookingConfirmationScreen extends StatelessWidget {
     return '$type (${age.isNotEmpty ? '$age Tuổi' : ''})';
   }
 
+  // Thay đổi hàm calculateTotal()
   double calculateTotal() {
-    double total = 0;
-    final basePrice = tourInfo['price'] as double;
-    for (var p in passengers) {
-      switch (p['passengerType']) {
+    if (widget.tourInfo.isEmpty) return 0;
+    
+    // Lấy giá đã giảm từ tourInfo
+    final basePrice = widget.tourInfo['price'] as double;
+    
+    // Khởi tạo biến đếm số lượng từng loại hành khách
+    int adultCount = 0;
+    int childCount = 0;
+    int infantCount = 0;
+
+    // Đếm số lượng từng loại hành khách
+    for (var passenger in widget.passengers) {
+      switch (passenger['passengerType']) {
         case 'adult':
-          total += basePrice;
+          adultCount++;
           break;
         case 'child':
-          total += basePrice * 0.5;
+          childCount++;
           break;
         case 'infant':
-          total += basePrice * 0.25;
+          infantCount++;
           break;
       }
     }
+
+    // Tính giá cho từng loại
+    final adultTotal = adultCount * basePrice;
+    final childTotal = childCount * (basePrice * 0.5);  // Trẻ em 50% giá
+    final infantTotal = infantCount * (basePrice * 0.25);  // Em bé miễn phí - Sửa từ 0.25 thành 0.0
+
+    final total = adultTotal + childTotal + infantTotal;
+
+    // Log để debug
+    print('Price calculation details:');
+    print('Base price per adult: $basePrice');
+    print('Adult count: $adultCount x $basePrice = $adultTotal');
+    print('Child count: $childCount x ${basePrice * 0.5} = $childTotal');
+    print('Infant count: $infantCount x ${basePrice * 0.25} = $infantTotal');
+    print('Total price: $total');
+
     return total;
   }
 
   @override
   Widget build(BuildContext context) {
-    final contact = contactInfo ?? passengers[0] ?? {};
+    final contact = widget.contactInfo ?? widget.passengers[0] ?? {};
     final bookingStatus = 'Đã xác nhận';
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
@@ -83,16 +116,7 @@ class BookingConfirmationScreen extends StatelessWidget {
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.orange.withOpacity(0.1),
-              Colors.white,
-            ],
-          ),
-        ),
+        color: Colors.white,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -115,9 +139,9 @@ class BookingConfirmationScreen extends StatelessWidget {
                 'CHI TIẾT BOOKING',
                 Icons.confirmation_number,
                 [
-                  _buildInfoRow('Mã đặt chỗ:', bookingId, Icons.qr_code, valueColor: Colors.red),
+                  _buildInfoRow('Mã đặt chỗ:', widget.bookingCode.isNotEmpty ? widget.bookingCode : widget.bookingId, Icons.qr_code, valueColor: Colors.red),
                   _buildInfoRow('Ngày đặt:', DateFormat('dd/MM/yyyy').format(DateTime.now()), Icons.calendar_today),
-                  _buildInfoRow('Số khách:', passengers.length.toString(), Icons.people),
+                  _buildInfoRow('Số khách:', widget.passengers.length.toString(), Icons.people),
                   _buildInfoRow('Tổng cộng:', currencyFormat.format(calculateTotal()),
                       Icons.payments, valueColor: Colors.orange, isBold: true),
                   _buildInfoRow('Trạng thái:', bookingStatus,
@@ -272,7 +296,7 @@ class BookingConfirmationScreen extends StatelessWidget {
                   ),
                 ),
               ],
-              rows: passengers.map((p) {
+              rows: widget.passengers.map((p) {
                 return DataRow(
                   cells: [
                     DataCell(Text(p['fullName'] ?? '')),
@@ -322,16 +346,16 @@ class BookingConfirmationScreen extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (tourInfo['imageUrl'] != null && (tourInfo['imageUrl'] as String).isNotEmpty)
+              if (widget.tourInfo['imageUrl'] != null && (widget.tourInfo['imageUrl'] as String).isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
-                    'http://10.0.2.2:8080${tourInfo['imageUrl']}',
+                    'http://10.0.2.2:8080${widget.tourInfo['imageUrl']}',
                     width: 200,
                     height: 150,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      print('Image load error: $error, url: http://10.0.2.2:8080${tourInfo['imageUrl']}');
+                      print('Image load error: $error, url: http://10.0.2.2:8080${widget.tourInfo['imageUrl']}');
                       return Container(
                         width: 200,
                         height: 150,
@@ -361,7 +385,7 @@ class BookingConfirmationScreen extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  tourInfo['name'] ?? '',
+                  widget.tourInfo['name'] ?? '',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -371,10 +395,10 @@ class BookingConfirmationScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          _buildInfoRow('Mã booking:', bookingId, Icons.qr_code, valueColor: Colors.red),
+          _buildInfoRow('Mã booking:', widget.bookingCode.isNotEmpty ? widget.bookingCode : widget.bookingId, Icons.qr_code, valueColor: Colors.red),
           _buildInfoRow('Trạng thái:', 'Đã xác nhận',
               Icons.check_circle, valueColor: const Color(0xFF388e3c), isBold: true),
-          if (itineraries.isNotEmpty) ...[
+          if (widget.itineraries.isNotEmpty) ...[
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(16),
@@ -403,9 +427,9 @@ class BookingConfirmationScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: itineraries.length,
+                      itemCount: widget.itineraries.length,
                       itemBuilder: (context, index) {
-                        final itinerary = itineraries[index];
+                        final itinerary = widget.itineraries[index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(12),
@@ -452,7 +476,15 @@ class BookingConfirmationScreen extends StatelessWidget {
             height: 50,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Implement payment functionality
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PaymentScreen(
+                      bookingId: widget.bookingId,
+                      amount: calculateTotal(),
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,

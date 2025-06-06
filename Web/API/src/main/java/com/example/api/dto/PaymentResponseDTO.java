@@ -16,7 +16,6 @@ public class PaymentResponseDTO {
     private String statusName;
     private String transactionId;
     private LocalDateTime paymentDate;
-    private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 } 

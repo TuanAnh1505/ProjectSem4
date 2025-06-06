@@ -6,6 +6,11 @@ import 'screens/auth/change_password_screen.dart';
 import 'services/deep_link_handler.dart';
 import 'widgets/app_navigation.dart';
 import 'screens/tour/tour_screen.dart';
+import 'screens/search_screen.dart';
+import 'screens/auth/personal_page_screen.dart';
+import 'screens/auth/update_info_user_screen.dart';
+import 'screens/setting_screen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +46,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: _deepLinkHandler.navigatorKey,
-      title: 'Tour Booking',
+      title: 'Hi Vietnam',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -66,26 +71,6 @@ class _MyAppState extends State<MyApp> {
               userRole: 'USER',
               currentIndex: 0,
             ),
-        '/hotels': (context) => const AppNavigation(
-              userName: 'Guest',
-              userRole: 'USER',
-              currentIndex: 1,
-            ),
-        '/flights': (context) => const AppNavigation(
-              userName: 'Guest',
-              userRole: 'USER',
-              currentIndex: 2,
-            ),
-        '/destinations': (context) => const AppNavigation(
-              userName: 'Guest',
-              userRole: 'USER',
-              currentIndex: 3,
-            ),
-        '/bookings': (context) => const AppNavigation(
-              userName: 'Guest',
-              userRole: 'USER',
-              currentIndex: 4,
-            ),
         '/settings': (context) => const AppNavigation(
               userName: 'Guest',
               userRole: 'USER',
@@ -99,6 +84,11 @@ class _MyAppState extends State<MyApp> {
               email: ModalRoute.of(context)!.settings.arguments as String,
             ),
         '/tours': (context) => TourScreen(),
+        '/search_screen': (context) => SearchScreen(),
+        '/personal_page_screen': (context) => PersonalPageScreen(),
+
+        '/update-info-user-screen': (context) => UpdateInfoUserScreen(),
+        '/setting-screen': (context) => SettingScreen(),
       },
     );
   }

@@ -50,6 +50,15 @@ public class PaymentService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private TourScheduleService tourScheduleService;
+
+    @Autowired
+    private BookingStatusRepository bookingStatusRepository;
+
+    @Autowired
+    private UserDiscountRepository userDiscountRepository;
+
     private static final String PARTNER_CODE = "MOMO";
     private static final String ACCESS_KEY = "F8BBA842ECF85";
     private static final String SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
@@ -118,33 +127,44 @@ public class PaymentService {
     public PaymentResponseDTO updatePaymentStatus(Integer paymentId, Integer statusId, String notes) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
-        
         PaymentStatus newStatus = paymentStatusRepository.findById(statusId)
                 .orElseThrow(() -> new RuntimeException("Payment status not found"));
 
+        // Chỉ gửi email nếu trạng thái trước đó chưa phải Completed và trạng thái mới là Completed
+        boolean wasCompleted = "Completed".equalsIgnoreCase(payment.getStatus().getStatusName());
         payment.setStatus(newStatus);
         payment = paymentRepository.save(payment);
 
-        // Gửi email khi thanh toán thành công (status_id = 3)
-        if (newStatus.getPaymentStatusId() == 3) { // 3 = Completed
-            System.out.println("DEBUG: Payment completed, preparing to send email...");
-            System.out.println("DEBUG: Payment ID: " + payment.getPaymentId());
-            System.out.println("DEBUG: Payment Status: " + newStatus.getStatusName());
+        // Nếu thanh toán thành công (status_id = 3), cập nhật trạng thái booking sang CONFIRMED
+        if (!wasCompleted && newStatus.getPaymentStatusId() == 3) { // 3 = Completed
+            Booking booking = bookingRepository.findById(payment.getBooking().getBookingId())
+                    .orElseThrow(() -> new RuntimeException("Booking not found"));
+            BookingStatus confirmedStatus = bookingStatusRepository.findByStatusName("CONFIRMED")
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái CONFIRMED"));
+            booking.setStatus(confirmedStatus);
+            bookingRepository.save(booking);
+
+            // Đánh dấu mã giảm giá đã sử dụng nếu có
+            if (booking.getDiscountId() != null) {
+                UserDiscount ud = new UserDiscount();
+                ud.setUserid(booking.getUser().getUserid());
+                ud.setTourId(booking.getTour().getTourId());
+                ud.setDiscountId(booking.getDiscountId());
+                ud.setUsed(true);
+                userDiscountRepository.save(ud);
+            }
+
             try {
-                Booking booking = bookingRepository.findById(payment.getBooking().getBookingId())
-                        .orElseThrow(() -> new RuntimeException("Booking not found"));
                 User user = userRepository.findById(payment.getUser().getUserid())
                         .orElseThrow(() -> new RuntimeException("User not found"));
                 List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
-                System.out.println("DEBUG: Found booking, user and passengers. Sending email to: " + user.getEmail());
                 emailService.sendPaymentSuccessEmail(user, booking, payment, passengers);
-                System.out.println("DEBUG: Email sent successfully!");
             } catch (Exception e) {
                 System.out.println("ERROR: Failed to send email: " + e.getMessage());
                 e.printStackTrace();
             }
         } else {
-            System.out.println("DEBUG: Payment status is not Completed. Current status: " + newStatus.getStatusName() + " (ID: " + newStatus.getPaymentStatusId() + ")");
+            System.out.println("DEBUG: Payment status is not Completed or was already completed. Current status: " + newStatus.getStatusName() + " (ID: " + newStatus.getPaymentStatusId() + ")");
         }
 
         // Create history record
@@ -153,6 +173,11 @@ public class PaymentService {
         history.setStatus(newStatus);
         history.setNotes(notes != null ? notes : "Status updated to " + newStatus.getStatusName());
         paymentHistoryRepository.save(history);
+
+        // Nếu thanh toán thành công (status_id = 3), kiểm tra và cập nhật trạng thái lịch trình
+        if (newStatus.getPaymentStatusId() == 3) { // 3 = Completed
+            tourScheduleService.checkAndUpdateScheduleStatus(payment.getBooking().getBookingId());
+        }
 
         return convertToDTO(payment);
     }
@@ -231,6 +256,29 @@ public class PaymentService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
+    public PaymentResponseDTO requestRefund(Integer paymentId, String notes, String email) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        // Kiểm tra user có quyền (email phải trùng với payment.user.email)
+        if (!payment.getUser().getEmail().equalsIgnoreCase(email)) {
+            throw new RuntimeException("Bạn không có quyền yêu cầu hoàn tiền cho payment này!");
+        }
+        PaymentStatus refundStatus = paymentStatusRepository.findById(7)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái Request Refund"));
+        payment.setStatus(refundStatus);
+        payment = paymentRepository.save(payment);
+
+        // Lưu lịch sử
+        PaymentHistory history = new PaymentHistory();
+        history.setPayment(payment);
+        history.setStatus(refundStatus);
+        history.setNotes(notes != null ? notes : "User requested refund");
+        paymentHistoryRepository.save(history);
+
+        return convertToDTO(payment);
+    }
+
     private PaymentResponseDTO convertToDTO(Payment payment) {
         PaymentResponseDTO dto = new PaymentResponseDTO();
         dto.setPaymentId(payment.getPaymentId());
@@ -243,7 +291,6 @@ public class PaymentService {
         dto.setStatusName(payment.getStatus().getStatusName());
         dto.setTransactionId(payment.getTransactionId());
         dto.setPaymentDate(payment.getPaymentDate());
-        dto.setNotes(payment.getNotes());
         dto.setCreatedAt(payment.getCreatedAt());
         dto.setUpdatedAt(payment.getUpdatedAt());
         return dto;
@@ -255,7 +302,6 @@ public class PaymentService {
         dto.setPaymentId(history.getPayment().getPaymentId());
         dto.setStatusId(history.getStatus().getPaymentStatusId());
         dto.setStatusName(history.getStatus().getStatusName());
-        dto.setNotes(history.getNotes());
         dto.setCreatedAt(history.getCreatedAt());
         return dto;
     }

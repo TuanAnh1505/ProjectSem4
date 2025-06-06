@@ -201,10 +201,13 @@
     animation: slideIn 0.3s ease;
   }
   
-  .tour-alert-icon {
+  .tour-alert-icon-wrapper {
     font-size: 3rem;
     margin-bottom: 1rem;
     color: #e74c3c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   .tour-alert-title {

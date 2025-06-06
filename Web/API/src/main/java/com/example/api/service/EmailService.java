@@ -50,32 +50,37 @@ public class EmailService {
         }
     }
 
-    public void sendPasswordResetEmail(String to, String publicId) {
+    public void sendPasswordResetEmail(String to, String publicId, boolean isApp) {
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             helper.setTo(to);
             helper.setSubject("Đặt lại mật khẩu - TravelTour");
-            
-            
-            String webLink = "https://localhost:3000/reset-password?publicId=" + publicId;
+
+            String webLink = "http://localhost:3000/reset-password?publicId=" + publicId;
             String appLink = "myapp://reset-password?publicId=" + publicId;
-            
+
             String htmlContent = "<html><body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>"
                     + "<div style='max-width: 600px; margin: 0 auto; padding: 20px;'>"
                     + "<h2 style='color: #007BFF;'>Đặt lại mật khẩu TravelTour</h2>"
                     + "<p>Xin chào,</p>"
                     + "<p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>"
                     + "<p>Vui lòng chọn một trong các cách sau để đặt lại mật khẩu:</p>"
-                    + "<ul style='list-style: none; padding: 0;'>"
-                    + "<li style='margin-bottom: 15px;'><b>Trên app:</b> <a href='" + appLink + "' style='display: inline-block; padding: 10px 20px; color: white; background-color: #28a745; text-decoration: none; border-radius: 5px;'>Đặt lại mật khẩu trên app</a></li>"
-                    + "</ul>"
+                    + "<ul style='list-style: none; padding: 0;'>";
+            if (isApp) {
+                htmlContent += "<li style='margin-bottom: 15px;'><b>Trên app:</b> <a href='" + appLink
+                        + "' style='display: inline-block; padding: 10px 20px; color: white; background-color: #28a745; text-decoration: none; border-radius: 5px;'>Đặt lại mật khẩu trên app</a></li>";
+            } else {
+                htmlContent += "<li style='margin-bottom: 15px;'><b>Trên Web:</b> <a href='" + webLink
+                        + "' style='display: inline-block; padding: 10px 20px; color: white; background-color: #28a745; text-decoration: none; border-radius: 5px;'>Đặt lại mật khẩu trên web</a></li>";
+            }
+            htmlContent += "</ul>"
                     + "<p style='color: #dc3545;'><strong>Lưu ý:</strong> Link này sẽ hết hạn sau 30 phút.</p>"
                     + "<p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>"
                     + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>"
                     + "</div>"
                     + "</body></html>";
-            
+
             helper.setText(htmlContent, true);
             emailSender.send(mimeMessage);
         } catch (MessagingException e) {
@@ -130,7 +135,8 @@ public class EmailService {
         }
     }
 
-    public void sendPaymentSuccessEmail(User user, Booking booking, Payment payment, List<BookingPassenger> passengers) {
+    public void sendPaymentSuccessEmail(User user, Booking booking, Payment payment,
+            List<BookingPassenger> passengers) {
         try {
             String to = user.getEmail();
             String subject = "Xác nhận thanh toán thành công - Đặt tour " + booking.getBookingId();
@@ -142,9 +148,9 @@ public class EmailService {
             content.append("<h3>Thông tin khách:</h3>");
             for (BookingPassenger p : passengers) {
                 content.append("<p>")
-                    .append(p.getFullName()).append(" - ")
-                    .append(p.getPhone() != null ? p.getPhone() : "")
-                    .append("</p>");
+                        .append(p.getFullName()).append(" - ")
+                        .append(p.getPhone() != null ? p.getPhone() : "")
+                        .append("</p>");
             }
             sendHtmlEmail(to, subject, content.toString());
         } catch (Exception e) {

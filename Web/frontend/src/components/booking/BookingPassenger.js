@@ -9,7 +9,8 @@ import { toast } from 'react-toastify';
 const BookingPassenger = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bookingId, tourInfo, selectedDate, itineraries = [] } = location.state || {};
+  console.log('BookingPassenger location.state:', location.state);
+  const { bookingId, bookingCode, tourInfo, selectedDate, itineraries = [], finalPrice } = location.state || {};
 
   // State cho thông tin người đặt tour
   const [useLoggedInInfo, setUseLoggedInInfo] = useState(true);
@@ -33,11 +34,12 @@ const BookingPassenger = () => {
   });
 
   // State cho số lượng hành khách
-  const [passengerCounts, setPassengerCounts] = useState({
+  const initialPassengerCounts = location.state?.passengerCounts || {
     adult: 1,
     child: 0,
     infant: 0
-  });
+  };
+  const [passengerCounts, setPassengerCounts] = useState(initialPassengerCounts);
 
   // State cho thông tin chi tiết của các hành khách phụ
   const [additionalPassengers, setAdditionalPassengers] = useState({
@@ -51,6 +53,12 @@ const BookingPassenger = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [expandedDestinationIds, setExpandedDestinationIds] = useState([]);
   const [expandedEventIds, setExpandedEventIds] = useState([]);
+
+  // Thêm lại các state cho mã giảm giá
+  const [discountCode, setDiscountCode] = useState('');
+  const [discountInfo, setDiscountInfo] = useState(null);
+  const [discountError, setDiscountError] = useState('');
+  const [discountedPrice, setDiscountedPrice] = useState(location.state?.finalPrice || 0);
 
   function formatTime(timeStr) {
     if (!timeStr) return '';
@@ -110,19 +118,26 @@ const BookingPassenger = () => {
     fetchUserInfo();
   }, [bookingId, tourInfo, navigate]);
 
-  // Tính toán tổng giá
+  // Tính toán tổng giá (có áp dụng giảm giá nếu có)
   useEffect(() => {
-    if (bookedTour) {
-      const adultPrice = bookedTour.price;
-      const childPrice = bookedTour.price * 0.5;
-      const infantPrice = bookedTour.price * 0.25;
-
-      const total = (passengerCounts.adult * adultPrice) +
-        (passengerCounts.child * childPrice) +
-        (passengerCounts.infant * infantPrice);
-      setTotalPrice(total);
+    if (!bookedTour) return;
+    const adultPrice = bookedTour.price;
+    const childPrice = bookedTour.price * 0.5;
+    const infantPrice = bookedTour.price * 0.25;
+    const totalBeforeDiscount =
+      (passengerCounts.adult * adultPrice) +
+      (passengerCounts.child * childPrice) +
+      (passengerCounts.infant * infantPrice);
+    if (discountInfo && discountInfo.discountPercent) {
+      const percent = discountInfo.discountPercent;
+      const newTotal = Math.round(totalBeforeDiscount - (totalBeforeDiscount * percent / 100));
+      setDiscountedPrice(newTotal);
+      setTotalPrice(newTotal);
+    } else {
+      setDiscountedPrice(totalBeforeDiscount);
+      setTotalPrice(totalBeforeDiscount);
     }
-  }, [passengerCounts, bookedTour]);
+  }, [passengerCounts, bookedTour, discountInfo]);
 
   // Xử lý thay đổi thông tin liên hệ
   const handleContactChange = (e) => {
@@ -135,25 +150,29 @@ const BookingPassenger = () => {
   // Xử lý thay đổi số lượng hành khách
   const handlePassengerCountChange = (type, operation) => {
     setPassengerCounts(prev => {
-      const newCount = operation === 'add'
+      const totalCurrent = prev.adult + prev.child + prev.infant;
+      const max = bookedTour?.maxParticipants || 99;
+      let newCount = operation === 'add'
         ? prev[type] + 1
         : Math.max(type === 'adult' ? 1 : 0, prev[type] - 1);
-
+      // Nếu là tăng, kiểm tra tổng số khách mới
+      if (operation === 'add') {
+        if (totalCurrent + 1 > max) {
+          toast.error(`Số lượng khách không được vượt quá ${max} người!`);
+          return prev;
+        }
+      }
       setAdditionalPassengers(prevDetails => {
         let updated = [...prevDetails[type]];
         if (type === 'adult') {
-          // Đảm bảo số phần tử luôn là newCount - 1
           if (updated.length < newCount - 1) {
-            // Thêm phần tử nếu thiếu
             while (updated.length < newCount - 1) {
               updated.push({ fullName: '', gender: 'Nam', birthDate: '' });
             }
           } else if (updated.length > newCount - 1) {
-            // Xóa phần tử nếu thừa
             updated = updated.slice(0, newCount - 1);
           }
         } else {
-          // Trẻ em và em bé: số phần tử đúng bằng newCount
           if (updated.length < newCount) {
             while (updated.length < newCount) {
               updated.push({ fullName: '', gender: 'Nam', birthDate: '' });
@@ -164,7 +183,6 @@ const BookingPassenger = () => {
         }
         return { ...prevDetails, [type]: updated };
       });
-
       return { ...prev, [type]: newCount };
     });
   };
@@ -310,28 +328,32 @@ const BookingPassenger = () => {
         }))
       ];
 
-      const payload = {
-        bookingId: parseInt(bookingId),
-        publicId: publicId,
-        contactInfo: {
-          fullName: contactInfo.fullName.trim(),
-          phoneNumber: contactInfo.phoneNumber.trim(),
-          email: contactInfo.email.trim(),
-          address: contactInfo.address?.trim() || '',
-          gender: contactInfo.gender,
-          birthDate: contactInfo.birthDate
-        },
+      const bookingPassengerRequest = {
+        bookingId,
+        publicId: localStorage.getItem('publicId'),
+        contactInfo,
         passengers: passengerCounts,
-        passengerDetails // <-- chỉ chứa Người lớn 2 trở đi, trẻ em, em bé
+        passengerDetails,
+        discountCode: discountCode || null,
+        discountedPrice: discountedPrice || null
       };
 
-      const res = await axios.post('http://localhost:8080/api/booking-passengers/submit', payload, {
+      const res = await axios.post('http://localhost:8080/api/booking-passengers/submit', bookingPassengerRequest, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       
       toast.success('Đăng ký thông tin hành khách thành công!');
       navigate('/booking-confirmation', {
-        state: { bookingId, passengers: res.data, tourInfo: bookedTour, itineraries }
+        state: {
+          bookingId,
+          bookingCode: location.state.bookingCode,
+          passengers: res.data,
+          tourInfo: bookedTour,
+          finalPrice: discountedPrice,
+          basePrice: bookedTour.price,
+          itineraries,
+          passengerCounts
+        }
       });
     } catch (err) {
       const msg = err.response?.data?.message || 'Đã có lỗi xảy ra khi đăng ký thông tin hành khách';
@@ -341,6 +363,36 @@ const BookingPassenger = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Hàm áp dụng mã giảm giá
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) {
+      setDiscountError('Vui lòng nhập mã giảm giá trước khi áp dụng!');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(
+        'http://localhost:8080/api/discounts/check',
+        { code: discountCode, tourId: bookedTour?.tourId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setDiscountInfo(res.data);
+      setDiscountError('');
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setDiscountInfo(null);
+        setDiscountedPrice(bookedTour.price);
+        setDiscountError('Mã giảm giá không hợp lệ hoặc đã hết hạn');
+      }
+    }
+  };
+
+  if (!bookedTour) {
+    return <div style={{ padding: 32, textAlign: 'center', fontSize: 20 }}>Đang tải dữ liệu tour...</div>;
+  }
 
   return (
     <div className="booking-layout">
@@ -577,8 +629,8 @@ const BookingPassenger = () => {
               <div className="tour-details">
                 <h3>{bookedTour.name}</h3>
                 <p>Ngày khởi hành: {new Date(selectedDate).toLocaleDateString('vi-VN')}</p>
-                <p>Giá: {bookedTour.price.toLocaleString()}đ</p>
-                <p>Mã đặt tour: {bookingId}</p>
+                <p>Giá: {location.state.finalPrice.toLocaleString()}đ</p>
+                <p>Mã đặt tour: {bookingCode}</p>
               </div>
             </div>
             <div>
@@ -648,22 +700,52 @@ const BookingPassenger = () => {
                   {passengerCounts.adult > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Người lớn</span>
-                      <span>{passengerCounts.adult} x {bookedTour.price.toLocaleString()} đ</span>
+                      <span>{passengerCounts.adult} x {location.state.finalPrice.toLocaleString()} đ</span>
                     </div>
                   )}
                   {passengerCounts.child > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Trẻ em</span>
-                      <span>{passengerCounts.child} x {(bookedTour.price * 0.5).toLocaleString()} đ</span>
+                      <span>{passengerCounts.child} x {(location.state.finalPrice * 0.5).toLocaleString()} đ</span>
                     </div>
                   )}
                   {passengerCounts.infant > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Em bé</span>
-                      <span>{passengerCounts.infant} x {(bookedTour.price * 0.25).toLocaleString()} đ</span>
+                      <span>{passengerCounts.infant} x {(location.state.finalPrice * 0.25).toLocaleString()} đ</span>
                     </div>
                   )}
                 </div>
+              </div>
+              <div style={{ margin: '16px 0' }}>
+                <label style={{ fontWeight: 600 }}>Mã giảm giá (nếu có):</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="VD: NEWUSER10"
+                    value={discountCode}
+                    onChange={e => setDiscountCode(e.target.value)}
+                    style={{ flex: 1, padding: 8, borderRadius: 6, border: '1px solid #1976d2' }}
+                  />
+                  <button onClick={handleApplyDiscount} style={{ padding: '8px 16px', borderRadius: 6, background: '#1976d2', color: '#fff', border: 'none' }}>Áp dụng</button>
+                </div>
+                {discountError && <div style={{ color: 'red', marginTop: 4 }}>{discountError}</div>}
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                {discountInfo ? (
+                  <>
+                    <span style={{ textDecoration: 'line-through', color: '#888', marginRight: 8 }}>
+                      {bookedTour.price.toLocaleString()} đ
+                    </span>
+                    <span style={{ color: '#388e3c', fontWeight: 700, fontSize: 20 }}>
+                      {discountedPrice.toLocaleString()} đ
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ color: '#388e3c', fontWeight: 700, fontSize: 20 }}>
+                    {bookedTour.price.toLocaleString()} đ
+                  </span>
+                )}
               </div>
               <div className="submit-section">
                 <button className="submit-button" onClick={handleSubmitPassengers} disabled={isSubmitting}>

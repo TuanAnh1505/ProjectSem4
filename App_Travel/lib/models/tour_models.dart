@@ -31,7 +31,7 @@ class Tour {
       description: json['description'] ?? '',
       price: json['price'] != null ? double.parse(json['price'].toString()) : null,
       duration: json['duration'] ?? 0,
-      maxParticipants: json['max_participants'] ?? 0,
+      maxParticipants: json['maxParticipants'] ?? json['max_participants'] ?? 0,
       statusId: json['status_id'] ?? 0,
       imageUrl: json['image_url'] ?? json['imageUrl'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,

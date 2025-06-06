@@ -7,16 +7,20 @@ import 'booking_confirmation_screen.dart';
 
 class BookingPassengerScreen extends StatefulWidget {
   final int bookingId;
+  final String bookingCode;
   final Tour tour;
   final String selectedDate;
   final List<dynamic> itineraries;
+  final double finalPrice; // Add this line
 
   const BookingPassengerScreen({
     Key? key,
     required this.bookingId,
+    required this.bookingCode,
     required this.tour,
     required this.selectedDate,
     required this.itineraries,
+    required this.finalPrice, // Add this line
   }) : super(key: key);
 
   @override
@@ -126,16 +130,27 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     }
   }
 
+  // Thay đổi hàm _calculateTotalPrice()
   void _calculateTotalPrice() {
-    final adultPrice = widget.tour.price ?? 0;
-    final childPrice = adultPrice * 0.5;
-    final infantPrice = adultPrice * 0.25;
+    // Use finalPrice instead of tour.price
+    final basePrice = widget.finalPrice;
+    final adultPrice = basePrice;
+    final childPrice = basePrice * 0.5;  // Trẻ em 50% giá người lớn
+    final infantPrice = basePrice * 0.25;  // Em bé miễn phí
 
     setState(() {
       _totalPrice = (_passengerCounts['adult']! * adultPrice) +
-          (_passengerCounts['child']! * childPrice) +
-          (_passengerCounts['infant']! * infantPrice);
+                   (_passengerCounts['child']! * childPrice) +
+                   (_passengerCounts['infant']! * infantPrice);
     });
+
+    // Log để debug
+    print('Price calculation:');
+    print('Base price (after discount): $basePrice');
+    print('Adult count: ${_passengerCounts['adult']}');
+    print('Child count: ${_passengerCounts['child']}');
+    print('Infant count: ${_passengerCounts['infant']}');
+    print('Total price: $_totalPrice');
   }
 
   void _handlePassengerCountChange(String type, String operation) {
@@ -193,25 +208,37 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     });
 
     try {
-      // Tạo danh sách hành khách từ form
-      final List<Map<String, dynamic>> passengers = [];
+      // Lấy token và publicId từ SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final publicId = prefs.getString('public_id');
+
+      if (token == null || publicId == null) {
+        throw Exception('Vui lòng đăng nhập để đặt tour');
+      }
+
+      // Tạo danh sách hành khách
+      final List<Map<String, dynamic>> allPassengers = [];
       
       // Thêm thông tin người liên hệ vào danh sách hành khách
-      passengers.add({
-        'fullName': _fullNameController.text,
-        'birthDate': _birthDate,
+      allPassengers.add({
+        'fullName': _fullNameController.text.trim(),
         'gender': _gender,
+        'birthDate': _birthDate,
         'passengerType': 'adult',
+        'phone': _phoneController.text.trim(),
+        'email': _emailController.text.trim(),
+        'address': _addressController.text.trim(),
       });
 
       // Thêm các hành khách bổ sung
       for (var type in ['adult', 'child', 'infant']) {
         for (var passenger in _additionalPassengers[type]!) {
           if (passenger['fullName']?.isNotEmpty == true) {
-            passengers.add({
-              'fullName': passenger['fullName'],
-              'birthDate': passenger['birthDate'],
+            allPassengers.add({
+              'fullName': passenger['fullName'].trim(),
               'gender': passenger['gender'],
+              'birthDate': passenger['birthDate'],
               'passengerType': type,
             });
           }
@@ -220,16 +247,34 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
 
       // Tạo thông tin liên lạc
       final contactInfo = {
-        'fullName': _fullNameController.text,
-        'email': _emailController.text,
-        'phone': _phoneController.text,
-        'address': _addressController.text,
+        'fullName': _fullNameController.text.trim(),
+        'phoneNumber': _phoneController.text.trim(),
+        'email': _emailController.text.trim(),
+        'address': _addressController.text.trim(),
         'gender': _gender,
         'birthDate': _birthDate,
       };
 
-      // Lấy bookingId từ widget (tức là từ database/backend)
-      final bookingId = widget.bookingId.toString();
+      // Tạo payload cho API
+      final payload = {
+        'bookingId': widget.bookingId,
+        'publicId': publicId,
+        'contactInfo': contactInfo,
+        'passengers': _passengerCounts,
+        'passengerDetails': allPassengers.skip(1).toList(), // Bỏ qua người liên hệ đầu tiên
+      };
+
+      print('Submitting payload: $payload'); // Debug print
+
+      // Gọi API để lưu thông tin hành khách
+      final response = await _bookingPassengerService.submitPassengers(payload);
+
+      // Chuyển đổi response thành List<Map<String, dynamic>>
+      final List<Map<String, dynamic>> convertedResponse = (response as List)
+          .map((item) => item is Map<String, dynamic> 
+              ? item 
+              : Map<String, dynamic>.from(item as Map))
+          .toList();
 
       // Chuyển đổi Tour object thành Map
       final tourInfo = {
@@ -258,9 +303,13 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => BookingConfirmationScreen(
-              bookingId: bookingId,
-              passengers: passengers,
-              tourInfo: tourInfo,
+              bookingId: widget.bookingId.toString(),
+              bookingCode: widget.bookingCode,
+              passengers: convertedResponse,
+              tourInfo: {
+                ...tourInfo,
+                'price': widget.finalPrice, // Thay đổi ở đây: sử dụng giá đã giảm
+              },
               contactInfo: contactInfo,
               itineraries: convertedItineraries,
             ),
@@ -1059,4 +1108,3 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     return widgets;
   }
 }
-  

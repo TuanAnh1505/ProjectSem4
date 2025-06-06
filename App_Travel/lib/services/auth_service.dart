@@ -57,7 +57,7 @@ class AuthService {
   Future<String> forgotPassword(String email) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/forgot-password?email=$email'),
+        Uri.parse('$baseUrl/forgot-password?email=$email&isApp=true'),
         headers: {'Content-Type': 'application/json'},
       );
 

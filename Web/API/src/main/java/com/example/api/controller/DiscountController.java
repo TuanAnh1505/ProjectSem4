@@ -21,4 +21,24 @@ public class DiscountController {
         discountService.sendDiscountCodeToUser(userId, discountId);
         return ResponseEntity.ok("Mã giảm giá đã được gửi thành công.");
     }
+
+    @PostMapping("/check")
+    public ResponseEntity<?> checkDiscount(@RequestBody java.util.Map<String, Object> payload) {
+        String code = (String) payload.get("code");
+        // Có thể nhận thêm tourId nếu muốn kiểm tra theo tour
+        // Integer tourId = payload.get("tourId") != null ? Integer.parseInt(payload.get("tourId").toString()) : null;
+        if (code == null || code.isBlank()) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Mã giảm giá không hợp lệ"));
+        }
+        var discountOpt = discountService.getDiscountByCode(code);
+        if (discountOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Mã giảm giá không hợp lệ hoặc đã hết hạn"));
+        }
+        var discount = discountOpt.get();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        if (now.isBefore(discount.getStartDate()) || now.isAfter(discount.getEndDate())) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Mã giảm giá đã hết hạn"));
+        }
+        return ResponseEntity.ok(discount);
+    }
 }

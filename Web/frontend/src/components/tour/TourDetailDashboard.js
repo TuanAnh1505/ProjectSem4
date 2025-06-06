@@ -11,11 +11,11 @@ export default function TourDetailDashboard() {
   const [tour, setTour] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [discountCode, setDiscountCode] = useState('');
   const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [relatedTours, setRelatedTours] = useState([]);
   const [itineraries, setItineraries] = useState([]);
+  const [finalPrice, setFinalPrice] = useState(0); // Add new state for final price
 
   const [openScheduleId, setOpenScheduleId] = useState(null);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
@@ -81,41 +81,51 @@ export default function TourDetailDashboard() {
     return `${hour}:${m} ${ampm}`;
   }
 
-  useEffect(() => {
-    const fetchItineraries = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const config = token 
-          ? { headers: { Authorization: `Bearer ${token}` } }
-          : {};
+  // Đưa fetchItineraries ra ngoài để có thể gọi lại
+  const fetchItineraries = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const config = token 
+        ? { headers: { Authorization: `Bearer ${token}` } }
+        : {};
 
-        // 1. Lấy tất cả schedule của tour (chỉ của tour hiện tại)
-        const schedulesRes = await axios.get(
-          `http://localhost:8080/api/schedules/tour/${tourId}`,
+      // 1. Lấy tất cả schedule của tour (chỉ của tour hiện tại)
+      const schedulesRes = await axios.get(
+        `http://localhost:8080/api/schedules/tour/${tourId}`,
+        config
+      );
+      const schedules = schedulesRes.data;
+
+      // 2. Lấy itinerary cho từng schedule
+      const schedulesWithItineraries = [];
+      for (const schedule of schedules) {
+        const itinerariesRes = await axios.get(
+          `http://localhost:8080/api/itineraries/schedule/${schedule.scheduleId}`,
           config
         );
-        const schedules = schedulesRes.data;
-
-        // 2. Lấy itinerary cho từng schedule
-        const schedulesWithItineraries = [];
-        for (const schedule of schedules) {
-          const itinerariesRes = await axios.get(
-            `http://localhost:8080/api/itineraries/schedule/${schedule.scheduleId}`,
-            config
-          );
-          schedulesWithItineraries.push({
-            ...schedule,
-            itineraries: itinerariesRes.data
-          });
-        }
-        setItineraries(schedulesWithItineraries);
-      } catch (err) {
-        console.error('Failed to fetch itineraries:', err);
+        schedulesWithItineraries.push({
+          ...schedule,
+          itineraries: itinerariesRes.data
+        });
       }
-    };
+      setItineraries(schedulesWithItineraries);
+    } catch (err) {
+      console.error('Failed to fetch itineraries:', err);
+    }
+  };
 
+  useEffect(() => {
     if (tourId) fetchItineraries();
   }, [tourId]);
+
+  useEffect(() => {
+    if (selectedScheduleId) {
+      const selected = itineraries.find(sch => sch.scheduleId === selectedScheduleId);
+      if (selected && selected.status === 'full') {
+        setSelectedScheduleId(null);
+      }
+    }
+  }, [itineraries, selectedScheduleId]);
 
   const handleItinerarySelect = (itineraryId) => {
     setSelectedItineraryId(itineraryId);
@@ -150,19 +160,25 @@ export default function TourDetailDashboard() {
         userId: parseInt(userId),
         tourId: parseInt(tourId),
         scheduleId: selectedScheduleId,
-        discountCode: discountCode.trim() || null
       };
       console.log('Booking request:', bookingRequest);
 
       const res = await axios.post('http://localhost:8080/api/bookings', bookingRequest, config);
       if (res.data && res.data.bookingId) {
         toast.success(res.data.message || 'Đặt tour thành công!');
+        await fetchItineraries();
+
+        // Đảm bảo lấy finalPrice từ response
+        const finalPrice = res.data.finalPrice;
+        
         navigate('/booking-passenger', { 
           state: { 
             bookingId: res.data.bookingId,
+            bookingCode: res.data.bookingCode,
             tourInfo: tour,
             selectedDate: selectedSchedule?.startDate,
-            itineraries: selectedSchedule?.itineraries || []
+            itineraries: selectedSchedule?.itineraries || [],
+            finalPrice: finalPrice // Truyền finalPrice từ response
           }
         });
       } else {
@@ -260,8 +276,40 @@ export default function TourDetailDashboard() {
         <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: 24, border: '1.5px solid #e3e8f0', borderTop: 'none', boxShadow: '0 2px 8px #e3e8f0' }}>
           {itineraries.length > 0 ? (
             itineraries.map((schedule, idx) => (
-              <div key={schedule.scheduleId} style={{ marginBottom: 24, background: '#e3f2fd', borderRadius: 10, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0', padding: 18 }}>
-                <div style={{ fontWeight: 600, color: '#1976d2', fontSize: 16, marginBottom: 8 }}>Lịch trình {idx + 1}: {schedule.startDate} - {schedule.endDate} ({schedule.status})</div>
+              <div key={schedule.scheduleId} style={{ 
+                marginBottom: 24, 
+                background: schedule.status === 'full' ? '#fff1f0' : '#e3f2fd', 
+                borderRadius: 10, 
+                boxShadow: '0 2px 8px #e3e8f0', 
+                border: `1.5px solid ${schedule.status === 'full' ? '#ff4d4f' : '#e3e8f0'}`, 
+                padding: 18 
+              }}>
+                <div style={{ 
+                  fontWeight: 600, 
+                  color: schedule.status === 'full' ? '#ff4d4f' : '#1976d2', 
+                  fontSize: 16, 
+                  marginBottom: 8,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span>Lịch trình {idx + 1}: {schedule.startDate} - {schedule.endDate}</span>
+                  <span style={{
+                    padding: '4px 8px',
+                    borderRadius: 4,
+                    background: schedule.status === 'full' ? '#ff4d4f' : schedule.status === 'closed' ? '#b71c1c' : '#1976d2',
+                    color: '#fff',
+                    fontSize: 14
+                  }}>
+                    {schedule.status === 'full' ? 'Đã đủ người' : schedule.status === 'closed' ? 'Đã đóng' : 'Còn chỗ'}
+                    ({schedule.currentParticipants || 0}/{tour.maxParticipants})
+                  </span>
+                  {schedule.status === 'full' && (
+                    <span style={{ color: '#ff4d4f', fontWeight: 700, marginLeft: 16, fontSize: 15 }}>
+                      ⚠️ Lịch trình này đã hết chỗ!
+                    </span>
+                  )}
+                </div>
                 {schedule.itineraries && schedule.itineraries.length > 0 ? (
                   <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                     {schedule.itineraries.map((itinerary, i) => (
@@ -299,16 +347,6 @@ export default function TourDetailDashboard() {
         <div style={{ flex: 1, minWidth: 320, background: '#e3f2fd', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0' }}>
           <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 18, marginBottom: 16 }}>Đặt tour</div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ fontWeight: 600 }}>Mã giảm giá (nếu có):</label>
-            <input
-              type="text"
-              placeholder="VD: NEWUSER10"
-              value={discountCode}
-              onChange={(e) => setDiscountCode(e.target.value)}
-              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #1976d2', marginTop: 6, marginBottom: 12 }}
-            />
-          </div>
-          <div style={{ marginBottom: 12 }}>
             <label style={{ fontWeight: 600 }}>Chọn lịch trình:</label>
             <select
               value={selectedScheduleId || ''}
@@ -317,19 +355,85 @@ export default function TourDetailDashboard() {
             >
               <option value="">-- Chọn lịch trình --</option>
               {itineraries.map(sch => (
-                <option key={sch.scheduleId} value={sch.scheduleId}>
-                  {sch.startDate} - {sch.endDate} ({sch.status})
+                <option 
+                  key={sch.scheduleId} 
+                  value={sch.scheduleId}
+                  disabled={sch.status === 'full' || sch.status === 'closed'}
+                  style={{ 
+                    color: sch.status === 'full' || sch.status === 'closed' ? '#ff4d4f' : 'inherit',
+                    backgroundColor: sch.status === 'full' || sch.status === 'closed' ? '#fff1f0' : 'inherit'
+                  }}
+                >
+                  {sch.startDate} - {sch.endDate} {sch.status === 'full' ? '(Đã đủ người)' : sch.status === 'closed' ? '(Đã đóng)' : '(Còn chỗ)'} - {sch.currentParticipants || 0}/{tour.maxParticipants} người
                 </option>
               ))}
             </select>
+            {/* Cảnh báo đỏ khi lịch trình đã hết chỗ hoặc đã đóng */}
+            {selectedScheduleId && ['full', 'closed'].includes(itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status) && (
+              <div style={{
+                marginTop: 10,
+                padding: 10,
+                background: '#fff1f0',
+                border: '1.5px solid #ff4d4f',
+                borderRadius: 8,
+                color: '#ff4d4f',
+                fontWeight: 700,
+                fontSize: 16
+              }}>
+                {itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full'
+                  ? '⚠️ Lịch trình này đã hết chỗ! Bạn không thể đặt thêm.'
+                  : '⚠️ Lịch trình này đã đóng! Bạn không thể đặt thêm.'}
+              </div>
+            )}
           </div>
           <button
             onClick={handleBooking}
-            disabled={bookingLoading || !selectedScheduleId}
-            style={{ width: '100%', padding: 12, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: bookingLoading || !selectedScheduleId ? 'not-allowed' : 'pointer', marginTop: 8 }}
+            disabled={bookingLoading || !selectedScheduleId || 
+              ['full', 'closed'].includes(itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status)}
+            style={{ 
+              width: '100%', 
+              padding: 12, 
+              background: (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full') 
+                ? '#ff4d4f' 
+                : '#1976d2', 
+              color: '#fff', 
+              border: 'none', 
+              borderRadius: 8, 
+              fontWeight: 700, 
+              fontSize: 16, 
+              cursor: (bookingLoading || !selectedScheduleId || 
+                ['full', 'closed'].includes(itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status)) 
+                ? 'not-allowed' 
+                : 'pointer', 
+              marginTop: 8,
+              opacity: (bookingLoading || !selectedScheduleId || 
+                ['full', 'closed'].includes(itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status)) 
+                ? 0.7 
+                : 1
+            }}
           >
-            {bookingLoading ? 'Đang xử lý...' : 'Đặt ngay'}
+            {bookingLoading ? 'Đang xử lý...' : 
+              (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full') 
+                ? 'Đã đủ người' 
+                : (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'closed')
+                  ? 'Đã đóng' 
+                  : 'Đặt ngay'}
           </button>
+
+          {/* Thông báo khi lịch trình đã đủ người */}
+          {selectedScheduleId && itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full' && (
+            <div style={{ 
+              marginTop: 12, 
+              padding: 12, 
+              background: '#fff1f0', 
+              border: '1px solid #ff4d4f', 
+              borderRadius: 8,
+              color: '#ff4d4f',
+              fontSize: 14
+            }}>
+              ⚠️ Lịch trình này đã đủ số lượng người tham gia. Vui lòng chọn lịch trình khác.
+            </div>
+          )}
         </div>
         {/* Điểm nổi bật (demo) */}
         <div style={{ flex: 1, minWidth: 320, background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0' }}>

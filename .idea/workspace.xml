@@ -4,7 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94450224-2e36-4dd7-b68e-63c8468d7370" name="Changes" comment="" />
+    <list default="true" id="0507ab1b-b778-4b81-8916-03ac8c0e44f5" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/PaymentHistoryDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/PaymentHistoryDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/PaymentResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/PaymentResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/filter/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/filter/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/Payment.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/Payment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/PaymentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/PaymentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/auth/ResetPassword.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/auth/ResetPassword.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDetailDashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDetailDashboard.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,48 +25,51 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;customColor&quot;: &quot;&quot;,
-  &quot;associatedIndex&quot;: 7
+  &quot;associatedIndex&quot;: 6
 }</component>
-  <component name="ProjectId" id="2xfjSDCoIdmG1WeKbllufE1xn81" />
+  <component name="ProjectId" id="2xhfO9P2Vsz0KttUnMB1WqV3w1X" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "cuong",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Admin/Desktop/ProjectSem4",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;hoangdo&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/SEM 4/ProjectSem4&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.25659.39" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.25659.39" />
+        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.22562.218" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-IU-243.22562.218" />
       </set>
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="94450224-2e36-4dd7-b68e-63c8468d7370" name="Changes" comment="" />
-      <created>1748336024610</created>
+      <changelist id="0507ab1b-b778-4b81-8916-03ac8c0e44f5" name="Changes" comment="" />
+      <created>1748395190696</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1748336024610</updated>
-      <workItem from="1748336028153" duration="65000" />
-      <workItem from="1748576372741" duration="129000" />
-      <workItem from="1749173141008" duration="364000" />
+      <updated>1748395190696</updated>
+      <workItem from="1748395191922" duration="1249000" />
+      <workItem from="1748576983293" duration="743000" />
+      <workItem from="1748580526996" duration="33000" />
+      <workItem from="1748681140345" duration="917000" />
+      <workItem from="1748770906228" duration="397000" />
+      <workItem from="1748914514712" duration="741000" />
     </task>
     <servers />
   </component>

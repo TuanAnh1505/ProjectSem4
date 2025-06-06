@@ -6,16 +6,15 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const DashboardPage = () => {
   // Fake data cho 4 box thống kê tổng quan (bạn có thể thay bằng API thật nếu có)
   const [summary, setSummary] = useState({
-    totalTours: 124,
-    totalUsers: 3567,
-    totalBookings: 2189,
-    monthRevenue: 235000000,
-    month: 5,
-    revenueChange: 10,
-    tourChange: 12,
-    userChange: 8,
-    bookingChange: 15
-    
+    totalTours: 0,
+    totalUsers: 0,
+    totalBookings: 0,
+    monthRevenue: 0,
+    month: new Date().getMonth() + 1,
+    revenueChange: 0,
+    tourChange: 0,
+    userChange: 0,
+    bookingChange: 0
   });
 
   // State cho bảng Tour mới nhất
@@ -23,22 +22,108 @@ const DashboardPage = () => {
   const [statuses, setStatuses] = useState([]);
   // State cho bảng Đặt tour gần đây
   const [latestBookings, setLatestBookings] = useState([]);
+  // State cho biểu đồ doanh thu
+  const [revenueData, setRevenueData] = useState([]);
+  const [paymentStatuses, setPaymentStatuses] = useState([]);
 
-  // Dữ liệu mẫu cho biểu đồ doanh thu
-  const revenueData = [
-    { name: "T1", revenue: 210 },
-    { name: "T2", revenue: 220 },
-    { name: "T3", revenue: 195 },
-    { name: "T4", revenue: 250 },
-    { name: "T5", revenue: 270 },
-    { name: "T6", revenue: 290 },
-    { name: "T7", revenue: 310 },
-    { name: "T8", revenue: 300 },
-    { name: "T9", revenue: 280 },
-    { name: "T10", revenue: 260 },
-    { name: "T11", revenue: 250 },
-    { name: "T12", revenue: 320 }
-  ];
+  // Hàm tính doanh thu theo tháng
+  const calculateMonthlyRevenue = (payments) => {
+    const monthlyRevenue = Array(12).fill(0);
+    const currentYear = new Date().getFullYear();
+    
+    // Tìm statusId của trạng thái "Completed"
+    const completedStatus = paymentStatuses.find(status => status.statusName === "Completed");
+    if (!completedStatus) return monthlyRevenue.map((_, index) => ({ name: `T${index + 1}`, revenue: 0 }));
+
+    payments.forEach(payment => {
+      if (payment.statusId === completedStatus.paymentStatusId && payment.paymentDate) {
+        const paymentDate = new Date(payment.paymentDate);
+        if (paymentDate.getFullYear() === currentYear) {
+          const month = paymentDate.getMonth();
+          monthlyRevenue[month] += Number(payment.amount) || 0;
+        }
+      }
+    });
+
+    return monthlyRevenue.map((revenue, index) => ({
+      name: `T${index + 1}`,
+      revenue: Number((revenue / 1000000).toFixed(2)) // Chuyển đổi sang triệu VND và giữ 2 số thập phân
+    }));
+  };
+
+  // Hàm tính tổng doanh thu
+  const calculateTotalRevenue = (payments) => {
+    const completedStatus = paymentStatuses.find(status => status.statusName === "Completed");
+    if (!completedStatus) return 0;
+
+    return payments.reduce((total, payment) => {
+      if (payment.statusId === completedStatus.paymentStatusId) {
+        return total + (Number(payment.amount) || 0);
+      }
+      return total;
+    }, 0);
+  };
+
+  // Fetch trạng thái payment
+  useEffect(() => {
+    const fetchPaymentStatuses = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:8080/api/payments/statuses', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const statuses = await res.json();
+        setPaymentStatuses(statuses);
+      } catch (err) {
+        console.error('Error fetching payment statuses:', err);
+        setPaymentStatuses([]);
+      }
+    };
+
+    fetchPaymentStatuses();
+  }, []);
+
+  // Fetch dữ liệu thanh toán và cập nhật summary
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:8080/api/payments', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const payments = await res.json();
+        const monthlyData = calculateMonthlyRevenue(payments);
+        setRevenueData(monthlyData);
+
+        // Tính toán doanh thu tháng hiện tại và tháng trước
+        const currentMonth = new Date().getMonth();
+        const currentMonthRevenue = monthlyData[currentMonth].revenue * 1000000;
+        const previousMonthRevenue = currentMonth > 0 
+          ? monthlyData[currentMonth - 1].revenue * 1000000 
+          : monthlyData[11].revenue * 1000000;
+
+        // Tính phần trăm thay đổi
+        const revenueChange = previousMonthRevenue === 0 
+          ? 0 
+          : Number(((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue * 100).toFixed(2));
+
+        // Cập nhật summary
+        setSummary(prev => ({
+          ...prev,
+          monthRevenue: Math.round(currentMonthRevenue),
+          month: currentMonth + 1,
+          revenueChange: revenueChange
+        }));
+      } catch (err) {
+        console.error('Error fetching payments:', err);
+        setRevenueData([]);
+      }
+    };
+
+    if (paymentStatuses.length > 0) {
+      fetchPayments();
+    }
+  }, [paymentStatuses]);
 
   useEffect(() => {
     const fetchToursAndStatus = async () => {
@@ -50,11 +135,16 @@ const DashboardPage = () => {
         ]);
         const tours = await tourRes.json();
         const statuses = await statusRes.json();
-        // Sắp xếp và lấy 5 tour mới nhất
-        const sortedTours = tours.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+        // Sắp xếp theo ngày tạo mới nhất và lấy 5 tour đầu tiên
+        const sortedTours = Array.isArray(tours) 
+          ? tours
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .slice(0, 5)
+          : [];
         setLatestTours(sortedTours);
         setStatuses(statuses);
       } catch (err) {
+        console.error("Error fetching tours:", err);
         setLatestTours([]);
         setStatuses([]);
       }
@@ -68,10 +158,15 @@ const DashboardPage = () => {
         const token = localStorage.getItem("token");
         const res = await fetch("http://localhost:8080/api/bookings/admin-bookings", { headers: { Authorization: `Bearer ${token}` } });
         const bookings = await res.json();
-        // Sắp xếp và lấy 5 booking mới nhất
-        const sortedBookings = bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+        // Sắp xếp theo ngày đặt mới nhất và lấy 5 booking đầu tiên
+        const sortedBookings = Array.isArray(bookings)
+          ? bookings
+              .sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate))
+              .slice(0, 5)
+          : [];
         setLatestBookings(sortedBookings);
       } catch (err) {
+        console.error("Error fetching bookings:", err);
         setLatestBookings([]);
       }
     };
@@ -91,12 +186,41 @@ const DashboardPage = () => {
         const users = await usersRes.json();
         const bookings = await bookingsRes.json();
 
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+        const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
+        // Helper: Đếm số lượng theo tháng
+        const countByMonth = (arr, dateField, month, year) => {
+          return arr.filter(item => {
+            const d = new Date(item[dateField]);
+            return d.getMonth() + 1 === month && d.getFullYear() === year;
+          }).length;
+        };
+
+        const toursThisMonth = countByMonth(tours, 'createdAt', currentMonth, currentYear);
+        const toursLastMonth = countByMonth(tours, 'createdAt', prevMonth, prevYear);
+        const usersThisMonth = countByMonth(users, 'createdAt', currentMonth, currentYear);
+        const usersLastMonth = countByMonth(users, 'createdAt', prevMonth, prevYear);
+        const bookingsThisMonth = countByMonth(bookings, 'bookingDate', currentMonth, currentYear);
+        const bookingsLastMonth = countByMonth(bookings, 'bookingDate', prevMonth, prevYear);
+
+        // Tính phần trăm thay đổi
+        const calcChange = (now, last) => last === 0 ? 0 : ((now - last) / last) * 100;
+
         setSummary(prev => ({
           ...prev,
           totalTours: Array.isArray(tours) ? tours.length : 0,
           totalUsers: Array.isArray(users) ? users.length : 0,
           totalBookings: Array.isArray(bookings) ? bookings.length : 0,
-          // monthRevenue: ... // Nếu có API doanh thu thì fetch và set ở đây
+          toursThisMonth: Number(toursThisMonth) || 0,
+          toursLastMonth: Number(toursLastMonth) || 0,
+          usersThisMonth: Number(usersThisMonth) || 0,
+          usersLastMonth: Number(usersLastMonth) || 0,
+          bookingsThisMonth: Number(bookingsThisMonth) || 0,
+          bookingsLastMonth: Number(bookingsLastMonth) || 0,
         }));
       } catch (err) {
         // Có thể giữ lại fake data hoặc set về 0
@@ -112,8 +236,21 @@ const DashboardPage = () => {
   };
 
   // Helper format tiền
-  const formatVND = (amount) =>
-    amount.toLocaleString("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 });
+  const formatVND = (amount) => {
+    if (!amount) return "0 VND";
+    return amount.toLocaleString("vi-VN", { 
+      style: "currency", 
+      currency: "VND",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  };
+
+  // Helper format phần trăm
+  const formatPercent = (value) => {
+    if (!value) return "0%";
+    return `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
+  };
 
   // Helper format ngày
   const formatDate = (dateStr) => {
@@ -161,8 +298,10 @@ const DashboardPage = () => {
           </div>
           <div>
             <div className="dashboard-summary-title">Tổng số Tour</div>
-            <div className="dashboard-summary-value">{summary.totalTours}</div>
-            <div className="dashboard-summary-change up">↑ {summary.tourChange}% so với tháng trước</div>
+            <div className="dashboard-summary-value" style={{'textAlign': 'center'}}>{summary.totalTours}</div>
+            <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
+              Tháng này thêm: {(summary.toursThisMonth || 0)} tour
+            </div>
           </div>
         </div>
         <div className="dashboard-summary-box">
@@ -171,8 +310,10 @@ const DashboardPage = () => {
           </div>
           <div>
             <div className="dashboard-summary-title">Tổng số Người dùng</div>
-            <div className="dashboard-summary-value">{summary.totalUsers}</div>
-            <div className="dashboard-summary-change up">↑ {summary.userChange}% so với tháng trước</div>
+            <div className="dashboard-summary-value" style={{'textAlign': 'center'}}>{summary.totalUsers}</div>
+            <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
+              Tháng này thêm: {(summary.usersThisMonth || 0)} người dùng
+            </div>
           </div>
         </div>
         <div className="dashboard-summary-box">
@@ -181,8 +322,10 @@ const DashboardPage = () => {
           </div>
           <div>
             <div className="dashboard-summary-title">Tổng số Đặt tour</div>
-            <div className="dashboard-summary-value">{summary.totalBookings}</div>
-            <div className="dashboard-summary-change up">↑ {summary.bookingChange}% so với tháng trước</div>
+            <div className="dashboard-summary-value" style={{'textAlign': 'center'}}>{summary.totalBookings}</div>
+            <div className="dashboard-summary-change" style={{color: '#4caf50'}}>
+              Tháng này thêm: {(summary.bookingsThisMonth || 0)} đặt tour
+            </div>
           </div>
         </div>
         <div className="dashboard-summary-box">
@@ -192,7 +335,14 @@ const DashboardPage = () => {
           <div>
             <div className="dashboard-summary-title">Doanh thu tháng {summary.month}</div>
             <div className="dashboard-summary-value">{formatVND(summary.monthRevenue)}</div>
-            <div className="dashboard-summary-change up">↑ {summary.revenueChange}% so với tháng trước</div>
+            <div className={`dashboard-summary-change ${summary.revenueChange >= 0 ? 'up' : 'down'}`}>
+              {summary.revenueChange >= 0 ? (
+                <span style={{color: '#4caf50', fontWeight: 700, marginRight: 4}}>▲</span>
+              ) : (
+                <span style={{color: '#f44336', fontWeight: 700, marginRight: 4}}>▼</span>
+              )}
+              {formatPercent(summary.revenueChange)} so với tháng trước
+            </div>
           </div>
         </div>
       </div>
@@ -201,7 +351,7 @@ const DashboardPage = () => {
         <div className="dashboard-chart-header">
           <span>Biểu Đồ Doanh Thu</span>
           <div>
-            Năm: <button className="dashboard-year-btn">2025</button>
+            Năm: <button className="dashboard-year-btn">{new Date().getFullYear()}</button>
           </div>
         </div>
         <div className="dashboard-chart-title">Doanh Thu Theo Tháng (Triệu VND)</div>
@@ -216,7 +366,10 @@ const DashboardPage = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip />
+            <Tooltip 
+              formatter={(value) => [`${value.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} triệu VND`, 'Doanh thu']}
+              labelFormatter={(label) => `Tháng ${label.replace('T', '')}`}
+            />
             <Area type="monotone" dataKey="revenue" stroke="#7b6ef6" fillOpacity={1} fill="url(#colorRevenue)" />
             <Line type="monotone" dataKey="revenue" stroke="#7b6ef6" dot={{ r: 3 }} />
           </AreaChart>

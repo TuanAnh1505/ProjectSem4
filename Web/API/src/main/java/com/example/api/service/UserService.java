@@ -180,10 +180,9 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void sendPasswordResetEmail(String email) {
+    public void sendPasswordResetEmail(String email, boolean isApp) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-
-        emailService.sendPasswordResetEmail(user.getEmail(), user.getPublicId());
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getPublicId(), isApp);
     }
 
     public void resetPassword(String publicId, String newPassword) {
@@ -207,7 +206,7 @@ public class UserService {
                 .build();
     }
 
-   @Scheduled(fixedRate = 36000000)
+    @Scheduled(fixedRate = 36000000)
     public void deleteExpiredTokens() {
         userTokenRepository.deleteAllByExpiryBefore(LocalDateTime.now());
         jdbcTemplate.execute("ALTER TABLE usertokens AUTO_INCREMENT = 1");
@@ -216,5 +215,21 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+    }
+
+    public User updateUserInfo(String publicId, String fullName, String phone, String address) {
+        User user = userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+
+        user.setFullName(fullName);
+        user.setPhone(phone);
+        user.setAddress(address);
+
+        return userRepository.save(user);
+    }
+
+    public User findByPublicId(String publicId) {
+        return userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + publicId));
     }
 }

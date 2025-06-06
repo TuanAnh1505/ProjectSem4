@@ -16,6 +16,8 @@ const Payment = () => {
   const [qrLoading, setQrLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmResult, setConfirmResult] = useState(null); // 'success' | 'failed' | null
+  const [showPaidModal, setShowPaidModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -68,29 +70,55 @@ const Payment = () => {
       const userPhone = booking?.booking?.user?.phone || '0123456789';
       const amount = booking?.booking?.totalPrice || booking?.totalAmount;
 
+      // Kiểm tra payment đã tồn tại cho booking này chưa
+      const paymentRes = await axios.get(
+        `http://localhost:8080/api/payments/booking/${bookingId}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      const existingPayment = paymentRes.data.find(
+        p => p.statusName !== 'Completed' && p.statusName !== 'Failed'
+      );
+
       // Nếu là Bank Transfer (methodId = 2)
       if (selectedMethod === 2) {
         setQrLoading(true);
         setBankQr(null);
         try {
-          const response = await axios.post(
-            'http://localhost:8080/api/payments/bank-transfer-qr',
-            {
-              amount: amount,
-              phone: userPhone,
-              bookingId: parseInt(bookingId),
-              userId: parseInt(userId)
-            },
-            {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+          if (existingPayment) {
+            setBankQr(existingPayment);
+          } else {
+            const response = await axios.post(
+              'http://localhost:8080/api/payments/bank-transfer-qr',
+              {
+                amount: amount,
+                phone: userPhone,
+                bookingId: parseInt(bookingId),
+                userId: parseInt(userId)
+              },
+              {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                }
               }
-            }
-          );
-          setBankQr(response.data);
+            );
+            setBankQr(response.data);
+          }
         } catch (err) {
-          setError('Không thể tạo mã QR. Vui lòng thử lại sau.');
+          const errMsg = err.response?.data?.error || 'Không thể tạo mã QR. Vui lòng thử lại sau.';
+          // Kiểm tra lỗi booking đã thanh toán
+          if (errMsg.includes('đã thanh toán')) {
+            // Kiểm tra user hiện tại có phải chủ booking không
+            if (booking?.booking?.user?.userid?.toString() === userId) {
+              setShowPaidModal(true);
+            } else {
+              setError('Bạn không có quyền truy cập booking này!');
+              setShowErrorModal(true);
+            }
+          } else {
+            setError(errMsg);
+            setShowErrorModal(true);
+          }
         } finally {
           setQrLoading(false);
         }
@@ -99,6 +127,12 @@ const Payment = () => {
 
       // Nếu là MoMo (giả sử methodId = 5 là MoMo)
       if (selectedMethod === 5) {
+        if (existingPayment) {
+          // Nếu đã có payment chưa completed, dùng lại
+          // (Có thể redirect hoặc hiển thị thông tin payment)
+          setBankQr(existingPayment);
+          return;
+        }
         const response = await axios.post(
           'http://localhost:8080/api/payments/momo',
           {
@@ -119,6 +153,12 @@ const Payment = () => {
       }
 
       // Xử lý các phương thức thanh toán khác ở đây
+      if (existingPayment) {
+        setBankQr(existingPayment);
+        setConfirmResult('success');
+        setSelectedMethod(null);
+        return;
+      }
       const response = await axios.post(
         'http://localhost:8080/api/payments',
         {
@@ -134,8 +174,6 @@ const Payment = () => {
           }
         }
       );
-
-      // Hiển thị thông báo thành công thay vì chuyển hướng
       setConfirmResult('success');
       setBankQr(null);
       setSelectedMethod(null);
@@ -291,7 +329,7 @@ const Payment = () => {
               minWidth: 320
             }}>
               <div style={{ fontSize: 48, color: '#28a745', marginBottom: 16 }}>✔</div>
-              <div style={{ fontSize: 22, color: '#28a745', fontWeight: 600, marginBottom: 12 }}>Thanh toán thành công!</div>
+              <div style={{ fontSize: 22, color: '#28a745', fontWeight: 600, marginBottom: 12 }}>Thanh toán thành công !</div>
               <button
                 style={{
                   marginTop: 16,
@@ -304,7 +342,14 @@ const Payment = () => {
                   fontWeight: 500,
                   cursor: 'pointer'
                 }}
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  const publicId = localStorage.getItem('publicId');
+                  if (publicId) {
+                    navigate(`/account/${publicId}`);
+                  } else {
+                    navigate('/login');
+                  }
+                }}
               >
                 Đóng
               </button>
@@ -353,6 +398,26 @@ const Payment = () => {
               >
                 Đóng
               </button>
+            </div>
+          </div>
+        )}
+        {showPaidModal && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+          }}>
+            <div style={{ background: '#fff', borderRadius: 12, padding: '32px 48px', boxShadow: '0 4px 24px rgba(0,0,0,0.2)', textAlign: 'center', minWidth: 320, border: '1px solid #28a745' }}>
+              <div style={{ fontSize: 48, color: '#28a745', marginBottom: 16 }}>✔</div>
+              <div style={{ fontSize: 22, color: '#28a745', fontWeight: 600, marginBottom: 12 }}>Tour này đã được thanh toán!</div>
+              <button style={{ marginTop: 16, padding: '10px 28px', background: '#28a745', color: '#fff', border: 'none', borderRadius: 6, fontSize: 16, fontWeight: 500, cursor: 'pointer' }} onClick={() => { setShowPaidModal(false); navigate('/'); }}>Đóng</button>
+            </div>
+          </div>
+        )}
+        {showErrorModal && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+            <div style={{ background: '#fff0f0', borderRadius: 12, padding: '32px 48px', boxShadow: '0 4px 24px rgba(0,0,0,0.2)', textAlign: 'center', minWidth: 320, border: '1px solid #f5c2c7' }}>
+              <div style={{ fontSize: 48, color: '#dc3545', marginBottom: 16 }}>✖</div>
+              <div style={{ fontSize: 20, color: '#dc3545', fontWeight: 600, marginBottom: 12 }}>{error}</div>
+              <button style={{ marginTop: 16, padding: '10px 28px', background: '#dc3545', color: '#fff', border: 'none', borderRadius: 6, fontSize: 16, fontWeight: 500, cursor: 'pointer' }} onClick={() => setShowErrorModal(false)}>Đóng</button>
             </div>
           </div>
         )}
