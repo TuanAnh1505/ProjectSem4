@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import "../styles/admin/AdminDashboard.css";
-import {FaInfo, FaChartLine, FaGlobeAsia, FaCalendarAlt, FaMapMarkedAlt, FaListAlt, FaUser, FaSignOutAlt, FaBook, FaChevronUp, FaChevronDown, FaSearch, FaDollarSign } from "react-icons/fa";
+import {FaCamera,FaInfo, FaChartLine, FaGlobeAsia, FaCalendarAlt, FaMapMarkedAlt, FaListAlt, FaUser, FaSignOutAlt, FaBook, FaChevronUp, FaChevronDown, FaSearch, FaDollarSign } from "react-icons/fa";
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();
@@ -120,7 +120,8 @@ const AdminDashboard = ({ children }) => {
                 "/admin/destination",
                 "/admin/event",
                 "/admin/itineraries",
-                "/admin/schedules"
+                "/admin/schedules",
+                "/admin/experience"
               ].includes(location.pathname)
                 ? "active has-submenu"
                 : "has-submenu"}
@@ -178,6 +179,13 @@ const AdminDashboard = ({ children }) => {
                   >
                     <span className="menu-icon-circle"><FaCalendarAlt /></span>
                     <span className="menu-text-modern">Sự kiện</span>
+                  </li>
+                  <li
+                    onClick={e => { e.stopPropagation(); navigate("/admin/experience"); }}
+                    className={location.pathname === "/admin/experience" ? "active" : ""}
+                  >
+                    <span className="menu-icon-circle"><FaCamera /></span>
+                    <span className="menu-text-modern">Trải nghiệm</span>
                   </li>
                 </ul>
               )}

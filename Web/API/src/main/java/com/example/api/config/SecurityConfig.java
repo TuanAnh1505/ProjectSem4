@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/uploads/**").permitAll()
                         .requestMatchers("/favicon.ico", "/manifest.json").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tour-status").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tour-status", "/api/experiences/**", "/api/media/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
