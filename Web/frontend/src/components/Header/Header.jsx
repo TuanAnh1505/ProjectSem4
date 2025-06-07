@@ -2,19 +2,25 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
 import logo from '../../assets/images/logo.png';
+import PersonIcon from '@mui/icons-material/Person';
 
 const Header = () => {
   const navigate = useNavigate();
   const isAuthenticated = !!localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const userMenuRef = useRef(null);
+  const langMenuRef = useRef(null);
 
   // Đóng menu khi click ra ngoài
   useEffect(() => {
     function handleClickOutside(event) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setUserMenuOpen(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target)) {
+        setLangOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -30,44 +36,23 @@ const Header = () => {
   };
 
   return (
-    <header className={styles.header} style={{ boxShadow: '0 2px 12px #e3e8f0', background: '#fff', position: 'sticky', top: 0, zIndex: 100 }}>
-      <div className={styles.container} style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-        <div className={styles.toplinks} />
-        <div
-          className={styles.row}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 48,
-            width: '100%',
-            flexWrap: 'wrap',
-          }}
-        >
-          <h1 className={styles.logo} style={{ margin: 0, padding: '18px 0 8px 0', textAlign: 'center' }}>
-            <Link to="/" style={{ textDecoration: 'none' }}>
-              <img 
-                src={logo}
-                alt="Vietnam Tourism Logo" 
-                style={{ 
-                  height: '40px',
-                  width: 'auto'
-                }}
-              />
+    <header className={styles.header}>
+      <div className={styles.container}>
+        <div className={styles.flexRow}>
+          {/* Logo bên trái */}
+          <div className={styles.logoWrap}>
+            <Link to="/">
+              <img src={logo} alt="Vietnam Tourism Logo" className={styles.logoImg} />
             </Link>
-          </h1>
-          <nav className={styles.mainNav} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: 'auto', flex: 1 }}>
-            <ul style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 32, margin: 0, padding: 0, listStyle: 'none' }}>
-              <li className={styles.hasFlyout}>
-                <Link to="/live-fully" className={styles.lang}>
-                  Live fully in Vietnam <span className={styles.arrow}></span>
-                </Link>
+          </div>
+          {/* Menu giữa */}
+          <nav className={styles.mainNav}>
+            <ul>
+              <li>
+                <Link to="/live-fully">Live fully in Vietnam</Link>
               </li>
-              <li className={styles.hasFlyout}>
-                <Link to="/places-to-go">
-                  Places to go <span className={styles.arrow}></span>
-                </Link>
+              <li>
+                <Link to="/places-to-go">Places to go</Link>
               </li>
               <li>
                 <Link to="/tour-dashboard">Tour booking</Link>
@@ -77,131 +62,76 @@ const Header = () => {
                   <Link to="/admin/about">Admin Dashboard</Link>
                 </li>
               )}
-              <li className={styles.hasFlyout}>
-                <a href="#" className={styles.lang}>
-                  EN <span className={styles.arrow}></span>
-                </a>
-                <div className={styles.flyout} />
-              </li>
-              {isAuthenticated ? (
-                <li ref={userMenuRef} style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => setUserMenuOpen((open) => !open)}
-                    style={{ marginLeft: 16, fontWeight: 600, color: '#1976d2', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}
-                  >
-                    <span role="img" aria-label="user" style={{ fontSize: '2rem' }}>👤</span>
-                  </button>
-                  {userMenuOpen && (
-                    <div style={{
-                      position: 'absolute',
-                      left: '50%',
-                      top: '110%',
-                      transform: 'translateX(-50%)',
-                      background: '#fff',
-                      boxShadow: '0 8px 32px rgba(60,60,60,0.18)',
-                      borderRadius: 14,
-                      minWidth: 210,
-                      zIndex: 1000,
-                      overflow: 'hidden',
-                      border: '1px solid #ececec',
-                      animation: 'fadeInMenu 0.25s',
-                    }}>
-                      <style>{`
-                        @keyframes fadeInMenu {
-                          from { opacity: 0; transform: translateY(-10px) translateX(-50%); }
-                          to { opacity: 1; transform: translateY(0) translateX(-50%); }
-                        }
-                      `}</style>
-                      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <li>
-                          <button
-                            onClick={() => {
-                              const publicId = localStorage.getItem('publicId');
-                              setUserMenuOpen(false);
-                              if (publicId) {
-                                navigate(`/account/${publicId}`);
-                              } else {
-                                navigate('/login');
-                              }
-                            }}
-                            style={{
-                              width: '100%',
-                              textAlign: 'left',
-                              padding: '10px 16px',
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              fontSize: '1rem',
-                              transition: 'background 0.18s',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'flex-start',
-                              gap: 10,
-                              minHeight: 36,
-                            }}
-                            onMouseOver={e => e.currentTarget.style.background = '#f0f4ff'}
-                            onMouseOut={e => e.currentTarget.style.background = 'none'}
-                          >
-                            <span role="img" aria-label="user" style={{fontSize: '1.3em', color: '#673ab7', minWidth: 24}}>👤</span>
-                            <span style={{whiteSpace: 'nowrap'}}>Thông tin tài khoản</span>
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            onClick={() => {
-                              setUserMenuOpen(false);
-                              handleLogout();
-                            }}
-                            style={{
-                              width: '100%',
-                              textAlign: 'left',
-                              padding: '10px 16px',
-                              color: '#d32f2f',
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              fontWeight: 600,
-                              fontSize: '1rem',
-                              transition: 'background 0.18s',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'flex-start',
-                              gap: 10,
-                              minHeight: 36,
-                            }}
-                            onMouseOver={e => e.currentTarget.style.background = '#ffeaea'}
-                            onMouseOut={e => e.currentTarget.style.background = 'none'}
-                          >
-                            <span role="img" aria-label="logout" style={{fontSize: '1.3em', color: '#d32f2f', minWidth: 24}}>🚪</span>
-                            <span style={{whiteSpace: 'nowrap'}}>Logout</span>
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-                </li>
-              ) : (
-                <li>
-                  <Link to="/login" className={styles.loginButton} style={{ minWidth: 80 }}>
-                    Login
-                  </Link>
-                </li>
-              )}
             </ul>
           </nav>
+          {/* Phần bên phải: ngôn ngữ + user */}
+          <div className={styles.rightSection}>
+            {/* Dropdown ngôn ngữ */}
+            <div className={styles.langDropdown} ref={langMenuRef}>
+              <button
+                className={styles.langBtn}
+                onClick={() => setLangOpen((open) => !open)}
+                aria-haspopup="true"
+                aria-expanded={langOpen}
+              >
+                EN <span className={styles.arrow}></span>
+              </button>
+              {langOpen && (
+                <div className={styles.langMenu}>
+                  <button className={styles.langItem}>English</button>
+                  <button className={styles.langItem}>Vietnamese</button>
+                  <button className={styles.langItem}>Chinese</button>
+                </div>
+              )}
+            </div>
+            {/* User icon/login */}
+            {isAuthenticated ? (
+              <div className={styles.userMenuWrap} ref={userMenuRef}>
+                <button
+                  className={styles.userBtn}
+                  onClick={() => setUserMenuOpen((open) => !open)}
+                  aria-haspopup="true"
+                  aria-expanded={userMenuOpen}
+                >
+                  <PersonIcon style={{ fontSize: '2rem' }} />
+                </button>
+                {userMenuOpen && (
+                  <div className={styles.userMenu}>
+                    <button
+                      className={styles.userMenuItem}
+                      onClick={() => {
+                        const publicId = localStorage.getItem('publicId');
+                        setUserMenuOpen(false);
+                        if (publicId) {
+                          navigate(`/account/${publicId}`);
+                        } else {
+                          navigate('/login');
+                        }
+                      }}
+                    >
+                      <PersonIcon style={{ fontSize: '1.3em', marginRight: 8 }} /> Thông tin tài khoản
+                    </button>
+                    <button
+                      className={styles.userMenuItem}
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        handleLogout();
+                      }}
+                      style={{ color: '#d32f2f' }}
+                    >
+                      <span style={{ fontSize: '1.3em', marginRight: 8 }}>🚪</span> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to="/login" className={styles.loginButton}>
+                Login
+              </Link>
+            )}
+          </div>
         </div>
       </div>
-      <style>{`
-        @media (max-width: 900px) {
-          .${styles.row} {
-            flex-direction: column !important;
-            gap: 12px !important;
-          }
-          .${styles.mainNav} ul {
-            gap: 18px !important;
-          }
-        }
-      `}</style>
     </header>
   );
 };

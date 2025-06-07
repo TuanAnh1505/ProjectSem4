@@ -21,6 +21,30 @@ export default function TourDetailDashboard() {
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
   const [selectedItineraryId, setSelectedItineraryId] = useState(null);
 
+  // Dữ liệu mẫu cho các mốc thời gian trong ngày nếu API không trả về
+  const sampleDayDetails = [
+    {
+      time: '8:00 - 8:30',
+      icon: 'ri-time-line',
+      title: 'Tập trung tại điểm hẹn: 44 Nguyễn Thái Học, Ba Đình. Làm quen với HDV và các thành viên trong đoàn.'
+    },
+    {
+      time: '8:30 - 12:00',
+      icon: 'ri-time-line',
+      title: 'Di chuyển theo cao tốc Nội Bài - Lào Cai. Dừng chân nghỉ ngơi tại trạm dừng chân và dùng bữa trưa.'
+    },
+    {
+      time: '12:00 - 17:00',
+      icon: 'ri-time-line',
+      title: 'Tiếp tục hành trình qua Tuyên Quang, ngắm cảnh đẹp hai bên đường. Dừng chân chụp ảnh tại các điểm đẹp.'
+    },
+    {
+      time: '17:00 - 18:00',
+      icon: 'ri-time-line',
+      title: 'Đến Hà Giang, nhận phòng khách sạn. Nghỉ ngơi và tự do khám phá ẩm thực địa phương.'
+    }
+  ];
+
   useEffect(() => {
     const fetchTour = async () => {
       try {
@@ -200,277 +224,465 @@ export default function TourDetailDashboard() {
   const galleryImages = tour.images || (tour.imageUrl ? [tour.imageUrl] : []);
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', background: '#e3f2fd', borderRadius: 16, boxShadow: '0 4px 24px 0 #e3e8f0', padding: '0 0 32px 0', paddingTop: 80 }}>
-      {/* Top section: Title, Info, Banner */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, alignItems: 'center', padding: '32px 32px 0 32px', background: '#e3f2fd', borderRadius: 16, boxShadow: '0 2px 12px #e3e8f0', marginBottom: 24 }}>
-        {/* Info left */}
-        <div style={{
-          flex: 1,
-          minWidth: 380,
-          background: '#fff',
-          borderRadius: 24,
-          padding: '38px 38px 32px 38px',
-          boxShadow: '0 4px 24px #e3e8f0',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 0 0 0',
-        }}>
-          <div style={{
-            color: '#1976d2',
-            fontWeight: 800,
-            fontSize: 38,
-            marginBottom: 18,
-            textAlign: 'center',
-            width: '100%',
-            letterSpacing: 1
-          }}>{tour.name}</div>
-          <div style={{
-            color: '#333',
-            fontSize: 20,
-            marginBottom: 28,
-            textAlign: 'center',
-            lineHeight: 1.5,
-            fontWeight: 400
-          }}>{tour.description}</div>
-          <div style={{
-            display: 'flex',
-            gap: 48,
-            marginBottom: 0,
-            justifyContent: 'center',
-            width: '100%'
-          }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>Thời gian</span>
-              <span style={{ color: '#333', fontSize: 18 }}>{tour.duration} ngày</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>Số lượng</span>
-              <span style={{ color: '#333', fontSize: 18 }}>{tour.maxParticipants} khách</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>Giá</span>
-              <span style={{ color: '#388e3c', fontSize: 20, fontWeight: 700 }}>{tour.price?.toLocaleString()}đ</span>
+    <main className="tour-main-container">
+      {/* Tour Information */}
+      <div className="tour-info">
+        <div className="tour-info-row">
+          <div className="tour-info-left">
+            <h1 className="tour-title">{tour.name}</h1>
+            <p className="tour-desc">{tour.description}</p>
+            <div className="tour-meta">
+              <div className="tour-meta-item">
+                <div className="tour-meta-icon">
+                  <i className="ri-time-line ri-lg"></i>
+                </div>
+                <div className="tour-meta-text">
+                  <p className="tour-meta-label">Thời gian</p>
+                  <p className="tour-meta-value">{tour.duration} ngày</p>
+                </div>
+              </div>
+              <div className="tour-meta-item">
+                <div className="tour-meta-icon">
+                  <i className="ri-user-line ri-lg"></i>
+                </div>
+                <div className="tour-meta-text">
+                  <p className="tour-meta-label">Số lượng</p>
+                  <p className="tour-meta-value">{tour.maxParticipants} khách</p>
+                </div>
+              </div>
+              <div className="tour-meta-item">
+                <div className="tour-meta-icon">
+                  <i className="ri-money-dollar-circle-line ri-lg"></i>
+                </div>
+                <div className="tour-meta-text">
+                  <p className="tour-meta-label">Giá</p>
+                  <p className="tour-meta-value tour-meta-price">{tour.price?.toLocaleString()}đ</p>
+                </div>
+              </div>
             </div>
           </div>
+          <div className="tour-info-right">
+            {tour.imageUrl && (
+              <img
+                src={`http://localhost:8080${tour.imageUrl}`}
+                alt={tour.name}
+                className="tour-main-img"
+              />
+            )}
+          </div>
         </div>
-        {/* Banner right */}
-        <div style={{ flex: 1, minWidth: 320, display: 'flex', justifyContent: 'center' }}>
-          {tour.imageUrl && (
-            <img
-              src={`http://localhost:8080${tour.imageUrl}`}
-              alt={tour.name}
-              style={{ width: '100%', maxWidth: 420, maxHeight: 320, objectFit: 'cover', borderRadius: 18, border: '6px solid #1976d2', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
-            />
+      </div>
+
+      {/* Tour Itinerary */}
+      <div className="itinerary-section itinerary-fullwidth">
+        <h2 className="itinerary-title">LỊCH TRÌNH</h2>
+        <div className="itinerary-list">
+          {itineraries.length > 0 ? (
+            itineraries.map((schedule, idx) => (
+              <div key={schedule.scheduleId} className="itinerary-item itinerary-item-fullwidth">
+                <h3 className="itinerary-item-title">
+                  Lịch trình {idx + 1}: {schedule.startDate} - {schedule.endDate}
+                </h3>
+                {schedule.itineraries && schedule.itineraries.length > 0 ? (
+                  schedule.itineraries.map((itinerary, i) => (
+                    <div key={itinerary.itineraryId} className="itinerary-day itinerary-day-fullwidth">
+                      <div className="itinerary-day-header-row itinerary-day-header-row-fullwidth">
+                        <div className="itinerary-day-header-col">
+                          <span className="itinerary-day-label">Giờ bắt đầu:</span>
+                          <span className="itinerary-day-value">{formatTime(itinerary.startTime)}</span>
+                        </div>
+                        <div className="itinerary-day-title-main">Ngày {i + 1}: {itinerary.title}</div>
+                        <div className="itinerary-day-header-col" style={{textAlign: 'right'}}>
+                          <span className="itinerary-day-label">Giờ kết thúc:</span>
+                          <span className="itinerary-day-value">{formatTime(itinerary.endTime)}</span>
+                        </div>
+                      </div>
+                      <div className="itinerary-day-details">
+                        {(itinerary.dayDetails && itinerary.dayDetails.length > 0 ? itinerary.dayDetails : sampleDayDetails).map((detail, j) => (
+                          <div className="itinerary-detail-row" key={j}>
+                            <div className="itinerary-detail-icon">
+                              <i className={(detail.icon ? detail.icon : "ri-time-line") + ' ri-lg'}></i>
+                            </div>
+                            <div className="itinerary-detail-content">
+                              <span className="itinerary-detail-time">{detail.time}</span>
+                              <span className="itinerary-detail-title">{detail.title}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {itinerary.importantInfo && (
+                        <div className="itinerary-important itinerary-important-fullwidth">
+                          <h5 className="itinerary-important-title">
+                            <i className="ri-information-line itinerary-important-icon"></i>
+                            Thông tin quan trọng
+                          </h5>
+                          <ul className="itinerary-important-list">
+                            {itinerary.importantInfo.map((info, k) => (
+                              <li className="itinerary-important-item" key={k}>
+                                <i className={(info.icon ? info.icon : "ri-information-line") + ' itinerary-important-item-icon'}></i>
+                                <span className="itinerary-important-item-text">{info.text}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="itinerary-no-data">Không có lịch trình cho schedule này.</div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="itinerary-no-data">Chưa có lịch trình cho tour này</div>
           )}
         </div>
       </div>
 
-      {/* Tabs section: Lịch trình, Giới thiệu, Chuẩn bị */}
-      <div style={{ margin: '32px 0 0 0', padding: '0 32px' }}>
-        <div style={{ display: 'flex', gap: 0 }}>
-          <div style={{ background: '#1976d2', color: '#fff', padding: '12px 32px', borderTopLeftRadius: 12, borderTopRightRadius: 12, fontWeight: 700, fontSize: 18, letterSpacing: 1 }}>LỊCH TRÌNH</div>
-          {/* Có thể thêm tab Giới thiệu, Chuẩn bị nếu muốn */}
-        </div>
-        <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: 24, border: '1.5px solid #e3e8f0', borderTop: 'none', boxShadow: '0 2px 8px #e3e8f0' }}>
-          {itineraries.length > 0 ? (
-            itineraries.map((schedule, idx) => (
-              <div key={schedule.scheduleId} style={{ 
-                marginBottom: 24, 
-                background: schedule.status === 'full' ? '#fff1f0' : '#e3f2fd', 
-                borderRadius: 10, 
-                boxShadow: '0 2px 8px #e3e8f0', 
-                border: `1.5px solid ${schedule.status === 'full' ? '#ff4d4f' : '#e3e8f0'}`, 
-                padding: 18 
-              }}>
-                <div style={{ 
-                  fontWeight: 600, 
-                  color: schedule.status === 'full' ? '#ff4d4f' : '#1976d2', 
-                  fontSize: 16, 
-                  marginBottom: 8,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <span>Lịch trình {idx + 1}: {schedule.startDate} - {schedule.endDate}</span>
-                  <span style={{
-                    padding: '4px 8px',
-                    borderRadius: 4,
-                    background: schedule.status === 'full' ? '#ff4d4f' : schedule.status === 'closed' ? '#b71c1c' : '#1976d2',
-                    color: '#fff',
-                    fontSize: 14
-                  }}>
-                    {schedule.status === 'full' ? 'Đã đủ người' : schedule.status === 'closed' ? 'Đã đóng' : 'Còn chỗ'}
-                    ({schedule.currentParticipants || 0}/{tour.maxParticipants})
-                  </span>
-                  {schedule.status === 'full' && (
-                    <span style={{ color: '#ff4d4f', fontWeight: 700, marginLeft: 16, fontSize: 15 }}>
-                      ⚠️ Lịch trình này đã hết chỗ!
-                    </span>
-                  )}
-                </div>
-                {schedule.itineraries && schedule.itineraries.length > 0 ? (
-                  <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                    {schedule.itineraries.map((itinerary, i) => (
-                      <li key={itinerary.itineraryId} style={{ marginBottom: 10, padding: 12, background: '#fff', borderRadius: 8, border: '1px solid #e3e8f0' }}>
-                        <div style={{ fontWeight: 600, color: '#1976d2' }}>Ngày {i + 1}: {itinerary.title}</div>
-                        {itinerary.startTime && <div><b>Giờ bắt đầu:</b> {formatTime(itinerary.startTime)}</div>}
-                        {itinerary.endTime && <div><b>Giờ kết thúc:</b> {formatTime(itinerary.endTime)}</div>}
-                        {itinerary.description && <div><b>Mô tả:</b> {itinerary.description}</div>}
-                        {itinerary.type && <div><b>Loại:</b> {itinerary.type}</div>}
-                      </li>
-                    ))}
-                  </ul>
-                ) : <div style={{ color: '#888' }}>Không có lịch trình nào cho schedule này.</div>}
-              </div>
-            ))
-          ) : <div style={{ color: '#888' }}>Chưa có lịch trình cho tour này</div>}
-        </div>
-      </div>
-
-      {/* Gallery section */}
+      {/* Tour Images */}
       {galleryImages.length > 0 && (
-        <div style={{ margin: '32px 0', padding: '0 32px' }}>
-          <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 16 }}>Hình ảnh tour</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 2px 8px #e3e8f0' }}>
+        <div className="tour-gallery">
+          <h2 className="tour-gallery-title">Hình ảnh tour</h2>
+          <div className="tour-gallery-list">
             {galleryImages.map((img, idx) => (
-              <img key={idx} src={`http://localhost:8080${img}`} alt={`gallery-${idx}`} style={{ width: 180, height: 120, objectFit: 'cover', borderRadius: 10, border: '2px solid #e3e8f0' }} />
+              <div key={idx} className="tour-gallery-img-wrap">
+                <img src={`http://localhost:8080${img}`} alt={`gallery-${idx}`} className="tour-gallery-img" />
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Booking form + Điểm nổi bật + FAQ */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, margin: '32px 0', padding: '0 32px' }}>
-        {/* Booking form */}
-        <div style={{ flex: 1, minWidth: 320, background: '#e3f2fd', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0' }}>
-          <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 18, marginBottom: 16 }}>Đặt tour</div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontWeight: 600 }}>Chọn lịch trình:</label>
-            <select
-              value={selectedScheduleId || ''}
-              onChange={e => setSelectedScheduleId(Number(e.target.value))}
-              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #1976d2', marginTop: 6 }}
-            >
-              <option value="">-- Chọn lịch trình --</option>
-              {itineraries.map(sch => (
-                <option 
-                  key={sch.scheduleId} 
-                  value={sch.scheduleId}
-                  disabled={sch.status === 'full' || sch.status === 'closed'}
-                  style={{ 
-                    color: sch.status === 'full' || sch.status === 'closed' ? '#ff4d4f' : 'inherit',
-                    backgroundColor: sch.status === 'full' || sch.status === 'closed' ? '#fff1f0' : 'inherit'
-                  }}
-                >
-                  {sch.startDate} - {sch.endDate} {sch.status === 'full' ? '(Đã đủ người)' : sch.status === 'closed' ? '(Đã đóng)' : '(Còn chỗ)'} - {sch.currentParticipants || 0}/{tour.maxParticipants} người
-                </option>
-              ))}
-            </select>
-            {/* Cảnh báo đỏ khi lịch trình đã hết chỗ hoặc đã đóng */}
-            {selectedScheduleId && ['full', 'closed'].includes(itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status) && (
-              <div style={{
-                marginTop: 10,
-                padding: 10,
-                background: '#fff1f0',
-                border: '1.5px solid #ff4d4f',
-                borderRadius: 8,
-                color: '#ff4d4f',
-                fontWeight: 700,
-                fontSize: 16
-              }}>
-                {itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full'
-                  ? '⚠️ Lịch trình này đã hết chỗ! Bạn không thể đặt thêm.'
-                  : '⚠️ Lịch trình này đã đóng! Bạn không thể đặt thêm.'}
+      {/* Booking and Highlights */}
+      <div className="booking-highlight-row">
+        {/* Booking Form */}
+        <div className="booking-form">
+          <h2 className="booking-title">Đặt tour</h2>
+          <div className="booking-form-group">
+            <label htmlFor="schedule" className="booking-label">Chọn lịch trình:</label>
+            <div className="booking-select-wrap">
+              <select
+                id="schedule"
+                className="booking-select"
+                value={selectedScheduleId || ''}
+                onChange={e => setSelectedScheduleId(Number(e.target.value))}
+              >
+                <option value="">-- Chọn lịch trình --</option>
+                {itineraries.map(sch => (
+                  <option
+                    key={sch.scheduleId}
+                    value={sch.scheduleId}
+                    disabled={sch.status === 'full' || sch.status === 'closed'}
+                  >
+                    {sch.startDate} - {sch.endDate} {sch.status === 'full' ? '(Đã đủ người)' : sch.status === 'closed' ? '(Đã đóng)' : '(Còn chỗ)'} - {sch.currentParticipants || 0}/{tour.maxParticipants} người
+                  </option>
+                ))}
+              </select>
+              <div className="booking-select-icon">
+                <i className="ri-arrow-down-s-line"></i>
               </div>
-            )}
+            </div>
           </div>
           <button
+            className="booking-btn"
             onClick={handleBooking}
-            disabled={bookingLoading || !selectedScheduleId || 
+            disabled={bookingLoading || !selectedScheduleId ||
               ['full', 'closed'].includes(itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status)}
-            style={{ 
-              width: '100%', 
-              padding: 12, 
-              background: (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full') 
-                ? '#ff4d4f' 
-                : '#1976d2', 
-              color: '#fff', 
-              border: 'none', 
-              borderRadius: 8, 
-              fontWeight: 700, 
-              fontSize: 16, 
-              cursor: (bookingLoading || !selectedScheduleId || 
-                ['full', 'closed'].includes(itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status)) 
-                ? 'not-allowed' 
-                : 'pointer', 
-              marginTop: 8,
-              opacity: (bookingLoading || !selectedScheduleId || 
-                ['full', 'closed'].includes(itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status)) 
-                ? 0.7 
-                : 1
-            }}
           >
-            {bookingLoading ? 'Đang xử lý...' : 
-              (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full') 
-                ? 'Đã đủ người' 
+            {bookingLoading ? 'Đang xử lý...' :
+              (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full')
+                ? 'Đã đủ người'
                 : (itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'closed')
-                  ? 'Đã đóng' 
+                  ? 'Đã đóng'
                   : 'Đặt ngay'}
           </button>
-
-          {/* Thông báo khi lịch trình đã đủ người */}
-          {selectedScheduleId && itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status === 'full' && (
-            <div style={{ 
-              marginTop: 12, 
-              padding: 12, 
-              background: '#fff1f0', 
-              border: '1px solid #ff4d4f', 
-              borderRadius: 8,
-              color: '#ff4d4f',
-              fontSize: 14
-            }}>
-              ⚠️ Lịch trình này đã đủ số lượng người tham gia. Vui lòng chọn lịch trình khác.
-            </div>
-          )}
         </div>
-        {/* Điểm nổi bật (demo) */}
-        <div style={{ flex: 1, minWidth: 320, background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0' }}>
-          <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 18, marginBottom: 16 }}>Điểm nổi bật</div>
-          <ul style={{ margin: 0, padding: 0, listStyle: 'disc inside', color: '#333', fontSize: 15 }}>
-            <li>Tour an toàn, uy tín, trải nghiệm thiên nhiên tuyệt vời</li>
-            <li>Hướng dẫn viên chuyên nghiệp, hỗ trợ tận tình</li>
-            <li>Lịch trình linh hoạt, phù hợp nhiều đối tượng</li>
-            <li>Giá cả hợp lý, nhiều ưu đãi hấp dẫn</li>
+        {/* Highlights */}
+        <div className="highlight-section">
+          <h2 className="highlight-title">Điểm nổi bật</h2>
+          <ul className="highlight-list">
+            <li className="highlight-item">
+              <div className="highlight-icon">
+                <i className="ri-check-line"></i>
+              </div>
+              <span className="highlight-text">Khám phá Cao nguyên đá Đồng Văn - Di sản địa chất toàn cầu được UNESCO công nhận</span>
+            </li>
+            <li className="highlight-item">
+              <div className="highlight-icon">
+                <i className="ri-check-line"></i>
+              </div>
+              <span className="highlight-text">Trải nghiệm đèo Mã Pí Lèng - Con đường hạnh phúc</span>
+            </li>
+            <li className="highlight-item">
+              <div className="highlight-icon">
+                <i className="ri-check-line"></i>
+              </div>
+              <span className="highlight-text">Tham quan Cột cờ Lũng Cú - Điểm cực Bắc của Tổ quốc</span>
+            </li>
+            <li className="highlight-item">
+              <div className="highlight-icon">
+                <i className="ri-check-line"></i>
+              </div>
+              <span className="highlight-text">Khám phá văn hóa đặc sắc của đồng bào dân tộc thiểu số</span>
+            </li>
           </ul>
         </div>
       </div>
 
-      {/* FAQ (demo) */}
-      <div style={{ margin: '32px 0', padding: '0 32px', background: '#e3f2fd', borderRadius: 12, boxShadow: '0 2px 8px #e3e8f0' }}>
-        <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 18, marginBottom: 16 }}>FAQ về tour</div>
-        <ul style={{ margin: 0, padding: 0, listStyle: 'none', color: '#333', fontSize: 15 }}>
-          <li style={{ marginBottom: 8 }}><b>Đi một mình ổn không?</b> Hoàn toàn ổn, tour có nhiều khách đi lẻ.</li>
-          <li style={{ marginBottom: 8 }}><b>Cung đường trekking dài bao nhiêu?</b> Tùy tour, thường 10-20km/ngày.</li>
-          <li style={{ marginBottom: 8 }}><b>Không có kinh nghiệm trekking có tham gia được không?</b> Được, HDV sẽ hỗ trợ tận tình.</li>
-        </ul>
+      {/* FAQ */}
+      <div className="faq-section">
+        <h2 className="faq-title">FAQ về tour</h2>
+        <div className="faq-list">
+          <div className="faq-item">
+            <h3 className="faq-question">Tôi cần mang những gì khi tham gia tour {tour.name}?</h3>
+            <p className="faq-answer">Quần áo thoải mái, giày đi bộ, áo khoác nhẹ (vì thời tiết có thể thay đổi đột ngột), kem chống nắng, thuốc cá nhân, giấy tờ tùy thân và tiền mặt (một số nơi không hỗ trợ thanh toán điện tử).</p>
+          </div>
+          <div className="faq-item">
+            <h3 className="faq-question">Có cần giấy phép đi {tour.name} không?</h3>
+            <p className="faq-answer">Đối với người Việt Nam không cần giấy phép đặc biệt. Đối với khách nước ngoài, cần mang theo hộ chiếu để làm thủ tục tạm trú tại các điểm lưu trú.</p>
+          </div>
+          <div className="faq-item">
+            <h3 className="faq-question">Thời điểm lý tưởng để đi {tour.name} là khi nào?</h3>
+            <p className="faq-answer">Hà Giang đẹp quanh năm, nhưng thời điểm lý tưởng nhất là từ tháng 9 đến tháng 11 (mùa hoa tam giác mạch) và tháng 4 đến tháng 5 (mùa lúa xanh).</p>
+          </div>
+        </div>
       </div>
 
-      {/* Related tours */}
-      <div style={{ margin: '32px 0', padding: '0 32px' }}>
-        <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 16 }}>Các tour liên quan</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18 }}>
+      {/* Related Tours */}
+      <div className="related-tours">
+        <h2 className="related-tours-title">Các tour liên quan</h2>
+        <div className="related-tours-list">
           {relatedTours.map(tour => (
-            <div key={tour.tourId} style={{ background: '#e3f2fd', borderRadius: 12, boxShadow: '0 2px 8px #e3e8f0', border: '1.5px solid #e3e8f0', width: 260, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <img src={`http://localhost:8080${tour.imageUrl}`} alt={tour.name} style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }} />
-              <div style={{ fontWeight: 600, color: '#1976d2', fontSize: 16, marginBottom: 4 }}>{tour.name}</div>
-              <div style={{ color: '#388e3c', fontSize: 15, marginBottom: 8 }}>Giá từ {tour.price.toLocaleString()}đ</div>
-              <button onClick={() => navigate(`/tour-dashboard/detail/${tour.tourId}`)} style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Xem chi tiết</button>
+            <div key={tour.tourId} className="related-tour-card">
+              <div className="related-tour-img-wrap">
+                <img src={`http://localhost:8080${tour.imageUrl}`} alt={tour.name} className="related-tour-img" />
+              </div>
+              <div className="related-tour-content">
+                <h3 className="related-tour-name">{tour.name}</h3>
+                <div className="related-tour-meta">
+                  <div className="related-tour-meta-icon">
+                    <i className="ri-time-line"></i>
+                  </div>
+                  <span className="related-tour-meta-text">{tour.duration || 'N/A'} ngày</span>
+                </div>
+                <div className="related-tour-meta-bottom">
+                  <p className="related-tour-price">{tour.price?.toLocaleString()}đ</p>
+                  <button onClick={() => navigate(`/tour-dashboard/detail/${tour.tourId}`)} className="related-tour-btn">Xem chi tiết</button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
-    </div>
+
+      {/* CSS bổ sung cho layout và class mới */}
+      <style>{`
+        .tour-main-container { max-width: 1200px; margin: 0 auto; padding: 32px 0; }
+        .tour-info { background: #fff; border-radius: 16px; box-shadow: 0 2px 8px #e3e8f0; padding: 32px; margin-bottom: 32px; }
+        .tour-info-row { display: flex; flex-wrap: wrap; gap: 32px; align-items: center; }
+        .tour-info-left { flex: 1; min-width: 380px; }
+        .tour-title { color: #1976d2; font-weight: 800; font-size: 38px; margin-bottom: 18px; text-align: left; letter-spacing: 1px; }
+        .tour-desc { color: #333; font-size: 20px; margin-bottom: 28px; line-height: 1.5; font-weight: 400; }
+        .tour-meta { display: flex; gap: 48px; margin-bottom: 0; justify-content: flex-start; width: 100%; }
+        .tour-meta-item { display: flex; flex-direction: row; align-items: center; }
+        .tour-meta-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #1976d2; font-size: 24px; }
+        .tour-meta-label { font-size: 15px; color: #888; margin-bottom: 2px; }
+        .tour-meta-value { font-size: 18px; color: #333; font-weight: 500; }
+        .tour-meta-price { color: #388e3c; font-weight: 700; font-size: 20px; }
+        .tour-info-right { flex: 1; min-width: 320px; display: flex; justify-content: center; }
+        .tour-main-img { width: 100%; max-width: 420px; max-height: 320px; object-fit: cover; border-radius: 18px; border: 6px solid #1976d2; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+
+        .itinerary-section.itinerary-fullwidth {
+          width: 100vw;
+          max-width: none;
+          margin-left: 50%;
+          transform: translateX(-50%);
+          border-radius: 0;
+          box-shadow: none;
+          padding: 0 0 32px 0;
+        }
+        .itinerary-list {
+          width: 100%;
+          padding: 0 0 0 0;
+        }
+        .itinerary-item.itinerary-item-fullwidth {
+          background: #eaf3fc;
+          border-radius: 18px;
+          box-shadow: 0 4px 24px #dbeafe;
+          padding: 32px 48px 32px 48px;
+          margin-bottom: 36px;
+          width: 90vw;
+          max-width: 1400px;
+          margin-left: 50%;
+          transform: translateX(-50%);
+        }
+        .itinerary-day.itinerary-day-fullwidth {
+          background: #f7fbff;
+          border-radius: 14px;
+          box-shadow: 0 2px 8px #e3e8f0;
+          border: 2px solid #1976d2;
+          padding: 32px 32px 20px 32px;
+          margin-bottom: 18px;
+          width: 100%;
+        }
+        .itinerary-day-header-row.itinerary-day-header-row-fullwidth {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 18px;
+          gap: 18px;
+        }
+        .itinerary-day-header-col {
+          min-width: 140px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          font-size: 16px;
+        }
+        .itinerary-day-title-main {
+          flex: 1;
+          text-align: center;
+          font-size: 20px;
+          font-weight: 700;
+          color: #1976d2;
+          letter-spacing: 0.5px;
+        }
+        .itinerary-day-label {
+          font-size: 15px;
+          color: #888;
+          font-weight: 500;
+        }
+        .itinerary-day-value {
+          font-size: 18px;
+          color: #222;
+          font-weight: 700;
+          margin-left: 2px;
+        }
+        .itinerary-day-details {
+          margin-top: 0;
+          margin-bottom: 18px;
+        }
+        .itinerary-detail-row {
+          display: flex;
+          align-items: flex-start;
+          margin-bottom: 10px;
+          gap: 8px;
+        }
+        .itinerary-detail-icon {
+          width: 22px;
+          height: 22px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #1976d2;
+          margin-top: 2px;
+        }
+        .itinerary-detail-content {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+        }
+        .itinerary-detail-time {
+          font-weight: 500;
+          color: #1976d2;
+          font-size: 15px;
+          margin-bottom: 0;
+        }
+        .itinerary-detail-title {
+          color: #333;
+          font-size: 15px;
+        }
+        .itinerary-important.itinerary-important-fullwidth {
+          background: #fff;
+          border-radius: 16px;
+          padding: 16px 20px;
+          border: 1.5px solid #1976d2;
+          margin-top: 18px;
+          box-shadow: 0 1px 4px #e3e8f0;
+        }
+        .itinerary-important-title {
+          font-weight: 700;
+          color: #1976d2;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+        .itinerary-important-icon {
+          font-size: 18px;
+          margin-right: 8px;
+        }
+        .itinerary-important-list {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+        }
+        .itinerary-important-item {
+          display: flex;
+          align-items: flex-start;
+          margin-bottom: 6px;
+        }
+        .itinerary-important-item-icon {
+          font-size: 16px;
+          color: #1976d2;
+          margin-top: 2px;
+        }
+        .itinerary-important-item-text {
+          margin-left: 8px;
+          color: #444;
+          font-size: 15px;
+        }
+        .itinerary-no-data { color: #888; font-size: 15px; margin: 12px 0; }
+
+        .tour-gallery { background: #fff; border-radius: 16px; box-shadow: 0 2px 8px #e3e8f0; padding: 32px; margin-bottom: 32px; }
+        .tour-gallery-title { font-size: 20px; font-weight: 700; color: #1976d2; margin-bottom: 16px; }
+        .tour-gallery-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .tour-gallery-img-wrap { overflow: hidden; border-radius: 12px; height: 180px; }
+        .tour-gallery-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .tour-gallery-img:hover { transform: scale(1.05); }
+
+        .booking-highlight-row { display: flex; flex-wrap: wrap; gap: 32px; margin-bottom: 32px; }
+        .booking-form { flex: 1; min-width: 320px; background: #e3f2fd; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px #e3e8f0; border: 1.5px solid #e3e8f0; }
+        .booking-title { font-weight: 700; color: #1976d2; font-size: 18px; margin-bottom: 16px; }
+        .booking-form-group { margin-bottom: 16px; }
+        .booking-label { font-weight: 600; color: #333; margin-bottom: 6px; display: block; }
+        .booking-select-wrap { position: relative; }
+        .booking-select { width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid #1976d2; margin-top: 6px; font-size: 15px; }
+        .booking-select-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #888; pointer-events: none; }
+        .booking-btn { width: 100%; padding: 12px; background: #1976d2; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+        .booking-btn:disabled { background: #bdbdbd; cursor: not-allowed; }
+
+        .highlight-section { flex: 1; min-width: 320px; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px #e3e8f0; border: 1.5px solid #e3e8f0; }
+        .highlight-title { font-weight: 700; color: #1976d2; font-size: 18px; margin-bottom: 16px; }
+        .highlight-list { margin: 0; padding: 0; list-style: none; }
+        .highlight-item { display: flex; align-items: flex-start; margin-bottom: 12px; }
+        .highlight-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: #1976d2; margin-top: 2px; }
+        .highlight-text { margin-left: 8px; color: #333; font-size: 15px; }
+
+        .faq-section { background: #fff; border-radius: 16px; box-shadow: 0 2px 8px #e3e8f0; padding: 32px; margin-bottom: 32px; }
+        .faq-title { font-size: 20px; font-weight: 700; color: #1976d2; margin-bottom: 16px; }
+        .faq-list { margin: 0; padding: 0; }
+        .faq-item { border-bottom: 1px solid #e3e8f0; padding-bottom: 16px; margin-bottom: 16px; }
+        .faq-question { font-weight: 600; color: #1976d2; font-size: 16px; margin-bottom: 6px; }
+        .faq-answer { color: #444; font-size: 15px; }
+
+        .related-tours { margin-bottom: 32px; }
+        .related-tours-title { font-size: 20px; font-weight: 700; color: #1976d2; margin-bottom: 16px; }
+        .related-tours-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .related-tour-card { background: #e3f2fd; border-radius: 12px; box-shadow: 0 2px 8px #e3e8f0; border: 1.5px solid #e3e8f0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
+        .related-tour-img-wrap { width: 100%; height: 120px; overflow: hidden; border-radius: 8px; margin-bottom: 8px; }
+        .related-tour-img { width: 100%; height: 100%; object-fit: cover; }
+        .related-tour-content { width: 100%; }
+        .related-tour-name { font-weight: 600; color: #1976d2; font-size: 16px; margin-bottom: 4px; }
+        .related-tour-meta { display: flex; align-items: center; color: #666; margin-bottom: 8px; }
+        .related-tour-meta-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+        .related-tour-meta-text { margin-left: 6px; font-size: 14px; }
+        .related-tour-meta-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .related-tour-price { color: #388e3c; font-size: 15px; font-weight: 600; }
+        .related-tour-btn { background: #1976d2; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .related-tour-btn:hover { background: #1565c0; }
+      `}</style>
+    </main>
   );
 }
