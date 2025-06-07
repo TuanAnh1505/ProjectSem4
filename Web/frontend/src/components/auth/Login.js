@@ -40,8 +40,11 @@ const Login = () => {
       localStorage.setItem("publicId", publicId);
       localStorage.setItem("role", role); 
 
-      // Chuyển hướng dựa trên vai trò người dùng
-      if (role === "ADMIN") {
+      // Nếu có state (hoặc query) chứa tourId thì quay lại trang tour đó, ngược lại thì chuyển hướng theo role.
+      const tourId = location.state?.tourId;
+      if (tourId) {
+        navigate(`/tour-dashboard/detail/${tourId}`);
+      } else if (role === "ADMIN") {
         navigate("/admin/about");
       } else {
         navigate("/");
