@@ -69,11 +69,6 @@ const Header = () => {
                   Places to go <span className={styles.arrow}></span>
                 </Link>
               </li>
-              <li className={styles.hasFlyout}>
-                <Link to="/things-to-do">
-                  Things to do <span className={styles.arrow}></span>
-                </Link>
-              </li>
               <li>
                 <Link to="/tour-dashboard">Tour booking</Link>
               </li>
@@ -117,7 +112,7 @@ const Header = () => {
                           to { opacity: 1; transform: translateY(0) translateX(-50%); }
                         }
                       `}</style>
-                      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
+                      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <li>
                           <button
                             onClick={() => {
@@ -132,7 +127,7 @@ const Header = () => {
                             style={{
                               width: '100%',
                               textAlign: 'left',
-                              padding: '8px 12px',
+                              padding: '10px 16px',
                               background: 'none',
                               border: 'none',
                               cursor: 'pointer',
@@ -141,7 +136,7 @@ const Header = () => {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'flex-start',
-                              gap: 6,
+                              gap: 10,
                               minHeight: 36,
                             }}
                             onMouseOver={e => e.currentTarget.style.background = '#f0f4ff'}
@@ -155,40 +150,12 @@ const Header = () => {
                           <button
                             onClick={() => {
                               setUserMenuOpen(false);
-                              navigate('/payment');
-                            }}
-                            style={{
-                              width: '100%',
-                              textAlign: 'left',
-                              padding: '8px 12px',
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              fontSize: '1rem',
-                              transition: 'background 0.18s',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'flex-start',
-                              gap: 6,
-                              minHeight: 36,
-                            }}
-                            onMouseOver={e => e.currentTarget.style.background = '#f0f4ff'}
-                            onMouseOut={e => e.currentTarget.style.background = 'none'}
-                          >
-                            <span role="img" aria-label="payment" style={{fontSize: '1.3em', color: '#1976d2', minWidth: 24}}>💳</span>
-                            <span style={{whiteSpace: 'nowrap'}}>Thanh toán</span>
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            onClick={() => {
-                              setUserMenuOpen(false);
                               handleLogout();
                             }}
                             style={{
                               width: '100%',
                               textAlign: 'left',
-                              padding: '8px 12px',
+                              padding: '10px 16px',
                               color: '#d32f2f',
                               background: 'none',
                               border: 'none',
@@ -199,7 +166,7 @@ const Header = () => {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'flex-start',
-                              gap: 6,
+                              gap: 10,
                               minHeight: 36,
                             }}
                             onMouseOver={e => e.currentTarget.style.background = '#ffeaea'}
