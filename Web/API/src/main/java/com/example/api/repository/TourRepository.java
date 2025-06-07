@@ -13,5 +13,5 @@ public interface TourRepository extends JpaRepository<Tour, Integer> {
     @Query(value = "SELECT * FROM tours WHERE tour_id <> :excludeTourId ORDER BY RAND() LIMIT 4", nativeQuery = true)
     List<Tour> findRandomTours(@Param("excludeTourId") Integer excludeTourId);
 
-
+    
 }

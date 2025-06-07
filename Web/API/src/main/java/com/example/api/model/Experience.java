@@ -20,8 +20,10 @@ public class Experience {
     @JsonIgnoreProperties({"tokens", "roles", "tourGuide", "hibernateLazyInitializer", "handler"})
     private User user;
 
-    @Column(name = "tour_id")
-    private Long tourId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tour_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Tour tour;
 
     @Column(name = "title")
     private String title;

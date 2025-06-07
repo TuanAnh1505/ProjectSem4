@@ -15,6 +15,8 @@ import com.example.api.repository.UserRepository;
 import java.util.Map;
 import java.util.HashMap;
 import org.springframework.http.ResponseEntity;
+import com.example.api.repository.TourRepository;
+import com.example.api.model.Tour;
 
 @RestController
 @RequestMapping("/api/experiences")
@@ -28,14 +30,18 @@ public class ExperienceController {
     @Autowired
     private UserRepository userRepo;
 
+    @Autowired
+    private TourRepository tourRepo;
+
     @PostMapping
     public Map<String, Object> createExperience(@RequestBody ExperienceCreateDTO dto) {
         Experience exp = new Experience();
         exp.setTitle(dto.getTitle());
         exp.setContent(dto.getContent());
-        exp.setTourId(dto.getTourId());
         User user = userRepo.findById(dto.getUserid()).orElseThrow();
+        Tour tour = tourRepo.findById(dto.getTourId().intValue()).orElseThrow();
         exp.setUser(user);
+        exp.setTour(tour);
         Experience saved = experienceRepo.save(exp);
 
         Map<String, Object> result = new HashMap<>();
@@ -56,7 +62,7 @@ public class ExperienceController {
 
     @GetMapping("/tour/{tourId}")
     public List<ExperienceWithMediaDTO> getByTourId(@PathVariable Long tourId) {
-        List<Experience> experiences = experienceRepo.findByTourIdAndStatus(tourId, "approved");
+        List<Experience> experiences = experienceRepo.findByTour_TourIdAndStatus(tourId, "approved");
         List<ExperienceWithMediaDTO> result = new ArrayList<>();
         for (Experience exp : experiences) {
             ExperienceWithMediaDTO dto = new ExperienceWithMediaDTO();
