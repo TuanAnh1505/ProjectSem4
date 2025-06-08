@@ -11,6 +11,7 @@ export default function TourDetailDashboard() {
   const [tour, setTour] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [discountCode, setDiscountCode] = useState('');
   const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [relatedTours, setRelatedTours] = useState([]);
@@ -145,65 +146,54 @@ export default function TourDetailDashboard() {
   };
 
   const handleBooking = async () => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+    if (!token) {
+      toast.info(
+        <div>
+          Bạn cần đăng nhập (hoặc đăng ký) để đặt tour.<br />
+          <button
+            style={{ marginTop: 8, padding: "4px 12px", background: "#1976d2", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer" }}
+            onClick={() => navigate("/login", { state: { tourId } })}
+          >
+            Đăng nhập ngay
+          </button>
+        </div>,
+        { autoClose: false, position: "top-center" }
+      );
+      return;
+    }
+    if (!userId) {
+      toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+      return;
+    }
+    if (!selectedScheduleId) {
+      toast.error("Vui lòng chọn một lịch trình trước khi đặt tour.");
+      return;
+    }
+    setBookingLoading(true);
     try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
-
-      if (!userId) {
-        toast.error('Bạn cần đăng nhập để đặt tour!');
-        return navigate('/login');
-      }
-      if (!selectedScheduleId) {
-        toast.error('Vui lòng chọn lịch trình muốn đặt!');
+      const res = await axios.post(
+        "http://localhost:8080/api/bookings",
+        { userId: parseInt(userId), tourId, scheduleId: selectedScheduleId, discountCode },
+        { headers: { Authorization: "Bearer " + token } }
+      );
+      if (res.data && res.data.bookingId) {
+        await fetchItineraries();
+        const finalPrice = res.data.finalPrice;
+        const selectedSchedule = itineraries.find(sch => sch.scheduleId === selectedScheduleId);
+        navigate("/booking-passenger", { state: { bookingId: res.data.bookingId, bookingCode: res.data.bookingCode, tourInfo: tour, selectedDate: selectedSchedule?.startDate, itineraries: selectedSchedule?.itineraries || [], finalPrice } });
+      } else {
+        toast.error("Invalid response from server");
         return;
       }
-
-      setBookingLoading(true);
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      };
-
-      const selectedSchedule = itineraries.find(sch => sch.scheduleId === selectedScheduleId);
-      const selectedItinerary = selectedSchedule?.itineraries?.[0] || null;
-
-      const bookingRequest = {
-        userId: parseInt(userId),
-        tourId: parseInt(tourId),
-        scheduleId: selectedScheduleId,
-      };
-      console.log('Booking request:', bookingRequest);
-
-      const res = await axios.post('http://localhost:8080/api/bookings', bookingRequest, config);
-      if (res.data && res.data.bookingId) {
-        toast.success(res.data.message || 'Đặt tour thành công!');
-        await fetchItineraries();
-
-        // Đảm bảo lấy finalPrice từ response
-        const finalPrice = res.data.finalPrice;
-        
-        navigate('/booking-passenger', { 
-          state: { 
-            bookingId: res.data.bookingId,
-            bookingCode: res.data.bookingCode,
-            tourInfo: tour,
-            selectedDate: selectedSchedule?.startDate,
-            itineraries: selectedSchedule?.itineraries || [],
-            finalPrice: finalPrice // Truyền finalPrice từ response
-          }
-        });
-      } else {
-        throw new Error('Invalid response from server');
-      }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi đặt tour');
-      console.error('Booking error:', err);
+      toast.error(err.response?.data?.message || "Có lỗi xảy ra khi đặt tour");
+      console.error("Booking error:", err);
     } finally {
       setBookingLoading(false);
     }
-  };
+  }
 
   // Hàm lấy danh sách trải nghiệm
   const fetchExperiences = async () => {
