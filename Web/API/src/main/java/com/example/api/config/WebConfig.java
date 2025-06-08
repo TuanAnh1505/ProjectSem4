@@ -17,6 +17,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
+
+        registry.addMapping("/uploads/**")
+                .allowedOrigins("http://localhost:3000")
+                .allowedMethods("GET")
+                .allowedHeaders("*");
     }
 
     @Override
