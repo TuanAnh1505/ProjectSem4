@@ -49,13 +49,14 @@ export default function ExperienceIndex() {
                 const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
                 const res = await axios.get('http://localhost:8080/api/media', config);
                 
-                // Transform media data to handle potential circular references
+                // Chỉ lấy các trường cần thiết của media, không lấy user lồng nhau
                 const transformedMedia = Array.isArray(res.data) ? res.data.map(media => ({
-                    ...media,
-                    user: media.user ? {
-                        fullName: media.user.fullName,
-                        publicId: media.user.publicId
-                    } : null
+                    mediaId: media.mediaId,
+                    fileType: media.fileType,
+                    fileUrl: media.fileUrl,
+                    uploadedAt: media.uploadedAt,
+                    userPublicId: media.userPublicId || (media.user ? media.user.publicId : null),
+                    experienceId: media.experienceId // nếu cần liên kết với experience
                 })) : [];
                 
                 setMediaList(transformedMedia);
@@ -67,44 +68,6 @@ export default function ExperienceIndex() {
         fetchMedia();
     }, []);
 
-//   // Fetch user info for each unique userid
-//     useEffect(() => {
-//         const fetchUserInfo = async (publicId) => {
-//         try {
-//             const token = localStorage.getItem('token');
-//             const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-//             const res = await axios.get(`http://localhost:8080/api/users/${publicId}`, config);
-//             return res.data;
-//         } catch (err) {
-//             return null;
-//         }
-//     };
-
-//     const fetchAllUsers = async () => {
-//       // Lấy danh sách publicId duy nhất từ experience
-//       const uniqueUserPublicIds = [...new Set(experiences.map(exp => exp.userPublicId))];
-//       const userPromises = uniqueUserPublicIds.map(publicId => fetchUserInfo(publicId));
-//       const userResults = await Promise.all(userPromises);
-
-//       const newUserMap = {};
-//       userResults.forEach((user, index) => {
-//         if (user) {
-//           newUserMap[uniqueUserPublicIds[index]] = user;
-//         }
-//       });
-//       setUserMap(newUserMap);
-//     };
-
-//     if (experiences.length > 0) {
-//       fetchAllUsers();
-//     }
-//   }, [experiences]);
-
-//   // Hàm lấy tên người dùng từ userid
-//   const getFullName = (publicId) => {
-//     const user = userMap[publicId];
-//     return user ? user.fullName : publicId;
-//   };
 
   if (loading) return <div style={{ padding: 32, textAlign: 'center' }}>Đang tải danh sách trải nghiệm...</div>;
   if (error) return <div style={{ padding: 32, color: 'red', textAlign: 'center' }}>{error}</div>;
@@ -124,211 +87,186 @@ export default function ExperienceIndex() {
     fetchExperiences();
   };
 
-  const totalPages = Math.ceil(experiences.length / itemsPerPage);
-  const paginatedExperiences = experiences.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Sắp xếp trải nghiệm mới nhất lên trên
+  const sortedExperiences = [...experiences].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 0', overflowX: 'auto' }}>
-      <h2 style={{ color: '#1976d2', fontWeight: 900, fontSize: 32, marginBottom: 32, textAlign: 'center' }}>
-        Danh sách tất cả trải nghiệm đã chia sẻ
+      <h2 style={{ color: '#1976d2', fontWeight: 900, fontSize: 32, marginBottom: 32, textAlign: 'center', letterSpacing: 1 }}>
+        Quản lý trải nghiệm người dùng
       </h2>
-      {experiences.length === 0 ? (
-        <div style={{ color: '#888', fontSize: 18, textAlign: 'center', padding: 32, background: '#f6f7fb', borderRadius: 12, boxShadow: '0 2px 8px #e3e8f0' }}>
-          Chưa có trải nghiệm nào.
-        </div>
-      ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: 14, boxShadow: '0 2px 12px #e3e8f0', overflow: 'hidden', minWidth: 900 }}>
-            <thead>
-              <tr style={{ background: '#e3f2fd', color: '#1976d2', fontWeight: 800, fontSize: 17 }}>
-                <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>STT</th>
-                <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Tiêu đề</th>
-                <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Tên người trải nghiệm</th>
-                <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Ngày tạo</th>
-                <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Nội dung</th>
-                <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Ảnh/Video</th>
-                <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Trạng thái</th>
-                <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedExperiences.map((exp, idx) => {
-                const mediaArr = mediaList.filter(m => m.experienceId === exp.experienceId);
-                const images = mediaArr.filter(m => m.fileType === 'image');
-                const videos = mediaArr.filter(m => m.fileType === 'video');
-                const imageUrls = images.map(m => m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}`);
-                
-                return (
-                  <tr key={exp.experienceId} style={{ borderBottom: '1px solid #e3e8f0', fontSize: 16 }}>
-                    <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700 }}>{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                    <td style={{ padding: '12px 8px', fontWeight: 700, color: '#1976d2' }}>{exp.title || 'Trải nghiệm'}</td>
-                    <td style={{ padding: '12px 8px', color: '#333', fontWeight: 600 }}>{exp.user?.fullName || ''}</td>
-                    <td style={{ padding: '12px 8px', color: '#888', minWidth: 120 }}>{exp.createdAt && (new Date(exp.createdAt).toLocaleString())}</td>
-                    <td style={{ padding: '12px 8px', color: '#333', minWidth: 180, whiteSpace: 'pre-line' }}>{exp.content}</td>
-                    <td style={{ padding: '12px 8px', minWidth: 180 }}>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                        {/* Hiển thị 1 ảnh đại diện, overlay số lượng nếu có nhiều ảnh */}
-                        {images.length > 0 && (
-                          <div style={{ position: 'relative', width: 54, height: 54, cursor: 'pointer' }}
-                            onClick={() => setModalGallery({ images: imageUrls, index: 0, open: true })}>
-                            <img
-                              src={imageUrls[0]}
-                              alt="media"
-                              style={{ width: 54, height: 54, objectFit: 'cover', borderRadius: 6, border: '1.5px solid #1976d2', background: '#fafafa' }}
-                            />
-                            {images.length > 1 && (
-                              <div style={{
-                                position: 'absolute',
-                                top: 0, left: 0, right: 0, bottom: 0,
-                                background: 'rgba(0,0,0,0.45)',
-                                color: '#fff',
-                                fontWeight: 900,
-                                fontSize: 18,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: 6
-                              }}>
-                                +{images.length - 1}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {/* Hiển thị video (nếu có) */}
-                        {videos.map(m => {
-                          const url = m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}`;
-                          return (
-                            <video
-                              key={m.mediaId}
-                              src={url}
-                              controls
-                              style={{ width: 54, height: 54, objectFit: 'cover', borderRadius: 6, border: '1.5px solid #1976d2', background: '#fafafa' }}
-                            />
-                          );
-                        })}
-                      </div>
-                    </td>
-                    <td style={{ padding: '12px 8px', color: '#333', fontWeight: 600 }}>
-                      {exp.status === 'approved' ? 'Đã duyệt' : exp.status === 'pending' ? 'Chờ duyệt' : 'Từ chối'}
-                    </td>
-                    <td style={{ padding: '12px 8px' }}>
-                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                        {(exp.status === 'pending' || exp.status === 'rejected') && (
-                          <button
-                            onClick={() => handleApprove(exp.experienceId)}
-                            title="Duyệt"
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: '#4caf50',
-                              fontSize: 22,
-                              borderRadius: '50%',
-                              width: 36,
-                              height: 36,
+      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 24px #e3e8f0', padding: 24, minWidth: 900 }}>
+        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: 16 }}>
+          <thead>
+            <tr style={{ background: '#e3f2fd', color: '#1976d2', fontWeight: 800, fontSize: 17 }}>
+              <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>STT</th>
+              <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Tiêu đề</th>
+              <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Người gửi</th>
+              <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Ngày tạo</th>
+              <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Nội dung</th>
+              <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Ảnh/Video</th>
+              <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Trạng thái</th>
+              <th style={{ padding: '14px 8px', borderBottom: '2px solid #1976d2', textAlign:'left' }}>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedExperiences.map((exp, idx) => {
+              const mediaArr = mediaList.filter(m => m.experienceId === exp.experienceId);
+              const images = mediaArr.filter(m => m.fileType === 'image');
+              const videos = mediaArr.filter(m => m.fileType === 'video');
+              const imageUrls = images.map(m => m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}`);
+              
+              return (
+                <tr key={exp.experienceId} style={{ borderBottom: '1px solid #e3e8f0', fontSize: 16 }}>
+                  <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700 }}>{idx + 1}</td>
+                  <td style={{ padding: '12px 8px', fontWeight: 700, color: '#1976d2', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={exp.title}>
+                    {exp.title && exp.title.length > 30 ? exp.title.slice(0, 30) + '...' : exp.title || 'Trải nghiệm'}
+                  </td>
+                  <td style={{ padding: '12px 8px', color: '#333', fontWeight: 600 }}>{exp.user?.fullName || ''}</td>
+                  <td style={{ padding: '12px 8px', color: '#888', minWidth: 120 }}>{exp.createdAt && (new Date(exp.createdAt).toLocaleString())}</td>
+                  <td style={{ padding: '12px 8px', color: '#333', minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={exp.content}>
+                    {exp.content && exp.content.length > 80 ? exp.content.slice(0, 80) + '...' : exp.content}
+                  </td>
+                  <td style={{ padding: '12px 8px', minWidth: 180 }}>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                      {/* Hiển thị 1 ảnh đại diện, overlay số lượng nếu có nhiều ảnh */}
+                      {images.length > 0 && (
+                        <div style={{ position: 'relative', width: 54, height: 54, cursor: 'pointer' }}
+                          onClick={() => setModalGallery({ images: imageUrls, index: 0, open: true })}>
+                          <img
+                            src={imageUrls[0]}
+                            alt="media"
+                            style={{ width: 54, height: 54, objectFit: 'cover', borderRadius: 6, border: '1.5px solid #1976d2', background: '#fafafa' }}
+                          />
+                          {images.length > 1 && (
+                            <div style={{
+                              position: 'absolute',
+                              top: 0, left: 0, right: 0, bottom: 0,
+                              background: 'rgba(0,0,0,0.45)',
+                              color: '#fff',
+                              fontWeight: 900,
+                              fontSize: 18,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              cursor: 'pointer',
-                              transition: 'background 0.2s',
-                            }}
-                            onMouseOver={e => (e.currentTarget.style.background = '#e8f5e9')}
-                            onMouseOut={e => (e.currentTarget.style.background = 'none')}
-                          >
-                            ✔
-                          </button>
-                        )}
-                        {exp.status === 'pending' && (
-                          <button
-                            onClick={() => handleReject(exp.experienceId)}
-                            title="Từ chối"
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: '#f44336',
-                              fontSize: 22,
-                              borderRadius: '50%',
-                              width: 36,
-                              height: 36,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: 'pointer',
-                              transition: 'background 0.2s',
-                            }}
-                            onMouseOver={e => (e.currentTarget.style.background = '#ffebee')}
-                            onMouseOut={e => (e.currentTarget.style.background = 'none')}
-                          >
-                            ✖
-                          </button>
-                        )}
-                        {exp.status === 'approved' && (
-                          <span
-                            title="Đã duyệt"
-                            style={{
-                              color: '#bdbdbd',
-                              fontSize: 22,
-                              borderRadius: '50%',
-                              width: 36,
-                              height: 36,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              background: '#f5f5f5',
-                            }}
-                          >
-                            ✔
-                          </span>
-                        )}
-                        {exp.status === 'rejected' && (
-                          <span
-                            title="Đã từ chối"
-                            style={{
-                              color: '#bdbdbd',
-                              fontSize: 22,
-                              borderRadius: '50%',
-                              width: 36,
-                              height: 36,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              background: '#f5f5f5',
-                            }}
-                          >
-                            ✖
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {/* Pagination controls */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              style={{ marginRight: 8, padding: '6px 12px', borderRadius: 4, border: '1px solid #1976d2', background: currentPage === 1 ? '#eee' : '#fff', color: '#1976d2', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
-            >
-              &lt; Trước
-            </button>
-            <span style={{ lineHeight: '32px', fontWeight: 600, color: '#1976d2' }}>
-              Trang {currentPage} / {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              style={{ marginLeft: 8, padding: '6px 12px', borderRadius: 4, border: '1px solid #1976d2', background: currentPage === totalPages ? '#eee' : '#fff', color: '#1976d2', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
-            >
-              Sau &gt;
-            </button>
-          </div>
-        </div>
-      )}
+                              borderRadius: 6
+                            }}>
+                              +{images.length - 1}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {/* Hiển thị video (nếu có) */}
+                      {videos.map(m => {
+                        const url = m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}`;
+                        return (
+                          <video
+                            key={m.mediaId}
+                            src={url}
+                            controls
+                            style={{ width: 54, height: 54, objectFit: 'cover', borderRadius: 6, border: '1.5px solid #1976d2', background: '#fafafa' }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </td>
+                  <td style={{ padding: '12px 8px', color: '#333', fontWeight: 600 }}>
+                    {exp.status === 'approved' ? 'Đã duyệt' : exp.status === 'pending' ? 'Chờ duyệt' : 'Từ chối'}
+                  </td>
+                  <td style={{ padding: '12px 8px' }}>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      {(exp.status === 'pending' || exp.status === 'rejected') && (
+                        <button
+                          onClick={() => handleApprove(exp.experienceId)}
+                          title="Duyệt"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#4caf50',
+                            fontSize: 22,
+                            borderRadius: '50%',
+                            width: 36,
+                            height: 36,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseOver={e => (e.currentTarget.style.background = '#e8f5e9')}
+                          onMouseOut={e => (e.currentTarget.style.background = 'none')}
+                        >
+                          ✔
+                        </button>
+                      )}
+                      {exp.status === 'pending' && (
+                        <button
+                          onClick={() => handleReject(exp.experienceId)}
+                          title="Từ chối"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#f44336',
+                            fontSize: 22,
+                            borderRadius: '50%',
+                            width: 36,
+                            height: 36,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseOver={e => (e.currentTarget.style.background = '#ffebee')}
+                          onMouseOut={e => (e.currentTarget.style.background = 'none')}
+                        >
+                          ✖
+                        </button>
+                      )}
+                      {exp.status === 'approved' && (
+                        <span
+                          title="Đã duyệt"
+                          style={{
+                            color: '#bdbdbd',
+                            fontSize: 22,
+                            borderRadius: '50%',
+                            width: 36,
+                            height: 36,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: '#f5f5f5',
+                          }}
+                        >
+                          ✔
+                        </span>
+                      )}
+                      {exp.status === 'rejected' && (
+                        <span
+                          title="Đã từ chối"
+                          style={{
+                            color: '#bdbdbd',
+                            fontSize: 22,
+                            borderRadius: '50%',
+                            width: 36,
+                            height: 36,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: '#f5f5f5',
+                          }}
+                        >
+                          ✖
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
       {/* Modal gallery ảnh lớn với <, > */}
       {modalGallery.open && (
         <div
@@ -444,6 +382,45 @@ export default function ExperienceIndex() {
     </div>
   );
 }
+
+// Helper cho phân trang dạng nút
+function getPageNumbers(current, total) {
+  const maxPages = 5;
+  if (total <= maxPages) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = [];
+  if (current <= 3) {
+    pages.push(1, 2, 3, '...', total);
+  } else if (current >= total - 2) {
+    pages.push(1, '...', total - 2, total - 1, total);
+  } else {
+    pages.push(1, '...', current - 1, current, current + 1, '...', total);
+  }
+  return pages;
+}
+
+const pageBtn = (active, isNumber) => ({
+  minWidth: 40,
+  height: 40,
+  borderRadius: 8,
+  border: 'none',
+  background: active ? '#1976d2' : '#f5f6fa',
+  color: active ? '#fff' : '#1976d2',
+  fontWeight: 700,
+  fontSize: 18,
+  margin: 0,
+  padding: 0,
+  cursor: active ? 'default' : 'pointer',
+  boxShadow: active ? '0 2px 8px #1976d2aa' : 'none',
+  outline: 'none',
+  transition: 'background 0.18s, color 0.18s',
+  ...(isNumber && !active ? {
+    ':hover': {
+      background: '#e3f2fd',
+      color: '#1565c0'
+    }
+  } : {}),
+  opacity: active ? 1 : undefined
+});
 
 
 

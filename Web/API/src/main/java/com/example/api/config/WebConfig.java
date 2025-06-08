@@ -27,5 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "file:" + uploadPath + File.separator + "tours" + File.separator)
                 .setCachePeriod(3600)
                 .resourceChain(true);
+
+        registry.addResourceHandler("/uploads/media/**")
+                .addResourceLocations("file:uploads/media/");
     }
 }

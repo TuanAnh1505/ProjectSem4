@@ -17,6 +17,8 @@ import java.util.HashMap;
 import org.springframework.http.ResponseEntity;
 import com.example.api.repository.TourRepository;
 import com.example.api.model.Tour;
+import com.example.api.dto.MediaDTO;
+import com.example.api.model.Media;
 
 @RestController
 @RequestMapping("/api/experiences")
@@ -74,7 +76,20 @@ public class ExperienceController {
             // Explicitly set fields that might not be copied correctly
             dto.setTourId(exp.getTour().getTourId() != null ? exp.getTour().getTourId().longValue() : null);
             dto.setStatus(exp.getStatus());
-            dto.setMedia(mediaRepo.findByExperienceId(exp.getExperienceId()));
+            List<Media> mediaList = mediaRepo.findByExperienceId(exp.getExperienceId());
+            List<MediaDTO> mediaDTOs = new ArrayList<>();
+            for (Media m : mediaList) {
+                MediaDTO mdto = new MediaDTO();
+                mdto.setMediaId(m.getMediaId());
+                mdto.setFileType(m.getFileType());
+                mdto.setFileUrl(m.getFileUrl());
+                mdto.setUploadedAt(m.getUploadedAt());
+                if (m.getUser() != null) {
+                    mdto.setUserPublicId(m.getUser().getPublicId());
+                }
+                mediaDTOs.add(mdto);
+            }
+            dto.setMedia(mediaDTOs);
             dto.setUserPublicId(exp.getUser().getPublicId());
             dto.setUserFullName(exp.getUser().getFullName());
 
