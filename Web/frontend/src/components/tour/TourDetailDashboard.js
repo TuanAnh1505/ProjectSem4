@@ -731,7 +731,7 @@ export default function TourDetailDashboard() {
               .filter(exp => (exp.status || '').toLowerCase() === 'approved')
               .slice()
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-              .slice(0, 6)
+              .slice(0, 4)
               .map(exp => (
                 <div key={exp.experienceId} style={{
                   background: '#fff',
@@ -748,7 +748,7 @@ export default function TourDetailDashboard() {
                 }}>
                   <div style={{ fontWeight: 800, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>{exp.title || 'Trải nghiệm'}</div>
                   <div style={{ color: '#1976d2', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
-                    {exp.userFullName || 'Ẩn danh'}
+                    👤 {exp.userFullName || 'Ẩn danh'}
                   </div>
                   <div style={{ color: '#888', fontSize: 14, marginBottom: 2 }}>
                     {exp.createdAt && (new Date(exp.createdAt).toLocaleString())}

@@ -38,6 +38,7 @@ public class ExperienceController {
         Experience exp = new Experience();
         exp.setTitle(dto.getTitle());
         exp.setContent(dto.getContent());
+        exp.setStatus("pending"); // Thêm dòng này
         User user = userRepo.findById(dto.getUserid()).orElseThrow();
         Tour tour = tourRepo.findById(dto.getTourId().intValue()).orElseThrow();
         exp.setUser(user);
@@ -63,15 +64,24 @@ public class ExperienceController {
     @GetMapping("/tour/{tourId}")
     public List<ExperienceWithMediaDTO> getByTourId(@PathVariable Long tourId) {
         List<Experience> experiences = experienceRepo.findByTour_TourIdAndStatus(tourId, "approved");
+        System.out.println("Found " + experiences.size() + " experiences for tour " + tourId);
+
         List<ExperienceWithMediaDTO> result = new ArrayList<>();
         for (Experience exp : experiences) {
             ExperienceWithMediaDTO dto = new ExperienceWithMediaDTO();
             BeanUtils.copyProperties(exp, dto);
+
+            // Explicitly set fields that might not be copied correctly
+            dto.setTourId(exp.getTour().getTourId() != null ? exp.getTour().getTourId().longValue() : null);
+            dto.setStatus(exp.getStatus());
             dto.setMedia(mediaRepo.findByExperienceId(exp.getExperienceId()));
             dto.setUserPublicId(exp.getUser().getPublicId());
             dto.setUserFullName(exp.getUser().getFullName());
+
+            System.out.println("Created DTO: " + dto);
             result.add(dto);
         }
+
         return result;
     }
 

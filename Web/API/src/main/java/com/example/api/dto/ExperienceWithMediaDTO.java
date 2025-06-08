@@ -1,6 +1,7 @@
 package com.example.api.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import com.example.api.model.Media;
@@ -14,7 +15,17 @@ public class ExperienceWithMediaDTO {
     private String title;
     private String content;
     private LocalDateTime createdAt;
-    private List<Media> media;
+    private List<Media> media = new ArrayList<>();
     private String status;
-    // getters, setters
+
+    @Override
+    public String toString() {
+        return String.format(
+                "ExperienceDTO[id=%d, tourId=%d, title='%s', status='%s', mediaCount=%d]",
+                experienceId,
+                tourId,
+                title,
+                status,
+                media != null ? media.size() : 0);
+    }
 }

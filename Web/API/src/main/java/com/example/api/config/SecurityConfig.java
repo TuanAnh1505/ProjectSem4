@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/uploads/**").permitAll()
                         .requestMatchers("/favicon.ico", "/manifest.json").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tour-status").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/experiences/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/media/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tours/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/itineraries/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/schedules/**").permitAll()
