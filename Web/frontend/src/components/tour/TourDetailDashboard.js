@@ -35,6 +35,10 @@ export default function TourDetailDashboard() {
   // Thêm state cho modal gallery ảnh
   const [modalGallery, setModalGallery] = useState({ images: [], index: 0, open: false });
 
+  // Feedback state
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(true);
+
   useEffect(() => {
     const fetchTour = async () => {
       try {
@@ -261,6 +265,20 @@ export default function TourDetailDashboard() {
     }
     setExpLoading(false);
   };
+
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      setFeedbackLoading(true);
+      try {
+        const res = await axios.get(`http://localhost:8080/api/feedbacks?tourId=${tourId}`);
+        setFeedbacks(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        setFeedbacks([]);
+      }
+      setFeedbackLoading(false);
+    };
+    if (tourId) fetchFeedbacks();
+  }, [tourId]);
 
   if (loading) return <div className="loading">Loading tour details...</div>;
   if (error) return <div className="error-box">{error}</div>;
@@ -841,6 +859,54 @@ export default function TourDetailDashboard() {
                       </div>
                     ) : null;
                   })()}
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Hiển thị danh sách feedback (đánh giá) */}
+      <div style={{ maxWidth: 900, margin: '0 auto', marginTop: 32, marginBottom: 48, padding: '0 8px' }}>
+        <h3 style={{ color: '#1976d2', fontWeight: 800, fontSize: 24, marginBottom: 18, letterSpacing: 1 }}>
+          Đánh giá của khách hàng
+        </h3>
+        {feedbackLoading ? (
+          <div>Đang tải đánh giá...</div>
+        ) : feedbacks.length === 0 ? (
+          <div style={{ color: '#888', fontSize: 17, textAlign: 'center', padding: 32, background: '#f6f7fb', borderRadius: 12, boxShadow: '0 2px 8px #e3e8f0' }}>
+            Chưa có đánh giá nào cho tour này.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 28, justifyContent: 'flex-start' }}>
+            {feedbacks
+              .filter(fb => (fb.statusName || '').toLowerCase() === 'approved')
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .slice(0, 4)
+              .map(fb => (
+                <div key={fb.feedbackId} style={{
+                  background: '#fff',
+                  borderRadius: 16,
+                  boxShadow: '0 2px 12px #e3e8f0',
+                  padding: '24px 22px 18px 22px',
+                  minWidth: 320,
+                  maxWidth: 420,
+                  flex: '1 1 340px',
+                  marginBottom: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                }}>
+                  <div style={{ fontWeight: 800, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>
+                    {Array.from({ length: fb.rating }, (_, i) => <span key={i} style={{ color: '#FFD700', fontSize: 22 }}>★</span>)}
+                    {Array.from({ length: 5 - fb.rating }, (_, i) => <span key={i} style={{ color: '#e0e0e0', fontSize: 22 }}>★</span>)}
+                  </div>
+                  <div style={{ color: '#1976d2', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+                    👤 {fb.userFullName || 'Ẩn danh'}
+                  </div>
+                  <div style={{ color: '#888', fontSize: 14, marginBottom: 2 }}>
+                    {fb.createdAt && (new Date(fb.createdAt).toLocaleString())}
+                  </div>
+                  <div style={{ color: '#333', fontSize: 16, marginBottom: 8, whiteSpace: 'pre-line' }}>{fb.message}</div>
                 </div>
               ))}
           </div>

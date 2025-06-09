@@ -158,7 +158,7 @@ public class EmailService {
         }
     }
 
-    private void sendHtmlEmail(String to, String subject, String htmlContent) {
+    public void sendHtmlEmail(String to, String subject, String htmlContent) {
         try {
             MimeMessage mimeMessage = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -166,6 +166,28 @@ public class EmailService {
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
             emailSender.send(mimeMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendFeedbackRequestEmail(String to, String userName, String tourName, String endDate, String feedbackLink) {
+        try {
+            String subject = "Mời bạn đánh giá trải nghiệm tour - TravelTour";
+            String htmlContent = "<html><body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>"
+                    + "<div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background: #fafcff;'>"
+                    + "<h2 style='color: #007BFF;'>Cảm ơn bạn đã đồng hành cùng TravelTour!</h2>"
+                    + "<p>Xin chào <b>" + userName + "</b>,</p>"
+                    + "<p>Bạn vừa hoàn thành tour: <b>" + tourName + "</b></p>"
+                    + "<p><b>Ngày kết thúc:</b> " + endDate + "</p>"
+                    + "<p>Chúng tôi rất mong nhận được đánh giá của bạn để cải thiện dịch vụ.</p>"
+                    + "<div style='margin: 24px 0;'>"
+                    + "<a href='" + feedbackLink + "' style='display: inline-block; padding: 12px 28px; background: #007BFF; color: #fff; border-radius: 5px; text-decoration: none; font-size: 16px;'>Gửi feedback ngay</a>"
+                    + "</div>"
+                    + "<p style='color: #888;'>Nếu nút không hoạt động, hãy copy link sau vào trình duyệt:<br><a href='" + feedbackLink + "'>" + feedbackLink + "</a></p>"
+                    + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>"
+                    + "</div></body></html>";
+            sendHtmlEmail(to, subject, htmlContent);
         } catch (Exception e) {
             e.printStackTrace();
         }

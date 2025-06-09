@@ -24,6 +24,7 @@ import './App.css';
 import BookingConfirmation from './components/booking/BookingConfirmation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Feedback from './components/feedback/Feedback';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -119,6 +120,11 @@ const App = () => {
           <Route path="/payment/:bookingId" element={
             <Layout>
               <ProtectedRoute element={<Payment />} />
+            </Layout>
+          } />
+          <Route path="/feedback" element={
+            <Layout>
+              <ProtectedRoute element={<Feedback />} />
             </Layout>
           } />
 
@@ -324,6 +330,13 @@ const App = () => {
             path="/admin/experience"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
+
+          <Route
+            path="/admin/feedback"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          <Route path="/feedback" element={<Feedback />} />
         </Routes>
       </div>
     </Router>

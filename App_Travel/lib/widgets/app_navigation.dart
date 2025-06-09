@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'app_drawer.dart';
-import '../screens/home_screen.dart';
-import '../screens/tour/tour_screen.dart';
-import '../screens/search_screen.dart';
-import '../screens/auth/personal_page_screen.dart';
+import '../../widgets/app_drawer.dart';
+import '../../screens/home_screen.dart';
+import '../../screens/tour/tour_screen.dart';
+import '../../screens/search_screen.dart';
+import '../../screens/auth/personal_page_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 
 class AppNavigation extends StatefulWidget {
@@ -55,10 +56,9 @@ class _AppNavigationState extends State<AppNavigation> {
           : AppBar(
               leading: null,
               title: _selectedIndex == 0
-                  ? const Text(
+                  ? Text(
                       'Hi Vietnam',
-                      style: TextStyle(
-                        fontFamily: 'Pacifico',
+                      style: GoogleFonts.nunito(
                         color: Colors.orange,
                         fontSize: 30,
                         fontWeight: FontWeight.normal,
