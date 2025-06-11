@@ -10,6 +10,7 @@ const BookingTable = ({ bookings, handleDeleteClick }) => (
       <thead>
         <tr>
           <th>Mã</th>
+          <th>Mã đặt chỗ</th>
           <th>Người đặt</th>
           <th>Tour</th>
           <th>Ngày đặt</th>
@@ -22,6 +23,7 @@ const BookingTable = ({ bookings, handleDeleteClick }) => (
         {bookings.map((b, index) => (
           <tr key={`booking-${b.bookingId}-${index}`}>
             <td>{b.bookingId}</td>
+            <td>{b.bookingCode}</td>
             <td>{b.userFullName || 'N/A'}</td>
             <td>{b.tourName || 'N/A'}</td>
             <td>{b.bookingDate ? new Date(b.bookingDate).toLocaleString() : 'N/A'}</td>

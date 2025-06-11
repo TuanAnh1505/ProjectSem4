@@ -47,11 +47,7 @@ const Home = () => {
   useEffect(() => {
     const fetchTours = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const config = {
-          headers: { Authorization: `Bearer ${token}` }
-        };
-        const res = await axios.get('http://localhost:8080/api/tours', config);
+        const res = await axios.get('http://localhost:8080/api/tours');
         setTours(res.data);
         setFilteredTours(res.data);
         setError('');

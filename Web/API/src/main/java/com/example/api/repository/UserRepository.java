@@ -23,6 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.roleName = 'ROLE_TOUR_GUIDE' AND (u.fullName LIKE %:search% OR u.email LIKE %:search%)")
     Page<User> searchTourGuideUsers(@Param("search") String search, Pageable pageable);
+    
 }
 
 

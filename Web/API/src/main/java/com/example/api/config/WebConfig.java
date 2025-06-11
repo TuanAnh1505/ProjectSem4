@@ -17,6 +17,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
+
+        registry.addMapping("/uploads/**")
+                .allowedOrigins("http://localhost:3000")
+                .allowedMethods("GET")
+                .allowedHeaders("*");
     }
 
     @Override
@@ -27,5 +32,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "file:" + uploadPath + File.separator + "tours" + File.separator)
                 .setCachePeriod(3600)
                 .resourceChain(true);
+
+        registry.addResourceHandler("/uploads/media/**")
+                .addResourceLocations("file:uploads/media/");
     }
 }

@@ -7,6 +7,8 @@ import '../../models/tour_models.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../booking/booking_passenger_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class TourDetailScreen extends StatefulWidget {
   final int tourId;
@@ -23,12 +25,18 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   List<dynamic> schedules = [];
   List<dynamic> relatedTours = [];
   Map<int, List<dynamic>> itineraries = {};
+  List<dynamic> experiences = [];
   int? selectedScheduleId;
   bool loading = true;
   bool bookingLoading = false;
+  bool experienceLoading = false;
   String error = '';
-  String discountCode = '';
   int? userId;
+  final TextEditingController _experienceController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+  List<XFile> _mediaFiles = [];
+  bool _isPicking = false; // Prevent double pick
 
   String formatPrice(num? price) {
     if (price == null) return '';
@@ -41,6 +49,14 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     super.initState();
     fetchAll();
     _loadUserId();
+    fetchExperiences();
+  }
+
+  @override
+  void dispose() {
+    _experienceController.dispose();
+    _titleController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserId() async {
@@ -92,6 +108,28 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     }
   }
 
+  Future<void> fetchExperiences() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/experiences/tour/${widget.tourId}'),
+      );
+      print('Response body: \\n' + response.body);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        // Try to get array from data or fallback
+        if (data is List) {
+          setState(() { experiences = data; });
+        } else if (data is Map && data['experiences'] is List) {
+          setState(() { experiences = data['experiences']; });
+        } else {
+          setState(() { experiences = []; });
+        }
+      }
+    } catch (e) {
+      print('Error fetching experiences: $e');
+    }
+  }
+
   void onSelectSchedule(int scheduleId) async {
     final selected = schedules.firstWhere(
       (sch) => sch['scheduleId'] == scheduleId,
@@ -129,7 +167,6 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
         userId: userId!,
         tourId: widget.tourId,
         scheduleId: selectedScheduleId!,
-        discountCode: discountCode.trim().isEmpty ? null : discountCode.trim(),
       );
       if (!mounted) return;
       // Find selected schedule
@@ -167,6 +204,194 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
           bookingLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> handleExperienceSubmit() async {
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng đăng nhập để chia sẻ trải nghiệm')),
+      );
+      return;
+    }
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập tiêu đề trải nghiệm')),
+      );
+      return;
+    }
+    if (_experienceController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập nội dung trải nghiệm')),
+      );
+      return;
+    }
+    setState(() {
+      experienceLoading = true;
+    });
+    try {
+      // 1. Gửi trải nghiệm (nội dung + tiêu đề)
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      print('userId: $userId, tourId: ${widget.tourId}, content: ${_experienceController.text}, title: ${_titleController.text}');
+      final body = {
+        'userid': userId,
+        'tourId': widget.tourId,
+        'content': _experienceController.text.trim(),
+        'title': _titleController.text.trim(),
+      };
+      print('Body: ${json.encode(body)}');
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8080/api/experiences'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: json.encode(body),
+      );
+
+      print('Submit experience status: \\n${response.statusCode}');
+      print('Submit experience body: \\n${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final expData = json.decode(response.body);
+        final experienceId = expData['experienceId'];
+        // 2. Nếu có file, upload từng file
+        print('=== Starting media upload process ===');
+        print('Number of files to upload: ${_mediaFiles.length}');
+        print('Experience ID: $experienceId');
+        print('User ID: $userId');
+        print('Token: $token');
+        
+        if (_mediaFiles.isEmpty) {
+          print('No files to upload!');
+          return;
+        }
+        
+        for (final file in _mediaFiles) {
+          print('\n--- Uploading file ---');
+          print('File path: \\${file.path}');
+          print('File type: \\${file.mimeType}');
+          print('File size: \\${await file.length()} bytes');
+          print('Experience ID: \\${experienceId}');
+          
+          // Kiểm tra file có tồn tại không
+          final fileExists = await File(file.path).exists();
+          print('File exists: \\${fileExists}');
+          
+          if (!fileExists) {
+            print('File does not exist, skipping...');
+            continue;
+          }
+          
+          final request = http.MultipartRequest('POST', Uri.parse('http://10.0.2.2:8080/api/media'));
+          
+          // Thêm token vào header
+          request.headers.addAll({
+            'Content-Type': 'multipart/form-data',
+            if (token != null) 'Authorization': 'Bearer $token',
+          });
+          
+          // Add fields
+          request.fields['userid'] = userId.toString();
+          request.fields['experienceId'] = experienceId.toString();
+          request.fields['fileType'] =
+            (file.mimeType?.startsWith('image') == true ||
+             file.path.toLowerCase().endsWith('.jpg') ||
+             file.path.toLowerCase().endsWith('.jpeg') ||
+             file.path.toLowerCase().endsWith('.png'))
+              ? 'image'
+              : 'video';
+          
+          print('Request fields: \\${request.fields}');
+          print('Request headers: \\${request.headers}');
+          
+          // Add file
+          try {
+            request.files.add(await http.MultipartFile.fromPath('file', file.path));
+            print('File added to request successfully');
+          } catch (e) {
+            print('Error adding file to request: $e');
+            continue;
+          }
+          
+          print('Sending request...');
+          try {
+            final streamedResponse = await request.send();
+            final response = await streamedResponse.stream.bytesToString();
+            
+            print('Upload status: \\${streamedResponse.statusCode}');
+            print('Upload response: $response');
+            
+            if (streamedResponse.statusCode != 201) {
+              print('Upload failed with status: \\${streamedResponse.statusCode}');
+              print('Error response: $response');
+            } else {
+              print('Upload successful!');
+            }
+          } catch (e) {
+            print('Error during upload: $e');
+            print('Error details: \\${e.toString()}');
+          }
+        }
+        _experienceController.clear();
+        _titleController.clear();
+        setState(() { _mediaFiles = []; });
+        await fetchExperiences();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Chia sẻ trải nghiệm thành công')),
+        );
+      } else {
+        throw Exception('Failed to submit experience: ${response.body}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Có lỗi xảy ra: ${e.toString()}')),
+      );
+    } finally {
+      setState(() {
+        experienceLoading = false;
+      });
+    }
+  }
+
+  Future<void> pickMedia() async {
+    if (_isPicking) return;
+    _isPicking = true;
+    try {
+      final picked = await _picker.pickMultiImage();
+      if (picked != null && picked.isNotEmpty) {
+        setState(() {
+          _mediaFiles = [..._mediaFiles, ...picked].take(10).toList();
+        });
+      }
+    } catch (e) {
+      print('Error picking images: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể chọn ảnh: $e')),
+      );
+    } finally {
+      _isPicking = false;
+    }
+  }
+
+  Future<void> pickVideo() async {
+    if (_isPicking) return;
+    _isPicking = true;
+    try {
+      final video = await _picker.pickVideo(source: ImageSource.gallery);
+      if (video != null) {
+        setState(() {
+          if (_mediaFiles.length < 10) _mediaFiles.add(video);
+        });
+      }
+    } catch (e) {
+      print('Error picking video: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể chọn video: $e')),
+      );
+    } finally {
+      _isPicking = false;
     }
   }
 
@@ -438,15 +663,6 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Nhập mã giảm giá',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.card_giftcard),
-                      ),
-                      onChanged: (val) => discountCode = val,
-                    ),
-                    SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -468,6 +684,227 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                         Text('Đảm bảo hoàn tiền trong 24h', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                       ],
                     ),
+                  ],
+                ),
+              ),
+              // Add Experience Sharing Section before the related tours section
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(top: 12),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.rate_review, color: Colors.blue[700], size: 20),
+                        SizedBox(width: 6),
+                        Text('Chia sẻ trải nghiệm', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900])),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    // Experience Title Input
+                    TextField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        hintText: 'Tiêu đề trải nghiệm',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    // Experience Input Form
+                    TextField(
+                      controller: _experienceController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Cảm nhận, kinh nghiệm, kỷ niệm đáng nhớ...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    // Media Picker
+                    Row(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: (_mediaFiles.length < 10 && !_isPicking) ? pickMedia : null,
+                          icon: Icon(Icons.photo),
+                          label: Text('Chọn ảnh (tối đa 10)'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[50],
+                            foregroundColor: Colors.blue[900],
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          onPressed: (_mediaFiles.length < 10 && !_isPicking) ? pickVideo : null,
+                          icon: Icon(Icons.videocam),
+                          label: Text('Chọn video'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[50],
+                            foregroundColor: Colors.blue[900],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    // Preview selected media
+                    if (_mediaFiles.isNotEmpty)
+                      SizedBox(
+                        height: 90,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _mediaFiles.length,
+                          separatorBuilder: (_, __) => SizedBox(width: 8),
+                          itemBuilder: (context, idx) {
+                            final file = _mediaFiles[idx];
+                            final isImage = (file.mimeType?.startsWith('image') == true) ||
+                                            file.path.toLowerCase().endsWith('.jpg') ||
+                                            file.path.toLowerCase().endsWith('.jpeg') ||
+                                            file.path.toLowerCase().endsWith('.png');
+                            return Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: isImage
+                                    ? Image.file(File(file.path), width: 80, height: 80, fit: BoxFit.cover)
+                                    : Container(
+                                        width: 80,
+                                        height: 80,
+                                        color: Colors.black12,
+                                        child: Icon(Icons.videocam, size: 40, color: Colors.blue[700]),
+                                      ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _mediaFiles.removeAt(idx);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: EdgeInsets.all(2),
+                                      child: Icon(Icons.close, color: Colors.white, size: 18),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: experienceLoading ? null : handleExperienceSubmit,
+                        child: experienceLoading 
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Gửi trải nghiệm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    // Experiences List
+                    if (experiences.isEmpty)
+                      Center(
+                        child: Text(
+                          'Chưa có trải nghiệm nào được chia sẻ',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      )
+                    else
+                      Column(
+                        children: experiences.map((exp) => Card(
+                          margin: EdgeInsets.only(bottom: 12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: Colors.blue[100],
+                                      child: Text(
+                                        exp['userName']?.substring(0, 1).toUpperCase() ?? 'U',
+                                        style: TextStyle(color: Colors.blue[900]),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          exp['userName'] ?? 'Anonymous',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          exp['createdAt'] != null 
+                                            ? DateFormat('dd/MM/yyyy').format(DateTime.parse(exp['createdAt']))
+                                            : '',
+                                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                if (exp['title'] != null && exp['title'].toString().isNotEmpty)
+                                  Text(exp['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900])),
+                                SizedBox(height: 4),
+                                Text(exp['content'] ?? ''),
+                                if (exp['media'] != null && exp['media'] is List && exp['media'].isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: (exp['media'] as List).map<Widget>((m) {
+                                        print('media item: $m'); // Log để debug
+                                        final url = m['fileUrl']?.toString() ?? '';
+                                        final isImage = m['fileType'] == 'image';
+                                        if (isImage) {
+                                          return Image.network(
+                                            url.startsWith('http') ? url : 'http://10.0.2.2:8080$url',
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.cover,
+                                          );
+                                        } else {
+                                          return Container(
+                                            width: 80,
+                                            height: 80,
+                                            color: Colors.black12,
+                                            child: Icon(Icons.videocam, color: Colors.blue, size: 40),
+                                          );
+                                        }
+                                      }).toList(),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        )).toList(),
+                      ),
                   ],
                 ),
               ),

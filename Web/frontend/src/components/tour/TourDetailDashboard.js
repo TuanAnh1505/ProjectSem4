@@ -11,6 +11,7 @@ export default function TourDetailDashboard() {
   const [tour, setTour] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [discountCode, setDiscountCode] = useState('');
   const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [relatedTours, setRelatedTours] = useState([]);
@@ -20,6 +21,19 @@ export default function TourDetailDashboard() {
   const [openScheduleId, setOpenScheduleId] = useState(null);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
   const [selectedItineraryId, setSelectedItineraryId] = useState(null);
+
+  // Thêm state cho trải nghiệm
+  const [experiences, setExperiences] = useState([]);
+  const [expContent, setExpContent] = useState('');
+  const [expMedia, setExpMedia] = useState([]);
+  const [expLoading, setExpLoading] = useState(false);
+  const [expTitle, setExpTitle] = useState('');
+
+  // Thêm state cho modal xem ảnh
+  const [modalImage, setModalImage] = useState(null);
+
+  // Thêm state cho modal gallery ảnh
+  const [modalGallery, setModalGallery] = useState({ images: [], index: 0, open: false });
 
   useEffect(() => {
     const fetchTour = async () => {
@@ -132,64 +146,120 @@ export default function TourDetailDashboard() {
   };
 
   const handleBooking = async () => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+    if (!token) {
+      toast.info(
+        <div>
+          Bạn cần đăng nhập (hoặc đăng ký) để đặt tour.<br />
+          <button
+            style={{ marginTop: 8, padding: "4px 12px", background: "#1976d2", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer" }}
+            onClick={() => navigate("/login", { state: { tourId } })}
+          >
+            Đăng nhập ngay
+          </button>
+        </div>,
+        { autoClose: false, position: "top-center" }
+      );
+      return;
+    }
+    if (!userId) {
+      toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+      return;
+    }
+    if (!selectedScheduleId) {
+      toast.error("Vui lòng chọn một lịch trình trước khi đặt tour.");
+      return;
+    }
+    setBookingLoading(true);
     try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
-
-      if (!userId) {
-        toast.error('Bạn cần đăng nhập để đặt tour!');
-        return navigate('/login');
-      }
-      if (!selectedScheduleId) {
-        toast.error('Vui lòng chọn lịch trình muốn đặt!');
+      const res = await axios.post(
+        "http://localhost:8080/api/bookings",
+        { userId: parseInt(userId), tourId, scheduleId: selectedScheduleId, discountCode },
+        { headers: { Authorization: "Bearer " + token } }
+      );
+      if (res.data && res.data.bookingId) {
+        await fetchItineraries();
+        const finalPrice = res.data.finalPrice;
+        const selectedSchedule = itineraries.find(sch => sch.scheduleId === selectedScheduleId);
+        navigate("/booking-passenger", { state: { bookingId: res.data.bookingId, bookingCode: res.data.bookingCode, tourInfo: tour, selectedDate: selectedSchedule?.startDate, itineraries: selectedSchedule?.itineraries || [], finalPrice } });
+      } else {
+        toast.error("Invalid response from server");
         return;
       }
-
-      setBookingLoading(true);
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      };
-
-      const selectedSchedule = itineraries.find(sch => sch.scheduleId === selectedScheduleId);
-      const selectedItinerary = selectedSchedule?.itineraries?.[0] || null;
-
-      const bookingRequest = {
-        userId: parseInt(userId),
-        tourId: parseInt(tourId),
-        scheduleId: selectedScheduleId,
-      };
-      console.log('Booking request:', bookingRequest);
-
-      const res = await axios.post('http://localhost:8080/api/bookings', bookingRequest, config);
-      if (res.data && res.data.bookingId) {
-        toast.success(res.data.message || 'Đặt tour thành công!');
-        await fetchItineraries();
-
-        // Đảm bảo lấy finalPrice từ response
-        const finalPrice = res.data.finalPrice;
-        
-        navigate('/booking-passenger', { 
-          state: { 
-            bookingId: res.data.bookingId,
-            bookingCode: res.data.bookingCode,
-            tourInfo: tour,
-            selectedDate: selectedSchedule?.startDate,
-            itineraries: selectedSchedule?.itineraries || [],
-            finalPrice: finalPrice // Truyền finalPrice từ response
-          }
-        });
-      } else {
-        throw new Error('Invalid response from server');
-      }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi đặt tour');
-      console.error('Booking error:', err);
+      toast.error(err.response?.data?.message || "Có lỗi xảy ra khi đặt tour");
+      console.error("Booking error:", err);
     } finally {
       setBookingLoading(false);
     }
+  }
+
+  // Hàm lấy danh sách trải nghiệm
+  const fetchExperiences = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const res = await axios.get(`http://localhost:8080/api/experiences/tour/${tourId}`, config);
+      console.log('API experiences:', res.data);
+      setExperiences(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      setExperiences([]);
+    }
+  };
+
+  useEffect(() => {
+    if (tourId) fetchExperiences();
+  }, [tourId]);
+
+  // Hàm gửi trải nghiệm mới
+  const handleExpSubmit = async (e) => {
+    e.preventDefault();
+    setExpLoading(true);
+    try {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      // 1. Gửi trải nghiệm (nội dung)
+      const expRes = await axios.post('http://localhost:8080/api/experiences', {
+        userid: userId,
+        tourId: tourId,
+        content: expContent,
+        title: expTitle
+      }, config);
+      // Thêm log để kiểm tra response
+      console.log('expRes.data', expRes.data);
+      // 2. Nếu có file, upload từng file
+      const experienceId = expRes.data.experienceId;
+      if (!experienceId) {
+        alert('Không lấy được experienceId!');
+        return;
+      }
+      for (const file of expMedia) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('userid', userId);
+        formData.append('experienceId', experienceId);
+        formData.append('fileType', file.type.startsWith('image') ? 'image' : 'video');
+        console.log('Upload media:', {
+          userid: userId,
+          experienceId: experienceId,
+          fileType: file.type.startsWith('image') ? 'image' : 'video',
+          file
+        });
+        await axios.post('http://localhost:8080/api/media', formData, {
+          ...config,
+          headers: { ...config.headers, 'Content-Type': 'multipart/form-data' }
+        });
+      }
+      setExpContent('');
+      setExpMedia([]);
+      setExpTitle('');
+      fetchExperiences();
+    } catch (err) {
+      alert('Gửi trải nghiệm thất bại!');
+    }
+    setExpLoading(false);
   };
 
   if (loading) return <div className="loading">Loading tour details...</div>;
@@ -471,6 +541,424 @@ export default function TourDetailDashboard() {
           ))}
         </div>
       </div>
+
+      {/* --- Chia sẻ trải nghiệm --- */}
+      <div style={{
+        margin: '40px 0',
+        padding: 0,
+        display: 'flex',
+        justifyContent: 'center',
+      }}>
+        <div style={{
+          background: '#fff',
+          borderRadius: 18,
+          boxShadow: '0 4px 24px #e3e8f0',
+          maxWidth: 540,
+          width: '100%',
+          padding: '36px 32px 28px 32px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          position: 'relative',
+        }}>
+          <h2 style={{ color: '#1976d2', fontWeight: 900, fontSize: 28, marginBottom: 6, letterSpacing: 1 }}>Chia sẻ trải nghiệm của bạn</h2>
+          <div style={{ color: '#555', fontSize: 16, marginBottom: 24, textAlign: 'center', maxWidth: 420 }}>
+            Hãy chia sẻ cảm nhận, hình ảnh hoặc video về chuyến đi để truyền cảm hứng cho cộng đồng du lịch!
+          </div>
+          <form onSubmit={handleExpSubmit} style={{ width: '100%' }}>
+            <input
+              type="text"
+              value={expTitle}
+              onChange={e => setExpTitle(e.target.value)}
+              placeholder="Tiêu đề trải nghiệm"
+              required
+              style={{
+                width: '100%',
+                borderRadius: 10,
+                border: '2px solid #1976d2',
+                padding: '14px 16px',
+                fontWeight: 600,
+                fontSize: 17,
+                marginBottom: 16,
+                outline: 'none',
+                transition: 'border 0.2s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => e.target.style.border = '2px solid #1565c0'}
+              onBlur={e => e.target.style.border = '2px solid #1976d2'}
+            />
+            <textarea
+              value={expContent}
+              onChange={e => setExpContent(e.target.value)}
+              placeholder="Cảm nhận, kinh nghiệm, kỷ niệm đáng nhớ..."
+              required
+              style={{
+                width: '100%',
+                minHeight: 90,
+                borderRadius: 10,
+                border: '2px solid #1976d2',
+                padding: '14px 16px',
+                fontSize: 16,
+                marginBottom: 18,
+                outline: 'none',
+                fontWeight: 500,
+                transition: 'border 0.2s',
+                boxSizing: 'border-box',
+                resize: 'vertical',
+              }}
+              onFocus={e => e.target.style.border = '2px solid #1565c0'}
+              onBlur={e => e.target.style.border = '2px solid #1976d2'}
+            />
+            <label htmlFor="expMediaInput" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              background: '#e3f2fd',
+              color: '#1976d2',
+              borderRadius: 10,
+              padding: '10px 18px',
+              fontWeight: 700,
+              fontSize: 16,
+              cursor: 'pointer',
+              marginBottom: 16,
+              border: '2px dashed #1976d2',
+              width: '92%',
+              transition: 'background 0.2s',
+            }}
+              onMouseOver={e => e.currentTarget.style.background = '#bbdefb'}
+              onMouseOut={e => e.currentTarget.style.background = '#e3f2fd'}
+            >
+              <span style={{ fontSize: 22, display: 'flex', alignItems: 'center' }}>📷</span>
+              <span>Chọn ảnh/video (tối đa 10 file)</span>
+              <input
+                id="expMediaInput"
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={e => setExpMedia([...e.target.files])}
+              />
+            </label>
+            {expMedia && expMedia.length > 0 && (
+              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 18, width: '100%' }}>
+                {expMedia.map((file, idx) => {
+                  const url = URL.createObjectURL(file);
+                  return (
+                    <div key={idx} style={{ position: 'relative', display: 'inline-block', boxShadow: '0 2px 8px #e3e8f0', borderRadius: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => setExpMedia(expMedia.filter((_, i) => i !== idx))}
+                        style={{
+                          position: 'absolute',
+                          top: -10,
+                          right: -10,
+                          background: '#ff4d4f',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: 24,
+                          height: 24,
+                          cursor: 'pointer',
+                          fontWeight: 700,
+                          zIndex: 2,
+                          boxShadow: '0 1px 4px #8888',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: 0,
+                          fontSize: 18,
+                          transition: 'background 0.18s',
+                        }}
+                        title="Xóa ảnh/video này"
+                        onMouseOver={e => e.currentTarget.style.background = '#d32f2f'}
+                        onMouseOut={e => e.currentTarget.style.background = '#ff4d4f'}
+                      >×</button>
+                      {file.type.startsWith('image') ? (
+                        <img src={url} alt="preview" style={{ width: 84, height: 84, objectFit: 'cover', borderRadius: 8, border: '2px solid #1976d2', background: '#fafafa' }} />
+                      ) : (
+                        <video src={url} controls style={{ width: 84, height: 84, objectFit: 'cover', borderRadius: 8, border: '2px solid #1976d2', background: '#fafafa' }} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={expLoading}
+              style={{
+                width: '100%',
+                padding: '14px 0',
+                background: expLoading ? '#90caf9' : '#1976d2',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 10,
+                fontWeight: 900,
+                fontSize: 18,
+                marginTop: 6,
+                boxShadow: '0 2px 8px #e3e8f0',
+                cursor: expLoading ? 'not-allowed' : 'pointer',
+                transition: 'background 0.2s',
+                letterSpacing: 1,
+              }}
+              onMouseOver={e => { if (!expLoading) e.currentTarget.style.background = '#1565c0'; }}
+              onMouseOut={e => { if (!expLoading) e.currentTarget.style.background = '#1976d2'; }}
+            >
+              {expLoading ? 'Đang gửi...' : 'Gửi trải nghiệm'}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Hiển thị danh sách trải nghiệm đã chia sẻ */}
+      <div style={{
+        maxWidth: 900,
+        margin: '0 auto',
+        marginTop: 32,
+        marginBottom: 48,
+        padding: '0 8px',
+      }}>
+        <h3 style={{ color: '#1976d2', fontWeight: 800, fontSize: 24, marginBottom: 18, letterSpacing: 1 }}>
+          Các trải nghiệm đã chia sẻ
+        </h3>
+        {(!Array.isArray(experiences) || experiences.length === 0) ? (
+          <div style={{ color: '#888', fontSize: 17, textAlign: 'center', padding: 32, background: '#f6f7fb', borderRadius: 12, boxShadow: '0 2px 8px #e3e8f0' }}>
+            Chưa có trải nghiệm nào cho tour này.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 28, justifyContent: 'flex-start' }}>
+            {(Array.isArray(experiences) ? experiences : [])
+              .filter(exp => (exp.status || '').toLowerCase() === 'approved')
+              .slice()
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .slice(0, 4)
+              .map(exp => (
+                <div key={exp.experienceId} style={{
+                  background: '#fff',
+                  borderRadius: 16,
+                  boxShadow: '0 2px 12px #e3e8f0',
+                  padding: '24px 22px 18px 22px',
+                  minWidth: 320,
+                  maxWidth: 420,
+                  flex: '1 1 340px',
+                  marginBottom: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                }}>
+                  <div style={{ fontWeight: 800, color: '#1976d2', fontSize: 20, marginBottom: 4 }}>{exp.title || 'Trải nghiệm'}</div>
+                  <div style={{ color: '#1976d2', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+                    👤 {exp.userFullName || 'Ẩn danh'}
+                  </div>
+                  <div style={{ color: '#888', fontSize: 14, marginBottom: 2 }}>
+                    {exp.createdAt && (new Date(exp.createdAt).toLocaleString())}
+                  </div>
+                  <div style={{ color: '#333', fontSize: 16, marginBottom: 8, whiteSpace: 'pre-line' }}>{exp.content}</div>
+                  {(() => {
+                    const images = exp.media.filter(m => m.fileType === 'image');
+                    const videos = exp.media.filter(m => m.fileType === 'video');
+                    return images.length > 0 || videos.length > 0 ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 6 }}>
+                        {images.slice(0, 3).map((m, idx) => {
+                          const url = m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}`;
+                          // Nếu là ảnh thứ 4 và còn nhiều hơn 4 ảnh
+                          if (idx === 2 && images.length > 3) {
+                            return (
+                              <div
+                                key={m.mediaId}
+                                style={{
+                                  position: 'relative',
+                                  width: 90,
+                                  height: 90,
+                                  borderRadius: 8,
+                                  overflow: 'hidden',
+                                  border: '1.5px solid #1976d2',
+                                  background: '#fafafa',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => setModalGallery({ images: images.map(img => img.fileUrl.startsWith('/uploads/media/') ? img.fileUrl : `/uploads/media/${img.fileUrl}`), index: idx, open: true })}
+                              >
+                                <img
+                                  src={url}
+                                  alt="media"
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7)' }}
+                                />
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    top: 0, left: 0, right: 0, bottom: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#fff',
+                                    fontWeight: 900,
+                                    fontSize: 28,
+                                    background: 'rgba(0,0,0,0.35)'
+                                  }}
+                                >
+                                  +{images.length - 3}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return (
+                            <img
+                              key={m.mediaId}
+                              src={url}
+                              alt="media"
+                              style={{
+                                width: 90,
+                                height: 90,
+                                objectFit: 'cover',
+                                borderRadius: 8,
+                                border: '1.5px solid #1976d2',
+                                background: '#fafafa',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => setModalGallery({ images: images.map(img => img.fileUrl.startsWith('/uploads/media/') ? img.fileUrl : `/uploads/media/${img.fileUrl}`), index: idx, open: true })}
+                            />
+                          );
+                        })}
+                        {/* Video vẫn hiển thị như cũ */}
+                        {videos.map(m => {
+                          const url = m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}`;
+                          return (
+                            <video
+                              key={m.mediaId}
+                              src={url}
+                              controls
+                              style={{
+                                width: 90,
+                                height: 90,
+                                objectFit: 'cover',
+                                borderRadius: 8,
+                                border: '1.5px solid #1976d2',
+                                background: '#fafafa'
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Thêm modal gallery ảnh lớn với <, > */}
+      {modalGallery.open && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.7)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: 'fadeIn .2s',
+          }}
+          onClick={() => setModalGallery(g => ({ ...g, open: false }))}
+        >
+          <div
+            style={{
+              position: 'relative',
+              background: 'transparent',
+              borderRadius: 12,
+              boxShadow: '0 4px 32px #0008',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setModalGallery(g => ({ ...g, open: false }))}
+              style={{
+                position: 'absolute',
+                top: -18,
+                right: -18,
+                background: '#fff',
+                color: '#1976d2',
+                border: 'none',
+                borderRadius: '50%',
+                width: 38,
+                height: 38,
+                fontSize: 26,
+                fontWeight: 900,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px #0004',
+                zIndex: 2,
+              }}
+              title="Đóng"
+            >×</button>
+            {modalGallery.index > 0 && (
+              <button
+                onClick={() => setModalGallery(g => ({ ...g, index: g.index - 1 }))}
+                style={{
+                  position: 'absolute',
+                  left: -48,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: '#fff',
+                  color: '#1976d2',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 38,
+                  height: 38,
+                  fontSize: 28,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px #0004',
+                  zIndex: 2,
+                }}
+                title="Ảnh trước"
+              >&lt;</button>
+            )}
+            <img
+              src={modalGallery.images[modalGallery.index]}
+              alt="preview-large"
+              style={{
+                maxWidth: '80vw',
+                maxHeight: '80vh',
+                borderRadius: 12,
+                boxShadow: '0 2px 16px #0006',
+                background: '#fff',
+              }}
+            />
+            {modalGallery.index < modalGallery.images.length - 1 && (
+              <button
+                onClick={() => setModalGallery(g => ({ ...g, index: g.index + 1 }))}
+                style={{
+                  position: 'absolute',
+                  right: -48,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: '#fff',
+                  color: '#1976d2',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 38,
+                  height: 38,
+                  fontSize: 28,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px #0004',
+                  zIndex: 2,
+                }}
+                title="Ảnh tiếp theo"
+              >&gt;</button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

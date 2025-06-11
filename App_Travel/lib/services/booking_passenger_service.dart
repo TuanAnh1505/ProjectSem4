@@ -73,4 +73,34 @@ class BookingPassengerService {
       throw Exception(error['message'] ?? 'Failed to submit passengers');
     }
   }
+
+
+  Future<Map<String, dynamic>> checkDiscountCode(String code, int tourId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    
+    if (token == null) {
+      throw Exception('Authentication token not found');
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/discounts/check'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'code': code,
+        'tourId': tourId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized: Please login again');
+    } else {
+      throw Exception('Failed to check discount code: ${response.body}');
+    }
+  }
 } 

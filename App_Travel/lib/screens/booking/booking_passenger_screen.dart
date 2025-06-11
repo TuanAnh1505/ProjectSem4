@@ -11,7 +11,7 @@ class BookingPassengerScreen extends StatefulWidget {
   final Tour tour;
   final String selectedDate;
   final List<dynamic> itineraries;
-  final double finalPrice; // Add this line
+  final double finalPrice;
 
   const BookingPassengerScreen({
     Key? key,
@@ -20,7 +20,7 @@ class BookingPassengerScreen extends StatefulWidget {
     required this.tour,
     required this.selectedDate,
     required this.itineraries,
-    required this.finalPrice, // Add this line
+    required this.finalPrice,
   }) : super(key: key);
 
   @override
@@ -32,7 +32,6 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
   final _bookingPassengerService = BookingPassengerService();
   bool _useLoggedInInfo = true;
   bool _isSubmitting = false;
-  
   
   // Controllers cho các trường thông tin liên hệ
   final _fullNameController = TextEditingController();
@@ -59,6 +58,10 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
   };
 
   double _totalPrice = 0;
+  String _discountCode = '';
+  String _discountError = '';
+  Map<String, dynamic>? _discountInfo;
+  double _discountedPrice = 0;
 
   @override
   void initState() {
@@ -78,7 +81,6 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     _emailController.dispose();
     _addressController.dispose();
     _birthDateController.dispose();
-    // Dispose all controllers in _additionalPassengers
     for (var type in ['adult', 'child', 'infant']) {
       for (var p in _additionalPassengers[type]!) {
         p['birthDateController']?.dispose();
@@ -105,7 +107,6 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     }
     try {
       final userInfo = await _bookingPassengerService.getUserInfo(publicId);
-      print('Loaded user info: $userInfo');
       if (mounted) {
         setState(() {
           _fullNameController.text = userInfo['fullName'] ?? '';
@@ -118,7 +119,6 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
         });
       }
     } catch (e) {
-      print('Error loading user info: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Không thể tải thông tin người dùng: ${e.toString()}')),
@@ -130,32 +130,54 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     }
   }
 
-  // Thay đổi hàm _calculateTotalPrice()
-  void _calculateTotalPrice() {
-    // Use finalPrice instead of tour.price
-    final basePrice = widget.finalPrice;
-    final adultPrice = basePrice;
-    final childPrice = basePrice * 0.5;  // Trẻ em 50% giá người lớn
-    final infantPrice = basePrice * 0.25;  // Em bé miễn phí
+  double _calculateTotalPrice() {
+    double basePrice = widget.finalPrice ?? widget.tour.price ?? 0.0;
+    int adultCount = _passengerCounts['adult'] ?? 0;
+    int childCount = _passengerCounts['child'] ?? 0;
+    int infantCount = _passengerCounts['infant'] ?? 0;
+
+    // Calculate total price
+    double total = 0;
+    total += adultCount * basePrice; // Adults pay full price
+    total += childCount * (basePrice * 0.5); // Children pay 50%
+    // Infants are free
+
+    // Apply discount if any
+    if (_discountInfo != null && _discountInfo!['discountPercent'] != null) {
+      final percent = _discountInfo!['discountPercent'] as double;
+      total = total - (total * percent / 100);
+    }
+
+    print('Price calculation:');
+    print('Base price: $basePrice');
+    print('Adult count: $adultCount');
+    print('Child count: $childCount');
+    print('Infant count: $infantCount');
+    print('Discount percentage: ${_discountInfo?['discountPercent']}');
+    print('Total before discount: ${adultCount * basePrice + childCount * (basePrice * 0.5)}');
+    print('Final total: $total');
 
     setState(() {
-      _totalPrice = (_passengerCounts['adult']! * adultPrice) +
-                   (_passengerCounts['child']! * childPrice) +
-                   (_passengerCounts['infant']! * infantPrice);
+      _totalPrice = total;
+      _discountedPrice = total;
     });
 
-    // Log để debug
-    print('Price calculation:');
-    print('Base price (after discount): $basePrice');
-    print('Adult count: ${_passengerCounts['adult']}');
-    print('Child count: ${_passengerCounts['child']}');
-    print('Infant count: ${_passengerCounts['infant']}');
-    print('Total price: $_totalPrice');
+    return total;
   }
 
   void _handlePassengerCountChange(String type, String operation) {
     setState(() {
       final currentCount = _passengerCounts[type]!;
+      final max = widget.tour.maxParticipants ?? 99;
+      final totalCurrent = _passengerCounts['adult']! + _passengerCounts['child']! + _passengerCounts['infant']!;
+      
+      if (operation == 'add' && totalCurrent + 1 > max) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Số lượng khách không được vượt quá $max người!')),
+        );
+        return;
+      }
+
       final newCount = operation == 'add'
           ? currentCount + 1
           : type == 'adult'
@@ -167,7 +189,6 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
       // Update additional passengers list
       final currentList = List<Map<String, dynamic>>.from(_additionalPassengers[type]!);
       if (type == 'adult') {
-        // For adults, we need newCount - 1 additional passengers
         while (currentList.length < newCount - 1) {
           currentList.add({
             'fullName': '',
@@ -181,7 +202,6 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
           currentList.removeLast();
         }
       } else {
-        // For children and infants, we need exactly newCount additional passengers
         while (currentList.length < newCount) {
           currentList.add({
             'fullName': '',
@@ -200,6 +220,49 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     _calculateTotalPrice();
   }
 
+  Future<void> _handleApplyDiscount() async {
+    if (_discountCode.trim().isEmpty) {
+      setState(() {
+        _discountError = 'Vui lòng nhập mã giảm giá trước khi áp dụng!';
+      });
+      return;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      if (token == null) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+        return;
+      }
+
+      final response = await _bookingPassengerService.checkDiscountCode(
+        _discountCode,
+        widget.tour.tourId,
+      );
+
+      setState(() {
+        _discountInfo = response;
+        _discountError = '';
+      });
+      _calculateTotalPrice();
+    } catch (e) {
+      if (e.toString().contains('Unauthorized')) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      } else {
+        setState(() {
+          _discountInfo = null;
+          _discountError = 'Mã giảm giá không hợp lệ hoặc đã hết hạn';
+          _discountedPrice = widget.tour.price ?? 0.0;
+        });
+      }
+    }
+  }
+
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -208,19 +271,21 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     });
 
     try {
-      // Lấy token và publicId từ SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
       final publicId = prefs.getString('public_id');
 
       if (token == null || publicId == null) {
-        throw Exception('Vui lòng đăng nhập để đặt tour');
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+        return;
       }
 
       // Tạo danh sách hành khách
       final List<Map<String, dynamic>> allPassengers = [];
       
-      // Thêm thông tin người liên hệ vào danh sách hành khách
+      // Thêm thông tin người liên hệ
       allPassengers.add({
         'fullName': _fullNameController.text.trim(),
         'gender': _gender,
@@ -261,36 +326,23 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
         'publicId': publicId,
         'contactInfo': contactInfo,
         'passengers': _passengerCounts,
-        'passengerDetails': allPassengers.skip(1).toList(), // Bỏ qua người liên hệ đầu tiên
+        'passengerDetails': allPassengers.skip(1).toList(),
+        'discountCode': _discountCode.trim().isEmpty ? null : _discountCode.trim(),
+        'discountedPrice': _discountedPrice,
       };
 
-      print('Submitting payload: $payload'); // Debug print
-
-      // Gọi API để lưu thông tin hành khách
       final response = await _bookingPassengerService.submitPassengers(payload);
 
-      // Chuyển đổi response thành List<Map<String, dynamic>>
+      if (!mounted) return;
+
+      // Convert response to List<Map<String, dynamic>>
       final List<Map<String, dynamic>> convertedResponse = (response as List)
           .map((item) => item is Map<String, dynamic> 
               ? item 
               : Map<String, dynamic>.from(item as Map))
           .toList();
 
-      // Chuyển đổi Tour object thành Map
-      final tourInfo = {
-        'tourId': widget.tour.tourId,
-        'name': widget.tour.name,
-        'description': widget.tour.description,
-        'price': widget.tour.price,
-        'duration': widget.tour.duration,
-        'maxParticipants': widget.tour.maxParticipants,
-        'statusId': widget.tour.statusId,
-        'imageUrl': widget.tour.imageUrl,
-        'createdAt': widget.tour.createdAt?.toIso8601String(),
-        'updatedAt': widget.tour.updatedAt?.toIso8601String(),
-      };
-
-      // Chuyển đổi itineraries thành List<Map<String, dynamic>>
+      // Convert itineraries to List<Map<String, dynamic>>
       final List<Map<String, dynamic>> convertedItineraries = widget.itineraries
           .map((itinerary) => itinerary is Map<String, dynamic>
               ? itinerary
@@ -298,29 +350,42 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
           .toList();
 
       // Chuyển sang màn hình xác nhận
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BookingConfirmationScreen(
-              bookingId: widget.bookingId.toString(),
-              bookingCode: widget.bookingCode,
-              passengers: convertedResponse,
-              tourInfo: {
-                ...tourInfo,
-                'price': widget.finalPrice, // Thay đổi ở đây: sử dụng giá đã giảm
-              },
-              contactInfo: contactInfo,
-              itineraries: convertedItineraries,
-            ),
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BookingConfirmationScreen(
+            bookingId: widget.bookingId.toString(),
+            bookingCode: widget.bookingCode,
+            passengers: convertedResponse,
+            tourInfo: {
+              'tourId': widget.tour.tourId,
+              'name': widget.tour.name,
+              'description': widget.tour.description,
+              'price': _discountedPrice,
+              'originalPrice': widget.tour.price,
+              'duration': widget.tour.duration,
+              'maxParticipants': widget.tour.maxParticipants,
+              'statusId': widget.tour.statusId,
+              'imageUrl': widget.tour.imageUrl,
+              'createdAt': widget.tour.createdAt?.toIso8601String(),
+              'updatedAt': widget.tour.updatedAt?.toIso8601String(),
+            },
+            contactInfo: contactInfo,
+            itineraries: convertedItineraries,
           ),
-        );
-      }
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Có lỗi xảy ra: $e')),
-        );
+      if (e.toString().contains('Unauthorized')) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Có lỗi xảy ra: ${e.toString()}')),
+          );
+        }
       }
     } finally {
       if (mounted) {
@@ -340,9 +405,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
         foregroundColor: Colors.black,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.orange),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SingleChildScrollView(
@@ -353,15 +416,14 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Tour information card with image
+                // Tour information card
                 Card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tour image
                       if (widget.tour.imageUrl != null && widget.tour.imageUrl!.isNotEmpty)
                         ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(0), bottom: Radius.circular(0)),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(0)),
                           child: Image.network(
                             'http://10.0.2.2:8080${widget.tour.imageUrl}',
                             width: double.infinity,
@@ -434,7 +496,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Use logged in info switch
                 SwitchListTile(
                   title: const Text('Sử dụng thông tin tài khoản đang đăng nhập'),
@@ -448,7 +510,6 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                       if (value) {
                         _loadUserInfo();
                       } else {
-                        // Clear contact info
                         _fullNameController.text = '';
                         _phoneController.text = '';
                         _emailController.text = '';
@@ -460,7 +521,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                   },
                 ),
                 const SizedBox(height: 10),
-                
+
                 // Contact information section
                 Container(
                   decoration: BoxDecoration(
@@ -818,6 +879,64 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                       ],
                     ),
                   ),
+                const SizedBox(height: 20),
+
+                // Discount code section
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Mã giảm giá',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                decoration: InputDecoration(
+                                  hintText: 'Nhập mã giảm giá',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _discountCode = value;
+                                    _discountError = '';
+                                  });
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            ElevatedButton(
+                              onPressed: _handleApplyDiscount,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text('Áp dụng'),
+                            ),
+                          ],
+                        ),
+                        if (_discountError.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              _discountError,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 // Total price and submit button

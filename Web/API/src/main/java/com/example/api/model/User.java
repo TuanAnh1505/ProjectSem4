@@ -3,12 +3,15 @@ package com.example.api.model;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     @Id
@@ -48,7 +51,9 @@ public class User {
     @JoinTable(name = "userroles", joinColumns = @JoinColumn(name = "userid"), inverseJoinColumns = @JoinColumn(name = "roleid"))
     @JsonManagedReference // Quản lý phía "cha" của quan hệ
     private Set<Role> roles;
+
     @OneToOne(mappedBy = "user")
+    @JsonBackReference
     private TourGuide tourGuide;
 
     public TourGuide getTourGuide() {
