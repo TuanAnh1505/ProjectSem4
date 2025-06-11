@@ -5,8 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0507ab1b-b778-4b81-8916-03ac8c0e44f5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/easycode.ignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/ExperienceController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/MediaController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/ExperienceCreateDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/ExperienceWithMediaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/MediaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/Experience.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/Media.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/ExperienceRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/MediaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/experience/ExperienceIndex.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/ProjectSem4.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ProjectSem4.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/booking/booking_passenger_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/booking/booking_passenger_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/tour/tour_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/tour/tour_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/services/booking_passenger_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/services/booking_passenger_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/pubspec.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/config/WebConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/TourRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/TourRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/VietnamTourism/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/VietnamTourism/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/admin/AdminDashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/AdminDashboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/admin/AdminPage.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/AdminPage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/admin/booking/BookingIndex.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/booking/BookingIndex.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/auth/Login.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/auth/Login.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/booking/BookingPassenger.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/booking/BookingPassenger.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDashboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDetailDashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDetailDashboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,7 +61,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "hoangdo",
+    "git-widget-placeholder": "Merging cuong",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/SEM 4/ProjectSem4",
