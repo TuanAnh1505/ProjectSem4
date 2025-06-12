@@ -57,11 +57,12 @@ class _AppNavigationState extends State<AppNavigation> {
               leading: null,
               title: _selectedIndex == 0
                   ? Text(
-                      'Hi Vietnam',
-                      style: GoogleFonts.nunito(
+                      'Hi VietNam',
+                      style: GoogleFonts.baloo2(
                         color: Colors.orange,
-                        fontSize: 30,
-                        fontWeight: FontWeight.normal,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2.5,
                       ),
                     )
                   : _selectedIndex == 1
@@ -89,12 +90,7 @@ class _AppNavigationState extends State<AppNavigation> {
                     ]
                   : null,
             ),
-      drawer: _selectedIndex == 0
-          ? AppDrawer(
-              userName: widget.userName,
-              userRole: widget.userRole,
-            )
-          : null,
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           Expanded(child: _buildBody()),

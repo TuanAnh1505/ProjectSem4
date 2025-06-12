@@ -92,13 +92,59 @@ class PersonalPageScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Đã xác thực tài khoản',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.green,
-                fontWeight: FontWeight.w400,
-              ),
+            FutureBuilder(
+              future: SharedPreferences.getInstance(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const SizedBox.shrink();
+                }
+                final prefs = snapshot.data!;
+                final token = prefs.getString('auth_token');
+                if (token != null) {
+                  return const Text(
+                    'Đã xác thực tài khoản',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  );
+                } else {
+                  return Column(
+                    children: [
+                      const Text(
+                        'Bạn chưa đăng nhập',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(context, '/login');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            child: const Text('Đăng nhập', style: TextStyle(fontSize: 16)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
             ),
             const SizedBox(height: 28),
             // Menu

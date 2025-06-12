@@ -10,6 +10,7 @@ import 'screens/search_screen.dart';
 import 'screens/auth/personal_page_screen.dart';
 import 'screens/auth/update_info_user_screen.dart';
 import 'screens/setting_screen.dart';
+import 'screens/booking/history_user_booking_tour_screen.dart';
 
 
 void main() async {
@@ -63,7 +64,7 @@ class _MyAppState extends State<MyApp> {
           iconTheme: IconThemeData(color: Colors.orange),
         ),
       ),
-      initialRoute: '/login',
+      initialRoute: '/home',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const AppNavigation(
@@ -89,6 +90,7 @@ class _MyAppState extends State<MyApp> {
 
         '/update-info-user-screen': (context) => UpdateInfoUserScreen(),
         '/setting-screen': (context) => SettingScreen(),
+        '/history-user-booking-tour-screen': (context) => const HistoryUserBookingTourScreen(),
       },
     );
   }

@@ -147,11 +147,33 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
 
   Future<void> handleBooking() async {
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng đăng nhập để đặt tour')),
+      // Show dialog to ask user to login
+      if (!mounted) return;
+      final shouldLogin = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Đăng nhập cần thiết'),
+          content: Text('Hãy đăng nhập để có thể đặt tour. Bạn có muốn đăng nhập ngay bây giờ không?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text('Đăng nhập'),
+            ),
+          ],
+        ),
       );
+
+      if (shouldLogin == true) {
+        if (!mounted) return;
+        Navigator.pushNamed(context, '/login');
+      }
       return;
     }
+
     if (selectedScheduleId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng chọn lịch trình muốn đặt!')),
@@ -186,7 +208,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
             tour: tour!,
             selectedDate: selectedSchedule['startDate'] ?? '',
             itineraries: selectedItineraries,
-            finalPrice: booking['finalPrice'] ?? tour!.price, // Thêm finalPrice
+            finalPrice: booking['finalPrice'] ?? tour!.price,
           ),
         ),
       );
@@ -194,9 +216,34 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
       await fetchAll();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Có lỗi xảy ra khi đặt tour: ${e.toString()}')),
-        );
+        if (e.toString().contains('Hãy đăng nhập để có thể đặt tour')) {
+          // Show dialog to ask user to login
+          final shouldLogin = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Đăng nhập cần thiết'),
+              content: Text('Hãy đăng nhập để có thể đặt tour. Bạn có muốn đăng nhập ngay bây giờ không?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Hủy'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text('Đăng nhập'),
+                ),
+              ],
+            ),
+          );
+
+          if (shouldLogin == true) {
+            Navigator.pushReplacementNamed(context, '/login');
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Có lỗi xảy ra khi đặt tour: ${e.toString()}')),
+          );
+        }
       }
     } finally {
       if (mounted) {

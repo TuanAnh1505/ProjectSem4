@@ -223,7 +223,7 @@ class _SettingScreenState extends State<SettingScreen> {
             onPressed: () {
               Navigator.pushNamedAndRemoveUntil(
                 context,
-                '/login',
+                '/home',
                 (route) => false,
               );
             },
@@ -238,7 +238,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 Text(
                   'Hi VietNam',
                   style: GoogleFonts.baloo2(
-                    color: Color(0xFF908CFF),
+                    color: Colors.orange,
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 2.5,

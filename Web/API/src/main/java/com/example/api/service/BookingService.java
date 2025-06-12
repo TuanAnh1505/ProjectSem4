@@ -218,6 +218,7 @@ public class BookingService {
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> bookingDetails = new HashMap<>();
         bookingDetails.put("bookingId", booking.getBookingId());
+        bookingDetails.put("bookingCode", booking.getBookingCode());
         bookingDetails.put("bookingDate", booking.getBookingDate());
         bookingDetails.put("totalPrice", booking.getTotalPrice());
         bookingDetails.put("scheduleId", booking.getScheduleId());

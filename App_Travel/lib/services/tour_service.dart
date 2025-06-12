@@ -7,20 +7,9 @@ class TourService {
   static const String baseUrl = 'http://10.0.2.2:8080/api/tours';
 
   Future<List<Tour>> fetchTours() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
     final response = await http.get(
       Uri.parse(baseUrl),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
-
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -31,14 +20,8 @@ class TourService {
   }
 
   Future<Tour> fetchTourDetail(int tourId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
     final response = await http.get(
       Uri.parse('$baseUrl/$tourId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
     print('Fetch tour detail status: ${response.statusCode}');
     print('Response body: ${response.body}');
@@ -50,14 +33,8 @@ class TourService {
   }
 
   Future<List<dynamic>> fetchSchedules(int tourId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
     final response = await http.get(
       Uri.parse('http://10.0.2.2:8080/api/schedules/tour/$tourId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -67,14 +44,8 @@ class TourService {
   }
 
   Future<List<dynamic>> fetchItineraries(int scheduleId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
     final response = await http.get(
       Uri.parse('http://10.0.2.2:8080/api/itineraries/schedule/$scheduleId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -87,15 +58,8 @@ class TourService {
     required int count,
     required int excludeTourId,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    
     final response = await http.get(
       Uri.parse('$baseUrl/random?count=$count&excludeTourId=$excludeTourId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
 
     if (response.statusCode == 200) {

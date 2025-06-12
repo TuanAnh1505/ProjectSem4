@@ -230,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }
                         return SizedBox(
-                          height: 310,
+                          height: 350,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: filteredTours.length > 5 ? 5 : filteredTours.length,
@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     );
                                   },
                                   child: Container(
-                                    width: 220,
+                                    width: 250,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(16),
@@ -271,13 +271,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                               child: tour.imageUrl != null && tour.imageUrl!.isNotEmpty
                                                   ? Image.network(
                                                       'http://10.0.2.2:8080${tour.imageUrl}',
-                                                      width: 220,
-                                                      height: 160,
+                                                      width: 250,
+                                                      height: 180,
                                                       fit: BoxFit.cover,
                                                     )
                                                   : Container(
-                                                      width: 220,
-                                                      height: 160,
+                                                      width: 250,
+                                                      height: 180,
                                                       color: Colors.grey[200],
                                                       child: Icon(Icons.image_not_supported, size: 60, color: Colors.grey),
                                                     ),

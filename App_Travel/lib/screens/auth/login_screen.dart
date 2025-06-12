@@ -91,6 +91,19 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 8, bottom: 8),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.orange, size: 32),
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                    },
+                    tooltip: 'Quay lại',
+                  ),
+                ),
+              ),
               // Logo
               SizedBox(
                 width: 250,
