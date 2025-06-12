@@ -906,7 +906,14 @@ export default function TourDetailDashboard() {
                   <div style={{ color: '#888', fontSize: 14, marginBottom: 2 }}>
                     {fb.createdAt && (new Date(fb.createdAt).toLocaleString())}
                   </div>
-                  <div style={{ color: '#333', fontSize: 16, marginBottom: 8, whiteSpace: 'pre-line' }}>{fb.message}</div>
+                  <div style={{
+                    color: '#333',
+                    fontSize: 16,
+                    marginBottom: 8,
+                    whiteSpace: 'pre-line',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                  }}>{fb.message}</div>
                 </div>
               ))}
           </div>

@@ -37,6 +37,10 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   final ImagePicker _picker = ImagePicker();
   List<XFile> _mediaFiles = [];
   bool _isPicking = false; // Prevent double pick
+  double? averageRating;
+  int? feedbackCount;
+  bool ratingLoading = true;
+  bool showFullDescription = false;
 
   String formatPrice(num? price) {
     if (price == null) return '';
@@ -50,6 +54,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     fetchAll();
     _loadUserId();
     fetchExperiences();
+    fetchTourRating(widget.tourId);
   }
 
   @override
@@ -127,6 +132,33 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
       }
     } catch (e) {
       print('Error fetching experiences: $e');
+    }
+  }
+
+  Future<void> fetchTourRating(int tourId) async {
+    setState(() {
+      ratingLoading = true;
+    });
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/tours/$tourId/feedback-stats'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          averageRating = (data['averageRating'] as num?)?.toDouble();
+          feedbackCount = data['feedbackCount'] as int?;
+          ratingLoading = false;
+        });
+      } else {
+        setState(() {
+          ratingLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        ratingLoading = false;
+      });
     }
   }
 
@@ -530,16 +562,49 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       children: [
                         Icon(Icons.star, color: Colors.amber, size: 20),
                         SizedBox(width: 4),
-                        Text('4.8', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ratingLoading
+                          ? SizedBox(width: 24, height: 16, child: LinearProgressIndicator())
+                          : Text(
+                              averageRating != null ? averageRating!.toStringAsFixed(1) : '0.0',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                         SizedBox(width: 4),
-                        Text('(128 đánh giá)', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                        ratingLoading
+                          ? SizedBox.shrink()
+                          : Text(
+                              '(${feedbackCount ?? 0} đánh giá)',
+                              style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                            ),
                       ],
                     ),
                     SizedBox(height: 8),
                     // Mô tả
-                    Text(
-                      tour?.description ?? '',
-                      style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tour?.description ?? '',
+                          maxLines: showFullDescription ? null : 6,
+                          overflow: showFullDescription ? TextOverflow.visible : TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+                        ),
+                        if ((tour?.description?.length ?? 0) > 120)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                showFullDescription = !showFullDescription;
+                              });
+                            },
+                            child: Text(
+                              showFullDescription ? 'Thu gọn' : 'Xem thêm',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     SizedBox(height: 12),
                     // Giá

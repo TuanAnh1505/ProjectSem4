@@ -5,10 +5,12 @@ import com.example.api.model.Feedback;
 import com.example.api.model.User;
 import com.example.api.model.FeedbackStatus;
 import com.example.api.model.Booking;
+import com.example.api.model.Tour;
 import com.example.api.service.FeedbackService;
 import com.example.api.service.UserService;
 import com.example.api.service.FeedbackStatusService;
 import com.example.api.service.BookingService;
+import com.example.api.service.TourService;
 import com.example.api.repository.BookingRepository;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -39,6 +41,8 @@ public class FeedbackController {
     private BookingService bookingService;
     @Autowired
     private BookingRepository bookingRepository;
+    @Autowired
+    private TourService tourService;
 
     @GetMapping
     public List<FeedbackDTO> getAllFeedbacks(@RequestParam(value = "tourId", required = false) Integer tourId) {
@@ -49,7 +53,7 @@ public class FeedbackController {
             FeedbackDTO dto = new FeedbackDTO();
             dto.setFeedbackId(fb.getFeedbackId());
             dto.setUserFullName(fb.getUser() != null ? fb.getUser().getFullName() : null);
-            dto.setTourId(fb.getTourId());
+            dto.setTourId(fb.getTour() != null ? fb.getTour().getTourId() : null);
             dto.setRating(fb.getRating());
             dto.setMessage(fb.getMessage());
             dto.setStatusName(fb.getStatus() != null ? fb.getStatus().getStatusName() : null);
@@ -94,7 +98,8 @@ public class FeedbackController {
         
         Feedback feedback = new Feedback();
         feedback.setUser(user);
-        feedback.setTourId(request.getTourId());
+        Tour tour = tourService.getTourDetail(request.getTourId());
+        feedback.setTour(tour);
         feedback.setMessage(request.getMessage());
         feedback.setRating(request.getRating());
         feedback.setCreatedAt(LocalDateTime.now());

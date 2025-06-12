@@ -17,8 +17,9 @@ public class Feedback {
     @JoinColumn(name = "userid", referencedColumnName = "userid", nullable = false)
     private User user;
 
-    @Column(name = "tour_id")
-    private Integer tourId;
+    @ManyToOne
+    @JoinColumn(name = "tour_id")
+    private Tour tour;
 
     @Column(name = "message", columnDefinition = "TEXT")
     private String message;
