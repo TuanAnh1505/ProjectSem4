@@ -41,6 +41,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   int? feedbackCount;
   bool ratingLoading = true;
   bool showFullDescription = false;
+  bool showExperienceForm = false;
 
   String formatPrice(num? price) {
     if (price == null) return '';
@@ -622,7 +623,12 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       children: [
                         Icon(Icons.calendar_today, size: 18, color: Colors.blue[700]),
                         SizedBox(width: 4),
-                        Text('${tour?.duration ?? ''} ngày', style: TextStyle(fontSize: 14)),
+                        Text(
+                          (tour?.duration ?? 1) > 1
+                              ? '${tour?.duration ?? 1} ngày ${(tour?.duration ?? 1) - 1} đêm'
+                              : '${tour?.duration ?? 1} ngày',
+                          style: TextStyle(fontSize: 13, color: Colors.black87),
+                        ),
                         SizedBox(width: 18),
                         Icon(Icons.group, size: 18, color: Colors.blue[700]),
                         SizedBox(width: 4),
@@ -813,128 +819,140 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                         Icon(Icons.rate_review, color: Colors.blue[700], size: 20),
                         SizedBox(width: 6),
                         Text('Chia sẻ trải nghiệm', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900])),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    // Experience Title Input
-                    TextField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        hintText: 'Tiêu đề trải nghiệm',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[50],
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    // Experience Input Form
-                    TextField(
-                      controller: _experienceController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        hintText: 'Cảm nhận, kinh nghiệm, kỷ niệm đáng nhớ...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[50],
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    // Media Picker
-                    Row(
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: (_mediaFiles.length < 10 && !_isPicking) ? pickMedia : null,
-                          icon: Icon(Icons.photo),
-                          label: Text('Chọn ảnh (tối đa 10)'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[50],
-                            foregroundColor: Colors.blue[900],
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: (_mediaFiles.length < 10 && !_isPicking) ? pickVideo : null,
-                          icon: Icon(Icons.videocam),
-                          label: Text('Chọn video'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[50],
-                            foregroundColor: Colors.blue[900],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    // Preview selected media
-                    if (_mediaFiles.isNotEmpty)
-                      SizedBox(
-                        height: 90,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _mediaFiles.length,
-                          separatorBuilder: (_, __) => SizedBox(width: 8),
-                          itemBuilder: (context, idx) {
-                            final file = _mediaFiles[idx];
-                            final isImage = (file.mimeType?.startsWith('image') == true) ||
-                                            file.path.toLowerCase().endsWith('.jpg') ||
-                                            file.path.toLowerCase().endsWith('.jpeg') ||
-                                            file.path.toLowerCase().endsWith('.png');
-                            return Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: isImage
-                                    ? Image.file(File(file.path), width: 80, height: 80, fit: BoxFit.cover)
-                                    : Container(
-                                        width: 80,
-                                        height: 80,
-                                        color: Colors.black12,
-                                        child: Icon(Icons.videocam, size: 40, color: Colors.blue[700]),
-                                      ),
-                                ),
-                                Positioned(
-                                  top: 0,
-                                  right: 0,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _mediaFiles.removeAt(idx);
-                                      });
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      padding: EdgeInsets.all(2),
-                                      child: Icon(Icons.close, color: Colors.white, size: 18),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
+                        SizedBox(width: 12),
+                        Checkbox(
+                          value: showExperienceForm,
+                          onChanged: (val) {
+                            setState(() {
+                              showExperienceForm = val ?? false;
+                            });
                           },
                         ),
-                      ),
-                    SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        onPressed: experienceLoading ? null : handleExperienceSubmit,
-                        child: experienceLoading 
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Gửi trải nghiệm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                      ),
+                        Text('Tích để chia sẻ', style: TextStyle(color: Colors.blue[700], fontSize: 14)),
+                      ],
                     ),
-                    SizedBox(height: 20),
+                    if (showExperienceForm) ...[
+                      SizedBox(height: 16),
+                      // Experience Title Input
+                      TextField(
+                        controller: _titleController,
+                        decoration: InputDecoration(
+                          hintText: 'Tiêu đề trải nghiệm',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      // Experience Input Form
+                      TextField(
+                        controller: _experienceController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: 'Cảm nhận, kinh nghiệm, kỷ niệm đáng nhớ...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      // Media Picker
+                      Row(
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: (_mediaFiles.length < 10 && !_isPicking) ? pickMedia : null,
+                            icon: Icon(Icons.photo),
+                            label: Text('Chọn ảnh (tối đa 10)'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue[50],
+                              foregroundColor: Colors.blue[900],
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            onPressed: (_mediaFiles.length < 10 && !_isPicking) ? pickVideo : null,
+                            icon: Icon(Icons.videocam),
+                            label: Text('Chọn video'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue[50],
+                              foregroundColor: Colors.blue[900],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      // Preview selected media
+                      if (_mediaFiles.isNotEmpty)
+                        SizedBox(
+                          height: 90,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _mediaFiles.length,
+                            separatorBuilder: (_, __) => SizedBox(width: 8),
+                            itemBuilder: (context, idx) {
+                              final file = _mediaFiles[idx];
+                              final isImage = (file.mimeType?.startsWith('image') == true) ||
+                                              file.path.toLowerCase().endsWith('.jpg') ||
+                                              file.path.toLowerCase().endsWith('.jpeg') ||
+                                              file.path.toLowerCase().endsWith('.png');
+                              return Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: isImage
+                                      ? Image.file(File(file.path), width: 80, height: 80, fit: BoxFit.cover)
+                                      : Container(
+                                          width: 80,
+                                          height: 80,
+                                          color: Colors.black12,
+                                          child: Icon(Icons.videocam, size: 40, color: Colors.blue[700]),
+                                        ),
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _mediaFiles.removeAt(idx);
+                                        });
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        padding: EdgeInsets.all(2),
+                                        child: Icon(Icons.close, color: Colors.white, size: 18),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: experienceLoading ? null : handleExperienceSubmit,
+                          child: experienceLoading 
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('Gửi trải nghiệm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                    ],
                     // Experiences List
                     if (experiences.isEmpty)
                       Center(
