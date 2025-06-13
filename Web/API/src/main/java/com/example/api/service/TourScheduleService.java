@@ -175,7 +175,7 @@ public class TourScheduleService {
         }
     }
 
-    @Scheduled(cron = "0 0 8 * * ?")
+    @Scheduled(cron = "0 0 6 * * ?")
     @Transactional
     public void sendTourReminders() {
         logger.info("Bắt đầu gửi email nhắc nhở tour (1 ngày trước khi khởi hành)");
