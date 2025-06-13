@@ -107,8 +107,7 @@ public class EmailService {
                 "Mã giảm giá: " + code + "\n" +
                 "Mô tả: " + description + "\n\n" +
                 "Hãy sử dụng mã này trong lần đặt tour đầu tiên của bạn!\n\n" +
-                "Trân trọng,\n" +
-                "Đội ngũ TravelTour");
+                "Trân trọng,<br>Đội ngũ TravelTour");
         try {
             emailSender.send(message);
             logger.info("Successfully sent discount code email to: {}", to);
@@ -217,6 +216,55 @@ public class EmailService {
                         </html>
                         """,
                 userName, tourName, endDate, webFeedbackLink, appFeedbackLink);
+        sendHtmlEmail(to, subject, content);
+    }
+
+    public void sendTourReminderEmail(String to, String userName, String tourName, String startDate, 
+            String endDate, String tourDetails) {
+        String subject = "Nhắc nhở: Tour " + tourName + " sẽ bắt đầu sau 2 ngày";
+        String content = String.format(
+                """
+                        <html>
+                        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                                <h2 style="color: #1976d2;">Xin chào %s,</h2>
+                                <p>Tour <strong>%s</strong> của bạn sẽ bắt đầu sau <strong>2 ngày</strong> (ngày <strong>%s</strong>) và kết thúc vào ngày <strong>%s</strong>.</p>
+                                
+                                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                    <h3 style="color: #28a745; margin-top: 0;">Thông tin quan trọng:</h3>
+                                    <p><strong>Thời gian tập trung:</strong> 30 phút trước giờ khởi hành</p>
+                                    <p><strong>Ngày khởi hành:</strong> %s</p>
+                                </div>
+
+                                <div style="background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                    <h3 style="color: #17a2b8; margin-top: 0;">Chi tiết tour:</h3>
+                                    %s
+                                </div>
+
+                                <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                    <h3 style="color: #856404; margin-top: 0;">Chuẩn bị cho chuyến đi:</h3>
+                                    <ul>
+                                        <li>Vui lòng mang theo giấy tờ tùy thân (CMND/CCCD/Hộ chiếu)</li>
+                                        <li>Mang theo đồ dùng cá nhân cần thiết</li>
+                                        <li>Đến đúng điểm hẹn trước giờ khởi hành</li>
+                                        <li>Kiểm tra lại hành lý và đồ dùng cá nhân</li>
+                                        <li>Chuẩn bị sẵn sàng cho chuyến đi</li>
+                                    </ul>
+                                </div>
+
+                                <p>Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua:</p>
+                                <ul>
+                                    <li>Hotline: 1900 xxxx</li>
+                                    <li>Email: support@traveltour.com</li>
+                                </ul>
+
+                                <p>Chúc bạn có một chuyến đi thú vị!</p>
+                                <p>Trân trọng,<br>Đội ngũ TravelTour</p>
+                            </div>
+                        </body>
+                        </html>
+                        """,
+                userName, tourName, startDate, endDate, startDate, tourDetails);
         sendHtmlEmail(to, subject, content);
     }
 }

@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/tours/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/itineraries/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/schedules/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/schedules/send-reminders").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/feedbacks/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated())
