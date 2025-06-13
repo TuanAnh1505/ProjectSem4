@@ -39,6 +39,9 @@ public class DiscountController {
         if (now.isBefore(discount.getStartDate()) || now.isAfter(discount.getEndDate())) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", "Mã giảm giá đã hết hạn"));
         }
+        if (!discountService.isDiscountAvailable(discount)) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Mã giảm giá đã hết số lượng"));
+        }
         return ResponseEntity.ok(discount);
     }
 }

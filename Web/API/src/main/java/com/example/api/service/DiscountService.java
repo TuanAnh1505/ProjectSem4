@@ -1,6 +1,7 @@
 package com.example.api.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.api.model.Discount;
 import com.example.api.model.User;
@@ -28,5 +29,22 @@ public class DiscountService {
 
     public java.util.Optional<Discount> getDiscountByCode(String code) {
         return discountRepository.findByCode(code);
+    }
+
+    @Transactional
+    public boolean checkAndUpdateDiscountQuantity(Discount discount) {
+        if (discount.getUsedQuantity() == null) discount.setUsedQuantity(0);
+        if (discount.getQuantity() != null && discount.getUsedQuantity() >= discount.getQuantity()) {
+            return false;
+        }
+        discount.setUsedQuantity(discount.getUsedQuantity() + 1);
+        discountRepository.save(discount);
+        return true;
+    }
+
+    public boolean isDiscountAvailable(Discount discount) {
+        if (discount.getQuantity() == null) return true;
+        if (discount.getUsedQuantity() == null) discount.setUsedQuantity(0);
+        return discount.getUsedQuantity() < discount.getQuantity();
     }
 }
