@@ -5,8 +5,95 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0507ab1b-b778-4b81-8916-03ac8c0e44f5" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable-hdpi/splash.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable-mdpi/splash.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable-v21/background.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable-xhdpi/splash.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable-xxhdpi/splash.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable-xxxhdpi/splash.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable/background.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/values-night-v31/styles.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/values-v31/styles.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/assets/images/logo2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-50x50@1x.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-50x50@2x.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-57x57@1x.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-57x57@2x.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-72x72@1x.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-72x72@2x.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchBackground.imageset/Contents.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchBackground.imageset/background.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/App_Travel/lib/screens/feedback/feedback_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/FeedbackController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/FeedbackStatusController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/dto/FeedbackDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/Feedback.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/model/FeedbackStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/FeedbackRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/repository/FeedbackStatusRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/scheduler/FeedbackRequestScheduler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/FeedbackService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/FeedbackStatusService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/feedback/FeedbackIndex.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Web/frontend/src/components/feedback/Feedback.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable-v21/launch_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable-v21/launch_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable/launch_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/drawable/launch_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/values-night/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/values-night/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/android/app/src/main/res/values/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/assets/fonts/Pacifico-Regular.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Base.lproj/LaunchScreen.storyboard" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Base.lproj/LaunchScreen.storyboard" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/ios/Runner/Info.plist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/auth/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/auth/login_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/auth/personal_page_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/auth/personal_page_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/booking/booking_passenger_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/booking/booking_passenger_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/home_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/setting_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/setting_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/screens/tour/tour_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/screens/tour/tour_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/services/booking_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/services/booking_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/services/deep_link_handler.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/services/deep_link_handler.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/services/tour_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/services/tour_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/widgets/app_drawer.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/widgets/app_drawer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/lib/widgets/app_navigation.dart" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/lib/widgets/app_navigation.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Travel/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/App_Travel/pubspec.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/config/WebConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/TourController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/controller/TourController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/BookingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/BookingService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Web/API/src/main/java/com/example/api/service/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/admin/AdminDashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/AdminDashboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/admin/AdminPage.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/AdminPage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/admin/booking/BookingIndex.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/booking/BookingIndex.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/admin/experience/ExperienceIndex.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/admin/experience/ExperienceIndex.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDetailDashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/Web/frontend/src/components/tour/TourDetailDashboard.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,15 +115,17 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "hoangdo",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "Merging tuananh",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/SEM 4/ProjectSem4",
+    "last_opened_file_path": "D:/Aptech/ProjectSem4/Web/API",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "show.migrate.to.gradle.popup": "false",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -62,6 +151,7 @@
       <workItem from="1748681140345" duration="917000" />
       <workItem from="1748770906228" duration="397000" />
       <workItem from="1748914514712" duration="741000" />
+      <workItem from="1749781520960" duration="117000" />
     </task>
     <servers />
   </component>
