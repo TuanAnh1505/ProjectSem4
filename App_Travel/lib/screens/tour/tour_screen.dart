@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'tour_detail_screen.dart';
 import 'package:diacritic/diacritic.dart';
 import '/screens/search_screen.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class TourScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -297,108 +299,168 @@ class _TourScreenState extends State<TourScreen> {
                       );
                     }
                     
-                    return ListView.builder(
-                      padding: EdgeInsets.only(top: 0),
-                      itemCount: tours.length,
-                      itemBuilder: (context, index) {
-                        final tour = tours[index];
-                        print('Tour imageUrl: \u001b[200m\u001b[200m[200m${tour.imageUrl}');
-                        return Card(
-                          margin: EdgeInsets.fromLTRB(16, index == 0 ? 0 : 10, 16, 10),
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-                                child: tour.imageUrl != null && tour.imageUrl!.isNotEmpty
-                                    ? Image.network(
-                                        (() {
-                                          final url = 'http://10.0.2.2:8080${tour.imageUrl!.startsWith('/') ? '' : '/'}${tour.imageUrl!}';
-                                          return url;
-                                        })(),
-                                        width: double.infinity,
-                                        height: 250,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Container(
+                    // Lấy rating cho tất cả tour
+                    return FutureBuilder<List<Map<String, dynamic>>>(
+                      future: Future.wait(tours.map((tour) async {
+                        try {
+                          final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/tours/${tour.tourId}/feedback-stats'));
+                          if (response.statusCode == 200) {
+                            final data = json.decode(response.body);
+                            return {
+                              'tour': tour,
+                              'averageRating': (data['averageRating'] as num?)?.toDouble() ?? 0.0,
+                              'feedbackCount': data['feedbackCount'] as int? ?? 0,
+                            };
+                          }
+                        } catch (_) {}
+                        return {
+                          'tour': tour,
+                          'averageRating': 0.0,
+                          'feedbackCount': 0,
+                        };
+                      }).toList()),
+                      builder: (context, ratingSnapshot) {
+                        if (ratingSnapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (ratingSnapshot.hasError) {
+                          return Center(child: Text('Lỗi khi lấy đánh giá tour'));
+                        } else if (!ratingSnapshot.hasData) {
+                          return Center(child: Text('Không có dữ liệu đánh giá'));
+                        }
+                        final ratedTours = ratingSnapshot.data!;
+                        // Sắp xếp theo số sao giảm dần
+                        ratedTours.sort((a, b) => (b['averageRating'] as double).compareTo(a['averageRating'] as double));
+                        return ListView.builder(
+                          padding: EdgeInsets.only(top: 0),
+                          itemCount: ratedTours.length,
+                          itemBuilder: (context, index) {
+                            final item = ratedTours[index];
+                            final tour = item['tour'] as Tour;
+                            final averageRating = item['averageRating'] as double;
+                            final feedbackCount = item['feedbackCount'] as int;
+                            return Card(
+                              margin: EdgeInsets.fromLTRB(16, index == 0 ? 0 : 10, 16, 10),
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+                                    child: tour.imageUrl != null && tour.imageUrl!.isNotEmpty
+                                        ? Image.network(
+                                            (() {
+                                              final url = 'http://10.0.2.2:8080${tour.imageUrl!.startsWith('/') ? '' : '/'}${tour.imageUrl!}';
+                                              return url;
+                                            })(),
+                                            width: double.infinity,
+                                            height: 250,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Container(
+                                                width: double.infinity,
+                                                height: 250,
+                                                color: Colors.grey[200],
+                                                child: Icon(Icons.image_not_supported, size: 60, color: Colors.grey),
+                                              );
+                                            },
+                                          )
+                                        : Container(
                                             width: double.infinity,
                                             height: 250,
                                             color: Colors.grey[200],
                                             child: Icon(Icons.image_not_supported, size: 60, color: Colors.grey),
-                                          );
-                                        },
-                                      )
-                                    : Container(
-                                        width: double.infinity,
-                                        height: 250,
-                                        color: Colors.grey[200],
-                                        child: Icon(Icons.image_not_supported, size: 60, color: Colors.grey),
-                                      ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(14.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      tour.name,
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 21, color: Colors.blue[900]),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: 7),
-                                    Text(
-                                      tour.description.length > 70
-                                          ? '${tour.description.substring(0, 70)}...'
-                                          : tour.description,
-                                      style: TextStyle(fontSize: 15, color: Colors.grey[800]),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      'Số ngày: ${tour.duration}',
-                                      style: TextStyle(fontSize: 15, color: Colors.black87),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(14.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Giá: ${formatPrice(tour.price)}',
-                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange[800]),
+                                          tour.name,
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 21, color: Colors.blue[900]),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.orange,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
+                                        SizedBox(height: 7),
+                                        Text(
+                                          tour.description.length > 70
+                                              ? '${tour.description.substring(0, 70)}...'
+                                              : tour.description,
+                                          style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        SizedBox(height: 10),
+                                        // Hiển thị rating
+                                        Row(
+                                          children: [
+                                            Icon(Icons.star, color: Colors.amber, size: 16),
+                                            SizedBox(width: 3),
+                                            Text(
+                                              averageRating.toStringAsFixed(1),
+                                              style: TextStyle(fontWeight: FontWeight.bold),
                                             ),
-                                            padding: EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-                                          ),
-                                          onPressed: () {
-                                            print('TourId: ${tour.tourId}');
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => TourDetailScreen(tourId: tour.tourId),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              '($feedbackCount đánh giá)',
+                                              style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.calendar_today, size: 15, color: Colors.black87),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              tour.duration > 1
+                                                  ? '${tour.duration} ngày ${tour.duration - 1} đêm'
+                                                  : '${tour.duration} ngày',
+                                              style: TextStyle(fontSize: 15, color: Colors.black87),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Giá: ${formatPrice(tour.price)}',
+                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange[800]),
+                                            ),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.orange,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                padding: EdgeInsets.symmetric(horizontal: 22, vertical: 10),
                                               ),
-                                            );
-                                          },
-                                          child: Text(
-                                            'Chi tiết',
-                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
-                                          ),
+                                              onPressed: () {
+                                                print('TourId: ${tour.tourId}');
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => TourDetailScreen(tourId: tour.tourId),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text(
+                                                'Chi tiết',
+                                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         );
                       },
                     );

@@ -22,8 +22,8 @@ public class FeedbackRequestScheduler {
     private final TourScheduleRepository tourScheduleRepository;
     private final EmailService emailService;
 
-    // Chạy ngay khi khởi động và mỗi 5 phút một lần để test
-    @Scheduled(initialDelay = 1000, fixedRate = 300000)
+    // Chạy mỗi ngày một lần vào lúc 00:00
+    @Scheduled(cron = "0 0 0 * * ?")
     public void sendFeedbackRequestEmails() {
         logger.info("Starting feedback request email scheduler at {}", LocalDate.now());
         LocalDate today = LocalDate.now();
