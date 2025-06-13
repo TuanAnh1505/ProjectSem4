@@ -5,6 +5,7 @@ import '../screens/auth/change_password_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'terms_policy_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({Key? key}) : super(key: key);
@@ -222,7 +223,7 @@ class _SettingScreenState extends State<SettingScreen> {
             onPressed: () {
               Navigator.pushNamedAndRemoveUntil(
                 context,
-                '/login',
+                '/home',
                 (route) => false,
               );
             },
@@ -233,13 +234,14 @@ class _SettingScreenState extends State<SettingScreen> {
           const SizedBox(height: 24),
           Center(
             child: Column(
-              children: const [
+              children: [
                 Text(
                   'Hi VietNam',
-                  style: TextStyle(
-                    fontFamily: 'Pacifico',
+                  style: GoogleFonts.baloo2(
                     color: Colors.orange,
-                    fontSize: 24,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2.5,
                   ),
                 ),
                 SizedBox(height: 4),

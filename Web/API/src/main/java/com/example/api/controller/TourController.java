@@ -3,6 +3,7 @@ package com.example.api.controller;
 import com.example.api.dto.TourDTO;
 import com.example.api.model.Tour;
 import com.example.api.service.TourService;
+import com.example.api.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,9 @@ public class TourController {
 
     @Autowired
     private final TourService tourService;
+
+    @Autowired
+    private final FeedbackService feedbackService;
 
     @GetMapping
     public ResponseEntity<List<Tour>> getAllTours() {
@@ -103,6 +107,11 @@ public class TourController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error fetching events");
         }
+    }
+
+    @GetMapping("/{tourId}/feedback-stats")
+    public ResponseEntity<?> getTourFeedbackStats(@PathVariable Integer tourId) {
+        return ResponseEntity.ok(feedbackService.getTourFeedbackStats(tourId));
     }
 
 }

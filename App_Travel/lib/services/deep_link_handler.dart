@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../screens/auth/reset_password_screen.dart';
+import '../screens/feedback/feedback_screen.dart';
 
 class DeepLinkHandler {
   AppLinks? _appLinks;
@@ -37,6 +38,22 @@ class DeepLinkHandler {
             navigatorKey.currentState?.push(
               MaterialPageRoute(
                 builder: (context) => ResetPasswordScreen(publicId: publicId),
+              ),
+            );
+          }
+        } else if (uri.host == 'feedback') {
+          final bookingId = uri.queryParameters['bookingId'];
+          if (bookingId != null) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => FeedbackScreen(
+                  bookingId: int.parse(bookingId),
+                  bookingCode: '',
+                  tour: {},
+                  selectedDate: '',
+                  itineraries: [],
+                  finalPrice: 0,
+                ),
               ),
             );
           }

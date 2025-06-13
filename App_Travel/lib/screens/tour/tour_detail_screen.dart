@@ -37,6 +37,10 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   final ImagePicker _picker = ImagePicker();
   List<XFile> _mediaFiles = [];
   bool _isPicking = false; // Prevent double pick
+  double? averageRating;
+  int? feedbackCount;
+  bool ratingLoading = true;
+  bool showFullDescription = false;
 
   String formatPrice(num? price) {
     if (price == null) return '';
@@ -50,6 +54,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     fetchAll();
     _loadUserId();
     fetchExperiences();
+    fetchTourRating(widget.tourId);
   }
 
   @override
@@ -130,6 +135,33 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     }
   }
 
+  Future<void> fetchTourRating(int tourId) async {
+    setState(() {
+      ratingLoading = true;
+    });
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/tours/$tourId/feedback-stats'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          averageRating = (data['averageRating'] as num?)?.toDouble();
+          feedbackCount = data['feedbackCount'] as int?;
+          ratingLoading = false;
+        });
+      } else {
+        setState(() {
+          ratingLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        ratingLoading = false;
+      });
+    }
+  }
+
   void onSelectSchedule(int scheduleId) async {
     final selected = schedules.firstWhere(
       (sch) => sch['scheduleId'] == scheduleId,
@@ -147,11 +179,33 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
 
   Future<void> handleBooking() async {
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng đăng nhập để đặt tour')),
+      // Show dialog to ask user to login
+      if (!mounted) return;
+      final shouldLogin = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Đăng nhập cần thiết'),
+          content: Text('Hãy đăng nhập để có thể đặt tour. Bạn có muốn đăng nhập ngay bây giờ không?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text('Đăng nhập'),
+            ),
+          ],
+        ),
       );
+
+      if (shouldLogin == true) {
+        if (!mounted) return;
+        Navigator.pushNamed(context, '/login');
+      }
       return;
     }
+
     if (selectedScheduleId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng chọn lịch trình muốn đặt!')),
@@ -186,7 +240,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
             tour: tour!,
             selectedDate: selectedSchedule['startDate'] ?? '',
             itineraries: selectedItineraries,
-            finalPrice: booking['finalPrice'] ?? tour!.price, // Thêm finalPrice
+            finalPrice: booking['finalPrice'] ?? tour!.price,
           ),
         ),
       );
@@ -194,9 +248,34 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
       await fetchAll();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Có lỗi xảy ra khi đặt tour: ${e.toString()}')),
-        );
+        if (e.toString().contains('Hãy đăng nhập để có thể đặt tour')) {
+          // Show dialog to ask user to login
+          final shouldLogin = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Đăng nhập cần thiết'),
+              content: Text('Hãy đăng nhập để có thể đặt tour. Bạn có muốn đăng nhập ngay bây giờ không?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Hủy'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text('Đăng nhập'),
+                ),
+              ],
+            ),
+          );
+
+          if (shouldLogin == true) {
+            Navigator.pushReplacementNamed(context, '/login');
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Có lỗi xảy ra khi đặt tour: ${e.toString()}')),
+          );
+        }
       }
     } finally {
       if (mounted) {
@@ -483,16 +562,49 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       children: [
                         Icon(Icons.star, color: Colors.amber, size: 20),
                         SizedBox(width: 4),
-                        Text('4.8', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ratingLoading
+                          ? SizedBox(width: 24, height: 16, child: LinearProgressIndicator())
+                          : Text(
+                              averageRating != null ? averageRating!.toStringAsFixed(1) : '0.0',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                         SizedBox(width: 4),
-                        Text('(128 đánh giá)', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                        ratingLoading
+                          ? SizedBox.shrink()
+                          : Text(
+                              '(${feedbackCount ?? 0} đánh giá)',
+                              style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                            ),
                       ],
                     ),
                     SizedBox(height: 8),
                     // Mô tả
-                    Text(
-                      tour?.description ?? '',
-                      style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tour?.description ?? '',
+                          maxLines: showFullDescription ? null : 6,
+                          overflow: showFullDescription ? TextOverflow.visible : TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+                        ),
+                        if ((tour?.description?.length ?? 0) > 120)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                showFullDescription = !showFullDescription;
+                              });
+                            },
+                            child: Text(
+                              showFullDescription ? 'Thu gọn' : 'Xem thêm',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     SizedBox(height: 12),
                     // Giá

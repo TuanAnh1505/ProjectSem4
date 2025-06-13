@@ -66,6 +66,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
   @override
   void initState() {
     super.initState();
+    _checkAuth();
     if (_useLoggedInInfo) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadUserInfo();
@@ -392,6 +393,16 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
         setState(() {
           _isSubmitting = false;
         });
+      }
+    }
+  }
+
+  Future<void> _checkAuth() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (token == null) {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
       }
     }
   }

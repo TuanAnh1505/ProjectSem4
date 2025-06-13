@@ -15,29 +15,37 @@ class BookingService {
     final token = prefs.getString('auth_token');
     
     if (token == null) {
-      throw Exception('No token found');
+      throw Exception('Hãy đăng nhập để có thể đặt tour');
     }
 
-    final response = await http.post(
-      Uri.parse(baseUrl),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      
-      body: json.encode({
-        'userId': userId,
-        'tourId': tourId,
-        'scheduleId': scheduleId,
-        'discountCode': discountCode,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'userId': userId,
+          'tourId': tourId,
+          'scheduleId': scheduleId,
+          'discountCode': discountCode,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      final error = json.decode(response.body);
-      throw Exception(error['message'] ?? 'Failed to create booking');
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else if (response.statusCode == 401) {
+        throw Exception('Hãy đăng nhập để có thể đặt tour');
+      } else {
+        final error = json.decode(response.body);
+        throw Exception(error['message'] ?? 'Không thể tạo booking');
+      }
+    } catch (e) {
+      if (e.toString().contains('JWT expired')) {
+        throw Exception('Hãy đăng nhập để có thể đặt tour');
+      }
+      rethrow;
     }
   }
 } 
