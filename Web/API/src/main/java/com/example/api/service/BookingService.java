@@ -221,7 +221,9 @@ public class BookingService {
                 b.getTour() != null ? b.getTour().getName() : null,
                 b.getBookingDate() != null ? b.getBookingDate().toString() : null,
                 b.getStatus() != null ? b.getStatus().getStatusName() : null,
-                b.getTotalPrice())).collect(Collectors.toList());
+                b.getTotalPrice(),
+                b.getScheduleId())).collect(Collectors.toList());
+                
     }
 
     public Map<String, Object> getBookingDetail(Integer bookingId) {

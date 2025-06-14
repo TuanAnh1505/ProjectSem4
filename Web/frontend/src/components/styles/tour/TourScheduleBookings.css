@@ -1,0 +1,274 @@
+/* Wrapper & Header */
+.tour-schedule-list-wrapper, .tour-schedule-detail-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 10px 32px 10px;
+}
+.tour-header-modern {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.tour-header-modern h1 {
+  font-size: 2.2rem;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+.tour-header-modern p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Danh sách lịch trình */
+.tour-schedule-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
+}
+.tour-schedule-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+  padding: 28px 22px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: box-shadow 0.18s, transform 0.18s;
+  position: relative;
+}
+.tour-schedule-card:hover {
+  box-shadow: 0 6px 24px rgba(44,62,80,0.13);
+  transform: translateY(-4px) scale(1.01);
+}
+.tour-schedule-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.tour-schedule-icon {
+  color: #4a90e2;
+  font-size: 1.5rem;
+}
+.tour-schedule-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.98rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  background: #f0f4fa;
+  color: #2c3e50;
+}
+.tour-schedule-status.available { background: #e3fcef; color: #00a854; }
+.tour-schedule-status.full { background: #fff1f0; color: #f5222d; }
+.tour-schedule-status.cancelled { background: #f5f5f5; color: #8c8c8c; }
+.tour-schedule-status.completed { background: #e6f7ff; color: #1890ff; }
+.tour-schedule-card-body {
+  margin-bottom: 18px;
+  color: #444;
+  font-size: 1.05rem;
+  display: grid;
+  gap: 7px;
+}
+.tour-schedule-detail-btn {
+  margin-top: auto;
+  background: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.18s;
+}
+.tour-schedule-detail-btn:hover {
+  background: #357ab8;
+}
+
+/* Block trống */
+.tour-empty-block {
+  text-align: center;
+  color: #aaa;
+  background: #f8fafd;
+  border-radius: 12px;
+  padding: 36px 0 32px 0;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Trang chi tiết lịch trình */
+.tour-back-btn {
+  background: #f0f4fa;
+  color: #2c3e50;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  transition: background 0.18s;
+}
+.tour-back-btn:hover {
+  background: #e6f7ff;
+}
+.tour-schedule-detail {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+  padding: 28px 22px 22px 22px;
+  margin-bottom: 28px;
+}
+.tour-schedule-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.tour-schedule-detail-header h2 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin: 0;
+}
+.tour-schedule-detail-info {
+  color: #444;
+  font-size: 1.05rem;
+  display: grid;
+  gap: 7px;
+}
+
+/* Danh sách booking */
+.tour-booking-list {
+  margin-top: 10px;
+}
+.tour-booking-list h3 {
+  font-size: 1.15rem;
+  color: #2c3e50;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tour-booking-card {
+  background: #f8fafd;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+  padding: 18px 16px 12px 16px;
+  margin-bottom: 18px;
+}
+.tour-booking-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.tour-booking-code {
+  font-weight: 600;
+  color: #2c3e50;
+}
+.tour-booking-status {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  background: #f0f4fa;
+  color: #2c3e50;
+}
+.tour-booking-status.confirmed { background: #e3fcef; color: #00a854; }
+.tour-booking-status.pending { background: #fff7e6; color: #fa8c16; }
+.tour-booking-status.cancelled { background: #f5f5f5; color: #8c8c8c; }
+.tour-booking-card-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: #444;
+  font-size: 1.01rem;
+  margin-bottom: 10px;
+}
+
+/* Bảng hành khách */
+.tour-passenger-table-wrapper {
+  margin-top: 10px;
+}
+.tour-passenger-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+}
+.tour-passenger-header {
+  background: #f0f4fa;
+  color: #2c3e50;
+  font-weight: 600;
+}
+.tour-passenger-header th {
+  padding: 10px 8px;
+  border-bottom: 1.5px solid #e0e6ed;
+  font-size: 1rem;
+}
+.tour-passenger-row {
+  transition: background 0.15s;
+}
+.tour-passenger-row:hover {
+  background: #f6fbff;
+}
+.tour-passenger-cell {
+  padding: 8px 8px;
+  border-bottom: 1px solid #f0f4fa;
+  font-size: 0.98rem;
+  color: #34495e;
+  text-align: left;
+}
+.tour-passenger-row:last-child .tour-passenger-cell {
+  border-bottom: none;
+}
+
+/* Loading & Error */
+.tour-loading {
+  text-align: center;
+  padding: 48px 0;
+  font-size: 1.2rem;
+  color: #666;
+}
+.tour-error {
+  text-align: center;
+  padding: 48px 0;
+  color: #f5222d;
+  background: #fff1f0;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+@media (max-width: 700px) {
+  .tour-schedule-list {
+    grid-template-columns: 1fr;
+  }
+  .tour-schedule-card, .tour-schedule-detail {
+    padding: 16px 6px 16px 6px;
+  }
+  .tour-booking-card {
+    padding: 10px 4px 8px 4px;
+  }
+  .tour-passenger-table, .tour-passenger-header, .tour-passenger-row, .tour-passenger-cell {
+    font-size: 0.92rem;
+  }
+  .tour-passenger-table {
+    min-width: 400px;
+    overflow-x: auto;
+    display: block;
+  }
+} 

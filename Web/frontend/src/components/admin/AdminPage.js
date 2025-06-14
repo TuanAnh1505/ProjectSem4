@@ -14,6 +14,7 @@ import TourIndex from "./tour/TourIndex";
 import DetailDestination from "./destination/DetailDestination";
 import DetailEvent from "./event/DetailEvent";
 import DetailTour from "./tour/DetailTour";
+import TourScheduleBookings from "./tour/TourScheduleBookings";
 
 import AddItinerary from "./itinerary/AddItinerary";
 import UpdateItinerary from "./itinerary/UpdateItinerary";
@@ -71,6 +72,9 @@ const AdminPage = () => {
       }
       if (pathSegments.includes('edit')) {
         return <UpdateTour />;
+      }
+      if (pathSegments.includes('schedules')) {
+        return <TourScheduleBookings />;
       }
       return <TourIndex />;
     }
