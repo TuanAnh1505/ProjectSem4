@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'app_drawer.dart';
-import '../screens/home_screen.dart';
-import '../screens/tour/tour_screen.dart';
-import '../screens/search_screen.dart';
-import '../screens/auth/personal_page_screen.dart';
+import '../../widgets/app_drawer.dart';
+import '../../screens/home_screen.dart';
+import '../../screens/tour/tour_screen.dart';
+import '../../screens/search_screen.dart';
+import '../../screens/auth/personal_page_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 
 class AppNavigation extends StatefulWidget {
@@ -55,13 +56,13 @@ class _AppNavigationState extends State<AppNavigation> {
           : AppBar(
               leading: null,
               title: _selectedIndex == 0
-                  ? const Text(
-                      'Hi Vietnam',
-                      style: TextStyle(
-                        fontFamily: 'Pacifico',
+                  ? Text(
+                      'Hi VietNam',
+                      style: GoogleFonts.baloo2(
                         color: Colors.orange,
-                        fontSize: 30,
-                        fontWeight: FontWeight.normal,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2.5,
                       ),
                     )
                   : _selectedIndex == 1
@@ -89,12 +90,7 @@ class _AppNavigationState extends State<AppNavigation> {
                     ]
                   : null,
             ),
-      drawer: _selectedIndex == 0
-          ? AppDrawer(
-              userName: widget.userName,
-              userRole: widget.userRole,
-            )
-          : null,
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           Expanded(child: _buildBody()),

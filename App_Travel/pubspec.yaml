@@ -19,6 +19,9 @@ dependencies:
   font_awesome_flutter: ^10.6.0
   flutter_carousel_widget: ^2.2.0
   diacritic: ^0.1.3
+  image_picker: ^1.0.4
+  path: ^1.8.3
+  google_fonts: ^6.1.0
 
 
 dev_dependencies:
@@ -27,15 +30,28 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   build_runner: ^2.4.6
   json_serializable: ^6.7.1
+  flutter_native_splash: ^2.3.2
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   assets:
     - assets/images/
     - assets/images/logo.png
-  fonts:
-    - family: Pacifico
-      fonts:
-        - asset: assets/fonts/Pacifico-Regular.ttf
+  
+
 
   uses-material-design: true
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/images/logo2.png
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo2.png"
 

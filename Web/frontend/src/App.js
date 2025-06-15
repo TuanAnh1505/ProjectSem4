@@ -21,6 +21,9 @@ import Payment from './pages/Payment';
 import UpdateInfoUser from './components/auth/UpdateInfoUser';
 import './App.css';
 import BookingConfirmation from './components/booking/BookingConfirmation';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Feedback from './components/feedback/Feedback';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -53,6 +56,7 @@ const App = () => {
   return (
     <Router>
       <div>
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         <Routes>
           {/* Tourism-related routes */}
           <Route path="/" element={
@@ -75,6 +79,11 @@ const App = () => {
               <TourDashboard />
             </Layout>
           } />
+          <Route path="/tour-dashboard/detail/:tourId" element={
+            <Layout>
+              <TourDetailDashboard />
+            </Layout>
+          } />
           <Route path="/offers" element={
             <Layout>
               <Home />
@@ -85,34 +94,33 @@ const App = () => {
               <Home />
             </Layout>
           } />
+
+          {/* Protected routes that require authentication */}
           <Route path="/booking-passenger" element={
             <Layout>
-              <BookingPassenger />
+              <ProtectedRoute element={<BookingPassenger />} />
             </Layout>
           } />
-          <Route path="/tour-dashboard/detail/:tourId" element={
-            <Layout>
-              <TourDetailDashboard />
-            </Layout>
-          } />
-
-          <Route path="/update-user-info" element={
-            <Layout>
-              <UpdateInfoUser />
-            </Layout>
-          } />
-
           <Route path="/booking-confirmation" element={
             <Layout>
-              <BookingConfirmation />
+              <ProtectedRoute element={<BookingConfirmation />} />
             </Layout>
           } />
-
-          {/* <Route path="/account/:publicId" element={
+          <Route path="/momo-payment" element={
             <Layout>
-              <UserProfile />
+              <ProtectedRoute element={<MomoPaymentPage />} />
             </Layout>
-          } /> */}
+          } />
+          <Route path="/payment/:bookingId" element={
+            <Layout>
+              <ProtectedRoute element={<Payment />} />
+            </Layout>
+          } />
+          <Route path="/feedback" element={
+            <Layout>
+              <ProtectedRoute element={<Feedback />} />
+            </Layout>
+          } />
 
           {/* Authentication and user routes */}
           <Route path="/login" element={<Login />} />
@@ -311,6 +319,18 @@ const App = () => {
             path="/admin/payments"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
+          {/* Experience */}
+          <Route
+            path="/admin/experience"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          <Route
+            path="/admin/feedback"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          <Route path="/feedback" element={<Feedback />} />
         </Routes>
       </div>
     </Router>

@@ -55,7 +55,8 @@ public class BookingService {
 
             // Find and validate user
             User user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
 
             // Find and validate tour
             Tour tour = tourRepository.findById(request.getTourId())
@@ -67,7 +68,7 @@ public class BookingService {
                 throw new RuntimeException("Không tìm thấy lịch trình với ID: " + request.getScheduleId());
             }
             TourSchedule schedule = scheduleOpt.get();
-            
+
             // Validate schedule belongs to tour
             if (!schedule.getTourId().equals(tour.getTourId())) {
                 throw new RuntimeException("Lịch trình không thuộc tour này!");
@@ -79,8 +80,9 @@ public class BookingService {
             }
 
             // Count current participants for this schedule
-            long currentParticipants = bookingRepository.countByScheduleIdAndStatus_StatusName(request.getScheduleId(), "CONFIRMED");
-            
+            long currentParticipants = bookingRepository.countByScheduleIdAndStatus_StatusName(request.getScheduleId(),
+                    "CONFIRMED");
+
             // Check if schedule is full based on tour's maxParticipants
             if (currentParticipants >= tour.getMaxParticipants()) {
                 schedule.setStatus(TourSchedule.Status.full);
@@ -94,7 +96,8 @@ public class BookingService {
             Discount discount = null;
             if (request.getDiscountCode() != null && !request.getDiscountCode().isBlank()) {
                 discount = discountRepository.findByCode(request.getDiscountCode())
-                        .orElseThrow(() -> new RuntimeException("Mã giảm giá không hợp lệ: " + request.getDiscountCode()));
+                        .orElseThrow(
+                                () -> new RuntimeException("Mã giảm giá không hợp lệ: " + request.getDiscountCode()));
 
                 if (LocalDateTime.now().isBefore(discount.getStartDate()) ||
                         LocalDateTime.now().isAfter(discount.getEndDate())) {
@@ -105,7 +108,8 @@ public class BookingService {
                         user.getUserid(), discount.getDiscountId(), tour.getTourId());
 
                 if (used) {
-                    throw new RuntimeException("Bạn đã sử dụng mã giảm giá này cho tour này: " + request.getDiscountCode());
+                    throw new RuntimeException(
+                            "Bạn đã sử dụng mã giảm giá này cho tour này: " + request.getDiscountCode());
                 }
 
                 BigDecimal discountAmount = price.multiply(BigDecimal.valueOf(discount.getDiscountPercent()))
@@ -119,9 +123,8 @@ public class BookingService {
 
             // Kiểm tra booking PENDING đã tồn tại cho user/tour/schedule
             Optional<Booking> existingPending = bookingRepository
-                .findByUser_UseridAndTour_TourIdAndScheduleIdAndStatus_StatusName(
-                    request.getUserId(), request.getTourId(), request.getScheduleId(), "PENDING"
-                );
+                    .findByUser_UseridAndTour_TourIdAndScheduleIdAndStatus_StatusName(
+                            request.getUserId(), request.getTourId(), request.getScheduleId(), "PENDING");
 
             Booking booking;
             if (existingPending.isPresent()) {
@@ -160,26 +163,27 @@ public class BookingService {
             } else {
                 // Tạo booking mới như hiện tại
                 booking = new Booking();
-            booking.setUser(user);
-            booking.setTour(tour);
-            booking.setScheduleId(request.getScheduleId());
-            booking.setBookingDate(LocalDateTime.now());
-            booking.setTotalPrice(price);
-            booking.setStatus(status);
+                booking.setUser(user);
+                booking.setTour(tour);
+                booking.setScheduleId(request.getScheduleId());
+                booking.setBookingDate(LocalDateTime.now());
+                booking.setTotalPrice(price);
+                booking.setStatus(status);
                 if (discount != null) {
                     booking.setDiscountCode(discount.getCode());
                     booking.setDiscountId(discount.getDiscountId());
                 }
-            String bookingCode;
-            do {
-                bookingCode = generateBookingCode();
-            } while (bookingRepository.existsByBookingCode(bookingCode));
-            booking.setBookingCode(bookingCode);
+                String bookingCode;
+                do {
+                    bookingCode = generateBookingCode();
+                } while (bookingRepository.existsByBookingCode(bookingCode));
+                booking.setBookingCode(bookingCode);
             }
             Booking saved = bookingRepository.save(booking);
 
             // Update schedule status if needed
-            long updatedParticipants = bookingRepository.countByScheduleIdAndStatus_StatusName(request.getScheduleId(), "CONFIRMED");
+            long updatedParticipants = bookingRepository.countByScheduleIdAndStatus_StatusName(request.getScheduleId(),
+                    "CONFIRMED");
             if (updatedParticipants >= tour.getMaxParticipants()) {
                 schedule.setStatus(TourSchedule.Status.full);
                 tourScheduleRepository.save(schedule);
@@ -214,6 +218,7 @@ public class BookingService {
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> bookingDetails = new HashMap<>();
         bookingDetails.put("bookingId", booking.getBookingId());
+        bookingDetails.put("bookingCode", booking.getBookingCode());
         bookingDetails.put("bookingDate", booking.getBookingDate());
         bookingDetails.put("totalPrice", booking.getTotalPrice());
         bookingDetails.put("scheduleId", booking.getScheduleId());
@@ -248,6 +253,8 @@ public class BookingService {
             tourDetails.put("tourId", booking.getTour().getTourId());
             tourDetails.put("name", booking.getTour().getName());
             tourDetails.put("price", booking.getTour().getPrice());
+            tourDetails.put("imageUrl", booking.getTour().getImageUrl());
+            tourDetails.put("description", booking.getTour().getDescription());
             bookingDetails.put("tour", tourDetails);
         }
 
@@ -280,12 +287,12 @@ public class BookingService {
 
     public Booking getBookingById(Integer id) {
         return bookingRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
     }
 
     public List<Map<String, Object>> getBookingsByUserPublicId(String publicId) {
         var user = userRepository.findByPublicId(publicId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
         List<Booking> bookings = bookingRepository.findAllByUser_Userid(user.getUserid());
         // Sắp xếp theo bookingDate giảm dần
         bookings.sort((a, b) -> b.getBookingDate().compareTo(a.getBookingDate()));
@@ -312,7 +319,9 @@ public class BookingService {
             map.put("status", b.getStatus() != null ? b.getStatus().getStatusName() : null);
             // Lấy trạng thái payment
             var payments = paymentRepository.findByBooking_BookingId(b.getBookingId());
-            String paymentStatus = payments != null && !payments.isEmpty() && payments.get(0).getStatus() != null ? payments.get(0).getStatus().getStatusName() : "PENDING";
+            String paymentStatus = payments != null && !payments.isEmpty() && payments.get(0).getStatus() != null
+                    ? payments.get(0).getStatus().getStatusName()
+                    : "PENDING";
             map.put("paymentStatus", paymentStatus);
             result.add(map);
         }
@@ -339,4 +348,3 @@ public class BookingService {
         return code.toString();
     }
 }
-
