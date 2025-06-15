@@ -1,6 +1,7 @@
 package com.example.api.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import com.example.api.repository.TourScheduleRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,7 @@ public class TourScheduleService {
     private final TourScheduleRepository repository;
     private final BookingRepository bookingRepository;
     private final TourRepository tourRepository;
+    private final EmailService emailService;
 
     @Transactional
     public TourScheduleDTO create(TourScheduleDTO dto) {
@@ -170,6 +173,63 @@ public class TourScheduleService {
             logger.info("Schedule remains available. Total participants ({}) < max participants ({})",
                     totalParticipants, tour.getMaxParticipants());
         }
+    }
+
+    @Scheduled(cron = "0 0 6 * * ?")
+    @Transactional
+    public void sendTourReminders() {
+        logger.info("Bắt đầu gửi email nhắc nhở tour (1 ngày trước khi khởi hành)");
+        LocalDate oneDayLater = LocalDate.now().plusDays(1);
+
+        // Find all schedules starting in 1 day
+        List<TourSchedule> schedules = repository.findByStartDate(oneDayLater);
+        logger.info("Tìm thấy {} lịch trình tour sẽ khởi hành sau 1 ngày (ngày {})",
+                schedules.size(), oneDayLater.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
+        for (TourSchedule schedule : schedules) {
+            try {
+                // Get all confirmed bookings for this schedule
+                List<Booking> confirmedBookings = bookingRepository
+                        .findConfirmedBookingsForSchedule(schedule.getScheduleId());
+                logger.info("Lịch trình tour ID {}: Tìm thấy {} booking đã xác nhận",
+                        schedule.getScheduleId(), confirmedBookings.size());
+
+                // Get tour details
+                Tour tour = tourRepository.findById(schedule.getTourId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin tour"));
+
+                // Send reminder email to each booking
+                for (Booking booking : confirmedBookings) {
+                    try {
+                        String userName = booking.getUser().getFullName();
+                        String userEmail = booking.getUser().getEmail();
+                        String tourName = tour.getName();
+                        String startDate = schedule.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        String endDate = schedule.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        String tourDetails = tour.getDescription() != null ? tour.getDescription()
+                                : "Không có thông tin chi tiết";
+
+                        emailService.sendTourReminderEmail(
+                                userEmail,
+                                userName,
+                                tourName,
+                                startDate,
+                                endDate,
+                                tourDetails);
+                        logger.info(
+                                "Đã gửi email nhắc nhở cho khách hàng {} (email: {}) - Tour: {} - Khởi hành ngày {}",
+                                userName, userEmail, tourName, startDate);
+                    } catch (Exception e) {
+                        logger.error("Không thể gửi email nhắc nhở cho booking ID {}: {}",
+                                booking.getBookingId(), e.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Lỗi khi xử lý lịch trình tour ID {}: {}",
+                        schedule.getScheduleId(), e.getMessage());
+            }
+        }
+        logger.info("Hoàn thành việc gửi email nhắc nhở tour");
     }
 
     private void validateDates(TourScheduleDTO dto) {

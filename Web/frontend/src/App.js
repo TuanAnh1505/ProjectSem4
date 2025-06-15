@@ -240,7 +240,15 @@ const App = () => {
               element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
             />
             <Route
+              path="/admin/tour/schedules/:tourId"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+            />
+            <Route
               path="/admin/tour/:tourId"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+            />
+            <Route
+              path="/admin/tour/schedules/:tourId/:scheduleId"
               element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
             />
 
