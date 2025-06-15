@@ -7,6 +7,7 @@ import com.example.api.repository.TourGuideRepository;
 import com.example.api.repository.UserRepository;
 import com.example.api.repository.RoleRepository;
 import com.example.api.model.Role;
+import com.example.api.repository.UserRoleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,9 @@ public class TourGuideService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
     public TourGuideDTO createTourGuide(TourGuideDTO tourGuideDTO) {
         // Check if current user has ADMIN role
@@ -63,10 +68,12 @@ public class TourGuideService {
         TourGuide savedTourGuide = tourGuideRepository.save(tourGuide);
 
         // Gán role hướng dẫn viên nếu chưa có
-        Role guideRole = roleRepository.findByRoleName("ROLE_TOUR_GUIDE");
-        if (guideRole != null && !user.getRoles().contains(guideRole)) {
+        Role guideRole = roleRepository.findByRoleName("GUIDE");
+        if (guideRole != null && user.getRoles().stream().noneMatch(r -> r.getRoleName().equalsIgnoreCase("GUIDE"))) {
             user.getRoles().add(guideRole);
             userRepository.save(user);
+            // Bổ sung: luôn lưu vào userroles
+            userRoleRepository.save(new com.example.api.model.UserRole(user.getUserid(), guideRole.getRoleid()));
         }
 
         return convertToDTO(savedTourGuide);
@@ -181,6 +188,19 @@ public class TourGuideService {
                 .filter(tg -> (isAvailable == null || tg.getIsAvailable() == isAvailable))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    public TourGuideDTO createTourGuideForUser(Long userId, Integer experienceYears, String specialization, String languages) {
+        TourGuide guide = new TourGuide();
+        guide.setUserId(userId);
+        guide.setExperienceYears(experienceYears);
+        guide.setSpecialization(specialization);
+        guide.setLanguages(languages);
+        guide.setIsAvailable(true);
+        guide.setRating(0.0);
+        guide.setCreatedAt(LocalDateTime.now());
+        guide = tourGuideRepository.save(guide);
+        return convertToDTO(guide);
     }
 
     private TourGuideDTO convertToDTO(TourGuide tourGuide) {

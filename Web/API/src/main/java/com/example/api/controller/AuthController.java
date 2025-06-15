@@ -39,7 +39,7 @@ public class AuthController {
             user.setIsActive(false);
             userService.saveUser(user);
 
-            emailService.sendActivationEmail(user.getEmail(), user.getPublicId(), Boolean.TRUE.equals(registerRequest.getIsApp()));
+            emailService.sendActivationEmail(user.getEmail(), user.getPublicId(), Boolean.TRUE.equals(registerRequest.getIsApp()), false);
 
             return ResponseEntity.ok("Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.");
         } catch (IllegalArgumentException e) {

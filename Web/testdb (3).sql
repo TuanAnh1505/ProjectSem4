@@ -621,7 +621,6 @@ INSERT INTO `tour_events` (`tour_id`, `event_id`) VALUES
 
 CREATE TABLE `tour_guides` (
   `guide_id` int(11) NOT NULL,
-  `user_id` bigint(20) NOT NULL,
   `experience_years` int(11) NOT NULL,
   `specialization` varchar(255) NOT NULL,
   `languages` varchar(255) NOT NULL,
@@ -677,7 +676,7 @@ INSERT INTO `tour_itinerary` (`itinerary_id`, `schedule_id`, `title`, `descripti
 (8, 5, 'Khám phá thung lũng Mường Hoa', 'Tham quan ruộng bậc thang và di tích đá cổ', '13:00:00', '15:30:00', 'DESTINATION'),
 (9, 7, 'Đêm nhạc Hội An phố cổ', 'Chương trình nghệ thuật đặc sắc tái hiện văn hóa xưa', '19:00:00', '21:00:00', 'EVENT'),
 (14, 9, 'g', 'f', '11:11:00', '23:11:00', 'MEAL'),
-(15, 12, 'a', '08:00: Đón khách tại khách sạn – Khởi đầu một ngày mới tràn đầy năng lượng Xe và hướng dẫn viên đến đón bạn tại khách sạn trong trung tâm thành phố. Chỉ vài phút sau, bạn đã rời xa phố xá ồn ào để đến điểm xuất phát. Nơi mà hành trình “hít thở thật sâu” chính thức bắt đầu.', '18:01:00', '22:00:00', 'DESTINATION');
+(15, 12, 'a', '08:00: Đón khách tại khách sạn – Khởi đầu một ngày mới tràn đầy năng lượng Xe và hướng dẫn viên đến đón bạn tại khách sạn trong trung tâm thành phố. Chỉ vài phút sau, bạn đã rời xa phố xá ồn ào để đến điểm xuất phát. Nơi mà hành trình "hít thở thật sâu" chính thức bắt đầu.', '18:01:00', '22:00:00', 'DESTINATION');
 
 -- --------------------------------------------------------
 
@@ -1007,8 +1006,7 @@ ALTER TABLE `tour_events`
 --
 ALTER TABLE `tour_guides`
   ADD PRIMARY KEY (`guide_id`),
-  ADD UNIQUE KEY `UK_heivp9fqmiwskkog40ikipns8` (`userid`),
-  ADD KEY `fk_guide_user` (`user_id`);
+  ADD UNIQUE KEY `UK_heivp9fqmiwskkog40ikipns8` (`userid`);
 
 --
 -- Chỉ mục cho bảng `tour_guide_assignments`
@@ -1347,8 +1345,7 @@ ALTER TABLE `tour_events`
 -- Các ràng buộc cho bảng `tour_guides`
 --
 ALTER TABLE `tour_guides`
-  ADD CONSTRAINT `FKe77mlqfo649eeehhwvrgmaxvy` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`),
-  ADD CONSTRAINT `fk_guide_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
+  ADD CONSTRAINT `FKe77mlqfo649eeehhwvrgmaxvy` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`);
 
 --
 -- Các ràng buộc cho bảng `tour_guide_assignments`
