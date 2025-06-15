@@ -54,7 +54,7 @@ public class EmailService {
             helper.setText(htmlContent, true); // true để gửi HTML
             if (isGuide) {
                 helper.setSubject("Kích hoạt tài khoản Hướng dẫn viên - TravelTour");
-                String htmlContent = "<p>Xin chào,</p>"
+                htmlContent = "<p>Xin chào,</p>"
                         + "<p>Chúc mừng bạn đã được admin tạo tài khoản hướng dẫn viên tại TravelTour.</p>"
                         + "<p>Vui lòng kích hoạt tài khoản để bắt đầu sử dụng các chức năng dành cho hướng dẫn viên.</p>"
                         + "<ul>";
@@ -69,7 +69,7 @@ public class EmailService {
                 helper.setText(htmlContent, true);
             } else {
                 helper.setSubject("Kích hoạt tài khoản TravelTour");
-                String htmlContent = "<p>Xin chào,</p>"
+                htmlContent = "<p>Xin chào,</p>"
                         + "<p>Cảm ơn bạn đã đăng ký tài khoản tại TravelTour.</p>"
                         + "<p>Bạn có thể kích hoạt tài khoản bằng:</p>"
                         + "<ul>";
