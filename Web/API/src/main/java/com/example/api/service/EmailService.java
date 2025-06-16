@@ -4,6 +4,7 @@ import com.example.api.model.Booking;
 import com.example.api.model.BookingPassenger;
 import com.example.api.model.Payment;
 import com.example.api.model.User;
+import com.example.api.dto.TourItineraryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import java.util.List;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class EmailService {
@@ -265,6 +267,64 @@ public class EmailService {
                         </html>
                         """,
                 userName, tourName, startDate, endDate, startDate, tourDetails);
+        sendHtmlEmail(to, subject, content);
+    }
+
+    public void sendTourItineraryEmail(String to, String userName, String tourName, String startDate, 
+            String endDate, List<TourItineraryDTO> itineraries) {
+        String subject = "Chi tiết lịch trình tour " + tourName;
+        
+        StringBuilder itineraryHtml = new StringBuilder();
+        for (TourItineraryDTO itinerary : itineraries) {
+            itineraryHtml.append("<div style='margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;'>")
+                    .append("<h3 style='color: #1976d2; margin-top: 0;'>").append(itinerary.getTitle()).append("</h3>")
+                    .append("<p><strong>Thời gian:</strong> ")
+                    .append(itinerary.getStartTime() != null ? itinerary.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) : "N/A")
+                    .append(" - ")
+                    .append(itinerary.getEndTime() != null ? itinerary.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")) : "N/A")
+                    .append("</p>")
+                    .append("<p><strong>Loại hoạt động:</strong> ").append(itinerary.getType()).append("</p>")
+                    .append("<p><strong>Mô tả:</strong> ").append(itinerary.getDescription()).append("</p>")
+                    .append("</div>");
+        }
+
+        String content = String.format(
+                """
+                <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #1976d2;">Xin chào %s,</h2>
+                        <p>Tour <strong>%s</strong> của bạn sẽ bắt đầu vào ngày <strong>%s</strong> và kết thúc vào ngày <strong>%s</strong>.</p>
+                        
+                        <div style="background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="color: #17a2b8; margin-top: 0;">Chi tiết lịch trình:</h3>
+                            %s
+                        </div>
+
+                        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="color: #856404; margin-top: 0;">Lưu ý quan trọng:</h3>
+                            <ul>
+                                <li>Vui lòng đến đúng điểm hẹn trước giờ khởi hành</li>
+                                <li>Mang theo giấy tờ tùy thân (CMND/CCCD/Hộ chiếu)</li>
+                                <li>Chuẩn bị đồ dùng cá nhân cần thiết</li>
+                                <li>Tuân thủ các quy định và hướng dẫn của hướng dẫn viên</li>
+                            </ul>
+                        </div>
+
+                        <p>Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua:</p>
+                        <ul>
+                            <li>Hotline: 1900 xxxx</li>
+                            <li>Email: support@traveltour.com</li>
+                        </ul>
+
+                        <p>Chúc bạn có một chuyến đi thú vị!</p>
+                        <p>Trân trọng,<br>Đội ngũ TravelTour</p>
+                    </div>
+                </body>
+                </html>
+                """,
+                userName, tourName, startDate, endDate, itineraryHtml.toString());
+        
         sendHtmlEmail(to, subject, content);
     }
 }
