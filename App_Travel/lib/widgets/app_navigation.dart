@@ -83,7 +83,7 @@ class _AppNavigationState extends State<AppNavigation> {
                         icon: const Icon(Icons.person, color: Colors.orange),
                         onPressed: () {
                           setState(() {
-                            _selectedIndex = 4; // Chuyển sang tab tài khoản
+                            _selectedIndex = 3; // Chuyển sang tab tài khoản
                           });
                         },
                       ),
@@ -98,6 +98,9 @@ class _AppNavigationState extends State<AppNavigation> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        iconSize: 32,
+        selectedFontSize: 12,
+        unselectedFontSize: 11,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -110,10 +113,6 @@ class _AppNavigationState extends State<AppNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.flight_takeoff),
             label: 'Tour',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Yêu thích',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -150,9 +149,8 @@ class _AppNavigationState extends State<AppNavigation> {
             });
           },
         );
+      
       case 3:
-        return const Center(child: Text('Yêu thích'));
-      case 4:
         return const PersonalPageScreen(
           showAppBar: false,
         );

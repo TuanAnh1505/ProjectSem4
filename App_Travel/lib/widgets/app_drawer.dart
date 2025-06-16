@@ -113,7 +113,7 @@ class AppDrawer extends StatelessWidget {
                   title: const Text('Cài đặt'),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, '/settings');
+                    Navigator.pushReplacementNamed(context, '/setting-screen');
                   },
                 ),
                 ListTile(

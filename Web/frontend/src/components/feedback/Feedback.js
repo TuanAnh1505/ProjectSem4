@@ -83,7 +83,7 @@ function FeedbackForm({ bookingId, tourId, onSubmit, loading, bookingUserEmail }
           onChange={e => setMessage(e.target.value)}
           rows={7}
           style={{
-            width: "100%",
+            width: "93%",
             fontSize: 16,
             padding: 14,
             borderRadius: 10,
@@ -142,6 +142,7 @@ function Feedback() {
   const [passengers, setPassengers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [scheduleDetail, setScheduleDetail] = useState(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   useEffect(() => {
     async function fetchBooking() {
@@ -249,7 +250,36 @@ function Feedback() {
         <h2 style={{textAlign:'center',marginBottom:18,fontWeight:700,fontSize:26,letterSpacing:1}}>Gửi đánh giá cho booking #{booking.bookingCode}</h2>
         <div style={{display:'grid',gridTemplateColumns:'1fr',rowGap:8,fontSize:16,marginBottom:18}}>
           <div><b>Tour:</b> <span style={{color:'#1976d2'}}>{booking.tour?.name}</span></div>
-          <div><b>Mô tả:</b> <span style={{color:'#444'}}>{booking.tour?.description}</span></div>
+          <div>
+            <b>Mô tả:</b> 
+            <div style={{
+              color: '#444',
+              display: '-webkit-box',
+              WebkitLineClamp: showFullDescription ? 'unset' : 6,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              marginTop: 4
+            }}>
+              {booking.tour?.description}
+            </div>
+            {booking.tour?.description && booking.tour.description.length > 200 && (
+              <button
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#1976d2',
+                  cursor: 'pointer',
+                  padding: '4px 0',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  marginTop: 4
+                }}
+              >
+                {showFullDescription ? 'Thu gọn' : 'Xem thêm'}
+              </button>
+            )}
+          </div>
           <div><b>Ngày đặt:</b> {booking.bookingDate && new Date(booking.bookingDate).toLocaleString()}</div>
           <div><b>Giá:</b> <span style={{color:'#388e3c'}}>{booking.totalPrice?.toLocaleString()} VND</span></div>
           <div><b>Trạng thái:</b> {booking.status?.statusName}</div>

@@ -405,8 +405,18 @@ export default function TourDetailDashboard() {
                         <div style={{ fontWeight: 600, color: '#1976d2' }}>Ngày {i + 1}: {itinerary.title}</div>
                         {itinerary.startTime && <div><b>Giờ bắt đầu:</b> {formatTime(itinerary.startTime)}</div>}
                         {itinerary.endTime && <div><b>Giờ kết thúc:</b> {formatTime(itinerary.endTime)}</div>}
-                        {itinerary.description && <div><b>Mô tả:</b> {itinerary.description}</div>}
-                        {itinerary.type && <div><b>Loại:</b> {itinerary.type}</div>}
+                        {itinerary.description && (
+                          <div>
+                            <b>Mô tả:</b>
+                            <span
+                              style={{ whiteSpace: 'pre-line' }}
+                              dangerouslySetInnerHTML={{
+                                __html: itinerary.description.replace(/(\(?\d{2}:\d{2}\s*[–-]\s*\d{2}:\d{2}\)?)/g, match => `<b>${match}</b>`)
+                              }}
+                            />
+                          </div>
+                        )}
+                        {/* {itinerary.type && <div><b>Loại:</b> {itinerary.type}</div>} */}
                       </li>
                     ))}
                   </ul>

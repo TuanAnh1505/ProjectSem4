@@ -57,6 +57,11 @@ const Header = () => {
               <li>
                 <Link to="/tour-dashboard">Tour booking</Link>
               </li>
+              {isAuthenticated && userRole === 'GUIDE' && (
+                <li>
+                  <Link to="/guide/dashboard">Guide Dashboard</Link>
+                </li>
+              )}
               {isAuthenticated && userRole === 'ADMIN' && (
                 <li>
                   <Link to="/admin/about">Admin Dashboard</Link>
