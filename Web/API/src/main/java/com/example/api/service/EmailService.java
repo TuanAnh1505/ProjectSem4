@@ -24,7 +24,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender emailSender;
 
-    public void sendActivationEmail(String to, String publicId, boolean isApp) {
+    public void sendActivationEmail(String to, String publicId, boolean isApp, boolean isGuide) {
         logger.info("Preparing to send activation email to: {}", to);
         try {
             String webLink = "http://localhost:3000/activate?publicId=" + publicId;
@@ -35,20 +35,56 @@ public class EmailService {
             helper.setTo(to);
             helper.setSubject("Kích hoạt tài khoản TravelTour");
 
-            String htmlContent = "<p>Xin chào,</p>"
-                    + "<p>Cảm ơn bạn đã đăng ký tài khoản tại TravelTour.</p>"
-                    + "<p>Bạn có thể kích hoạt tài khoản bằng:</p>"
-                    + "<ul>";
-            if (isApp) {
-                htmlContent += "<li><b>Trên app:</b> <a href=\"" + appLink + "\">Kích hoạt tài khoản trên app</a></li>";
-            } else {
-                htmlContent += "<li><b>Trên web:</b> <a href=\"" + webLink + "\">Kích hoạt tài khoản trên web</a></li>";
-            }
-            htmlContent += "</ul>"
-                    + "<p>Liên kết này sẽ hết hạn sau 24 giờ.</p>"
-                    + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
+            String htmlContent = "<div style='max-width:600px;margin:0 auto;padding:32px 24px;background:#fff;border-radius:10px;font-family:Segoe UI,Arial,sans-serif;color:#222;'>"
+                    +
+                    "<h2 style='font-size:2rem;font-weight:700;margin-bottom:18px;'>Xin chào,</h2>" +
+                    "<p style='font-size:1.1rem;margin-bottom:10px;'>Cảm ơn bạn đã đăng ký tài khoản tại <b>TravelTour</b>.</p>"
+                    +
+                    "<p style='font-size:1.1rem;margin-bottom:24px;'>Bạn có thể kích hoạt tài khoản bằng cách nhấn vào nút dưới đây:</p>"
+                    +
+                    "<div style='margin:32px 0 28px 0;text-align:left;'>" +
+                    "<a href='" + webLink
+                    + "' style='display:inline-block;padding:12px 28px;background:#2196f3;color:#fff;text-decoration:none;border-radius:8px;font-size:1.1rem;font-weight:600;'>Kích hoạt tài khoản</a>"
+                    +
+                    "</div>" +
+                    "<p style='color:#444;font-size:1rem;margin-bottom:32px;'>Liên kết này sẽ hết hạn sau 24 giờ.</p>" +
+                    "<div style='margin-top:40px;color:#444;font-size:1rem;'>" +
+                    "Trân trọng,<br>Đội ngũ TravelTour" +
+                    "</div>" +
+                    "</div>";
 
-            helper.setText(htmlContent, true);
+            helper.setText(htmlContent, true); // true để gửi HTML
+            if (isGuide) {
+                helper.setSubject("Kích hoạt tài khoản Hướng dẫn viên - TravelTour");
+                htmlContent = "<p>Xin chào,</p>"
+                        + "<p>Chúc mừng bạn đã được admin tạo tài khoản hướng dẫn viên tại TravelTour.</p>"
+                        + "<p>Vui lòng kích hoạt tài khoản để bắt đầu sử dụng các chức năng dành cho hướng dẫn viên.</p>"
+                        + "<ul>";
+                if (isApp) {
+                    htmlContent += "<li><b>Trên app:</b> <a href=\"" + appLink + "\">Kích hoạt tài khoản trên app</a></li>";
+                } else {
+                    htmlContent += "<li><b>Trên web:</b> <a href=\"" + webLink + "\">Kích hoạt tài khoản trên web</a></li>";
+                }
+                htmlContent += "</ul>"
+                        + "<p>Liên kết này sẽ hết hạn sau 24 giờ.</p>"
+                        + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
+                helper.setText(htmlContent, true);
+            } else {
+                helper.setSubject("Kích hoạt tài khoản TravelTour");
+                htmlContent = "<p>Xin chào,</p>"
+                        + "<p>Cảm ơn bạn đã đăng ký tài khoản tại TravelTour.</p>"
+                        + "<p>Bạn có thể kích hoạt tài khoản bằng:</p>"
+                        + "<ul>";
+                if (isApp) {
+                    htmlContent += "<li><b>Trên app:</b> <a href=\"" + appLink + "\">Kích hoạt tài khoản trên app</a></li>";
+                } else {
+                    htmlContent += "<li><b>Trên web:</b> <a href=\"" + webLink + "\">Kích hoạt tài khoản trên web</a></li>";
+                }
+                htmlContent += "</ul>"
+                        + "<p>Liên kết này sẽ hết hạn sau 24 giờ.</p>"
+                        + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
+                helper.setText(htmlContent, true);
+            }
             emailSender.send(mimeMessage);
             logger.info("Successfully sent activation email to: {}", to);
         } catch (Exception e) {
@@ -221,7 +257,7 @@ public class EmailService {
         sendHtmlEmail(to, subject, content);
     }
 
-    public void sendTourReminderEmail(String to, String userName, String tourName, String startDate, 
+    public void sendTourReminderEmail(String to, String userName, String tourName, String startDate,
             String endDate, String tourDetails) {
         String subject = "Nhắc nhở: Tour " + tourName + " sẽ bắt đầu sau 2 ngày";
         String content = String.format(

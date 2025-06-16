@@ -115,20 +115,6 @@ const Home = () => {
       {/* Live Fully Text Centered Between Banner and Video */}
       <div className={styles.liveFullyText}>LIVE FULLY IN VIETNAM</div>
 
-      {/* Hero Video Section */}
-      <section className={styles.heroVideoSection}>
-        <div className={styles.heroVideoWrapper}>
-          <iframe
-            src="https://www.youtube.com/embed/04Kf_0kppPM?autoplay=1&mute=1&controls=0&loop=1&playlist=04Kf_0kppPM"
-            title="Vietnam Hero Video"
-            frameBorder="0"
-            allow="autoplay; encrypted-media"
-            allowFullScreen
-            className={styles.heroVideo}
-          ></iframe>
-          <div className={styles.heroOverlay}></div>
-        </div>
-      </section>
 
       {/* Tour List Section */}
       <section className={styles.tourSection}>

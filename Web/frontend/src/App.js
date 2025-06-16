@@ -4,7 +4,6 @@ import Home from './components/VietnamTourism/index';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import PlacesToGo from './components/PlaceToGo/PlaceToGo';
-import ThingsToDo from './components/ThingToDo/ThingsToDo';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ActivateAccount from './components/auth/ActivateAccount';
@@ -73,11 +72,6 @@ const App = () => {
           <Route path="/places-to-go" element={
             <Layout>
               <PlacesToGo />
-            </Layout>
-          } />
-          <Route path="/things-to-do" element={
-            <Layout>
-              <ThingsToDo />
             </Layout>
           } />
           <Route path="/tour-dashboard" element={

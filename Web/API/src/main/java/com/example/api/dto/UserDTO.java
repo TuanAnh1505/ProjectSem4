@@ -11,9 +11,10 @@ public class UserDTO {
     private String address;
     private boolean isActive;
     private LocalDateTime createdAt;
+    private boolean isGuide;
 
     public UserDTO(String publicId, String fullName, String email, String phone, String address, boolean isActive,
-            LocalDateTime createdAt) {
+            LocalDateTime createdAt, boolean isGuide) {
         // this.userid = userid;
         this.publicId = publicId;
         this.fullName = fullName;
@@ -22,6 +23,7 @@ public class UserDTO {
         this.address = address;
         this.isActive = isActive;
         this.createdAt = createdAt;
+        this.isGuide = isGuide;
     }
 
     // Getters and setters
@@ -87,5 +89,13 @@ public class UserDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean getIsGuide() {
+        return isGuide;
+    }
+
+    public void setIsGuide(boolean isGuide) {
+        this.isGuide = isGuide;
     }
 }

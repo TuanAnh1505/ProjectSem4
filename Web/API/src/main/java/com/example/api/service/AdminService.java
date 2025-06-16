@@ -51,7 +51,9 @@ public class AdminService {
                         user.getPhone(),
                         user.getAddress(),
                         user.getIsActive(),
-                        user.getCreatedAt()))
+                        user.getCreatedAt(),
+                        user.getRoles().stream().anyMatch(role -> role.getRoleName().equalsIgnoreCase("GUIDE"))
+                ))
                 .collect(Collectors.toList());
     }
 
