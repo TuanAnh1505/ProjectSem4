@@ -339,6 +339,11 @@ const App = () => {
           />
 
           <Route path="/feedback" element={<Feedback />} />
+
+          <Route
+            path="/admin/assignment"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
         </Routes>
       </div>
     </Router>

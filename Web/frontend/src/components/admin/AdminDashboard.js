@@ -208,6 +208,13 @@ const AdminDashboard = ({ children }) => {
               <span className="menu-icon-circle"><FaDollarSign /></span>
               <span className="menu-text-modern">Quản lý thanh toán</span>
             </li>
+            <li
+              onClick={() => navigate("/admin/assignment")}
+              className={location.pathname === "/admin/assignment" ? "active" : ""}
+            >
+              <span className="menu-icon-circle"><FaUser /></span>
+              <span className="menu-text-modern">Phân công</span>
+            </li>
             <div className="account-section-modern">
               <li className="menu-section-modern">Trang tài khoản</li>
               <li

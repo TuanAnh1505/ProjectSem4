@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +30,9 @@ public class TourGuideAssignmentService {
     @Autowired
     private TourGuideRepository tourGuideRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     public TourGuideAssignmentDTO createAssignment(TourGuideAssignmentDTO dto) {
         // Check if tour exists
         Tour tour = tourRepository.findById(dto.getTourId())
@@ -39,12 +44,26 @@ public class TourGuideAssignmentService {
 
         // Check if guide is available
         if (!guide.getIsAvailable()) {
-            throw new IllegalStateException("Tour guide is not available");
+            throw new IllegalStateException("Hướng dẫn viên hiện không sẵn sàng!");
         }
 
         // Check if dates are valid
         if (dto.getStartDate().isAfter(dto.getEndDate())) {
-            throw new IllegalArgumentException("Start date must be before end date");
+            throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc!");
+        }
+
+        // Check if schedule has already ended
+        if (dto.getEndDate().isBefore(LocalDate.now())) {
+            throw new IllegalStateException("Không thể gán hướng dẫn viên cho lịch trình đã kết thúc!");
+        }
+
+        // Check if guide has already been assigned to this tour & schedule
+        boolean alreadyAssigned = assignmentRepository.findByTourId(dto.getTourId()).stream()
+            .anyMatch(a -> a.getGuideId().equals(dto.getGuideId()) &&
+                          a.getStartDate().equals(dto.getStartDate()) &&
+                          a.getEndDate().equals(dto.getEndDate()));
+        if (alreadyAssigned) {
+            throw new IllegalStateException("Hướng dẫn viên đã được gán vào lịch trình này!");
         }
 
         // Check if guide has any overlapping assignments
@@ -52,7 +71,7 @@ public class TourGuideAssignmentService {
                 dto.getGuideId(),
                 dto.getStartDate(),
                 dto.getEndDate())) {
-            throw new IllegalStateException("Tour guide has overlapping assignments for the given dates");
+            throw new IllegalStateException("Hướng dẫn viên đã có tour khác trong khoảng thời gian này!");
         }
 
         TourGuideAssignment assignment = new TourGuideAssignment();
@@ -64,6 +83,50 @@ public class TourGuideAssignmentService {
         assignment.setStatus(TourGuideAssignment.AssignmentStatus.assigned);
 
         TourGuideAssignment savedAssignment = assignmentRepository.save(assignment);
+
+        // Gửi email cho hướng dẫn viên
+        try {
+            // Lấy thông tin user (hướng dẫn viên)
+            String guideEmail = guide.getUser() != null ? guide.getUser().getEmail() : null;
+            String guideName = guide.getUser() != null ? guide.getUser().getFullName() : "Hướng dẫn viên";
+            String tourName = tour.getName();
+            String tourDesc = tour.getDescription();
+            String startDate = assignment.getStartDate().toString();
+            String endDate = assignment.getEndDate().toString();
+            // Lấy danh sách khách hàng của tour/lịch trình này
+            List<Map<String, String>> customers = new java.util.ArrayList<>();
+            // (Giả sử bookingRepository có hàm findByTourIdAndScheduleId)
+            // Nếu không, bạn cần tự join hoặc query phù hợp
+            // Ở đây demo lấy tất cả booking CONFIRMED của tour này và lịch trình này
+            // (Bạn có thể cần chỉnh lại cho đúng logic thực tế)
+            // bookingRepository phải được @Autowired vào service này nếu chưa có
+            //
+            // Ví dụ:
+            // List<Booking> bookings = bookingRepository.findByTour_TourIdAndScheduleIdAndStatus_StatusName(
+            //     assignment.getTourId(), assignment.getStartDate(), "CONFIRMED");
+            // for (Booking b : bookings) {
+            //     for (BookingPassenger p : bookingPassengerRepository.findByBooking_BookingId(b.getBookingId())) {
+            //         Map<String, String> c = new java.util.HashMap<>();
+            //         c.put("name", p.getFullName());
+            //         c.put("phone", p.getPhone());
+            //         customers.add(c);
+            //     }
+            // }
+            //
+            // Tạm thời gửi mail không có khách nếu chưa có bookingRepository
+            emailService.sendGuideAssignmentEmail(
+                guideEmail,
+                guideName,
+                tourName,
+                tourDesc,
+                startDate,
+                endDate,
+                customers
+            );
+        } catch (Exception ex) {
+            // Log lỗi gửi mail nhưng không làm fail nghiệp vụ
+            System.err.println("Lỗi gửi mail phân công HDV: " + ex.getMessage());
+        }
         return convertToDTO(savedAssignment);
     }
 
