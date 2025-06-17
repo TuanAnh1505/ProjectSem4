@@ -683,15 +683,77 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                 ),
               ),
               // Ảnh tour
-              if (tour?.imageUrl != null && tour!.imageUrl!.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(0), bottom: Radius.circular(0)),
-                  child: Image.network(
-                    'http://10.0.2.2:8080${tour!.imageUrl}',
-                    width: double.infinity,
-                    height: 220,
-                    fit: BoxFit.cover,
-                  ),
+              if (tour?.imageUrls.isNotEmpty == true)
+                Stack(
+                  children: [
+                    Container(
+                      height: 220,
+                      child: PageView.builder(
+                        itemCount: tour!.imageUrls.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            galleryIndex = index;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              openGallery(tour!.imageUrls, index);
+                            },
+                            child: Image.network(
+                              'http://10.0.2.2:8080${tour!.imageUrls[index]}',
+                              width: double.infinity,
+                              height: 220,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    // Indicator dots
+                    if (tour!.imageUrls.length > 1)
+                      Positioned(
+                        bottom: 16,
+                        left: 0,
+                        right: 0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            tour!.imageUrls.length,
+                            (index) => Container(
+                              width: 8,
+                              height: 8,
+                              margin: EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: galleryIndex == index 
+                                    ? Colors.white 
+                                    : Colors.white.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Counter
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          '${galleryIndex + 1}/${tour!.imageUrls.length}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1468,14 +1530,23 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (tour['imageUrl'] != null)
+                                    if (tour['imageUrls'] != null && (tour['imageUrls'] as List).isNotEmpty)
                                       ClipRRect(
                                         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
                                         child: Image.network(
-                                          'http://10.0.2.2:8080${tour['imageUrl']}',
+                                          'http://10.0.2.2:8080${(tour['imageUrls'] as List).first}',
                                           height: 140,
                                           width: double.infinity,
                                           fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            print('Error loading image: $error');
+                                            return Container(
+                                              height: 140,
+                                              width: double.infinity,
+                                              color: Colors.grey[200],
+                                              child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey),
+                                            );
+                                          },
                                         ),
                                       ),
                                     Expanded(

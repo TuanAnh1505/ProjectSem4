@@ -65,6 +65,8 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
 
   bool showFullDescription = false;
 
+  int _currentImageIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -369,7 +371,8 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
               'duration': widget.tour.duration,
               'maxParticipants': widget.tour.maxParticipants,
               'statusId': widget.tour.statusId,
-              'imageUrl': widget.tour.imageUrl,
+              'imageUrl': widget.tour.imageUrls.isNotEmpty ? widget.tour.imageUrls[0] : null,
+              'imageUrls': widget.tour.imageUrls,
               'createdAt': widget.tour.createdAt?.toIso8601String(),
               'updatedAt': widget.tour.updatedAt?.toIso8601String(),
             },
@@ -434,21 +437,79 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (widget.tour.imageUrl != null && widget.tour.imageUrl!.isNotEmpty)
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(0)),
-                          child: Image.network(
-                            'http://10.0.2.2:8080${widget.tour.imageUrl}',
-                            width: double.infinity,
-                            height: 220,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 220,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.error),
-                              );
-                            },
+                      if (widget.tour.imageUrls.isNotEmpty)
+                        Container(
+                          height: 220,
+                          child: Stack(
+                            children: [
+                              PageView.builder(
+                                itemCount: widget.tour.imageUrls.length,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    _currentImageIndex = index;
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      // TODO: Implement full screen gallery view
+                                    },
+                                    child: Image.network(
+                                      'http://10.0.2.2:8080${widget.tour.imageUrls[index]}',
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey[300],
+                                          child: const Icon(Icons.error),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                              if (widget.tour.imageUrls.length > 1)
+                                Positioned(
+                                  bottom: 10,
+                                  left: 0,
+                                  right: 0,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(
+                                      widget.tour.imageUrls.length,
+                                      (index) => Container(
+                                        width: 8,
+                                        height: 8,
+                                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: _currentImageIndex == index
+                                              ? Colors.orange
+                                              : Colors.white.withOpacity(0.5),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.6),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${_currentImageIndex + 1}/${widget.tour.imageUrls.length}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       Padding(

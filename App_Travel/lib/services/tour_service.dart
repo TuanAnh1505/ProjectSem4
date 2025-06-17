@@ -58,14 +58,23 @@ class TourService {
     required int count,
     required int excludeTourId,
   }) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/random?count=$count&excludeTourId=$excludeTourId'),
-    );
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/random?count=$count&excludeTourId=$excludeTourId'),
+      );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load related tours');
+      print('Fetch related tours status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data;
+      } else {
+        throw Exception('Failed to load related tours');
+      }
+    } catch (e) {
+      print('Error fetching related tours: $e');
+      return [];
     }
   }
 }

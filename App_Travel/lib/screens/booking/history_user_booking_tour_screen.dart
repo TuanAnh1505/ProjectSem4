@@ -311,6 +311,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   String error = '';
   bool hasTourId = false;
   bool showFullDescription = false;
+  int _currentImageIndex = 0;
 
   @override
   void initState() {
@@ -405,7 +406,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final booking = widget.booking;
     final tourName = tour?.name ?? booking['tourName'] ?? booking['tour']?['name'] ?? '';
     final tourDesc = tour?.description ?? booking['tourDescription'] ?? booking['tour']?['description'] ?? '';
-    final tourImg = tour?.imageUrl ?? booking['tourImage'] ?? booking['tour']?['imageUrl'] ?? booking['tour']?['image_url'];
+    final tourImg = tour?.imageUrls?.isNotEmpty == true 
+        ? tour!.imageUrls[0]  // Using ! because we know tour is not null at this point
+        : (booking['tourImage'] ?? booking['tour']?['imageUrl'] ?? booking['tour']?['image_url']);
     final destination = booking['destination'] ?? booking['tour']?['destination'] ?? '';
     final departure = booking['departure'] ?? booking['tour']?['departure'] ?? '';
     final hotel = booking['hotel'] ?? booking['tour']?['hotel'] ?? '';
@@ -433,13 +436,87 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (tourImg != null && tourImg.toString().isNotEmpty)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.network(
-                            tourImg.toString().startsWith('http') ? tourImg : 'http://10.0.2.2:8080${tourImg}',
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                        Container(
+                          height: 200,
+                          child: Stack(
+                            children: [
+                              PageView.builder(
+                                itemCount: tour?.imageUrls?.length ?? 1,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    _currentImageIndex = index;
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  final imageUrl = tour?.imageUrls?.isNotEmpty == true
+                                      ? tour!.imageUrls[index]
+                                      : tourImg;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      // TODO: Implement full screen gallery view
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Image.network(
+                                        imageUrl.toString().startsWith('http')
+                                            ? imageUrl.toString()
+                                            : 'http://10.0.2.2:8080${imageUrl}',
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          print('Error loading image: $error');
+                                          return Container(
+                                            color: Colors.grey[300],
+                                            child: const Icon(Icons.error, size: 40, color: Colors.grey),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              if ((tour?.imageUrls?.length ?? 0) > 1)
+                                Positioned(
+                                  bottom: 10,
+                                  left: 0,
+                                  right: 0,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(
+                                      tour?.imageUrls?.length ?? 1,
+                                      (index) => Container(
+                                        width: 8,
+                                        height: 8,
+                                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: _currentImageIndex == index
+                                              ? Colors.orange
+                                              : Colors.white.withOpacity(0.5),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.6),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${_currentImageIndex + 1}/${tour?.imageUrls?.length ?? 1}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       const SizedBox(height: 16),

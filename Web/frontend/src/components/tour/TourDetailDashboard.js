@@ -442,36 +442,78 @@ export default function TourDetailDashboard() {
       {galleryImages.length > 0 && (
         <div style={{ margin: '32px 0', padding: '0 32px' }}>
           <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 16 }}>Hình ảnh tour</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 2px 8px #e3e8f0' }}>
-            {galleryImages.map((img, idx) => (
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            gap: 16,
+            background: '#fff', 
+            borderRadius: 12, 
+            padding: 24, 
+            boxShadow: '0 2px 8px #e3e8f0' 
+          }}>
+            {/* Main image */}
+            <div style={{ 
+              width: '100%', 
+              height: 400, 
+              position: 'relative',
+              borderRadius: 12,
+              overflow: 'hidden'
+            }}>
               <img
-                key={idx}
-                src={`http://localhost:8080${img}`}
-                alt={`gallery-${idx}`}
+                src={`http://localhost:8080${galleryImages[modalGallery.index || 0]}`}
+                alt={tour.name}
                 style={{
-                  width: 180,
-                  height: 120,
+                  width: '100%',
+                  height: '100%',
                   objectFit: 'cover',
-                  borderRadius: 10,
-                  border: '2px solid #e3e8f0',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s, box-shadow 0.2s'
+                  borderRadius: 12,
                 }}
-                onMouseOver={(e) => {
-                  e.target.style.transform = 'scale(1.05)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(25, 118, 210, 0.3)';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.transform = 'scale(1)';
-                  e.target.style.boxShadow = 'none';
-                }}
-                onClick={() => setModalGallery({
-                  images: galleryImages.map(url => `http://localhost:8080${url}`),
-                  index: idx,
-                  open: true
-                })}
               />
-            ))}
+            </div>
+            
+            {/* Thumbnails */}
+            <div style={{ 
+              display: 'flex', 
+              gap: 12, 
+              overflowX: 'auto',
+              padding: '8px 0',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              }
+            }}>
+              {galleryImages.map((img, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setModalGallery({
+                    images: galleryImages.map(url => `http://localhost:8080${url}`),
+                    index: idx,
+                    open: true
+                  })}
+                  style={{
+                    flex: '0 0 auto',
+                    width: 100,
+                    height: 70,
+                    cursor: 'pointer',
+                    borderRadius: 8,
+                    overflow: 'hidden',
+                    border: `2px solid ${(modalGallery.index || 0) === idx ? '#1976d2' : '#e3e8f0'}`,
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <img
+                    src={`http://localhost:8080${img}`}
+                    alt={`thumbnail-${idx}`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

@@ -347,16 +347,14 @@ class _TourScreenState extends State<TourScreen> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-                                    child: tour.imageUrl != null && tour.imageUrl!.isNotEmpty
+                                    child: tour.imageUrls != null && tour.imageUrls.isNotEmpty
                                         ? Image.network(
-                                            (() {
-                                              final url = 'http://10.0.2.2:8080${tour.imageUrl!.startsWith('/') ? '' : '/'}${tour.imageUrl!}';
-                                              return url;
-                                            })(),
+                                            'http://10.0.2.2:8080${tour.imageUrls[0]}',
                                             width: double.infinity,
                                             height: 250,
                                             fit: BoxFit.cover,
                                             errorBuilder: (context, error, stackTrace) {
+                                              print('Error loading image: $error');
                                               return Container(
                                                 width: double.infinity,
                                                 height: 250,
