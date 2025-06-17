@@ -2,17 +2,30 @@ import React, { useState, useEffect} from "react";
 import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
 // import { useNavigate } from "react-router-dom";
 import "../../styles/admin/UserIndex.css";
+import "./GuideModal.css";
 
 const UserIndex = () => {
- 
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterType, setFilterType] = useState("all");
   const [message, setMessage] = useState(""); // For success/error messages
   const [deleteAlert, setDeleteAlert] = useState({ show: false, userId: null, userName: "" });
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [guideLoading, setGuideLoading] = useState(false);
+  const [guideForm, setGuideForm] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
+    experienceYears: "",
+    specialization: "",
+    languages: ""
+  });
   // const navigate = useNavigate();
 
   useEffect(() => {
@@ -207,6 +220,166 @@ const UserIndex = () => {
         paginate={paginate}
         currentPage={currentPage}
       />
+      {/* Modal tạo tài khoản hướng dẫn viên */}
+      {showGuideModal && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>Tạo tài khoản hướng dẫn viên</h2>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setGuideLoading(true);
+              try {
+                const token = localStorage.getItem("token");
+                const response = await fetch("http://localhost:8080/api/tour-guides/admin", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    ...guideForm,
+                    experienceYears: parseInt(guideForm.experienceYears),
+                  }),
+                });
+                if (!response.ok) {
+                  const err = await response.text();
+                  throw new Error(err || "Tạo tài khoản thất bại");
+                }
+                setMessage("Tạo tài khoản hướng dẫn viên thành công");
+                setShowGuideModal(false);
+                setGuideForm({
+                  fullName: "",
+                  email: "",
+                  password: "",
+                  phone: "",
+                  address: "",
+                  experienceYears: "",
+                  specialization: "",
+                  languages: ""
+                });
+                // Reload user list
+                setLoading(true);
+                const token2 = localStorage.getItem("token");
+                const res2 = await fetch("http://localhost:8080/api/admin/users", {
+                  headers: { Authorization: `Bearer ${token2}` },
+                });
+                const data2 = await res2.json();
+                setUsers(data2);
+                setFilteredUsers(data2);
+                setTimeout(() => setMessage(""), 3000);
+              } catch (error) {
+                setMessage(error.message || "Tạo tài khoản thất bại");
+                setTimeout(() => setMessage(""), 3000);
+              } finally {
+                setGuideLoading(false);
+              }
+            }}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Họ tên"
+                    required
+                    value={guideForm.fullName}
+                    onChange={(e) => setGuideForm(f => ({ ...f, fullName: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="email"
+                    className="form-control"
+                    placeholder="Email"
+                    required
+                    value={guideForm.email}
+                    onChange={(e) => setGuideForm(f => ({ ...f, email: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="password"
+                    className="form-control"
+                    placeholder="Mật khẩu"
+                    required
+                    value={guideForm.password}
+                    onChange={(e) => setGuideForm(f => ({ ...f, password: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Số điện thoại"
+                    required
+                    value={guideForm.phone}
+                    onChange={(e) => setGuideForm(f => ({ ...f, phone: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Địa chỉ"
+                    required
+                    value={guideForm.address}
+                    onChange={(e) => setGuideForm(f => ({ ...f, address: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="number"
+                    className="form-control"
+                    placeholder="Số năm kinh nghiệm"
+                    required
+                    min={0}
+                    value={guideForm.experienceYears}
+                    onChange={(e) => setGuideForm(f => ({ ...f, experienceYears: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Chuyên môn"
+                    required
+                    value={guideForm.specialization}
+                    onChange={(e) => setGuideForm(f => ({ ...f, specialization: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Ngôn ngữ"
+                    required
+                    value={guideForm.languages}
+                    onChange={(e) => setGuideForm(f => ({ ...f, languages: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowGuideModal(false)}
+                  disabled={guideLoading}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={guideLoading}
+                >
+                  {guideLoading ? "Đang tạo..." : "Tạo tài khoản"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Modal xác nhận xóa */}
       {deleteAlert.show && (
         <div className="destination-alert-overlay">

@@ -24,6 +24,8 @@ import './App.css';
 import BookingConfirmation from './components/booking/BookingConfirmation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Feedback from './components/feedback/Feedback';
+import ScrollToTop from './components/ScrollToTop';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -55,6 +57,7 @@ const ProtectedRoute = ({ element, requiredRole }) => {
 const App = () => {
   return (
     <Router>
+      <ScrollToTop />
       <div>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         <Routes>
