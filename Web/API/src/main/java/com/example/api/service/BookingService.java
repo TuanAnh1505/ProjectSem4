@@ -270,7 +270,8 @@ public class BookingService {
             tourDetails.put("tourId", booking.getTour().getTourId());
             tourDetails.put("name", booking.getTour().getName());
             tourDetails.put("price", booking.getTour().getPrice());
-            tourDetails.put("imageUrl", booking.getTour().getImageUrl());
+            List<String> imageUrls = booking.getTour().getImageUrls();
+            tourDetails.put("imageUrl", (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls.get(0) : null);
             tourDetails.put("description", booking.getTour().getDescription());
             bookingDetails.put("tour", tourDetails);
         }

@@ -134,9 +134,9 @@ export default function TourIndex() {
               <tr key={tour.tourId}>
                 <td>{tour.tourId}</td>
                 <td>
-                  {tour.imageUrl ? (
+                  {tour.imageUrls && tour.imageUrls.length > 0 ? (
                     <img
-                      src={`http://localhost:8080${tour.imageUrl}`}
+                      src={`http://localhost:8080${tour.imageUrls[0]}`}
                       alt={tour.name}
                       className="tour-thumbnail"
                     />

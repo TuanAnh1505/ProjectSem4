@@ -19,7 +19,7 @@ public class TourDTO {
     private Integer duration;
     private Integer maxParticipants;
     private Integer statusId;
-    private String imageUrl;
+    private List<String> imageUrls;
 
     private List<Integer> destinationIds;
     private List<Integer> eventIds;
