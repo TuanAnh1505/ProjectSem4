@@ -4,6 +4,7 @@ import '../../screens/home_screen.dart';
 import '../../screens/tour/tour_screen.dart';
 import '../../screens/search_screen.dart';
 import '../../screens/auth/personal_page_screen.dart';
+import '../../screens/guide/guide_management_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
@@ -33,11 +34,13 @@ class _AppNavigationState extends State<AppNavigation> {
   void initState() {
     super.initState();
     _selectedIndex = widget.currentIndex;
+    print('User Role: ${widget.userRole}');
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      print('Selected Index: $index');
     });
   }
 
@@ -51,7 +54,7 @@ class _AppNavigationState extends State<AppNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _selectedIndex == 2
+      appBar: _selectedIndex == 2 || _selectedIndex == 4
           ? null
           : AppBar(
               leading: null,
@@ -67,7 +70,9 @@ class _AppNavigationState extends State<AppNavigation> {
                     )
                   : _selectedIndex == 1
                       ? const Text('Tìm kiếm tour du lịch')
-                      : null,
+                      : _selectedIndex == 3
+                          ? const Text('Tài khoản')
+                          : const Text('Quản lý tour'),
               centerTitle: true,
               actions: _selectedIndex == 0
                   ? [
@@ -83,7 +88,7 @@ class _AppNavigationState extends State<AppNavigation> {
                         icon: const Icon(Icons.person, color: Colors.orange),
                         onPressed: () {
                           setState(() {
-                            _selectedIndex = 3; // Chuyển sang tab tài khoản
+                            _selectedIndex = 3;
                           });
                         },
                       ),
@@ -97,27 +102,32 @@ class _AppNavigationState extends State<AppNavigation> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        iconSize: 32,
+        type: BottomNavigationBarType.shifting,
+        iconSize:30,
         selectedFontSize: 12,
         unselectedFontSize: 11,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Trang chủ',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Tìm kiếm',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.flight_takeoff),
             label: 'Tour',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Tài khoản',
           ),
+          if (widget.userRole == 'GUIDE')
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.manage_accounts),
+              label: 'Quản lý tour',
+            ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.orange,
@@ -149,11 +159,15 @@ class _AppNavigationState extends State<AppNavigation> {
             });
           },
         );
-      
       case 3:
         return const PersonalPageScreen(
           showAppBar: false,
         );
+      case 4:
+        if (widget.userRole == 'GUIDE') {
+          return const GuideManagementScreen();
+        }
+        return HomeScreen(userName: widget.userName, userRole: widget.userRole);
       default:
         return HomeScreen(userName: widget.userName, userRole: widget.userRole);
     }

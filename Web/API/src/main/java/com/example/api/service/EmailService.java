@@ -16,6 +16,12 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import java.util.List;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.Comparator;
+import com.example.api.repository.TourScheduleRepository;
 
 @Service
 public class EmailService {
@@ -23,6 +29,9 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender emailSender;
+
+    @Autowired
+    private TourScheduleRepository tourScheduleRepository;
 
     public void sendActivationEmail(String to, String publicId, boolean isApp, boolean isGuide) {
         logger.info("Preparing to send activation email to: {}", to);
@@ -195,24 +204,110 @@ public class EmailService {
         try {
             String to = user.getEmail();
             String subject = "Xác nhận thanh toán thành công - Đặt tour " + booking.getBookingId();
-            StringBuilder content = new StringBuilder();
-            content.append("<h2>Thanh toán thành công!</h2>");
-            content.append("<p>Cảm ơn bạn đã đặt tour: <b>").append(booking.getTour().getName()).append("</b></p>");
-            content.append("<p><b>Giá tiền:</b> ").append(payment.getAmount()).append(" VND</p>");
-            content.append("<p><b>Số lượng khách:</b> ").append(passengers.size()).append("</p>");
-            content.append("<h3>Thông tin khách:</h3>");
-            for (BookingPassenger p : passengers) {
-                content.append("<p>")
-                        .append(p.getFullName()).append(" - ")
-                        .append(p.getPhone() != null ? p.getPhone() : "")
-                        .append("</p>");
+            
+            // Get schedule information
+            var scheduleOpt = tourScheduleRepository.findById(booking.getScheduleId());
+            String startDate = "N/A";
+            String endDate = "N/A";
+            
+            if (scheduleOpt.isPresent()) {
+                var schedule = scheduleOpt.get();
+                startDate = schedule.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                endDate = schedule.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             }
-            sendHtmlEmail(to, subject, content.toString());
+            
+            String content = String.format("""
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                </head>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #28a745; margin-bottom: 10px;">Thanh toán thành công!</h1>
+                            <p style="color: #666;">Cảm ơn bạn đã đặt tour với TravelTour</p>
+                        </div>
+
+                        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <h2 style="color: #1976d2; margin-top: 0;">Thông tin đặt tour</h2>
+                            <p><strong>Mã đặt tour:</strong> %s</p>
+                            <p><strong>Tên tour:</strong> %s</p>
+                            <p><strong>Ngày khởi hành:</strong> %s</p>
+                            <p><strong>Ngày kết thúc:</strong> %s</p>
+                        </div>
+
+                        <div style="background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <h2 style="color: #17a2b8; margin-top: 0;">Thông tin thanh toán</h2>
+                            <p><strong>Tổng tiền:</strong> %s VND</p>
+                            <p><strong>Phương thức thanh toán:</strong> %s</p>
+                            <p><strong>Trạng thái:</strong> <span style="color: #28a745;">Đã thanh toán</span></p>
+                        </div>
+
+                        <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <h2 style="color: #856404; margin-top: 0;">Danh sách khách hàng</h2>
+                            <table style="width: 100%%; border-collapse: collapse;">
+                                <tr style="background-color: #f8f9fa;">
+                                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Họ và tên</th>
+                                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Số điện thoại</th>
+                                </tr>
+                                %s
+                            </table>
+                        </div>
+
+                        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                            <h2 style="color: #1976d2; margin-top: 0;">Lưu ý quan trọng</h2>
+                            <ul style="padding-left: 20px;">
+                                <li>Vui lòng đến đúng điểm đón trước giờ khởi hành 30 phút</li>
+                                <li>Mang theo giấy tờ tùy thân (CMND/CCCD/Hộ chiếu)</li>
+                                <li>Chuẩn bị đồ dùng cá nhân cần thiết</li>
+                                <li>Nếu có thắc mắc, vui lòng liên hệ hotline: 1900 xxxx</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin-top: 30px; text-align: center; color: #666;">
+                            <p>Trân trọng,<br>Đội ngũ TravelTour</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """,
+                booking.getBookingCode(),
+                booking.getTour().getName(),
+                startDate,
+                endDate,
+                payment.getAmount(),
+                payment.getPaymentMethod().getMethodName(),
+                generatePassengerTableRows(passengers)
+            );
+
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            helper.setFrom("noreply@traveltour.com", "TravelTour");
+            emailSender.send(mimeMessage);
             logger.info("Successfully sent payment success email to: {}", to);
         } catch (Exception e) {
             logger.error("Failed to send payment success email to: {}. Error: {}", user.getEmail(), e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private String generatePassengerTableRows(List<BookingPassenger> passengers) {
+        StringBuilder rows = new StringBuilder();
+        for (BookingPassenger passenger : passengers) {
+            rows.append(String.format("""
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">%s</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">%s</td>
+                </tr>
+                """,
+                passenger.getFullName(),
+                passenger.getPhone() != null ? passenger.getPhone() : "N/A"
+            ));
+        }
+        return rows.toString();
     }
 
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
@@ -236,25 +331,62 @@ public class EmailService {
         String subject = "Yêu cầu đánh giá tour " + tourName;
         String content = String.format(
                 """
-                        <html>
-                        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                                <h2 style="color: #1976d2;">Xin chào %s,</h2>
-                                <p>Tour <strong>%s</strong> của bạn đã kết thúc vào ngày <strong>%s</strong>.</p>
-                                <p>Chúng tôi rất mong nhận được đánh giá của bạn về trải nghiệm tour này.</p>
-                                <p>Bạn có thể gửi đánh giá bằng cách:</p>
-                                <ol>
-                                    <li>Click vào link web: <a href="%s" style="color: #1976d2; text-decoration: none;">Gửi đánh giá qua Web</a></li>
-                                    <li>Hoặc mở ứng dụng di động: <a href="%s" style="color: #1976d2; text-decoration: none;">Gửi đánh giá qua App</a></li>
-                                </ol>
-                                <p>Đánh giá của bạn sẽ giúp chúng tôi cải thiện dịch vụ tốt hơn.</p>
-                                <p>Trân trọng,<br>Đội ngũ Travel App</p>
-                            </div>
-                        </body>
-                        </html>
-                        """,
-                userName, tourName, endDate, webFeedbackLink, appFeedbackLink);
-        sendHtmlEmail(to, subject, content);
+                <html>
+                <head>
+                    <meta charset='UTF-8'>
+                </head>
+                <body style='background: #f4f6f8; margin: 0; padding: 0;'>
+                    <table width='100%%' cellpadding='0' cellspacing='0' style='background: #f4f6f8; padding: 0; margin: 0;'>
+                        <tr>
+                            <td align='center'>
+                                <table width='600' cellpadding='0' cellspacing='0' style='background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin: 32px 0; padding: 0;'>
+                                    <tr>
+                                        <td style='padding: 40px 32px 32px 32px; text-align: left; font-family: Segoe UI, Arial, sans-serif;'>
+                                            <h1 style='color: #1976d2; font-size: 2.1rem; margin-bottom: 10px; margin-top: 0;'>Xin chào %s,</h1>
+                                            <p style='font-size: 1.13rem; color: #222; margin: 0 0 10px 0;'>Tour <b>%s</b> của bạn đã kết thúc vào ngày <b>%s</b>.</p>
+                                            <p style='font-size: 1.13rem; color: #222; margin: 0 0 28px 0;'>Chúng tôi rất mong nhận được đánh giá của bạn về trải nghiệm tour này.</p>
+                                            <div style='text-align: center; margin: 32px 0 18px 0;'>
+                                                <a href='%s' style='display: inline-block; padding: 16px 40px; background: #1976d2; color: #fff; text-decoration: none; border-radius: 8px; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px rgba(25,118,210,0.08); letter-spacing: 0.5px;'>Gửi đánh giá ngay</a>
+                                            </div>
+                                            <p style='font-size: 1rem; color: #444; margin-bottom: 16px; text-align: center;'>Hoặc bạn có thể mở ứng dụng di động và truy cập vào phần đánh giá tour:</p>
+                                            <div style='text-align: center; margin-bottom: 32px;'>
+                                                <a href='%s' style='display: inline-block; padding: 12px 32px; background: #43a047; color: #fff; text-decoration: none; border-radius: 8px; font-size: 1rem; font-weight: 500;'>Đánh giá qua App</a>
+                                            </div>
+                                            <div style='background: #f8f9fa; border-radius: 6px; padding: 18px 18px 14px 18px; color: #666; font-size: 1rem; margin-bottom: 30px;'>
+                                                <b style='color: #1976d2;'>Lưu ý:</b> Đánh giá của bạn sẽ giúp chúng tôi cải thiện dịch vụ tốt hơn.<br>
+                                                Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ: <a href='mailto:support@traveltour.com' style='color: #1976d2;'>support@traveltour.com</a> hoặc hotline: 1900 xxxx.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding: 0 32px 28px 32px; text-align: left; font-family: Segoe UI, Arial, sans-serif; color: #888; font-size: 0.98rem; border-top: 1px solid #eee;'>
+                                            <div style='margin-top: 24px;'>
+                                                <span style='color: #888;'>© %d TravelTour. Mọi quyền được bảo lưu.</span><br>
+                                                <span style='color: #888;'>Địa chỉ: 123 Đường Du Lịch, Quận 1, TP.HCM</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                """,
+                userName, tourName, endDate, webFeedbackLink, appFeedbackLink, java.time.Year.now().getValue());
+        try {
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            helper.setFrom("feedback@traveltour.com", "TravelTour Feedback");
+            emailSender.send(mimeMessage);
+            logger.info("Successfully sent feedback request email to: {}", to);
+        } catch (Exception e) {
+            logger.error("Failed to send feedback request email to: {}. Error: {}", to, e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void sendTourReminderEmail(String to, String userName, String tourName, String startDate,
@@ -310,36 +442,66 @@ public class EmailService {
             String endDate, List<TourItineraryDTO> itineraries) {
         String subject = "Chi tiết lịch trình tour " + tourName;
         
+        // Sort itineraries by itineraryId
+        itineraries.sort(Comparator.comparing(TourItineraryDTO::getItineraryId));
         StringBuilder itineraryHtml = new StringBuilder();
+        int idx = 0;
         for (TourItineraryDTO itinerary : itineraries) {
-            itineraryHtml.append("<div style='margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;'>")
-                    .append("<h3 style='color: #1976d2; margin-top: 0;'>").append(itinerary.getTitle()).append("</h3>")
-                    .append("<p><strong>Thời gian:</strong> ")
-                    .append(itinerary.getStartTime() != null ? itinerary.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) : "N/A")
-                    .append(" - ")
-                    .append(itinerary.getEndTime() != null ? itinerary.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")) : "N/A")
-                    .append("</p>")
-                    .append("<p><strong>Loại hoạt động:</strong> ").append(itinerary.getType()).append("</p>")
-                    .append("<p><strong>Mô tả:</strong> ").append(itinerary.getDescription()).append("</p>")
-                    .append("</div>");
+            String accordionId = "accordion-" + idx;
+            String description = itinerary.getDescription()
+                .replace("\"", "&quot;")  // Escape quotes
+                .replace("'", "&#39;")    // Escape single quotes
+                .replace("<", "&lt;")     // Escape HTML tags
+                .replace(">", "&gt;")
+                .replace("\n", "<br>");   // Convert newlines to HTML breaks
+
+            String title = itinerary.getTitle()
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+
+            itineraryHtml.append(
+                "<div style='margin-bottom: 16px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;'>" +
+                "<input type='checkbox' id='" + accordionId + "' style='display:none;'>" +
+                "<label for='" + accordionId + "' style='display:block; background:#f8f9fa; padding:15px; cursor:pointer; font-weight:600; color:#1976d2; font-size:18px; margin:0;'>Ngày " + (idx + 1) + ": " + title + "</label>" +
+                "<div style='max-height:0; overflow:hidden; transition:max-height 0.3s ease; background:#fff; padding:0 15px;'" +
+                " id='content-" + accordionId + "'>" +
+                "<div style='color:#666; margin:12px 0 5px 0;'><strong>" +
+                (itinerary.getStartTime() != null ? itinerary.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) : "N/A") +
+                " - " +
+                (itinerary.getEndTime() != null ? itinerary.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")) : "N/A") +
+                "</strong></div>" +
+                "<div style='color:#333; white-space: pre-line;'>" + description + "</div>" +
+                "</div>" +
+                "<style>" +
+                "#" + accordionId + ":checked ~ #content-" + accordionId + " { max-height: 1000px !important; padding: 15px !important; }" +
+                "#content-" + accordionId + " { max-height:0; overflow:hidden; transition:max-height 0.5s ease; }" +
+                "</style>" +
+                "</div>"
+            );
+            idx++;
         }
 
         String content = String.format(
                 """
                 <html>
+                <head>
+                    <meta charset="UTF-8">
+                </head>
                 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #1976d2;">Xin chào %s,</h2>
                         <p>Tour <strong>%s</strong> của bạn sẽ bắt đầu vào ngày <strong>%s</strong> và kết thúc vào ngày <strong>%s</strong>.</p>
                         
-                        <div style="background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                            <h3 style="color: #17a2b8; margin-top: 0;">Chi tiết lịch trình:</h3>
+                        <div style="margin: 20px 0;">
+                            <h3 style="color: #17a2b8; margin-bottom: 20px;">Chi tiết lịch trình:</h3>
                             %s
                         </div>
 
                         <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
                             <h3 style="color: #856404; margin-top: 0;">Lưu ý quan trọng:</h3>
-                            <ul>
+                            <ul style="padding-left: 20px;">
                                 <li>Vui lòng đến đúng điểm hẹn trước giờ khởi hành</li>
                                 <li>Mang theo giấy tờ tùy thân (CMND/CCCD/Hộ chiếu)</li>
                                 <li>Chuẩn bị đồ dùng cá nhân cần thiết</li>
@@ -347,13 +509,15 @@ public class EmailService {
                             </ul>
                         </div>
 
-                        <p>Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua:</p>
-                        <ul>
-                            <li>Hotline: 1900 xxxx</li>
-                            <li>Email: support@traveltour.com</li>
-                        </ul>
+                        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                            <h3 style="color: #28a745; margin-top: 0;">Thông tin liên hệ:</h3>
+                            <ul style="padding-left: 20px;">
+                                <li>Hotline: 1900 xxxx</li>
+                                <li>Email: support@traveltour.com</li>
+                            </ul>
+                        </div>
 
-                        <p>Chúc bạn có một chuyến đi thú vị!</p>
+                        <p style="margin-top: 20px;">Chúc bạn có một chuyến đi thú vị!</p>
                         <p>Trân trọng,<br>Đội ngũ TravelTour</p>
                     </div>
                 </body>
@@ -361,6 +525,18 @@ public class EmailService {
                 """,
                 userName, tourName, startDate, endDate, itineraryHtml.toString());
         
-        sendHtmlEmail(to, subject, content);
+        try {
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            helper.setFrom("noreply@traveltour.com", "TravelTour");
+            emailSender.send(mimeMessage);
+            logger.info("Successfully sent HTML email to: {}", to);
+        } catch (Exception e) {
+            logger.error("Failed to send HTML email to: {}. Error: {}", to, e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

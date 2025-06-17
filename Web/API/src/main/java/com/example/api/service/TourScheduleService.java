@@ -236,6 +236,7 @@ public class TourScheduleService {
     }
 
     @Scheduled(cron = "0 0 6 * * ?")
+    // @Scheduled(fixedDelay = 60000)
     @Transactional
     public void sendTourItineraryEmails() {
         logger.info("Bắt đầu gửi email chi tiết lịch trình tour");

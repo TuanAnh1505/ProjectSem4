@@ -24,6 +24,7 @@ public class FeedbackRequestScheduler {
 
     // Chạy mỗi ngày một lần vào lúc 00:00
     @Scheduled(cron = "0 0 0 * * ?")
+    // @Scheduled(fixedDelay = 60000)
     public void sendFeedbackRequestEmails() {
         logger.info("Starting feedback request email scheduler at {}", LocalDate.now());
         LocalDate today = LocalDate.now();
