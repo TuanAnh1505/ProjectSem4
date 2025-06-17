@@ -62,6 +62,7 @@ public class TourScheduleService {
         try {
             return repository.findByTourId(tourId)
                     .stream()
+                    .filter(schedule -> schedule.getEndDate().isAfter(java.time.LocalDate.now()) || schedule.getEndDate().isEqual(java.time.LocalDate.now()))
                     .map(this::mapToDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {

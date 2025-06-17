@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 export default function AssignGuidePage() {
   const [tours, setTours] = useState([]);
@@ -18,6 +19,7 @@ export default function AssignGuidePage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   useEffect(() => {
     axios.get('http://localhost:8080/api/tours').then(res => setTours(res.data));
@@ -39,17 +41,26 @@ export default function AssignGuidePage() {
 
   const handleAssign = async () => {
     setError(''); setSuccess('');
+    setIsAssigning(true);
     if (!selectedTour || !selectedSchedule || !selectedGuide || !role) {
       setError('Vui lòng chọn đầy đủ thông tin!');
+      setIsAssigning(false);
       return;
     }
     const schedule = schedules.find(s => s.scheduleId === Number(selectedSchedule));
     if (!schedule) {
       setError('Không tìm thấy lịch trình đã chọn!');
+      setIsAssigning(false);
+      return;
+    }
+    if (dayjs(schedule.endDate).isBefore(dayjs(), 'day')) {
+      setError('Không thể gán hướng dẫn viên cho lịch trình đã kết thúc!');
+      setIsAssigning(false);
       return;
     }
     if (!schedule.startDate || !schedule.endDate) {
       setError('Lịch trình chưa có ngày bắt đầu hoặc kết thúc!');
+      setIsAssigning(false);
       return;
     }
     const payload = {
@@ -77,6 +88,8 @@ export default function AssignGuidePage() {
         setError('Hướng dẫn viên đã có tour trùng lịch hoặc lỗi khác!');
       }
       console.error('Lỗi khi gửi request:', e);
+    } finally {
+      setIsAssigning(false);
     }
   };
 
@@ -141,7 +154,11 @@ export default function AssignGuidePage() {
             <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Chọn lịch trình</label>
             <select value={selectedSchedule} onChange={e => setSelectedSchedule(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}>
               <option value="">-- Chọn lịch trình --</option>
-              {schedules.map(s => <option key={s.scheduleId} value={s.scheduleId}>{s.startDate} - {s.endDate}</option>)}
+              {schedules.map(s => (
+                dayjs(s.endDate).isBefore(dayjs(), 'day') ? null : (
+                  <option key={s.scheduleId} value={s.scheduleId}>{s.startDate} - {s.endDate}</option>
+                )
+              ))}
             </select>
           </div>
           <div style={{ flex: 1, minWidth: 180 }}>
@@ -160,7 +177,9 @@ export default function AssignGuidePage() {
             </select>
           </div>
           <div style={{ alignSelf: 'flex-end' }}>
-            <button onClick={handleAssign} style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 24px', fontWeight: 700, cursor: 'pointer' }}>Gán</button>
+            <button onClick={handleAssign} disabled={isAssigning} style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 24px', fontWeight: 700, cursor: isAssigning ? 'not-allowed' : 'pointer', opacity: isAssigning ? 0.6 : 1 }}>
+              {isAssigning ? 'Đang xử lý...' : 'Gán'}
+            </button>
           </div>
         </div>
         {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}

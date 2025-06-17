@@ -15,6 +15,7 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "cra-template": "1.2.0",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "i18next": "^25.0.0",
     "i18next-browser-languagedetector": "^8.0.5",
     "lucide-react": "^0.509.0",
