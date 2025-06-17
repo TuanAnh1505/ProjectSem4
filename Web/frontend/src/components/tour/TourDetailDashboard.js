@@ -346,6 +346,22 @@ export default function TourDetailDashboard() {
               alt={tour.name}
               style={{ width: '100%', maxWidth: 420, maxHeight: 320, objectFit: 'cover', borderRadius: 18, border: '6px solid #1976d2', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
             />
+          ): (
+            <div style={{ 
+              width: '100%', 
+              maxWidth: 420, 
+              maxHeight: 320, 
+              backgroundColor: '#e3f2fd', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              color: '#1976d2', 
+              fontWeight: 700,
+              borderRadius: 18,
+              border: '6px solid #1976d2'
+            }}>
+              No Image Available
+            </div>
           )}
         </div>
       </div>
