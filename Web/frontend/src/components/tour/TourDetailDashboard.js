@@ -190,7 +190,7 @@ export default function TourDetailDashboard() {
   const fetchExperiences = async () => {
     try {
       const token = localStorage.getItem('token');
-      const config = token 
+      const config = token
         ? { headers: { Authorization: `Bearer ${token}` } }
         : {};
 
@@ -210,7 +210,7 @@ export default function TourDetailDashboard() {
     e.preventDefault();
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
-    
+
     if (!token || !userId) {
       toast.error('Vui lòng đăng nhập để chia sẻ trải nghiệm');
       return;
@@ -259,7 +259,7 @@ export default function TourDetailDashboard() {
     const fetchFeedbacks = async () => {
       try {
         const token = localStorage.getItem('token');
-        const config = token 
+        const config = token
           ? { headers: { Authorization: `Bearer ${token}` } }
           : {};
 
@@ -346,7 +346,7 @@ export default function TourDetailDashboard() {
               alt={tour.name}
               style={{ width: '100%', maxWidth: 420, maxHeight: 320, objectFit: 'cover', borderRadius: 18, border: '6px solid #1976d2', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
             />
-          ) : (
+          ): (
             <div style={{ 
               width: '100%', 
               maxWidth: 420, 
@@ -366,21 +366,93 @@ export default function TourDetailDashboard() {
         </div>
       </div>
 
+      {/* Tabs section: Lịch trình, Giới thiệu, Chuẩn bị */}
+      <div style={{ margin: '32px 0 0 0', padding: '0 32px' }}>
+        <div style={{ display: 'flex', gap: 0 }}>
+          <div style={{ background: '#1976d2', color: '#fff', padding: '12px 32px', borderTopLeftRadius: 12, borderTopRightRadius: 12, fontWeight: 700, fontSize: 18, letterSpacing: 1 }}>LỊCH TRÌNH</div>
+          {/* Có thể thêm tab Giới thiệu, Chuẩn bị nếu muốn */}
+        </div>
+        <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: 24, border: '1.5px solid #e3e8f0', borderTop: 'none', boxShadow: '0 2px 8px #e3e8f0' }}>
+          {itineraries.length > 0 ? (
+            itineraries.map((schedule, idx) => (
+              <div key={schedule.scheduleId} style={{ 
+                marginBottom: 24, 
+                background: schedule.status === 'full' ? '#fff1f0' : '#e3f2fd', 
+                borderRadius: 10, 
+                boxShadow: '0 2px 8px #e3e8f0', 
+                border: `1.5px solid ${schedule.status === 'full' ? '#ff4d4f' : '#e3e8f0'}`, 
+                padding: 18 
+              }}>
+                <div style={{ 
+                  fontWeight: 600, 
+                  color: schedule.status === 'full' ? '#ff4d4f' : '#1976d2', 
+                  fontSize: 16, 
+                  marginBottom: 8,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span>Lịch trình {idx + 1}: {schedule.startDate} - {schedule.endDate}</span>
+                  <span style={{
+                    padding: '4px 8px',
+                    borderRadius: 4,
+                    background: schedule.status === 'full' ? '#ff4d4f' : schedule.status === 'closed' ? '#b71c1c' : '#1976d2',
+                    color: '#fff',
+                    fontSize: 14
+                  }}>
+                    {schedule.status === 'full' ? 'Đã đủ người' : schedule.status === 'closed' ? 'Đã đóng' : 'Còn chỗ'}
+                    ({schedule.currentParticipants || 0}/{tour.maxParticipants})
+                  </span>
+                  {schedule.status === 'full' && (
+                    <span style={{ color: '#ff4d4f', fontWeight: 700, marginLeft: 16, fontSize: 15 }}>
+                      ⚠️ Lịch trình này đã hết chỗ!
+                    </span>
+                  )}
+                </div>
+                {schedule.itineraries && schedule.itineraries.length > 0 ? (
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                    {schedule.itineraries.map((itinerary, i) => (
+                      <li key={itinerary.itineraryId} style={{ marginBottom: 10, padding: 12, background: '#fff', borderRadius: 8, border: '1px solid #e3e8f0' }}>
+                        <div style={{ fontWeight: 600, color: '#1976d2' }}>Ngày {i + 1}: {itinerary.title}</div>
+                        {itinerary.startTime && <div><b>Giờ bắt đầu:</b> {formatTime(itinerary.startTime)}</div>}
+                        {itinerary.endTime && <div><b>Giờ kết thúc:</b> {formatTime(itinerary.endTime)}</div>}
+                        {itinerary.description && (
+                          <div>
+                            <b>Mô tả:</b>
+                            <span
+                              style={{ whiteSpace: 'pre-line' }}
+                              dangerouslySetInnerHTML={{
+                                __html: itinerary.description.replace(/(\(?\d{2}:\d{2}\s*[–-]\s*\d{2}:\d{2}\)?)/g, match => `<b>${match}</b>`)
+                              }}
+                            />
+                          </div>
+                        )}
+                        {/* {itinerary.type && <div><b>Loại:</b> {itinerary.type}</div>} */}
+                      </li>
+                    ))}
+                  </ul>
+                ) : <div style={{ color: '#888' }}>Không có lịch trình nào cho schedule này.</div>}
+              </div>
+            ))
+          ) : <div style={{ color: '#888' }}>Chưa có lịch trình cho tour này</div>}
+        </div>
+      </div>
+
       {/* Gallery section */}
       {galleryImages.length > 0 && (
         <div style={{ margin: '32px 0', padding: '0 32px' }}>
           <div style={{ fontWeight: 700, color: '#1976d2', fontSize: 20, marginBottom: 16 }}>Hình ảnh tour</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 2px 8px #e3e8f0' }}>
             {galleryImages.map((img, idx) => (
-              <img 
-                key={idx} 
-                src={`http://localhost:8080${img}`} 
-                alt={`gallery-${idx}`} 
-                style={{ 
-                  width: 180, 
-                  height: 120, 
-                  objectFit: 'cover', 
-                  borderRadius: 10, 
+              <img
+                key={idx}
+                src={`http://localhost:8080${img}`}
+                alt={`gallery-${idx}`}
+                style={{
+                  width: 180,
+                  height: 120,
+                  objectFit: 'cover',
+                  borderRadius: 10,
                   border: '2px solid #e3e8f0',
                   cursor: 'pointer',
                   transition: 'transform 0.2s, box-shadow 0.2s'
@@ -393,10 +465,10 @@ export default function TourDetailDashboard() {
                   e.target.style.transform = 'scale(1)';
                   e.target.style.boxShadow = 'none';
                 }}
-                onClick={() => setModalGallery({ 
-                  images: galleryImages.map(url => `http://localhost:8080${url}`), 
-                  index: idx, 
-                  open: true 
+                onClick={() => setModalGallery({
+                  images: galleryImages.map(url => `http://localhost:8080${url}`),
+                  index: idx,
+                  open: true
                 })}
               />
             ))}
@@ -512,4 +584,4 @@ export default function TourDetailDashboard() {
       )}
     </div>
   );
-} 
+}

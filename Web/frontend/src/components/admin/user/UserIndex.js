@@ -196,7 +196,7 @@ const UserIndex = () => {
           <table className="userindex-table">
             <thead className="userindex-table-light">
               <tr>
-                <th>ID</th>
+             
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
@@ -210,7 +210,7 @@ const UserIndex = () => {
             <tbody>
               {currentUsers.map((user) => (
                 <tr key={user.userid}>
-                  <td>{user.userid}</td>
+                  
                   <td>{user.fullName}</td>
                   <td>{user.email}</td>
                   <td>{user.phone}</td>

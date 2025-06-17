@@ -26,6 +26,7 @@ class _HistoryUserBookingTourScreenState extends State<HistoryUserBookingTourScr
     {'label': 'Đã thanh toán', 'value': 'COMPLETED'},
     {'label': 'Thanh toán thất bại', 'value': 'FAILED'},
   ];
+  bool showFullDescription = false;
 
   @override
   void initState() {
@@ -309,6 +310,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   Tour? tour;
   String error = '';
   bool hasTourId = false;
+  bool showFullDescription = false;
 
   @override
   void initState() {
@@ -445,15 +447,36 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         tourName,
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.blue[900]),
                       ),
-                      if (tourDesc.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                          child: Text(
-                            tourDesc,
-                            style: TextStyle(fontSize: 15, color: Colors.grey[800]),
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tourDesc,
+                              style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+                              maxLines: showFullDescription ? null : 6,
+                              overflow: showFullDescription ? TextOverflow.visible : TextOverflow.ellipsis,
+                            ),
+                            if ((tourDesc.length) > 120)
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    showFullDescription = !showFullDescription;
+                                  });
+                                },
+                                child: Text(
+                                  showFullDescription ? 'Thu gọn' : 'Xem thêm',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-
+                      ),
                        _infoRow(Icons.qr_code, 'Mã đặt chỗ', displayCode, valueColor: Colors.orange, fontWeight: FontWeight.bold, fontSize: 18),
                       Divider(height: 32, thickness: 1.2),
                       Text('Thông tin lịch trình', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange)),

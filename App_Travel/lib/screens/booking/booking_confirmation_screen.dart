@@ -25,6 +25,8 @@ class BookingConfirmationScreen extends StatefulWidget {
 }
 
 class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
+  int? openedItineraryIndex;
+
   // Hàm tính tuổi từ ngày sinh
   String getAge(String? birthDate) {
     if (birthDate == null) return '';
@@ -407,7 +409,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade200),
               ),
-              height: 220,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -425,47 +426,60 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: widget.itineraries.length,
-                      itemBuilder: (context, index) {
-                        final itinerary = widget.itineraries[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade200),
+                  ...widget.itineraries.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final itinerary = entry.value;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade200),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.06),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                itinerary['title'] ?? 'Lịch trình ${index + 1}',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (openedItineraryIndex == index) {
+                                  openedItineraryIndex = null;
+                                } else {
+                                  openedItineraryIndex = index;
+                                }
+                              });
+                            },
+                            child: Text(
+                              'Ngày ${index + 1}: ${itinerary['title'] ?? 'Lịch trình'}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1976d2),
+                                fontSize: 15,
                               ),
-                              if (itinerary['startDate'] != null ||
-                                  itinerary['endDate'] != null)
-                                Text(
-                                  '${itinerary['startDate'] != null ? 'Bắt đầu: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(itinerary['startDate']))}' : ''}'
-                                  '${itinerary['startDate'] != null && itinerary['endDate'] != null ? ' - ' : ''}'
-                                  '${itinerary['endDate'] != null ? 'Kết thúc: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(itinerary['endDate']))}' : ''}',
-                                ),
-                              if (itinerary['startTime'] != null)
-                                Text('Giờ bắt đầu: ${itinerary['startTime']}'),
-                              if (itinerary['endTime'] != null)
-                                Text('Giờ kết thúc: ${itinerary['endTime']}'),
-                              if (itinerary['description'] != null)
-                                Text('Mô tả: ${itinerary['description']}'),
-                              if (itinerary['type'] != null)
-                                Text('Loại: ${itinerary['type']}'),
-                            ],
+                            ),
                           ),
-                        );
-                      },
-                    ),
-                  ),
+                          if (openedItineraryIndex == index) ...[
+                            if (itinerary['startTime'] != null)
+                              Text('Giờ bắt đầu: ${itinerary['startTime']}'),
+                            if (itinerary['endTime'] != null)
+                              Text('Giờ kết thúc: ${itinerary['endTime']}'),
+                            if (itinerary['description'] != null)
+                              Text('Mô tả: ${itinerary['description']}'),
+                            if (itinerary['type'] != null)
+                              Text('Loại: ${itinerary['type']}'),
+                          ],
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),
