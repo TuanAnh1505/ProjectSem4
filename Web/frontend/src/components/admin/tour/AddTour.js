@@ -23,8 +23,8 @@ export default function AddTour() {
   const [statuses, setStatuses] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -71,60 +71,52 @@ export default function AddTour() {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    const files = Array.from(e.target.files);
+    setSelectedFiles(prev => [...prev, ...files]);
+    setPreviewUrls(prev => [...prev, ...files.map(file => URL.createObjectURL(file))]);
   };
 
-  const uploadImage = async (file) => {
-    const token = localStorage.getItem('token');
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await axios.post(
-        'http://localhost:8080/api/tours/upload',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Upload image failed:', error);
-      throw new Error(error.response?.data || 'Upload image failed');
-    }
+  const handleRemoveImage = (idx) => {
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== idx));
+    setPreviewUrls(previewUrls.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+    // Validate required fields
+    if (!formData.statusId) {
+      setError('Bạn phải chọn trạng thái cho tour!');
+      setLoading(false);
+      return;
+    }
+    if (!selectedFiles || selectedFiles.length === 0) {
+      setError('Bạn phải chọn ít nhất một ảnh cho tour!');
+      setLoading(false);
+      return;
+    }
     try {
-      const imageUrl = await uploadImage(selectedFile);
-
-      const submitData = {
-        ...formData,
-        imageUrl,
-        price: parseFloat(formData.price),
-        duration: parseInt(formData.duration),
-        maxParticipants: parseInt(formData.maxParticipants),
-        statusId: parseInt(formData.statusId),
-      };
-
+      const submitData = new FormData();
+      submitData.append('name', formData.name);
+      submitData.append('description', formData.description);
+      submitData.append('price', parseFloat(formData.price));
+      submitData.append('duration', parseInt(formData.duration));
+      submitData.append('maxParticipants', parseInt(formData.maxParticipants));
+      submitData.append('statusId', parseInt(formData.statusId));
+      (formData.destinationIds && formData.destinationIds.length > 0
+        ? formData.destinationIds
+        : []).forEach(id => submitData.append('destinationIds', id));
+      (formData.eventIds && formData.eventIds.length > 0
+        ? formData.eventIds
+        : []).forEach(id => submitData.append('eventIds', id));
+      selectedFiles.forEach(file => submitData.append('files', file));
       const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.post('http://localhost:8080/api/tours', submitData, config);
+      await axios.post('http://localhost:8080/api/tours', submitData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
       setShowSuccess(true);
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to create tour');
@@ -315,24 +307,25 @@ export default function AddTour() {
                   id="image"
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleFileChange}
-                  required
                 />
                 <div className="addtour-upload-placeholder">
                   <span className="addtour-upload-icon"><FaCamera /></span>
-                  <p>Click to upload tour image</p>
-                  <p className="addtour-upload-hint">PNG, JPG up to 5MB</p>
+                  <p>Click or drag to upload <b>one or more tour images</b></p>
+                  <p className="addtour-upload-hint">PNG, JPG up to 5MB each. You can select multiple images.</p>
                 </div>
               </label>
-              {previewUrl && (
-                <div className="addtour-preview">
-                  <img src={previewUrl} alt="Preview" />
-                  <button type="button" className="addtour-remove-image" onClick={() => {
-                    setSelectedFile(null);
-                    setPreviewUrl(null);
-                  }}>
-                    ✕
-                  </button>
+              {previewUrls.length > 0 && (
+                <div className="addtour-preview-multi">
+                  {previewUrls.map((url, idx) => (
+                    <div key={idx} className="addtour-preview">
+                      <img src={url} alt={`Preview ${idx + 1}`} />
+                      <button type="button" className="addtour-remove-image" onClick={() => handleRemoveImage(idx)}>
+                        ✕
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

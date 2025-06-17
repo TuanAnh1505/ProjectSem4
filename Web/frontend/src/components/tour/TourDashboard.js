@@ -15,6 +15,10 @@ export default function TourDashboard() {
     duration: '',
     destination: ''
   });
+  const [modalGallery, setModalGallery] = useState({ images: [], index: 0, open: false });
+  const [currentPage, setCurrentPage] = useState(1);
+  const toursPerPage = 6;
+  const totalPages = Math.ceil(filteredTours.length / toursPerPage);
 
   useEffect(() => {
     const fetchTours = async () => {
@@ -68,6 +72,10 @@ export default function TourDashboard() {
     setFilteredTours(result);
   }, [searchTerm, filters, tours]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters]);
+
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -91,6 +99,10 @@ export default function TourDashboard() {
       <div className="error-message">{error}</div>
     </div>
   );
+
+  const indexOfLastTour = currentPage * toursPerPage;
+  const indexOfFirstTour = indexOfLastTour - toursPerPage;
+  const currentTours = filteredTours.slice(indexOfFirstTour, indexOfLastTour);
 
   return (
     <div className="tour-dashboard" style={{ background: '#f6f7fb', minHeight: '100vh', padding: '0 0 48px 0' }}>
@@ -256,7 +268,7 @@ export default function TourDashboard() {
           maxWidth: 1200,
           margin: '0 auto'
         }}>
-          {filteredTours.slice(0, 6).map(tour => (
+          {currentTours.map(tour => (
             <div
               key={tour.tourId}
               className="tour-card-hover"
@@ -282,9 +294,9 @@ export default function TourDashboard() {
                 borderTopLeftRadius: 22,
                 borderTopRightRadius: 22,
               }}>
-                {tour.imageUrl ? (
+                {tour.imageUrls && tour.imageUrls.length > 0 ? (
                   <img
-                    src={`http://localhost:8080${tour.imageUrl}`}
+                    src={`http://localhost:8080${tour.imageUrls[0]}`}
                     alt={tour.name}
                     style={{
                       width: '100%',
@@ -400,6 +412,33 @@ export default function TourDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '32px 0 0 0', gap: 8 }}>
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #1976d2', background: currentPage === 1 ? '#e3e8f0' : '#1976d2', color: currentPage === 1 ? '#888' : '#fff', fontWeight: 700, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+          >
+            &lt;
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #1976d2', background: currentPage === i + 1 ? '#1976d2' : '#fff', color: currentPage === i + 1 ? '#fff' : '#1976d2', fontWeight: 700, cursor: 'pointer' }}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #1976d2', background: currentPage === totalPages ? '#e3e8f0' : '#1976d2', color: currentPage === totalPages ? '#888' : '#fff', fontWeight: 700, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+          >
+            &gt;
+          </button>
         </div>
       )}
       <style>{`

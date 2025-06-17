@@ -157,7 +157,17 @@ const Home = () => {
                     height: '200px',
                     overflow: 'hidden'
                   }}>
-                    {tour.imageUrl ? (
+                    {tour.imageUrls && tour.imageUrls.length > 0 ? (
+                      <img
+                        src={`http://localhost:8080${tour.imageUrls[0]}`}
+                        alt={tour.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    ) : tour.imageUrl ? (
                       <img
                         src={`http://localhost:8080${tour.imageUrl}`}
                         alt={tour.name}
