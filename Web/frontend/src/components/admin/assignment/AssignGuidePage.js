@@ -165,7 +165,9 @@ export default function AssignGuidePage() {
             <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Chọn hướng dẫn viên</label>
             <select value={selectedGuide} onChange={e => setSelectedGuide(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}>
               <option value="">-- Chọn HDV --</option>
-              {guides.map(g => <option key={g.guideId} value={g.guideId}>{g.userFullName}</option>)}
+              {guides.filter(g => g.isActive === true || g.isActive === undefined).map(g => (
+                <option key={g.guideId} value={g.guideId}>{g.userFullName}</option>
+              ))}
             </select>
           </div>
           <div style={{ flex: 1, minWidth: 140 }}>
