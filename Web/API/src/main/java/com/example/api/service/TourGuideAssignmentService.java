@@ -39,12 +39,21 @@ public class TourGuideAssignmentService {
 
         // Check if guide is available
         if (!guide.getIsAvailable()) {
-            throw new IllegalStateException("Tour guide is not available");
+            throw new IllegalStateException("Hướng dẫn viên hiện không sẵn sàng!");
         }
 
         // Check if dates are valid
         if (dto.getStartDate().isAfter(dto.getEndDate())) {
-            throw new IllegalArgumentException("Start date must be before end date");
+            throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc!");
+        }
+
+        // Check if guide has already been assigned to this tour & schedule
+        boolean alreadyAssigned = assignmentRepository.findByTourId(dto.getTourId()).stream()
+            .anyMatch(a -> a.getGuideId().equals(dto.getGuideId()) &&
+                          a.getStartDate().equals(dto.getStartDate()) &&
+                          a.getEndDate().equals(dto.getEndDate()));
+        if (alreadyAssigned) {
+            throw new IllegalStateException("Hướng dẫn viên đã được gán vào lịch trình này!");
         }
 
         // Check if guide has any overlapping assignments
@@ -52,7 +61,7 @@ public class TourGuideAssignmentService {
                 dto.getGuideId(),
                 dto.getStartDate(),
                 dto.getEndDate())) {
-            throw new IllegalStateException("Tour guide has overlapping assignments for the given dates");
+            throw new IllegalStateException("Hướng dẫn viên đã có tour khác trong khoảng thời gian này!");
         }
 
         TourGuideAssignment assignment = new TourGuideAssignment();
