@@ -16,7 +16,7 @@ class AppDrawer extends StatelessWidget {
 
           final prefs = snapshot.data!;
           final token = prefs.getString('auth_token');
-          final fullName = prefs.getString('full_name') ?? '';
+          final email = prefs.getString('email') ?? '';
           final userRole = prefs.getString('user_role') ?? '';
 
           return ListView(
@@ -45,7 +45,7 @@ class AppDrawer extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              fullName.isNotEmpty ? fullName : 'User',
+                              email.isNotEmpty ? email : 'User',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -129,7 +129,7 @@ class AppDrawer extends StatelessWidget {
                     '/home',
                     arguments: {
                       'userRole': userRole,
-                      'fullName': fullName,
+                      'fullName': email,
                     },
                   );
                 },
