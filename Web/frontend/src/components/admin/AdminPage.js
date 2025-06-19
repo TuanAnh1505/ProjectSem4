@@ -30,7 +30,7 @@ import AboutAdmin from "./AboutAdmin";
 import PaymentStatusManager from './PaymentStatusManager';
 import ExperienceIndex from "./experience/ExperienceIndex";
 import FeedbackIndex from "./feedback/FeedbackIndex";
-import AssignGuidePage from "./assignment/AssignGuidePage";
+import AssignGuidePage from "./assignment/AssignGuidePage.js";
 
 const AdminPage = () => {
   const location = useLocation();
