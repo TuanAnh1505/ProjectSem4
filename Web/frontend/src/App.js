@@ -24,7 +24,6 @@ import './App.css';
 import BookingConfirmation from './components/booking/BookingConfirmation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Feedback from './components/feedback/Feedback';
 import ScrollToTop from './components/ScrollToTop';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
