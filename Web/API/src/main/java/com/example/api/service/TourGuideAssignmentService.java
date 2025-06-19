@@ -47,6 +47,11 @@ public class TourGuideAssignmentService {
             throw new IllegalStateException("Hướng dẫn viên hiện không sẵn sàng!");
         }
 
+        // Check if guide's user account is active
+        if (guide.getUser() == null || guide.getUser().getIsActive() == null || !guide.getUser().getIsActive()) {
+            throw new IllegalStateException("Tài khoản hướng dẫn viên không hoạt động, không thể phân công!");
+        }
+
         // Check if dates are valid
         if (dto.getStartDate().isAfter(dto.getEndDate())) {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc!");
