@@ -388,80 +388,93 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                             ),
                           )
                         else
-                          ...schedules.map((schedule) {
-                            final scheduleId = schedule['scheduleId'] ?? schedule['id'];
-                            final passengers = bookingPassengers[scheduleId] ?? [];
-                            
-                            print('Rendering schedule $scheduleId with ${passengers.length} passengers');
-                            
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Lịch trình: ${_formatDate(DateTime.parse(schedule['startDate']))} - ${_formatDate(DateTime.parse(schedule['endDate']))}',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue,
-                                        ),
+                          ...schedules
+                              .where((s) {
+                                final scheduleStart = DateTime.parse(s['startDate']);
+                                final scheduleEnd = DateTime.parse(s['endDate']);
+                                return scheduleStart.isAtSameMomentAs(widget.assignment.startDate) &&
+                                       scheduleEnd.isAtSameMomentAs(widget.assignment.endDate);
+                              })
+                              .toList()
+                              .asMap()
+                              .entries
+                              .map((entry) {
+                                final index = entry.key;
+                                final schedule = entry.value;
+                                final scheduleId = schedule['scheduleId'] ?? schedule['id'];
+                                final passengers = bookingPassengers[scheduleId] ?? [];
+                                
+                                print('Rendering schedule $scheduleId with ${passengers.length} passengers');
+                                
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Lịch trình: ${_formatDate(DateTime.parse(schedule['startDate']))} - ${_formatDate(DateTime.parse(schedule['endDate']))}',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.blue,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Số lượng khách: ${passengers.length}',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Số lượng khách: ${passengers.length}',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (passengers.isEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 16.0),
-                                    child: Text(
-                                      'Chưa có khách hàng đặt tour',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
-                                        fontStyle: FontStyle.italic,
-                                      ),
+                                    ),
+                                    if (passengers.isEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 16.0),
+                                        child: Text(
+                                          'Chưa có khách hàng đặt tour',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[600],
+                                            fontStyle: FontStyle.italic,
+                                          ),
 
-                                    ),
-                                  )
-                                else
-                                  SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: DataTable(
-                                      headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
-                                      columns: const [
-                                        DataColumn(label: Text('Họ tên')),
-                                        DataColumn(label: Text('Loại khách')),
-                                        DataColumn(label: Text('Số điện thoại')),
-                                        DataColumn(label: Text('Email')),
-                                      ],
-                                      rows: passengers.map((passenger) {
-                                        return DataRow(
-                                          cells: [
-                                            DataCell(Text(passenger['fullName'] ?? '')),
-                                            DataCell(Text(_getPassengerType(passenger['passengerType']))),
-                                            DataCell(Text(passenger['phone'] ?? passenger['phoneNumber'] ?? '')),
-                                            DataCell(Text(passenger['email'] ?? '')),
+                                        ),
+                                      )
+                                    else
+                                      SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: DataTable(
+                                          headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
+                                          columns: const [
+                                            DataColumn(label: Text('Họ tên')),
+                                            DataColumn(label: Text('Loại khách')),
+                                            DataColumn(label: Text('Số điện thoại')),
+                                            DataColumn(label: Text('Email')),
                                           ],
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                if (scheduleId != schedules.last['scheduleId'] && schedules.last['id'])
-                                  const Divider(height: 32),
-                              ],
-                            );
-                          }).toList(),
+                                          rows: passengers.map((passenger) {
+                                            return DataRow(
+                                              cells: [
+                                                DataCell(Text(passenger['fullName'] ?? '')),
+                                                DataCell(Text(_getPassengerType(passenger['passengerType']))),
+                                                DataCell(Text(passenger['phone'] ?? passenger['phoneNumber'] ?? '')),
+                                                DataCell(Text(passenger['email'] ?? '')),
+                                              ],
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    if (index != schedules.length - 1)
+                                      const Divider(height: 32),
+                                  ],
+                                );
+                              })
+                              .toList(),
                       ],
                     ),
                   ),
@@ -1157,7 +1170,17 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => _buildScheduleDetailsSheet(setModalState),
+        builder: (context, setModalState) {
+          // Nếu có nhiều ảnh, chuyển galleryIndex về 1 (ảnh thứ 2)
+          if (tourImages.length > 1) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                galleryIndex = 1;
+              });
+            });
+          }
+          return _buildScheduleDetailsSheet(setModalState);
+        },
       ),
     );
   }
@@ -1214,112 +1237,122 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: schedules.length,
-                        itemBuilder: (context, index) {
-                          final schedule = schedules[index];
-                          print('Schedule data: $schedule'); // Debug log
-                          final scheduleId = schedule['scheduleId'] ?? schedule['id'];
-                          final isExpanded = expandedScheduleId == scheduleId;
-                          final scheduleItineraries = itineraries[scheduleId] ?? [];
-                          
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Schedule header
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[50]?.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                          children: [
-                                            Text(
-                                              'Lịch trình tour',
-                                            style: const TextStyle(
-                                                fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.blue,
-                                            ),
-                                          ),
-                                          const Spacer(),
-                                          GestureDetector(
-                                  onTap: () async {
-                                              print('Tapped schedule with id: $scheduleId');
-                                    if (isExpanded) {
-                                      setModalState(() {
-                                        expandedScheduleId = null;
-                                      });
-                                    } else {
-                                      if (itineraries[scheduleId] == null) {
-                                        await _loadItineraries(scheduleId);
-                                      }
-                                      setModalState(() {
-                                        expandedScheduleId = scheduleId;
-                                      });
-                                    }
-                                  },
-                                            child: Icon(
-                                              isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                                              color: Colors.grey[600],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${_formatDate(DateTime.parse(schedule['startDate']))} - ${_formatDate(DateTime.parse(schedule['endDate']))}',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                
-                                // Itineraries
-                                if (isExpanded)
+                    : (() {
+                        final assignmentStart = widget.assignment.startDate;
+                        final assignmentEnd = widget.assignment.endDate;
+                        final assignedSchedules = schedules.where((s) {
+                          final scheduleStart = DateTime.parse(s['startDate']);
+                          final scheduleEnd = DateTime.parse(s['endDate']);
+                          return scheduleStart.isAtSameMomentAs(assignmentStart) &&
+                                 scheduleEnd.isAtSameMomentAs(assignmentEnd);
+                        }).toList();
+                        return ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: assignedSchedules.length,
+                          itemBuilder: (context, index) {
+                            final schedule = assignedSchedules[index];
+                            print('Schedule data: $schedule'); // Debug log
+                            final scheduleId = schedule['scheduleId'] ?? schedule['id'];
+                            final isExpanded = expandedScheduleId == scheduleId;
+                            final scheduleItineraries = itineraries[scheduleId] ?? [];
+                            
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Schedule header
                                   Container(
-                                    padding: const EdgeInsets.only(top: 12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: scheduleItineraries.isEmpty
-                                          ? [
-                                              const Center(
-                                                child: Text(
-                                                  'Chưa có chi tiết hành trình',
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue[50]?.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                                children: [
+                                                  Text(
+                                                    'Lịch trình tour',
+                                                  style: const TextStyle(
+                                                      fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.blue,
                                                   ),
                                                 ),
+                                                const Spacer(),
+                                                GestureDetector(
+                                        onTap: () async {
+                                                    print('Tapped schedule with id: $scheduleId');
+                                          if (isExpanded) {
+                                            setModalState(() {
+                                              expandedScheduleId = null;
+                                            });
+                                          } else {
+                                            if (itineraries[scheduleId] == null) {
+                                              await _loadItineraries(scheduleId);
+                                            }
+                                            setModalState(() {
+                                              expandedScheduleId = scheduleId;
+                                            });
+                                          }
+                                        },
+                                                  child: Icon(
+                                                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${_formatDate(DateTime.parse(schedule['startDate']))} - ${_formatDate(DateTime.parse(schedule['endDate']))}',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey[600],
                                               ),
-                                            ]
-                                          : scheduleItineraries.asMap().entries.map((entry) {
-                                              final itinerary = entry.value;
-                                              print('Itinerary data: $itinerary');
-                                              final dayNumber = entry.key + 1;
-                                              
-                                              return _ItineraryItem(
-                                                itinerary: itinerary,
-                                                dayNumber: dayNumber,
-                                              );
-                                            }).toList(),
-                                    ),
+                                            ),
+                                          ],
+                                        ),
                                   ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                                  
+                                  // Itineraries
+                                  if (isExpanded)
+                                    Container(
+                                      padding: const EdgeInsets.only(top: 12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: scheduleItineraries.isEmpty
+                                            ? [
+                                                const Center(
+                                                  child: Text(
+                                                    'Chưa có chi tiết hành trình',
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ]
+                                            : scheduleItineraries.asMap().entries.map((entry) {
+                                                final itinerary = entry.value;
+                                                print('Itinerary data: $itinerary');
+                                                final dayNumber = entry.key + 1;
+                                                
+                                                return _ItineraryItem(
+                                                  itinerary: itinerary,
+                                                  dayNumber: dayNumber,
+                                                );
+                                              }).toList(),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      })(),
           ),
         ],
       ),

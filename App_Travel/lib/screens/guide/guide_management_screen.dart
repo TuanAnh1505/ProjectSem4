@@ -14,12 +14,15 @@ class GuideManagementScreen extends StatefulWidget {
 
 class _GuideManagementScreenState extends State<GuideManagementScreen> {
   final GuideService _guideService = GuideService();
+  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   List<TourGuideAssignment> _assignments = [];
   bool _isLoading = true;
   String? _error;
+  String _searchTerm = '';
   String _filterStatus = 'all'; // all, assigned, completed, cancelled
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -30,7 +33,9 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _scrollController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -52,12 +57,22 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     try {
       final assignments = await _guideService.fetchAllAssignments();
       
-      // Filter by status only (bỏ search filter)
+      // Filter by search term and status
       List<TourGuideAssignment> filteredAssignments = assignments.where((assignment) {
         // Status filter
         if (_filterStatus != 'all' && assignment.status.toLowerCase() != _filterStatus) {
           return false;
         }
+        
+        // Search filter
+        if (_searchTerm.isNotEmpty) {
+          final searchLower = _searchTerm.toLowerCase();
+          return assignment.tourName?.toLowerCase().contains(searchLower) == true ||
+                 assignment.guideName?.toLowerCase().contains(searchLower) == true ||
+                 assignment.role.toLowerCase().contains(searchLower) == true ||
+                 assignment.tourDescription?.toLowerCase().contains(searchLower) == true;
+        }
+        
         return true;
       }).toList();
 
@@ -75,6 +90,16 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
         _error = e.toString();
       });
     }
+  }
+
+  void _onSearchChanged(String value) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        _searchTerm = value;
+      });
+      _loadAssignments(refresh: true);
+    });
   }
 
   void _onFilterChanged(String status) {
@@ -337,6 +362,32 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
       ),
       child: Column(
         children: [
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm tour, hướng dẫn viên...',
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF6B7280)),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Color(0xFF6B7280)),
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearchChanged('');
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -399,99 +450,85 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     final isPast = assignment.endDate.isBefore(DateTime.now());
     final isOngoing = assignment.startDate.isBefore(DateTime.now()) && 
                      assignment.endDate.isAfter(DateTime.now());
-    final Color cardShadow = Colors.black.withOpacity(0.07);
-    final Color mainColor = Theme.of(context).primaryColor;
-    final Color badgeColor = _getStatusColor(assignment.status, isPast, isOngoing);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: cardShadow,
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-        border: Border.all(
-          color: badgeColor.withOpacity(0.18),
-          width: 1.2,
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: _getStatusColor(assignment.status, isPast, isOngoing).withOpacity(0.2),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Badge trạng thái
-            Align(
-              alignment: Alignment.topLeft,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: badgeColor.withOpacity(0.13),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.flag,
-                      color: badgeColor,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      _getStatusText(assignment.status, isPast, isOngoing),
-                      style: TextStyle(
-                        color: badgeColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            // Tên tour
-            Text(
-              assignment.tourName ?? 'Tour không xác định',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1F2937),
-                height: 1.2,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (assignment.tourDescription?.isNotEmpty == true) ...[
-              const SizedBox(height: 6),
-              Text(
-                assignment.tourDescription!,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF6B7280),
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            const SizedBox(height: 18),
-            // Thông tin hướng dẫn viên
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 26,
-                  backgroundColor: mainColor.withOpacity(0.13),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(assignment.status, isPast, isOngoing).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.tour,
+                    color: _getStatusColor(assignment.status, isPast, isOngoing),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildStatusBadge(assignment.status, isPast, isOngoing),
+                      const SizedBox(height: 6),
+                      Text(
+                        assignment.tourName ?? 'Tour không xác định',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      if (assignment.tourDescription?.isNotEmpty == true) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          assignment.tourDescription!,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF6B7280),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
                   child: Icon(
                     Icons.person,
-                    color: mainColor,
-                    size: 28,
+                    color: Theme.of(context).primaryColor,
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -508,11 +545,11 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
                         ),
                       ),
                       if (assignment.guideSpecialization?.isNotEmpty == true) ...[
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4),
                         Text(
                           assignment.guideSpecialization!,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             color: Color(0xFF6B7280),
                           ),
                         ),
@@ -535,7 +572,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
                             Text(
                               assignment.guideRating!.toStringAsFixed(1),
                               style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: 14,
                                 color: Color(0xFF6B7280),
                               ),
                             ),
@@ -547,62 +584,120 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 18),
-            // Thời gian & Vai trò
-            Row(
-              children: [
-                Icon(Icons.calendar_month, color: Colors.green, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  _formatDate(assignment.startDate) + ' - ' + _formatDate(assignment.endDate),
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.green,
-                  ),
-                ),
-                const Spacer(),
-                Icon(Icons.badge, color: mainColor, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  assignment.role,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F2937),
-                  ),
-                ),
-              ],
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: Color(0xFFE5E7EB)),
+              ),
             ),
-            const SizedBox(height: 18),
-            // Nút chi tiết
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            child: Row(
               children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => AssignmentDetailsScreen(assignment: assignment),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Thời gian',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF6B7280),
+                        ),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.info_outline, size: 18),
-                  label: const Text('Chi tiết'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_formatDate(assignment.startDate)} - ${_formatDate(assignment.endDate)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: const Color(0xFFE5E7EB),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Vai trò',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          assignment.role,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                      ],
                     ),
-                    elevation: 0,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          if (assignment.status.toLowerCase() == 'assigned' && !isPast)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Color(0xFFE5E7EB)),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // OutlinedButton.icon(
+                  //   onPressed: () => _deleteAssignment(assignment),
+                  //   icon: const Icon(Icons.cancel, size: 18),
+                  //   label: const Text('Hủy phân công'),
+                  //   style: OutlinedButton.styleFrom(
+                  //     foregroundColor: Colors.red,
+                  //     side: const BorderSide(color: Colors.red),
+                  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //   ),
+                  // ),
+                  // ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => AssignmentDetailsScreen(assignment: assignment),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline, size: 18),
+                    label: const Text('Chi tiết'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

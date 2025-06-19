@@ -117,7 +117,7 @@ class _AppNavigationState extends State<AppNavigation> {
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.flight_takeoff),
-            label: 'Tour',
+            label: 'Chuyến du lịch',
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -125,8 +125,8 @@ class _AppNavigationState extends State<AppNavigation> {
           ),
           if (widget.userRole == 'GUIDE')
             const BottomNavigationBarItem(
-              icon: Icon(Icons.manage_accounts),
-              label: 'Quản lý tour',
+              icon: Icon(Icons.emoji_people),
+              label: 'Hướng dẫn viên',
             ),
         ],
         currentIndex: _selectedIndex,
