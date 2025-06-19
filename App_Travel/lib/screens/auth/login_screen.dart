@@ -56,24 +56,24 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('auth_token', token);
         await prefs.setString('public_id', publicId);
         await prefs.setString('user_role', role);
-        await prefs.setString('full_name', _emailController.text.split('@')[0]);
+        await prefs.setString('email', _emailController.text);
         
         // Verify saved data
         final savedToken = prefs.getString('auth_token');
         final savedPublicId = prefs.getString('public_id');
         final savedRole = prefs.getString('user_role');
-        final savedFullName = prefs.getString('full_name');
+        final savedEmail = prefs.getString('email');
         print('Saved token: $savedToken');
         print('Saved publicId: $savedPublicId');
         print('Saved role: $savedRole');
-        print('Saved name: $savedFullName');
+        print('Saved email: $savedEmail');
         
         Navigator.pushReplacementNamed(
           context,
           '/home',
           arguments: {
             'userRole': role,
-            'fullName': _emailController.text.split('@')[0],
+            'email': _emailController.text,
           },
         );
       } catch (e) {

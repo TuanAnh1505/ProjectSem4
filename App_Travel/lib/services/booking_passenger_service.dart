@@ -103,4 +103,43 @@ class BookingPassengerService {
       throw Exception('Failed to check discount code: ${response.body}');
     }
   }
+
+  Future<List<Map<String, dynamic>>> fetchPassengersBySchedule(int scheduleId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (token == null) throw Exception('Authentication token not found');
+
+    // 1. Lấy tất cả booking
+    final bookingsRes = await http.get(
+      Uri.parse('http://10.0.2.2:8080/api/bookings/admin-bookings'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (bookingsRes.statusCode != 200) throw Exception('Failed to load bookings');
+    final List<dynamic> bookings = json.decode(bookingsRes.body);
+
+    // 2. Lọc booking theo scheduleId và statusName
+    final confirmedBookings = bookings.where((b) =>
+      b['scheduleId'] == scheduleId && b['statusName'] == 'Confirmed'
+    ).toList();
+
+    // 3. Lấy hành khách cho từng booking
+    List<Map<String, dynamic>> allPassengers = [];
+    for (var booking in confirmedBookings) {
+      final passengersRes = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/booking-passengers/booking/${booking['bookingId']}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (passengersRes.statusCode == 200) {
+        final List<dynamic> passengers = json.decode(passengersRes.body);
+        allPassengers.addAll(passengers.cast<Map<String, dynamic>>());
+      }
+    }
+    return allPassengers;
+  }
 } 

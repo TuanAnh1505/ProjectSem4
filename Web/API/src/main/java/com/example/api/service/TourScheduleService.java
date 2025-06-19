@@ -294,7 +294,7 @@ public class TourScheduleService {
         }
         logger.info("Hoàn thành việc gửi email chi tiết lịch trình tour");
     }
-
+    
     private void validateDates(TourScheduleDTO dto) {
         if (dto.getEndDate().isBefore(dto.getStartDate())) {
             throw new IllegalArgumentException("End date must be after start date");
