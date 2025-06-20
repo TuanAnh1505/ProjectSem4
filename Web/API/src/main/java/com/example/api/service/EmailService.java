@@ -539,4 +539,54 @@ public class EmailService {
             e.printStackTrace();
         }
     }
+
+    public void sendGuideAssignmentEmail(String to, String guideName, String tourName, String tourDesc, String startDate, String endDate, List<Map<String, String>> customers) {
+        try {
+            StringBuilder customerRows = new StringBuilder();
+            for (Map<String, String> c : customers) {
+                customerRows.append(String.format("""
+                    <tr>
+                        <td style='padding: 10px; border-bottom: 1px solid #ddd;'>%s</td>
+                        <td style='padding: 10px; border-bottom: 1px solid #ddd;'>%s</td>
+                    </tr>
+                """, c.getOrDefault("name", "N/A"), c.getOrDefault("phone", "N/A")));
+            }
+            String content = String.format("""
+                <html>
+                <head><meta charset='UTF-8'></head>
+                <body style='font-family: Arial, sans-serif; color: #333;'>
+                    <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                        <h2 style='color: #1976d2;'>Xin chào %s,</h2>
+                        <p>Bạn vừa được phân công làm hướng dẫn viên cho tour <b>%s</b>.</p>
+                        <p><b>Mô tả tour:</b> %s</p>
+                        <p><b>Lịch trình:</b> %s - %s</p>
+                        <h3 style='color: #1976d2;'>Danh sách khách hàng</h3>
+                        <table style='width: 100%%; border-collapse: collapse;'>
+                            <tr style='background-color: #f8f9fa;'>
+                                <th style='padding: 10px; text-align: left; border-bottom: 1px solid #ddd;'>Họ và tên</th>
+                                <th style='padding: 10px; text-align: left; border-bottom: 1px solid #ddd;'>Số điện thoại</th>
+                            </tr>
+                            %s
+                        </table>
+                        <div style='margin-top: 30px; color: #666;'>
+                            <p>Chúc bạn có một chuyến đi thành công!</p>
+                            <p>Trân trọng,<br>Đội ngũ TravelTour</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            """, guideName, tourName, tourDesc, startDate, endDate, customerRows.toString());
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject("Phân công hướng dẫn viên cho tour " + tourName);
+            helper.setText(content, true);
+            helper.setFrom("noreply@traveltour.com", "TravelTour");
+            emailSender.send(mimeMessage);
+            logger.info("Successfully sent guide assignment email to: {}", to);
+        } catch (Exception e) {
+            logger.error("Failed to send guide assignment email to: {}. Error: {}", to, e.getMessage());
+        }
+    }
+
 }
