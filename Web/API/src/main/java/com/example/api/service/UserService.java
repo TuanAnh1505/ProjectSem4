@@ -5,12 +5,10 @@ import com.example.api.model.Discount;
 import com.example.api.model.Role;
 import com.example.api.model.User;
 import com.example.api.model.UserToken;
-import com.example.api.model.UserRole;
 import com.example.api.repository.DiscountRepository;
 import com.example.api.repository.RoleRepository;
 import com.example.api.repository.UserRepository;
 import com.example.api.repository.UserTokenRepository;
-import com.example.api.repository.UserRoleRepository;
 import com.example.api.util.JwtUtil;
 
 // import jakarta.persistence.EntityNotFoundException;
@@ -30,7 +28,7 @@ import java.util.UUID;
 
 @Service
 public class UserService {
-   
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -45,9 +43,6 @@ public class UserService {
 
     @Autowired
     private UserTokenRepository userTokenRepository;
-
-    @Autowired
-    private UserRoleRepository userRoleRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -90,7 +85,7 @@ public class UserService {
             User savedUser = userRepository.save(user);
 
             // Gửi email kích hoạt
-            emailService.sendActivationEmail(savedUser.getEmail(), savedUser.getPublicId(), true, false);
+            emailService.sendActivationEmail(savedUser.getEmail(), savedUser.getPublicId(), true);
 
             // Gửi mã giảm giá NEWUSER10 nếu còn hạn
             Discount welcome = discountRepository.findByCode("NEWUSER10").orElse(null);
@@ -236,61 +231,5 @@ public class UserService {
     public User findByPublicId(String publicId) {
         return userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + publicId));
-    }
-
-    public User createGuideUser(String fullName, String email, String password, String phone, String address) {
-        // Kiểm tra email đã tồn tại chưa
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Email đã tồn tại!");
-        }
-        User user = new User();
-        user.setFullName(fullName);
-        user.setEmail(email);
-        user.setPasswordHash(passwordEncoder.encode(password));
-        user.setPhone(phone);
-        user.setAddress(address);
-        user.setIsActive(false);
-        user.setPublicId(UUID.randomUUID().toString());
-        user = userRepository.save(user);
-        // Gán role GUIDE
-        Role guideRole = roleRepository.findByRoleName("GUIDE");
-        if (guideRole == null) {
-            throw new RuntimeException("Role GUIDE không tồn tại!");
-        }
-        userRoleRepository.save(new UserRole(user.getUserid(), guideRole.getRoleid()));
-        // Gửi email kích hoạt
-        emailService.sendActivationEmail(user.getEmail(), user.getPublicId(), true, true);
-        return user;
-    }
-
-    public User createGuideUserAndSendMail(String fullName, String email, String password, String phone, String address) {
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Email đã tồn tại!");
-        }
-        User user = new User();
-        user.setFullName(fullName);
-        user.setEmail(email);
-        user.setPasswordHash(passwordEncoder.encode(password));
-        user.setPhone(phone);
-        user.setAddress(address);
-        user.setIsActive(true); // Kích hoạt luôn
-        user.setPublicId(UUID.randomUUID().toString());
-        user = userRepository.save(user);
-        // Gán role GUIDE
-        Role guideRole = roleRepository.findByRoleName("GUIDE");
-        if (guideRole == null) {
-            throw new RuntimeException("Role GUIDE không tồn tại!");
-        }
-        userRoleRepository.save(new UserRole(user.getUserid(), guideRole.getRoleid()));
-        // Gửi mail thông tin tài khoản
-        String subject = "Thông tin tài khoản hướng dẫn viên";
-        String content = "<p>Xin chào,</p>"
-            + "<p>Admin đã tạo cho bạn tài khoản hướng dẫn viên trên hệ thống TravelTour.</p>"
-            + "<p><b>Email đăng nhập:</b> " + email + "<br/>"
-            + "<b>Mật khẩu:</b> " + password + "</p>"
-            + "<p>Hãy đăng nhập và đổi mật khẩu sau khi sử dụng lần đầu.</p>"
-            + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
-        emailService.sendHtmlEmail(email, subject, content);
-        return user;
     }
 }
