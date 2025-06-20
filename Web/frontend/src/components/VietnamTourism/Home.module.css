@@ -857,3 +857,108 @@
   padding: 0 !important;
   background: #000;
 }
+
+/* Smooth fade-in animation for sections */
+.fadeInSection {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(.23,1.01,.32,1), transform 0.8s cubic-bezier(.23,1.01,.32,1);
+  will-change: opacity, transform;
+}
+.fadeInSection.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Card hover effect for tour cards */
+.tourCard {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(.23,1.01,.32,1), box-shadow 0.3s cubic-bezier(.23,1.01,.32,1);
+  cursor: pointer;
+}
+.tourCard:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.12), 0 1.5px 8px #b3c6e0;
+}
+
+.tourCardImg {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: filter 0.4s cubic-bezier(.23,1.01,.32,1);
+}
+.tourCard:hover .tourCardImg {
+  filter: brightness(0.92) saturate(1.2);
+}
+
+.tourCardBtn {
+  display: inline-block;
+  background: linear-gradient(90deg, #ff9800 0%, #ff5722 100%);
+  color: #fff;
+  padding: 14px 36px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 8px 32px #ff9800cc, 0 2px 12px #ff980077;
+  border: 3px solid #fff3e0;
+  outline: 3px solid #ff9800;
+  outline-offset: 2px;
+  letter-spacing: 2px;
+  transition: background 0.25s, box-shadow 0.25s, transform 0.18s, color 0.18s, outline 0.18s;
+  margin-top: 24px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 4px 16px #ff980088, 0 1px 1px #ff5722;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 8px #ff9800cc);
+  animation: btnPop 0.7s cubic-bezier(.23,1.01,.32,1);
+}
+.tourCardBtn:hover, .tourCardBtn:focus {
+  background: linear-gradient(90deg, #ff5722 0%, #ff9800 100%);
+  color: #fff;
+  box-shadow: 0 16px 48px #ff9800ee, 0 4px 24px #ff980088;
+  transform: translateY(-6px) scale(1.12) rotate(-2deg);
+  text-shadow: 0 8px 32px #ff9800cc, 0 2px 2px #ff5722;
+  outline: 4px solid #ff5722;
+  filter: drop-shadow(0 0 16px #ff9800ee);
+}
+@keyframes btnPop {
+  0% { transform: scale(0.7); opacity: 0; }
+  80% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.smoothBtn {
+  display: inline-block;
+  background: linear-gradient(90deg, #ff9800 0%, #ff5722 100%);
+  color: #fff;
+  padding: 22px 64px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-size: 28px;
+  font-weight: 900;
+  box-shadow: 0 12px 48px #ff9800cc, 0 4px 24px #ff980077;
+  border: 3px solid #fff3e0;
+  outline: 3px solid #ff9800;
+  outline-offset: 2px;
+  letter-spacing: 3px;
+  transition: all 0.3s cubic-bezier(.23,1.01,.32,1);
+  text-transform: uppercase;
+  margin-top: 32px;
+  text-shadow: 0 4px 16px #ff980088, 0 1px 1px #ff5722;
+  filter: drop-shadow(0 0 12px #ff9800cc);
+  animation: btnPop 0.7s cubic-bezier(.23,1.01,.32,1);
+}
+.smoothBtn:hover, .smoothBtn:focus {
+  background: linear-gradient(90deg, #ff5722 0%, #ff9800 100%);
+  color: #fff;
+  box-shadow: 0 24px 64px #ff9800ee, 0 8px 32px #ff980088;
+  transform: translateY(-8px) scale(1.13) rotate(1.5deg);
+  text-shadow: 0 12px 48px #ff9800cc, 0 2px 2px #ff5722;
+  outline: 5px solid #ff5722;
+  filter: drop-shadow(0 0 24px #ff9800ee);
+}
