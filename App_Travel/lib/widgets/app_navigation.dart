@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'app_drawer.dart';
-import '../screens/home_screen.dart';
-import '../screens/tour/tour_screen.dart';
-import '../screens/search_screen.dart';
-import '../screens/auth/personal_page_screen.dart';
+import '../../widgets/app_drawer.dart';
+import '../../screens/home_screen.dart';
+import '../../screens/tour/tour_screen.dart';
+import '../../screens/search_screen.dart';
+import '../../screens/auth/personal_page_screen.dart';
+import '../../screens/guide/guide_management_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 
 class AppNavigation extends StatefulWidget {
@@ -32,11 +34,13 @@ class _AppNavigationState extends State<AppNavigation> {
   void initState() {
     super.initState();
     _selectedIndex = widget.currentIndex;
+    print('User Role: ${widget.userRole}');
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      print('Selected Index: $index');
     });
   }
 
@@ -50,23 +54,25 @@ class _AppNavigationState extends State<AppNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _selectedIndex == 2
+      appBar: _selectedIndex == 2 || _selectedIndex == 4
           ? null
           : AppBar(
               leading: null,
               title: _selectedIndex == 0
-                  ? const Text(
-                      'Hi Vietnam',
-                      style: TextStyle(
-                        fontFamily: 'Pacifico',
+                  ? Text(
+                      'Hi VietNam',
+                      style: GoogleFonts.baloo2(
                         color: Colors.orange,
-                        fontSize: 30,
-                        fontWeight: FontWeight.normal,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2.5,
                       ),
                     )
                   : _selectedIndex == 1
                       ? const Text('Tìm kiếm tour du lịch')
-                      : null,
+                      : _selectedIndex == 3
+                          ? const Text('Tài khoản')
+                          : const Text('Quản lý tour'),
               centerTitle: true,
               actions: _selectedIndex == 0
                   ? [
@@ -82,47 +88,46 @@ class _AppNavigationState extends State<AppNavigation> {
                         icon: const Icon(Icons.person, color: Colors.orange),
                         onPressed: () {
                           setState(() {
-                            _selectedIndex = 4; // Chuyển sang tab tài khoản
+                            _selectedIndex = 3;
                           });
                         },
                       ),
                     ]
                   : null,
             ),
-      drawer: _selectedIndex == 0
-          ? AppDrawer(
-              userName: widget.userName,
-              userRole: widget.userRole,
-            )
-          : null,
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           Expanded(child: _buildBody()),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+        type: BottomNavigationBarType.shifting,
+        iconSize:30,
+        selectedFontSize: 12,
+        unselectedFontSize: 11,
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Trang chủ',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Tìm kiếm',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.flight_takeoff),
             label: 'Tour',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Yêu thích',
-          ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Tài khoản',
           ),
+          if (widget.userRole == 'GUIDE')
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.manage_accounts),
+              label: 'Quản lý tour',
+            ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.orange,
@@ -155,11 +160,14 @@ class _AppNavigationState extends State<AppNavigation> {
           },
         );
       case 3:
-        return const Center(child: Text('Yêu thích'));
-      case 4:
         return const PersonalPageScreen(
           showAppBar: false,
         );
+      case 4:
+        if (widget.userRole == 'GUIDE') {
+          return const GuideManagementScreen();
+        }
+        return HomeScreen(userName: widget.userName, userRole: widget.userRole);
       default:
         return HomeScreen(userName: widget.userName, userRole: widget.userRole);
     }

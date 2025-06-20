@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th6 04, 2025 lúc 06:13 AM
+-- Thời gian đã tạo: Th6 09, 2025 lúc 03:59 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -42,48 +42,39 @@ CREATE TABLE `audit_logs` (
 --
 
 CREATE TABLE `bookings` (
-  `booking_id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_id` int(11) NOT NULL,
+  `booking_code` varchar(20) DEFAULT NULL,
   `tour_id` int(11) NOT NULL,
-  `schedule_id` int(11) DEFAULT NULL,
-  `booking_date` datetime DEFAULT NULL,
-  `status_id` int(11) DEFAULT NULL,
+  `booking_date` datetime DEFAULT current_timestamp(),
+  `status_id` int(11) NOT NULL,
   `total_price` decimal(38,2) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `userid` bigint(20) NOT NULL,
-  `booking_code` varchar(20) NOT NULL,
-  `discount_code` varchar(50) DEFAULT NULL,
-  `discount_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`booking_id`),
-  UNIQUE KEY `booking_code` (`booking_code`),
-  KEY `tour_id` (`tour_id`),
-  KEY `status_id` (`status_id`),
-  KEY `userid` (`userid`),
-  KEY `discount_id` (`discount_id`),
-  CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`tour_id`),
-  CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `booking_statuses` (`status_id`),
-  CONSTRAINT `bookings_ibfk_3` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`),
-  CONSTRAINT `bookings_ibfk_4` FOREIGN KEY (`discount_id`) REFERENCES `discounts` (`discount_id`)
+  `schedule_id` int(11) DEFAULT NULL,
+  `discount_code` varchar(255) DEFAULT NULL,
+  `discount_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `bookings`
 --
 
-INSERT INTO `bookings` (`booking_id`, `booking_code`, `tour_id`, `booking_date`, `status_id`, `total_price`, `created_at`, `updated_at`, `userid`, `schedule_id`) VALUES
-(1, 'BK202506031608114851', 2, '2025-06-03 16:08:11', 2, 4780000.00, '2025-06-03 16:08:11', '2025-06-03 16:08:35', 1, 3),
-(2, 'BK202506031621179173', 4, '2025-06-03 16:21:17', 1, 3800000.00, '2025-06-03 16:21:17', '2025-06-03 16:21:17', 2, 4),
-(3, 'BK202506031622403491', 4, '2025-06-03 16:22:40', 1, 3800000.00, '2025-06-03 16:22:40', '2025-06-03 16:22:40', 2, 4),
-(4, 'BK202506031636350724', 5, '2025-06-03 16:36:35', 2, 4200000.00, '2025-06-03 16:36:35', '2025-06-03 16:37:31', 2, 9),
-(5, 'BK202506040834014981', 2, '2025-06-04 08:34:01', 1, 4780000.00, '2025-06-04 08:34:01', '2025-06-04 08:34:01', 4, 3),
-(6, 'BK202506040836475615', 4, '2025-06-04 08:36:47', 1, 3800000.00, '2025-06-04 08:36:47', '2025-06-04 08:36:47', 2, 4),
-(7, 'BKKCRWRC25088154', 5, '2025-06-04 08:39:23', 1, 4200000.00, '2025-06-04 08:39:23', '2025-06-04 08:39:23', 2, 5),
-(8, 'BKHD1955M97DYWCC24M5', 2, '2025-06-04 08:40:19', 2, 4780000.00, '2025-06-04 08:40:19', '2025-06-04 08:41:31', 2, 3),
-(9, 'BKJN68PWB230IOA7TG3G', 2, '2025-06-04 09:40:11', 2, 4780000.00, '2025-06-04 09:40:11', '2025-06-04 09:50:22', 2, 3),
-(10, 'BK2869A6JH482C012IX1', 5, '2025-06-04 09:50:09', 2, 4200000.00, '2025-06-04 09:50:09', '2025-06-04 09:50:29', 1, 5),
-(11, 'BK4IJ0P08VH96L8A1KJ0', 4, '2025-06-04 09:52:27', 2, 3800000.00, '2025-06-04 09:52:27', '2025-06-04 09:52:48', 1, 4),
-(12, 'BKJUNMSX2HO35KD55725', 4, '2025-06-04 10:01:19', 2, 3800000.00, '2025-06-04 10:01:19', '2025-06-04 10:01:39', 1, 4),
-(13, 'BK61IG3V97H23P54BF69', 4, '2025-06-04 10:50:04', 2, 3800000.00, '2025-06-04 10:50:04', '2025-06-04 10:50:28', 1, 4);
+INSERT INTO `bookings` (`booking_id`, `booking_code`, `tour_id`, `booking_date`, `status_id`, `total_price`, `created_at`, `updated_at`, `userid`, `schedule_id`, `discount_code`, `discount_id`) VALUES
+(1, 'BK202506031608114851', 2, '2025-06-03 16:08:11', 2, 4780000.00, '2025-06-03 16:08:11', '2025-06-03 16:08:35', 1, 3, NULL, NULL),
+(4, 'BK202506031636350724', 5, '2025-06-03 16:36:35', 2, 4200000.00, '2025-06-03 16:36:35', '2025-06-03 16:37:31', 2, 9, NULL, NULL),
+(8, 'BKHD1955M97DYWCC24M5', 2, '2025-06-04 08:40:19', 2, 4780000.00, '2025-06-04 08:40:19', '2025-06-04 08:41:31', 2, 3, NULL, NULL),
+(9, 'BKJN68PWB230IOA7TG3G', 2, '2025-06-04 09:40:11', 2, 4780000.00, '2025-06-04 09:40:11', '2025-06-04 09:50:22', 2, 3, NULL, NULL),
+(10, 'BK2869A6JH482C012IX1', 5, '2025-06-04 09:50:09', 2, 4200000.00, '2025-06-04 09:50:09', '2025-06-04 09:50:29', 1, 5, NULL, NULL),
+(11, 'BK4IJ0P08VH96L8A1KJ0', 4, '2025-06-04 09:52:27', 2, 3800000.00, '2025-06-04 09:52:27', '2025-06-04 09:52:48', 1, 4, NULL, NULL),
+(12, 'BKJUNMSX2HO35KD55725', 4, '2025-06-04 10:01:19', 2, 3800000.00, '2025-06-04 10:01:19', '2025-06-04 10:01:39', 1, 4, NULL, NULL),
+(13, 'BK61IG3V97H23P54BF69', 4, '2025-06-04 10:50:04', 2, 3800000.00, '2025-06-04 10:50:04', '2025-06-04 10:50:28', 1, 4, NULL, NULL),
+(17, 'BKK602MD940M07A2O53X', 5, '2025-06-05 15:19:53', 2, 4200000.00, '2025-06-05 15:19:53', '2025-06-05 15:20:19', 1, 5, NULL, NULL),
+(22, 'BKL672WE392Y6OR12900', 12, '2025-06-05 16:02:49', 2, 375000.00, '2025-06-05 16:02:49', '2025-06-05 16:03:18', 1, 12, 'FIRST100', 5),
+(27, 'BK51USHX13KHDKH70559', 12, '2025-06-05 22:09:01', 2, 450000.00, '2025-06-05 22:09:01', '2025-06-05 22:29:17', 1, 12, NULL, NULL),
+(28, 'BK68Y8E8G3971VO5WTU2', 7, '2025-06-05 22:44:02', 2, 3640000.00, '2025-06-05 22:44:02', '2025-06-05 22:55:09', 1, 13, 'HOTDEAL30', 3),
+(32, 'BK6225HHS00389LW95UY', 7, '2025-06-05 23:16:57', 2, 3900000.00, '2025-06-05 23:16:57', '2025-06-05 23:21:14', 1, 13, 'FIRST100', 5),
+(38, 'BK49NN05N56709AR2J7R', 12, '2025-06-07 15:45:12', 1, 500000.00, '2025-06-07 15:45:12', '2025-06-07 15:45:12', 1, 12, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -110,14 +101,22 @@ CREATE TABLE `booking_passengers` (
 
 INSERT INTO `booking_passengers` (`passenger_id`, `booking_id`, `userid`, `full_name`, `phone`, `email`, `address`, `passenger_type`, `birth_date`, `gender`) VALUES
 (1, 1, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2005-01-01', 'Nam'),
-(2, 2, 2, 'do viet hoang', '1234567890', 'hoang@gmail.com', 'hà nội1', 'adult', '2025-06-03', 'Nam'),
 (3, 4, 2, 'do viet hoang', '1234567890', 'hoang@gmail.com', 'hà nội1', 'adult', '2025-06-03', 'Nam'),
 (4, 8, 2, 'do viet hoang', '1234567890', 'hoang@gmail.com', 'hà nội1', 'adult', '2005-01-01', 'Nam'),
 (5, 9, 2, 'do viet hoang', '1234567890', 'hoang@gmail.com', 'hà nội1', 'adult', '2000-12-05', 'Nam'),
 (6, 10, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '20005-12-05', 'Nam'),
 (7, 11, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2000-12-05', 'Nam'),
 (8, 12, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2000-12-05', 'Nam'),
-(9, 13, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2000-12-02', 'Nam');
+(9, 13, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2000-12-02', 'Nam'),
+(12, 17, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2000-12-20', 'Nam'),
+(13, 22, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2005-02-01', 'Nam'),
+(15, 27, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2005-12-20', 'Nam'),
+(16, 27, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2000-12-02', 'Nam'),
+(17, 27, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2002-12-02', 'Nam'),
+(18, 28, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2005-12-20', 'Nam'),
+(19, 32, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2005-12-25', 'Nam'),
+(20, 32, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2000-12-20', 'Nam'),
+(23, 38, 1, 'admin', '1234567890', 'admin@gmail.com', '12345', 'adult', '2000-12-22', 'Nam');
 
 -- --------------------------------------------------------
 
@@ -215,6 +214,17 @@ CREATE TABLE `discounts` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `discounts`
+--
+
+INSERT INTO `discounts` (`discount_id`, `code`, `description`, `discount_percent`, `start_date`, `end_date`, `created_at`) VALUES
+(1, 'DISCOUNT10', 'Giảm 10% cho tất cả tour hè', 10, '2025-06-01 00:00:00', '2025-06-30 23:59:59', '2025-06-05 15:16:30'),
+(2, 'SUMMER20', 'Ưu đãi 20% dịp hè cho tour miền Trung', 20, '2025-06-10 00:00:00', '2025-07-15 23:59:59', '2025-06-05 15:16:30'),
+(3, 'HOTDEAL30', 'Giảm 30% cho tour đặt sớm trước 30 ngày', 30, '2025-06-01 00:00:00', '2025-08-31 23:59:59', '2025-06-05 15:16:30'),
+(4, 'FAMILY15', 'Ưu đãi 15% cho nhóm gia đình từ 4 người trở lên', 15, '2025-06-01 00:00:00', '2025-09-01 23:59:59', '2025-06-05 15:16:30'),
+(5, 'FIRST100', 'Tặng 25% cho 100 khách đầu tiên', 25, '2025-06-01 00:00:00', '2025-06-15 23:59:59', '2025-06-05 15:16:30');
+
 -- --------------------------------------------------------
 
 --
@@ -289,6 +299,22 @@ INSERT INTO `event_status` (`event_status_id`, `status_name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `experiences`
+--
+
+CREATE TABLE `experiences` (
+  `experience_id` bigint(20) NOT NULL,
+  `content` varchar(255) DEFAULT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `tour_id` int(11) DEFAULT NULL,
+  `userid` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `feedbacks`
 --
 
@@ -330,11 +356,12 @@ INSERT INTO `feedback_status` (`status_id`, `status_name`, `description`) VALUES
 --
 
 CREATE TABLE `media` (
-  `media_id` int(11) NOT NULL,
+  `media_id` bigint(20) NOT NULL,
   `userid` bigint(20) NOT NULL,
-  `file_type` enum('image','video') NOT NULL,
+  `file_type` varchar(255) DEFAULT NULL,
   `file_url` varchar(255) NOT NULL,
-  `uploaded_at` datetime DEFAULT current_timestamp()
+  `uploaded_at` datetime DEFAULT current_timestamp(),
+  `experience_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -386,7 +413,13 @@ INSERT INTO `payments` (`payment_id`, `booking_id`, `userid`, `amount`, `payment
 (5, 10, 1, 4200000.00, 2, 3, 'fd09f154-a746-4b22-83f5-4274018d04d3', '2025-06-04 09:50:19', '2025-06-04 09:50:19', '2025-06-04 09:50:29'),
 (6, 11, 1, 3800000.00, 2, 3, '8e5f8532-3722-4723-a9b4-6d0ce5186bd4', '2025-06-04 09:52:40', '2025-06-04 09:52:40', '2025-06-04 09:52:48'),
 (7, 12, 1, 3800000.00, 2, 3, 'f16126d1-9fd7-4b59-a0df-337985dd0394', '2025-06-04 10:01:27', '2025-06-04 10:01:27', '2025-06-04 10:01:39'),
-(8, 13, 1, 3800000.00, 2, 3, '9e3b3407-2513-492e-bd29-d9a0326c3b5f', '2025-06-04 10:50:18', '2025-06-04 10:50:18', '2025-06-04 10:50:28');
+(8, 13, 1, 3800000.00, 2, 3, '9e3b3407-2513-492e-bd29-d9a0326c3b5f', '2025-06-04 10:50:18', '2025-06-04 10:50:18', '2025-06-04 10:50:28'),
+(9, 17, 1, 4200000.00, 2, 3, '8551354c-ef12-49e4-8bce-610aa92c9480', '2025-06-05 15:20:07', '2025-06-05 15:20:07', '2025-06-05 15:20:19'),
+(10, 22, 1, 375000.00, 2, 3, '7f60c957-9854-4109-9f54-05a88e04d1d9', '2025-06-05 16:03:08', '2025-06-05 16:03:08', '2025-06-05 16:03:18'),
+(11, 27, 1, 450000.00, 2, 3, 'cf8e31fc-3e50-481d-885a-5b6f48c62558', '2025-06-05 22:28:34', '2025-06-05 22:28:34', '2025-06-05 22:29:17'),
+(12, 28, 1, 3640000.00, 2, 3, '46af7b4d-bf2a-48a6-b461-e1a8a7694294', '2025-06-05 22:54:59', '2025-06-05 22:54:59', '2025-06-05 22:55:09'),
+(13, 32, 1, 3900000.00, 2, 3, '17290717-43ec-4212-93d8-545468b9a236', '2025-06-05 23:21:04', '2025-06-05 23:21:04', '2025-06-05 23:21:14'),
+(15, 38, 1, 500000.00, 2, 1, 'dc73abd0-d41e-4146-b08b-a61a8ff18a9c', '2025-06-07 15:46:57', '2025-06-07 15:46:57', '2025-06-07 15:46:57');
 
 -- --------------------------------------------------------
 
@@ -425,7 +458,18 @@ INSERT INTO `payment_history` (`history_id`, `payment_id`, `status_id`, `notes`,
 (16, 7, 1, 'Payment created', '2025-06-04 10:01:27'),
 (17, 7, 3, 'Status updated to Completed', '2025-06-04 10:01:44'),
 (18, 8, 1, 'Payment created', '2025-06-04 10:50:18'),
-(19, 8, 3, 'Status updated to Completed', '2025-06-04 10:50:32');
+(19, 8, 3, 'Status updated to Completed', '2025-06-04 10:50:32'),
+(20, 9, 1, 'Payment created', '2025-06-05 15:20:07'),
+(21, 9, 3, 'Status updated to Completed', '2025-06-05 15:20:24'),
+(22, 10, 1, 'Payment created', '2025-06-05 16:03:08'),
+(23, 10, 3, 'Status updated to Completed', '2025-06-05 16:03:23'),
+(24, 11, 1, 'Payment created', '2025-06-05 22:28:34'),
+(25, 11, 3, 'Status updated to Completed', '2025-06-05 22:29:24'),
+(26, 12, 1, 'Payment created', '2025-06-05 22:54:59'),
+(27, 12, 3, 'Status updated to Completed', '2025-06-05 22:55:15'),
+(28, 13, 1, 'Payment created', '2025-06-05 23:21:04'),
+(29, 13, 3, 'Status updated to Completed', '2025-06-05 23:21:19'),
+(31, 15, 1, 'Payment created', '2025-06-07 15:46:57');
 
 -- --------------------------------------------------------
 
@@ -524,7 +568,8 @@ INSERT INTO `tours` (`tour_id`, `name`, `description`, `price`, `duration`, `max
 (2, 'Khám phá Hà Giang', 'Tour khám phá vùng núi đá Hà Giang, chiêm ngưỡng vẻ đẹp hùng vĩ và trải nghiệm văn hóa bản địa.', 4780000.00, 3, 20, 2, '/uploads/tours/42a359bb-df3b-4f1d-9db6-22cf24e24413_Tour khám phá vùng núi đá Hà Giang,.jfif', '2025-05-17 12:03:12', '2025-05-24 19:10:48'),
 (4, 'Du lịch Hạ Long', 'Tham quan Vịnh Hạ Long, hang Sửng Sốt, tắm biển Bãi Cháy.', 3800000.00, 3, 40, 3, '/uploads/tours/adaede19-66c6-45ef-af17-b0cd223df540_Hạ Long.jfif', '2025-05-20 19:50:44', '2025-05-20 19:50:44'),
 (5, 'Khám phá Sapa', 'Check-in đỉnh Fansipan, thung lũng Mường Hoa, bản Cát Cát.', 4200000.00, 3, 25, 3, '/uploads/tours/dd688e7e-9d55-4657-bf9b-fb00943c9b0b_Khám phá Sapa.jpg', '2025-05-20 19:52:00', '2025-05-20 19:52:00'),
-(7, 'Khám phá miền Trung', 'Di sản Hội An, Cố đô Huế, động Phong Nha - Kẻ Bàng.', 5200000.00, 4, 2, 3, '/uploads/tours/e453f51b-1024-47d4-a825-664b834506db_Khám phá miền Trung.jfif', '2025-05-20 19:55:25', '2025-06-01 16:54:50');
+(7, 'Khám phá miền Trung', 'Di sản Hội An, Cố đô Huế, động Phong Nha - Kẻ Bàng.', 5200000.00, 4, 2, 3, '/uploads/tours/e453f51b-1024-47d4-a825-664b834506db_Khám phá miền Trung.jfif', '2025-05-20 19:55:25', '2025-06-01 16:54:50'),
+(12, 'Tour xe đạp đồng quê Nha Trang 1 ngày', 'Tour xe đạp đồng quê Nha Trang 1 ngày không phải là một hành trình du lịch thông thường. Mà là một cuộc trở về – về với miền ký ức tuổi thơ, về với hồn quê chân thật giữa một vùng đất vẫn giữ nguyên vẻ đẹp nguyên sơ, bình dị và mộc mạc.', 500000.00, 1, 5, 2, '/uploads/tours/0fc48b11-471a-4544-ba2a-e636dfe33921_du-lich-nha-trang.webp', '2025-06-05 15:59:12', '2025-06-05 15:59:12');
 
 -- --------------------------------------------------------
 
@@ -576,7 +621,6 @@ INSERT INTO `tour_events` (`tour_id`, `event_id`) VALUES
 
 CREATE TABLE `tour_guides` (
   `guide_id` int(11) NOT NULL,
-  `user_id` bigint(20) NOT NULL,
   `experience_years` int(11) NOT NULL,
   `specialization` varchar(255) NOT NULL,
   `languages` varchar(255) NOT NULL,
@@ -631,7 +675,8 @@ INSERT INTO `tour_itinerary` (`itinerary_id`, `schedule_id`, `title`, `descripti
 (6, 4, 'Lễ hội Hoa Hạ Long', 'Chiêm ngưỡng không gian hoa và nghệ thuật', '13:00:00', '16:00:00', 'EVENT'),
 (8, 5, 'Khám phá thung lũng Mường Hoa', 'Tham quan ruộng bậc thang và di tích đá cổ', '13:00:00', '15:30:00', 'DESTINATION'),
 (9, 7, 'Đêm nhạc Hội An phố cổ', 'Chương trình nghệ thuật đặc sắc tái hiện văn hóa xưa', '19:00:00', '21:00:00', 'EVENT'),
-(14, 9, 'g', 'f', '11:11:00', '23:11:00', 'MEAL');
+(14, 9, 'g', 'f', '11:11:00', '23:11:00', 'MEAL'),
+(15, 12, 'a', '08:00: Đón khách tại khách sạn – Khởi đầu một ngày mới tràn đầy năng lượng Xe và hướng dẫn viên đến đón bạn tại khách sạn trong trung tâm thành phố. Chỉ vài phút sau, bạn đã rời xa phố xá ồn ào để đến điểm xuất phát. Nơi mà hành trình "hít thở thật sâu" chính thức bắt đầu.', '18:01:00', '22:00:00', 'DESTINATION');
 
 -- --------------------------------------------------------
 
@@ -659,7 +704,9 @@ INSERT INTO `tour_schedules` (`schedule_id`, `tour_id`, `start_date`, `end_date`
 (4, 4, '2025-06-15', '2025-06-17', 'available', '2025-05-20 19:59:02', '2025-05-20 19:59:02'),
 (5, 5, '2025-06-20', '2025-06-26', 'available', '2025-05-20 19:59:22', '2025-05-20 19:59:22'),
 (7, 7, '2025-08-05', '2025-08-06', 'full', '2025-05-20 20:02:25', '2025-05-20 20:02:25'),
-(9, 5, '2025-06-06', '2025-06-08', 'available', '2025-05-24 20:02:11', '2025-05-24 20:58:05');
+(9, 5, '2025-06-06', '2025-06-08', 'available', '2025-05-24 20:02:11', '2025-05-24 20:58:05'),
+(12, 12, '2025-07-06', '2025-07-07', 'available', '2025-06-05 15:59:42', '2025-06-05 15:59:42'),
+(13, 7, '2025-12-02', '2025-12-04', 'full', '2025-06-05 22:43:51', '2025-06-05 22:43:51');
 
 -- --------------------------------------------------------
 
@@ -751,10 +798,7 @@ CREATE TABLE `usertokens` (
 --
 
 INSERT INTO `usertokens` (`tokenid`, `userid`, `token`, `expiry`, `createdat`) VALUES
-(4, 2, 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob2FuZ0BnbWFpbC5jb20iLCJpYXQiOjE3NDkwMDQzNjgsImV4cCI6MTc0OTA0MDM2OH0.8IGCy8-CcRG5bEXjMyVM_1mn9Q2NAaFQ8vFa6oLgwIB6G1BZhS9y2iFJIwi_DQ9UTvRsgpvDR9ecug1o_uCbUg', '2025-06-04 09:42:48', '2025-06-04 09:32:48'),
-(5, 1, 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3NDkwMDUxODUsImV4cCI6MTc0OTA0MTE4NX0.QtCyBbcloHq9DusGNwswUhzMUAN5jgqOMUG0htbv1Dsippb4jC-HEVQ3EziRtQk1MbhcS2hAjIsTIMUmtoJrpA', '2025-06-04 09:56:25', '2025-06-04 09:46:25'),
-(6, 1, 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3NDkwMDg5NTksImV4cCI6MTc0OTA0NDk1OX0.QG9i0fVqJ8MeJpZRvWEctF9ANGDvIRb3UXLXMM-vcQnVMejH7_p8Mm3HdMBuwlTPTKmFKGPm9Dl2ZCA9GQ5TGA', '2025-06-04 10:59:19', '2025-06-04 10:49:19'),
-(7, 1, 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3NDkwMDg5NzQsImV4cCI6MTc0OTA0NDk3NH0.zvMjKfW8Do6YgZri9phELdTTSc9UpUESFyKgzlH-Ywb1IEkljUrC34x4ZhK1GNl1wd7LU0AMpW3l0a3calQRvQ', '2025-06-04 10:59:34', '2025-06-04 10:49:34');
+(1, 1, 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3NDk0MzM1NjksImV4cCI6MTc0OTQ2OTU2OX0.1h5vfU7H2MwKHUsZZHiLkSZv4HmnJV9BA-qS_Gvqz6qzdUld0Eu_BdPQ2bikNInY-wQDlXW2tmu6E20k2x2s1w', '2025-06-09 08:56:09', '2025-06-09 08:46:09');
 
 -- --------------------------------------------------------
 
@@ -769,6 +813,18 @@ CREATE TABLE `user_discounts` (
   `used` bit(1) DEFAULT b'0',
   `used_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `user_discounts`
+--
+
+INSERT INTO `user_discounts` (`tour_id`, `userid`, `discount_id`, `used`, `used_at`) VALUES
+(4, 1, 3, b'1', NULL),
+(5, 1, 1, b'1', NULL),
+(5, 1, 5, b'1', NULL),
+(7, 1, 3, b'1', NULL),
+(7, 1, 5, b'1', NULL),
+(12, 1, 5, b'1', NULL);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -845,6 +901,14 @@ ALTER TABLE `event_file_paths`
 ALTER TABLE `event_status`
   ADD PRIMARY KEY (`event_status_id`),
   ADD UNIQUE KEY `uk_status_name` (`status_name`);
+
+--
+-- Chỉ mục cho bảng `experiences`
+--
+ALTER TABLE `experiences`
+  ADD PRIMARY KEY (`experience_id`),
+  ADD KEY `FKavqfd594ubb9r0j5wbcb6tgpd` (`tour_id`),
+  ADD KEY `FKmvm09uynp3ikm1px4i6q5ve6r` (`userid`);
 
 --
 -- Chỉ mục cho bảng `feedbacks`
@@ -942,8 +1006,7 @@ ALTER TABLE `tour_events`
 --
 ALTER TABLE `tour_guides`
   ADD PRIMARY KEY (`guide_id`),
-  ADD UNIQUE KEY `UK_heivp9fqmiwskkog40ikipns8` (`userid`),
-  ADD KEY `fk_guide_user` (`user_id`);
+  ADD UNIQUE KEY `UK_heivp9fqmiwskkog40ikipns8` (`userid`);
 
 --
 -- Chỉ mục cho bảng `tour_guide_assignments`
@@ -1018,13 +1081,13 @@ ALTER TABLE `audit_logs`
 -- AUTO_INCREMENT cho bảng `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_passengers`
 --
 ALTER TABLE `booking_passengers`
-  MODIFY `passenger_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `passenger_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_status`
@@ -1048,7 +1111,7 @@ ALTER TABLE `destination_file_paths`
 -- AUTO_INCREMENT cho bảng `discounts`
 --
 ALTER TABLE `discounts`
-  MODIFY `discount_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `discount_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT cho bảng `events`
@@ -1061,6 +1124,12 @@ ALTER TABLE `events`
 --
 ALTER TABLE `event_status`
   MODIFY `event_status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT cho bảng `experiences`
+--
+ALTER TABLE `experiences`
+  MODIFY `experience_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `feedbacks`
@@ -1078,7 +1147,7 @@ ALTER TABLE `feedback_status`
 -- AUTO_INCREMENT cho bảng `media`
 --
 ALTER TABLE `media`
-  MODIFY `media_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `media_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `notifications`
@@ -1090,13 +1159,13 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT cho bảng `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `payment_history`
 --
 ALTER TABLE `payment_history`
-  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT cho bảng `payment_methods`
@@ -1120,7 +1189,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT cho bảng `tours`
 --
 ALTER TABLE `tours`
-  MODIFY `tour_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `tour_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT cho bảng `tour_guides`
@@ -1138,13 +1207,13 @@ ALTER TABLE `tour_guide_assignments`
 -- AUTO_INCREMENT cho bảng `tour_itinerary`
 --
 ALTER TABLE `tour_itinerary`
-  MODIFY `itinerary_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `itinerary_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `tour_schedules`
 --
 ALTER TABLE `tour_schedules`
-  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT cho bảng `tour_status`
@@ -1162,7 +1231,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `usertokens`
 --
 ALTER TABLE `usertokens`
-  MODIFY `tokenid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `tokenid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
@@ -1207,6 +1276,13 @@ ALTER TABLE `events`
 --
 ALTER TABLE `event_file_paths`
   ADD CONSTRAINT `FK7lmjuds8bmtdclfwuqrj560qy` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`);
+
+--
+-- Các ràng buộc cho bảng `experiences`
+--
+ALTER TABLE `experiences`
+  ADD CONSTRAINT `FKavqfd594ubb9r0j5wbcb6tgpd` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`tour_id`),
+  ADD CONSTRAINT `FKmvm09uynp3ikm1px4i6q5ve6r` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`);
 
 --
 -- Các ràng buộc cho bảng `feedbacks`
@@ -1269,8 +1345,7 @@ ALTER TABLE `tour_events`
 -- Các ràng buộc cho bảng `tour_guides`
 --
 ALTER TABLE `tour_guides`
-  ADD CONSTRAINT `FKe77mlqfo649eeehhwvrgmaxvy` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`),
-  ADD CONSTRAINT `fk_guide_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
+  ADD CONSTRAINT `FKe77mlqfo649eeehhwvrgmaxvy` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`);
 
 --
 -- Các ràng buộc cho bảng `tour_guide_assignments`

@@ -420,7 +420,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () => setState(() => confirmResult = null),
-                  child: const Text('Đóng', style: TextStyle(fontSize: 16)),
+                  child: const Text('Đóng', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ],
             ),
@@ -498,7 +498,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: const Text('Thanh toán ngay', style: TextStyle(fontSize: 16)),
+                    child: const Text('Thanh toán ngay', style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 TextButton(
                   onPressed: () => Navigator.pop(context),

@@ -55,16 +55,26 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
         await prefs.setString('public_id', publicId);
+        await prefs.setString('user_role', role);
+        await prefs.setString('full_name', _emailController.text.split('@')[0]);
         
         // Verify saved data
         final savedToken = prefs.getString('auth_token');
         final savedPublicId = prefs.getString('public_id');
+        final savedRole = prefs.getString('user_role');
+        final savedFullName = prefs.getString('full_name');
         print('Saved token: $savedToken');
         print('Saved publicId: $savedPublicId');
+        print('Saved role: $savedRole');
+        print('Saved name: $savedFullName');
         
         Navigator.pushReplacementNamed(
           context,
           '/home',
+          arguments: {
+            'userRole': role,
+            'fullName': _emailController.text.split('@')[0],
+          },
         );
       } catch (e) {
         if (!mounted) return;
@@ -91,6 +101,19 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 8, bottom: 8),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.orange, size: 32),
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                    },
+                    tooltip: 'Quay lại',
+                  ),
+                ),
+              ),
               // Logo
               SizedBox(
                 width: 250,

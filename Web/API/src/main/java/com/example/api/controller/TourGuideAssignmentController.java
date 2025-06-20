@@ -10,20 +10,22 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tour-guide-assignments")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class TourGuideAssignmentController {
 
     @Autowired
     private TourGuideAssignmentService assignmentService;
 
     @PostMapping
-    public ResponseEntity<TourGuideAssignmentDTO> createAssignment(
+    public ResponseEntity<?> createAssignment(
             @RequestBody @Valid TourGuideAssignmentDTO dto) {
         try {
             TourGuideAssignmentDTO assignment = assignmentService.createAssignment(dto);
             return ResponseEntity.ok(assignment);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Lỗi hệ thống: " + e.getMessage()));
         }
     }
 

@@ -52,7 +52,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     @Query("SELECT b FROM Booking b " +
            "WHERE b.scheduleId = :scheduleId " +
-           "AND b.status.statusName = 'CONFIRMED' " +
+           "AND b.status.statusName = 'Confirmed' " +
            "/* DEBUG: Getting all confirmed bookings for schedule */")
     List<Booking> findConfirmedBookingsForSchedule(@Param("scheduleId") Integer scheduleId);
 

@@ -29,6 +29,9 @@ export default function UpdateTour() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [existingImages, setExistingImages] = useState([]);
+  const [newFiles, setNewFiles] = useState([]);
+  const [newPreviews, setNewPreviews] = useState([]);
 
   useEffect(() => {
     if (!tourId) {
@@ -60,7 +63,9 @@ export default function UpdateTour() {
         setEvents(eventRes.data);
         setStatuses(statusRes.data);
         setFormData(tour);
-        setPreviewUrl(tour.imageUrl);
+        setExistingImages(tour.imageUrls || []);
+        setNewFiles([]);
+        setNewPreviews([]);
       } catch (err) {
         const message = err.response?.data?.message || err.message || 'Failed to load tour data';
         setError(message);
@@ -90,24 +95,26 @@ export default function UpdateTour() {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    const files = Array.from(e.target.files);
+    setNewFiles(prev => [...prev, ...files]);
+    setNewPreviews(prev => [...prev, ...files.map(file => URL.createObjectURL(file))]);
   };
 
-  const uploadImage = async (file) => {
-    if (!file) return formData.imageUrl;
-    const token = localStorage.getItem('token');
-    const formDataImage = new FormData();
-    formDataImage.append('file', file);
+  const handleRemoveExistingImage = (idx) => {
+    setExistingImages(existingImages.filter((_, i) => i !== idx));
+  };
 
-    try {
+  const handleRemoveNewImage = (idx) => {
+    setNewFiles(newFiles.filter((_, i) => i !== idx));
+    setNewPreviews(newPreviews.filter((_, i) => i !== idx));
+  };
+
+  const uploadImages = async (files) => {
+    const token = localStorage.getItem('token');
+    const uploadedUrls = [];
+    for (let file of files) {
+      const formDataImage = new FormData();
+      formDataImage.append('file', file);
       const response = await axios.post(
         'http://localhost:8080/api/tours/upload',
         formDataImage,
@@ -118,11 +125,9 @@ export default function UpdateTour() {
           }
         }
       );
-      return response.data;
-    } catch (error) {
-      console.error('Upload image failed:', error);
-      throw new Error(error.response?.data || 'Upload image failed');
+      uploadedUrls.push(response.data);
     }
+    return uploadedUrls;
   };
 
   const handleSubmit = async e => {
@@ -134,11 +139,15 @@ export default function UpdateTour() {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const imageUrl = await uploadImage(selectedFile);
+      let uploadedUrls = [];
+      if (newFiles.length > 0) {
+        uploadedUrls = await uploadImages(newFiles);
+      }
 
+      const finalImageUrls = [...existingImages, ...uploadedUrls];
       const submitData = {
         ...formData,
-        imageUrl,
+        imageUrls: finalImageUrls,
         price: parseFloat(formData.price),
         duration: parseInt(formData.duration),
         maxParticipants: parseInt(formData.maxParticipants),
@@ -341,23 +350,37 @@ export default function UpdateTour() {
                     id="image"
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleFileChange}
                   />
                   <div className="update-tour-upload-placeholder">
                     <span className="update-tour-upload-icon"><FaCamera /></span>
-                    <p>Click to upload tour image</p>
-                    <p className="update-tour-upload-hint">PNG, JPG up to 5MB</p>
+                    <p>Click để upload thêm ảnh tour</p>
+                    <p className="update-tour-upload-hint">PNG, JPG up to 5MB. Có thể chọn nhiều ảnh.</p>
                   </div>
                 </label>
-                {previewUrl && (
-                  <div className="update-tour-preview">
-                    <img src={previewUrl} alt="Preview" />
-                    <button type="button" className="update-tour-remove-image" onClick={() => {
-                      setSelectedFile(null);
-                      setPreviewUrl(null);
-                    }}>
-                      ✕
-                    </button>
+                {existingImages.length > 0 && (
+                  <div className="update-tour-preview-multi">
+                    {existingImages.map((url, idx) => (
+                      <div key={idx} className="update-tour-preview">
+                        <img src={`http://localhost:8080${url}`} alt={`Old ${idx + 1}`} />
+                        <button type="button" className="update-tour-remove-image" onClick={() => handleRemoveExistingImage(idx)}>
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {newPreviews.length > 0 && (
+                  <div className="update-tour-preview-multi">
+                    {newPreviews.map((url, idx) => (
+                      <div key={idx} className="update-tour-preview">
+                        <img src={url} alt={`New ${idx + 1}`} />
+                        <button type="button" className="update-tour-remove-image" onClick={() => handleRemoveNewImage(idx)}>
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

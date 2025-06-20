@@ -40,22 +40,6 @@ const BookingTable = ({ bookings, handleDeleteClick }) => (
               >
                 <FaEye />
               </Link>
-              <Link
-                to={`/admin/booking/edit/${b.bookingId}`}
-                className="action-link"
-                title="Chỉnh sửa"
-                style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <FaEdit />
-              </Link>
-              <button
-                onClick={() => handleDeleteClick(b.bookingId, b.customerName)}
-                className="delete-button"
-                title="Xóa"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <FaTrash />
-              </button>
             </td>
           </tr>
         ))}

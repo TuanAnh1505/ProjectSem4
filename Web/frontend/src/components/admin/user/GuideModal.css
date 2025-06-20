@@ -23,6 +23,7 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
+  color: #1976d2;
 }
 
 .modal-header {
@@ -34,7 +35,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
-  color: #333;
+  color: #1976d2;
 }
 
 .modal-body {
@@ -48,7 +49,15 @@
   flex-direction: column;
 }
 
+.form-group label {
+  color: #1976d2;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
 .form-control {
+  background: #fff;
+  color: #1976d2;
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 8px 12px;
@@ -58,7 +67,7 @@
 }
 
 .form-control:focus {
-  border: 1px solid #4a90e2;
+  border: 1px solid #1976d2;
 }
 
 .form-control::placeholder {

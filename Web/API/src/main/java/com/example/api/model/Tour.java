@@ -36,8 +36,10 @@ public class Tour {
     @Column(name = "status_id", nullable = false)
     private Integer statusId;
 
+    @ElementCollection
+    @CollectionTable(name = "tour_image_urls", joinColumns = @JoinColumn(name = "tour_id"))
     @Column(name = "image_url")
-    private String imageUrl;
+    private List<String> imageUrls = new ArrayList<>();
 
     @Column(name = "created_at", columnDefinition = "datetime default current_timestamp")
     @ColumnDefault("current_timestamp")

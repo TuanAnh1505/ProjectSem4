@@ -14,6 +14,7 @@ import TourIndex from "./tour/TourIndex";
 import DetailDestination from "./destination/DetailDestination";
 import DetailEvent from "./event/DetailEvent";
 import DetailTour from "./tour/DetailTour";
+import TourScheduleBookings from "./tour/TourScheduleBookings";
 
 import AddItinerary from "./itinerary/AddItinerary";
 import UpdateItinerary from "./itinerary/UpdateItinerary";
@@ -28,6 +29,8 @@ import ScheduleIndex from "./schedule/ScheduleIndex";
 import AboutAdmin from "./AboutAdmin";
 import PaymentStatusManager from './PaymentStatusManager';
 import ExperienceIndex from "./experience/ExperienceIndex";
+import FeedbackIndex from "./feedback/FeedbackIndex";
+import AssignGuidePage from "./assignment/AssignGuidePage";
 
 const AdminPage = () => {
   const location = useLocation();
@@ -70,6 +73,9 @@ const AdminPage = () => {
       }
       if (pathSegments.includes('edit')) {
         return <UpdateTour />;
+      }
+      if (pathSegments.includes('schedules')) {
+        return <TourScheduleBookings />;
       }
       return <TourIndex />;
     }
@@ -121,6 +127,14 @@ const AdminPage = () => {
 
     if (pathSegments.includes('experience')) {
       return <ExperienceIndex />;
+    }
+
+    if (pathSegments.includes('feedback')) {
+      return <FeedbackIndex />;
+    }
+
+    if (pathSegments.includes('assignment')) {
+      return <AssignGuidePage />;
     }
 
     return <AdminDashboard />;

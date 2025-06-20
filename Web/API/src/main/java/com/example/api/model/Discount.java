@@ -23,5 +23,11 @@ public class Discount {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "quantity")
+    private Integer quantity;
+
+    @Column(name = "used_quantity")
+    private Integer usedQuantity = 0;
 }
 

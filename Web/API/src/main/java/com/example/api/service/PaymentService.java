@@ -59,6 +59,12 @@ public class PaymentService {
     @Autowired
     private UserDiscountRepository userDiscountRepository;
 
+    @Autowired
+    private DiscountService discountService;
+
+    @Autowired
+    private DiscountRepository discountRepository;
+
     private static final String PARTNER_CODE = "MOMO";
     private static final String ACCESS_KEY = "F8BBA842ECF85";
     private static final String SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
@@ -152,6 +158,12 @@ public class PaymentService {
                 ud.setDiscountId(booking.getDiscountId());
                 ud.setUsed(true);
                 userDiscountRepository.save(ud);
+
+                // Cập nhật used_quantity cho discount
+                Discount discount = discountRepository.findById(booking.getDiscountId()).orElse(null);
+                if (discount != null) {
+                    discountService.checkAndUpdateDiscountQuantity(discount);
+                }
             }
 
             try {

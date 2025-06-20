@@ -68,6 +68,18 @@ export default function ExperienceIndex() {
         fetchMedia();
     }, []);
 
+    const getImageUrl = (fileUrl) => {
+        if (!fileUrl) return '';
+        console.log('Processing image URL:', fileUrl);
+        
+        if (fileUrl.startsWith('http')) return fileUrl;
+        
+        const cleanPath = fileUrl.startsWith('/') ? fileUrl.slice(1) : fileUrl;
+        const fullUrl = `http://localhost:8080/${cleanPath}`;
+        
+        console.log('Final image URL:', fullUrl);
+        return fullUrl;
+    };
 
   if (loading) return <div style={{ padding: 32, textAlign: 'center' }}>Đang tải danh sách trải nghiệm...</div>;
   if (error) return <div style={{ padding: 32, color: 'red', textAlign: 'center' }}>{error}</div>;
@@ -95,7 +107,14 @@ export default function ExperienceIndex() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 0', overflowX: 'auto' }}>
-      <h2 style={{ color: '#1976d2', fontWeight: 900, fontSize: 32, marginBottom: 32, textAlign: 'center' }}>
+      <h2 style={{ 
+        color: '#1976d2', 
+        fontWeight: 700, 
+        fontSize: '26px', 
+        marginBottom: 32, 
+        textAlign: 'center',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+      }}>
         Danh sách tất cả trải nghiệm đã chia sẻ
       </h2>
       {experiences.length === 0 ? (
@@ -122,14 +141,7 @@ export default function ExperienceIndex() {
                 const mediaArr = mediaList.filter(m => m.experienceId === exp.experienceId);
                 const images = mediaArr.filter(m => m.fileType === 'image');
                 const videos = mediaArr.filter(m => m.fileType === 'video');
-                const imageUrls = images.map(m => {
-                  if (!m.fileUrl) return '';
-                  // Nếu đã có http hoặc bắt đầu bằng /uploads/media thì giữ nguyên
-                  if (m.fileUrl.startsWith('http')) return m.fileUrl;
-                  if (m.fileUrl.startsWith('/uploads/media/')) return `http://localhost:8080${m.fileUrl}`;
-                  // Nếu chỉ là tên file
-                  return `http://localhost:8080/uploads/media/${m.fileUrl}`;
-                });
+                const imageUrls = images.map(m => getImageUrl(m.fileUrl));
                 
                 return (
                   <tr key={exp.experienceId} style={{ borderBottom: '1px solid #e3e8f0', fontSize: 16 }}>
@@ -147,11 +159,26 @@ export default function ExperienceIndex() {
                         {/* Hiển thị 1 ảnh đại diện, overlay số lượng nếu có nhiều ảnh */}
                         {images.length > 0 && (
                           <div style={{ position: 'relative', width: 54, height: 54, cursor: 'pointer' }}
-                            onClick={() => setModalGallery({ images: imageUrls, index: 0, open: true })}>
+                            onClick={() => {
+                                console.log('Opening gallery with URLs:', imageUrls);
+                                setModalGallery({ images: imageUrls, index: 0, open: true });
+                            }}>
                             <img
                               src={imageUrls[0]}
                               alt="media"
-                              style={{ width: 54, height: 54, objectFit: 'cover', borderRadius: 6, border: '1.5px solid #1976d2', background: '#fafafa' }}
+                              style={{ 
+                                width: 54, 
+                                height: 54, 
+                                objectFit: 'cover', 
+                                borderRadius: 6, 
+                                border: '1.5px solid #1976d2', 
+                                background: '#fafafa' 
+                              }}
+                              onError={(e) => {
+                                console.error('Image load error:', e);
+                                e.target.onerror = null;
+                                e.target.src = 'https://via.placeholder.com/54x54?text=Error';
+                              }}
                             />
                             {images.length > 1 && (
                               <div style={{
@@ -173,13 +200,23 @@ export default function ExperienceIndex() {
                         )}
                         {/* Hiển thị video (nếu có) */}
                         {videos.map(m => {
-                          const url = m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}`;
+                          const videoUrl = getImageUrl(m.fileUrl);
                           return (
                             <video
                               key={m.mediaId}
-                              src={url}
+                              src={videoUrl}
                               controls
-                              style={{ width: 54, height: 54, objectFit: 'cover', borderRadius: 6, border: '1.5px solid #1976d2', background: '#fafafa' }}
+                              style={{ 
+                                width: 54, 
+                                height: 54, 
+                                objectFit: 'cover', 
+                                borderRadius: 6, 
+                                border: '1.5px solid #1976d2', 
+                                background: '#fafafa' 
+                              }}
+                              onError={(e) => {
+                                console.error('Video load error:', e);
+                              }}
                             />
                           );
                         })}
@@ -387,6 +424,11 @@ export default function ExperienceIndex() {
                 borderRadius: 12,
                 boxShadow: '0 2px 16px #0006',
                 background: '#fff',
+              }}
+              onError={(e) => {
+                console.error('Modal image load error:', e);
+                e.target.onerror = null;
+                e.target.src = 'https://via.placeholder.com/800x600?text=Error+Loading+Image';
               }}
             />
             {modalGallery.index < modalGallery.images.length - 1 && (

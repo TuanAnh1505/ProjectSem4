@@ -63,9 +63,12 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
   Map<String, dynamic>? _discountInfo;
   double _discountedPrice = 0;
 
+  bool showFullDescription = false;
+
   @override
   void initState() {
     super.initState();
+    _checkAuth();
     if (_useLoggedInInfo) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadUserInfo();
@@ -396,6 +399,16 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     }
   }
 
+  Future<void> _checkAuth() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (token == null) {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -455,7 +468,25 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             Text(
                               widget.tour.description ?? 'Không có mô tả',
                               style: const TextStyle(fontSize: 14),
+                              maxLines: showFullDescription ? null : 4,
+                              overflow: showFullDescription ? TextOverflow.visible : TextOverflow.ellipsis,
                             ),
+                            if ((widget.tour.description?.length ?? 0) > 120)
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    showFullDescription = !showFullDescription;
+                                  });
+                                },
+                                child: Text(
+                                  showFullDescription ? 'Thu gọn' : 'Xem thêm',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
@@ -473,7 +504,9 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                                 Icon(Icons.timer, size: 16, color: Colors.orange),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Thời gian: ${widget.tour.duration} ngày',
+                                  (widget.tour.duration ?? 1) > 1
+                                      ? '${widget.tour.duration} ngày ${widget.tour.duration - 1} đêm'
+                                      : '${widget.tour.duration} ngày',
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ],
@@ -481,7 +514,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.attach_money, size: 25, color: Colors.orange),
+                                // Icon(Icons.attach_money, size: 25, color: Colors.orange),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Giá: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(widget.tour.price)}',
@@ -916,6 +949,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                               onPressed: _handleApplyDiscount,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white, 
                                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),

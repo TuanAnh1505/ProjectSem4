@@ -3,6 +3,7 @@ package com.example.api.controller;
 import com.example.api.dto.TourDTO;
 import com.example.api.model.Tour;
 import com.example.api.service.TourService;
+import com.example.api.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/tours")
@@ -27,6 +29,9 @@ public class TourController {
 
     @Autowired
     private final TourService tourService;
+
+    @Autowired
+    private final FeedbackService feedbackService;
 
     @GetMapping
     public ResponseEntity<List<Tour>> getAllTours() {
@@ -38,9 +43,28 @@ public class TourController {
         return ResponseEntity.ok(tourService.getTourDetail(id));
     }
 
-    @PostMapping
-    public ResponseEntity<Tour> createTour(@RequestBody TourDTO dto) {
-        return ResponseEntity.ok(tourService.createTour(dto));
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<Tour> createTour(@ModelAttribute TourDTO dto, @RequestParam("files") List<MultipartFile> files) {
+        List<String> imageUrls = new ArrayList<>();
+        try {
+            if (files != null && !files.isEmpty()) {
+                Path uploadPath = Paths.get("uploads", "tours");
+                Files.createDirectories(uploadPath);
+                for (MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+                        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                        Path filePath = uploadPath.resolve(fileName);
+                        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                        imageUrls.add("/uploads/tours/" + fileName);
+                    }
+                }
+            }
+            dto.setImageUrls(imageUrls);
+            return ResponseEntity.ok(tourService.createTour(dto));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
     }
 
     @PutMapping("/{id}")
@@ -102,6 +126,21 @@ public class TourController {
             return ResponseEntity.badRequest().body("Invalid tour ID format");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error fetching events");
+        }
+    }
+
+    @GetMapping("/{tourId}/feedback-stats")
+    public ResponseEntity<?> getTourFeedbackStats(@PathVariable Integer tourId) {
+        return ResponseEntity.ok(feedbackService.getTourFeedbackStats(tourId));
+    }
+
+    @GetMapping("/{tourId}/images")
+    public ResponseEntity<List<String>> getTourImages(@PathVariable Integer tourId) {
+        try {
+            Tour tour = tourService.getTourDetail(tourId);
+            return ResponseEntity.ok(tour.getImageUrls() != null ? tour.getImageUrls() : new ArrayList<>());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ArrayList<>());
         }
     }
 

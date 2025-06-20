@@ -232,8 +232,4 @@ public class UserService {
         return userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + publicId));
     }
-
-    public boolean existsByEmail(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
 }

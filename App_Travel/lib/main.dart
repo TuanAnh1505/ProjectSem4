@@ -10,6 +10,7 @@ import 'screens/search_screen.dart';
 import 'screens/auth/personal_page_screen.dart';
 import 'screens/auth/update_info_user_screen.dart';
 import 'screens/setting_screen.dart';
+import 'screens/booking/history_user_booking_tour_screen.dart';
 
 
 void main() async {
@@ -63,19 +64,25 @@ class _MyAppState extends State<MyApp> {
           iconTheme: IconThemeData(color: Colors.orange),
         ),
       ),
-      initialRoute: '/login',
+      initialRoute: '/home',
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/home': (context) => const AppNavigation(
-              userName: 'Guest',
-              userRole: 'USER',
-              currentIndex: 0,
-            ),
-        '/settings': (context) => const AppNavigation(
-              userName: 'Guest',
-              userRole: 'USER',
-              currentIndex: 0,
-            ),
+        '/home': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          return AppNavigation(
+            userName: args?['userName'] ?? 'Guest',
+            userRole: args?['userRole'] ?? 'USER',
+            currentIndex: 0,
+          );
+        },
+        '/settings': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          return AppNavigation(
+            userName: args?['userName'] ?? 'Guest',
+            userRole: args?['userRole'] ?? 'USER',
+            currentIndex: 0,
+          );
+        },
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/reset-password': (context) => ResetPasswordScreen(
               publicId: ModalRoute.of(context)!.settings.arguments as String,
@@ -89,6 +96,7 @@ class _MyAppState extends State<MyApp> {
 
         '/update-info-user-screen': (context) => UpdateInfoUserScreen(),
         '/setting-screen': (context) => SettingScreen(),
+        '/history-user-booking-tour-screen': (context) => const HistoryUserBookingTourScreen(),
       },
     );
   }

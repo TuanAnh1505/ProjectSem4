@@ -4,7 +4,6 @@ import Home from './components/VietnamTourism/index';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import PlacesToGo from './components/PlaceToGo/PlaceToGo';
-import ThingsToDo from './components/ThingToDo/ThingsToDo';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ActivateAccount from './components/auth/ActivateAccount';
@@ -24,7 +23,7 @@ import './App.css';
 import BookingConfirmation from './components/booking/BookingConfirmation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ScrollToTop from './components/ScrollToTop';
+import Feedback from './components/feedback/Feedback';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -56,7 +55,6 @@ const ProtectedRoute = ({ element, requiredRole }) => {
 const App = () => {
   return (
     <Router>
-      <ScrollToTop />
       <div>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         <Routes>
@@ -74,11 +72,6 @@ const App = () => {
           <Route path="/places-to-go" element={
             <Layout>
               <PlacesToGo />
-            </Layout>
-          } />
-          <Route path="/things-to-do" element={
-            <Layout>
-              <ThingsToDo />
             </Layout>
           } />
           <Route path="/tour-dashboard" element={
@@ -121,6 +114,11 @@ const App = () => {
           <Route path="/payment/:bookingId" element={
             <Layout>
               <ProtectedRoute element={<Payment />} />
+            </Layout>
+          } />
+          <Route path="/feedback" element={
+            <Layout>
+              <ProtectedRoute element={<Feedback />} />
             </Layout>
           } />
 
@@ -236,7 +234,15 @@ const App = () => {
               element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
             />
             <Route
+              path="/admin/tour/schedules/:tourId"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+            />
+            <Route
               path="/admin/tour/:tourId"
+              element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+            />
+            <Route
+              path="/admin/tour/schedules/:tourId/:scheduleId"
               element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
             />
 
@@ -324,6 +330,18 @@ const App = () => {
           {/* Experience */}
           <Route
             path="/admin/experience"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          <Route
+            path="/admin/feedback"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          <Route path="/feedback" element={<Feedback />} />
+
+          <Route
+            path="/admin/assignment"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
         </Routes>
