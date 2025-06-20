@@ -588,4 +588,5 @@ public class EmailService {
             logger.error("Failed to send guide assignment email to: {}. Error: {}", to, e.getMessage());
         }
     }
+
 }

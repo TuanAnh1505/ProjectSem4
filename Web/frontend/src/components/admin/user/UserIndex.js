@@ -249,9 +249,12 @@ const UserIndex = () => {
       {/* Modal tạo tài khoản hướng dẫn viên */}
       {showGuideModal && (
         <div className="destination-alert-overlay">
-          <div className="destination-alert-dialog" style={{ maxWidth: 500 }}>
-            <h2 className="destination-alert-title">Tạo tài khoản hướng dẫn viên</h2>
+          <div className="guide-modal">
+            <h2 className="guide-modal-title">
+              <FaUserPlus style={{marginRight:8, color:'#7b6ef6', verticalAlign:'middle'}}/> Tạo tài khoản hướng dẫn viên
+            </h2>
             <form
+              className="guide-modal-form"
               onSubmit={async (e) => {
                 e.preventDefault();
                 setGuideLoading(true);
@@ -302,41 +305,48 @@ const UserIndex = () => {
                 }
               }}
             >
-              <div className="mb-2">
-                <label>Họ tên</label>
-                <input type="text" className="form-control" required value={guideForm.fullName} onChange={e => setGuideForm(f => ({ ...f, fullName: e.target.value }))} />
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Họ tên</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.fullName} onChange={e => setGuideForm(f => ({ ...f, fullName: e.target.value }))} />
               </div>
-              <div className="mb-2">
-                <label>Email</label>
-                <input type="email" className="form-control" required value={guideForm.email} onChange={e => setGuideForm(f => ({ ...f, email: e.target.value }))} />
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Email</label>
+                <input type="email" className="guide-modal-input" required value={guideForm.email} onChange={e => setGuideForm(f => ({ ...f, email: e.target.value }))} />
               </div>
-              <div className="mb-2">
-                <label>Mật khẩu</label>
-                <input type="password" className="form-control" required value={guideForm.password} onChange={e => setGuideForm(f => ({ ...f, password: e.target.value }))} />
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Mật khẩu</label>
+                <input type="password" className="guide-modal-input" required value={guideForm.password} onChange={e => setGuideForm(f => ({ ...f, password: e.target.value }))} />
               </div>
-              <div className="mb-2">
-                <label>Số điện thoại</label>
-                <input type="text" className="form-control" required value={guideForm.phone} onChange={e => setGuideForm(f => ({ ...f, phone: e.target.value }))} />
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Số điện thoại</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.phone} onChange={e => setGuideForm(f => ({ ...f, phone: e.target.value }))} />
               </div>
-              <div className="mb-2">
-                <label>Địa chỉ</label>
-                <input type="text" className="form-control" required value={guideForm.address} onChange={e => setGuideForm(f => ({ ...f, address: e.target.value }))} />
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Địa chỉ</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.address} onChange={e => setGuideForm(f => ({ ...f, address: e.target.value }))} />
               </div>
-              <div className="mb-2">
-                <label>Số năm kinh nghiệm</label>
-                <input type="number" className="form-control" required min={0} value={guideForm.experienceYears} onChange={e => setGuideForm(f => ({ ...f, experienceYears: e.target.value }))} />
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Số năm kinh nghiệm</label>
+                <input type="number" className="guide-modal-input" required min={0} value={guideForm.experienceYears} onChange={e => setGuideForm(f => ({ ...f, experienceYears: e.target.value }))} />
               </div>
-              <div className="mb-2">
-                <label>Chuyên môn</label>
-                <input type="text" className="form-control" required value={guideForm.specialization} onChange={e => setGuideForm(f => ({ ...f, specialization: e.target.value }))} />
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Chuyên môn</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.specialization} onChange={e => setGuideForm(f => ({ ...f, specialization: e.target.value }))} />
               </div>
-              <div className="mb-2">
-                <label>Ngôn ngữ</label>
-                <input type="text" className="form-control" required value={guideForm.languages} onChange={e => setGuideForm(f => ({ ...f, languages: e.target.value }))} />
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Ngôn ngữ</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.languages} onChange={e => setGuideForm(f => ({ ...f, languages: e.target.value }))} />
               </div>
-              <div className="d-flex justify-content-end mt-3">
-                <button type="button" className="btn btn-secondary me-2" onClick={() => setShowGuideModal(false)} disabled={guideLoading}>Hủy</button>
-                <button type="submit" className="btn btn-primary" disabled={guideLoading}>{guideLoading ? "Đang tạo..." : "Tạo tài khoản"}</button>
+              <div className="guide-modal-btn-row">
+                <button type="button" className="guide-modal-btn guide-modal-btn-cancel" onClick={() => setShowGuideModal(false)} disabled={guideLoading}>Hủy</button>
+                <button type="submit" className="guide-modal-btn guide-modal-btn-create" disabled={guideLoading}>
+                  {guideLoading ? (
+                    <span className="guide-modal-loading">
+                      <span className="spinner-border spinner-border-sm" role="status" style={{marginRight:4}}></span>
+                      Đang tạo...
+                    </span>
+                  ) : "Tạo tài khoản"}
+                </button>
               </div>
             </form>
           </div>
