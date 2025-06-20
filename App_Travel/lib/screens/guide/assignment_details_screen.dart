@@ -12,6 +12,7 @@ class AssignmentDetailsScreen extends StatefulWidget {
     required this.assignment,
   }) : super(key: key);
 
+
   @override
   State<AssignmentDetailsScreen> createState() => _AssignmentDetailsScreenState();
 }
