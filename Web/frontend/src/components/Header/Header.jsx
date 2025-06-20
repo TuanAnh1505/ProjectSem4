@@ -3,24 +3,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
 import logo from '../../assets/images/logo.png';
 import PersonIcon from '@mui/icons-material/Person';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const Header = () => {
   const navigate = useNavigate();
   const isAuthenticated = !!localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
   const userMenuRef = useRef(null);
-  const langMenuRef = useRef(null);
 
-  // Đóng menu khi click ra ngoài
+  // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setUserMenuOpen(false);
-      }
-      if (langMenuRef.current && !langMenuRef.current.contains(event.target)) {
-        setLangOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -39,13 +36,19 @@ const Header = () => {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.flexRow}>
-          {/* Logo bên trái */}
+          {/* Logo - made larger */}
           <div className={styles.logoWrap}>
             <Link to="/">
-              <img src={logo} alt="Vietnam Tourism Logo" className={styles.logoImg} />
+              <img 
+                src={logo} 
+                alt="Vietnam Tourism Logo" 
+                className={styles.logoImg}
+                style={{ height: '60px' }} // Increased logo size
+              />
             </Link>
           </div>
-          {/* Menu giữa */}
+          
+          {/* Navigation menu */}
           <nav className={styles.mainNav}>
             <ul>
               <li>
@@ -69,39 +72,41 @@ const Header = () => {
               )}
             </ul>
           </nav>
-          {/* Phần bên phải: ngôn ngữ + user */}
+          
+          {/* User section - redesigned */}
           <div className={styles.rightSection}>
-            {/* Dropdown ngôn ngữ */}
-            <div className={styles.langDropdown} ref={langMenuRef}>
-              <button
-                className={styles.langBtn}
-                onClick={() => setLangOpen((open) => !open)}
-                aria-haspopup="true"
-                aria-expanded={langOpen}
-              >
-                EN <span className={styles.arrow}></span>
-              </button>
-              {langOpen && (
-                <div className={styles.langMenu}>
-                  <button className={styles.langItem}>English</button>
-                  <button className={styles.langItem}>Vietnamese</button>
-                  <button className={styles.langItem}>Chinese</button>
-                </div>
-              )}
-            </div>
-            {/* User icon/login */}
             {isAuthenticated ? (
               <div className={styles.userMenuWrap} ref={userMenuRef}>
                 <button
                   className={styles.userBtn}
-                  onClick={() => setUserMenuOpen((open) => !open)}
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
                   aria-haspopup="true"
                   aria-expanded={userMenuOpen}
                 >
-                  <PersonIcon style={{ fontSize: '2rem' }} />
+                  <div className={styles.userAvatar}>
+                    <PersonIcon style={{ fontSize: '1.8rem' }} />
+                  </div>
                 </button>
+                
+                {/* Redesigned user dropdown */}
                 {userMenuOpen && (
                   <div className={styles.userMenu}>
+                    <div className={styles.userMenuHeader}>
+                      <div className={styles.userAvatar}>
+                        <PersonIcon style={{ fontSize: '2.2rem' }} />
+                      </div>
+                      <div className={styles.userInfo}>
+                        <span className={styles.userName}>
+                          {localStorage.getItem('name') || 'My Account'}
+                        </span>
+                        <span className={styles.userRole}>
+                          {userRole === 'ADMIN' ? 'Administrator' : 'User'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className={styles.menuDivider}></div>
+                    
                     <button
                       className={styles.userMenuItem}
                       onClick={() => {
@@ -114,17 +119,19 @@ const Header = () => {
                         }
                       }}
                     >
-                      <PersonIcon style={{ fontSize: '1.3em', marginRight: 8 }} /> Thông tin tài khoản
+                      <SettingsIcon className={styles.menuIcon} />
+                      <span>Account Settings</span>
                     </button>
+                    
                     <button
-                      className={styles.userMenuItem}
+                      className={`${styles.userMenuItem} ${styles.logoutItem}`}
                       onClick={() => {
                         setUserMenuOpen(false);
                         handleLogout();
                       }}
-                      style={{ color: '#d32f2f' }}
                     >
-                      <span style={{ fontSize: '1.3em', marginRight: 8 }}>🚪</span> Logout
+                      <LogoutIcon className={styles.menuIcon} />
+                      <span>Logout</span>
                     </button>
                   </div>
                 )}
@@ -141,4 +148,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;

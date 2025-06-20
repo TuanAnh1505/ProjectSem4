@@ -1,3 +1,4 @@
+/* Header.module.css */
 .header {
   position: fixed;
   top: 0;
@@ -29,7 +30,7 @@
 }
 
 .logoImg {
-  height: 48px;
+  height: 60px; /* Increased logo size */
   width: auto;
   display: block;
 }
@@ -74,69 +75,7 @@
   gap: 18px;
 }
 
-.langDropdown {
-  position: relative;
-}
-
-.langBtn {
-  background: none;
-  border: none;
-  color: #222;
-  font-weight: 600;
-  font-size: 1.08rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  transition: background 0.2s;
-}
-
-.langBtn:hover {
-  background: #f0f4ff;
-  color: #e53e3e;
-}
-
-.arrow {
-  display: inline-block;
-  margin-left: 4px;
-  border: solid #888;
-  border-width: 0 2px 2px 0;
-  padding: 3px;
-  transform: rotate(45deg);
-  margin-top: 2px;
-}
-
-.langMenu {
-  position: absolute;
-  right: 0;
-  top: 110%;
-  background: #fff;
-  box-shadow: 0 8px 32px rgba(60,60,60,0.18);
-  border-radius: 12px;
-  min-width: 140px;
-  z-index: 1001;
-  padding: 8px 0;
-  animation: fadeInMenu 0.2s;
-}
-
-.langItem {
-  width: 100%;
-  background: none;
-  border: none;
-  text-align: left;
-  padding: 10px 18px;
-  font-size: 1rem;
-  color: #222;
-  cursor: pointer;
-  transition: background 0.18s;
-}
-
-.langItem:hover {
-  background: #f0f4ff;
-  color: #e53e3e;
-}
+/* Removed langDropdown styles */
 
 .userMenuWrap {
   position: relative;
@@ -158,6 +97,17 @@
   background: #f0f4ff;
 }
 
+.userAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #e0f0ff;
+  color: #1976d2;
+}
+
 .userMenu {
   position: absolute;
   right: 0;
@@ -170,8 +120,36 @@
   overflow: hidden;
   border: 1px solid #ececec;
   animation: fadeInMenu 0.2s;
+}
+
+.userMenuHeader {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+  color: white;
+}
+
+.userInfo {
+  margin-left: 12px;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 1.05rem;
+  display: block;
+}
+
+.userRole {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  display: block;
+}
+
+.menuDivider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 4px 0;
 }
 
 .userMenuItem {
@@ -186,10 +164,24 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  color: #333;
 }
 
 .userMenuItem:hover {
   background: #f0f4ff;
+}
+
+.menuIcon {
+  font-size: 1.3em !important;
+  color: #555;
+}
+
+.logoutItem {
+  color: #d32f2f;
+}
+
+.logoutItem .menuIcon {
+  color: #d32f2f;
 }
 
 .loginButton {
@@ -235,4 +227,4 @@
     justify-content: flex-end;
     margin-top: 8px;
   }
-} 
+}

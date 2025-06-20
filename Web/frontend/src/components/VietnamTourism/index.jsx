@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './Home.module.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
@@ -9,6 +9,26 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaSearch, FaFilter, FaMapMarkerAlt, FaCalendarAlt, FaDollarSign } from 'react-icons/fa';
 
+const useFadeInOnScroll = () => {
+  const ref = useRef();
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, visible];
+};
 
 const Home = () => {
   // Banner state and data
@@ -77,6 +97,10 @@ const Home = () => {
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
+  // Fade-in hooks for sections
+  const [tourSectionRef, tourSectionVisible] = useFadeInOnScroll();
+  const [tour360Ref, tour360Visible] = useFadeInOnScroll();
+
   return (
     <div className={styles.home}>
       {/* Banner */}
@@ -115,9 +139,11 @@ const Home = () => {
       {/* Live Fully Text Centered Between Banner and Video */}
       <div className={styles.liveFullyText}>LIVE FULLY IN VIETNAM</div>
 
-
       {/* Tour List Section */}
-      <section className={styles.tourSection}>
+      <section
+        ref={tourSectionRef}
+        className={`fadeInSection${tourSectionVisible ? ' visible' : ''}`}
+      >
         <div className={styles.container}>
           <div className={styles.sectionTitle}>OUTSTANDING TOURS</div>
           <div className={styles.sectionDesc}>Discover our curated selection of Vietnam tours</div>
@@ -141,17 +167,7 @@ const Home = () => {
               padding: '20px 0'
             }}>
               {filteredTours.map(tour => (
-                <div key={tour.tourId} style={{
-                  backgroundColor: '#fff',
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                  overflow: 'hidden',
-                  transition: 'transform 0.2s',
-                  cursor: 'pointer',
-                  ':hover': {
-                    transform: 'translateY(-5px)'
-                  }
-                }}>
+                <div key={tour.tourId} className="tourCard">
                   <div style={{
                     position: 'relative',
                     height: '200px',
@@ -171,11 +187,7 @@ const Home = () => {
                       <img
                         src={`http://localhost:8080${tour.imageUrl}`}
                         alt={tour.name}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover'
-                        }}
+                        className="tourCardImg"
                       />
                     ) : (
                       <div style={{
@@ -241,19 +253,7 @@ const Home = () => {
                     </p>
                     <Link
                       to={`/tour-dashboard/detail/${tour.tourId}`}
-                      style={{
-                        display: 'inline-block',
-                        backgroundColor: '#007bff',
-                        color: '#fff',
-                        padding: '8px 16px',
-                        borderRadius: '4px',
-                        textDecoration: 'none',
-                        fontSize: '14px',
-                        transition: 'background-color 0.2s',
-                        ':hover': {
-                          backgroundColor: '#0056b3'
-                        }
-                      }}
+                      className="tourCardBtn"
                     >
                       View Details
                     </Link>
@@ -271,27 +271,7 @@ const Home = () => {
         }}>
           <Link 
             to="/tour-dashboard"
-            style={{
-              display: 'inline-block',
-              backgroundColor: '#ff6b6b',
-              color: '#fff',
-              padding: '15px 40px',
-              borderRadius: '30px',
-              textDecoration: 'none',
-              fontSize: '18px',
-              fontWeight: '600',
-              boxShadow: '0 4px 15px rgba(255, 107, 107, 0.3)',
-              transition: 'all 0.3s ease',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              border: 'none',
-              cursor: 'pointer',
-              ':hover': {
-                backgroundColor: '#ff5252',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 20px rgba(255, 107, 107, 0.4)'
-              }
-            }}
+            className="smoothBtn"
           >
             View All Tours
           </Link>
@@ -299,7 +279,10 @@ const Home = () => {
       </section>
 
       {/* 360 Degree Tour Section */}
-      <section className={styles.tour360Section}>
+      <section
+        ref={tour360Ref}
+        className={`fadeInSection${tour360Visible ? ' visible' : ''}`}
+      >
         <div className={styles.sectionTitle}>MUST-SEE SITES</div>
         <div className={styles.sectionDesc}>
           Take a 360-degree tour of some of the country's most compelling natural wonders and cultural attractions right here.
