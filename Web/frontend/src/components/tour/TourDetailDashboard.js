@@ -10,10 +10,16 @@ export default function TourDetailDashboard() {
   const [tour, setTour] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [discountCode, setDiscountCode] = useState('');
+  const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [relatedTours, setRelatedTours] = useState([]);
   const [itineraries, setItineraries] = useState([]);
+  const [finalPrice, setFinalPrice] = useState(0);
+
   const [openScheduleId, setOpenScheduleId] = useState(null);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
+  const [selectedItineraryId, setSelectedItineraryId] = useState(null);
 
   // Thêm state cho trải nghiệm
   const [experiences, setExperiences] = useState([]);
@@ -34,6 +40,12 @@ export default function TourDetailDashboard() {
 
   // Thêm state cho gallery images
   const [galleryImages, setGalleryImages] = useState([]);
+  const [mainImgIdx, setMainImgIdx] = useState(0);
+
+  // Gallery-related variables
+  const showThumbs = galleryImages.length > 1;
+  const maxThumbs = 5;
+  const extraCount = galleryImages.length - maxThumbs;
 
   useEffect(() => {
     const fetchTour = async () => {
@@ -327,10 +339,10 @@ export default function TourDetailDashboard() {
             <div className={styles['tdd-galleryFlex']} style={{marginBottom:24}}>
               {/* Thumbnails left */}
               <div className={styles['tdd-galleryThumbs']}>
-                {showThumbs.map((img, idx) => (
+                {showThumbs && galleryImages.slice(0, maxThumbs).map((img, idx) => (
                   <div
                     key={idx}
-                    className={styles['tdd-thumbItem'] + (mainImgIdx === idx ? ' active' : '')}
+                    className={`${styles['tdd-thumbItem']} ${idx === mainImgIdx ? ' active' : ''}`}
                     onClick={() => setMainImgIdx(idx)}
                   >
                     <img
