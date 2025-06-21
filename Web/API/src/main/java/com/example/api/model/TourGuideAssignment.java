@@ -51,6 +51,7 @@ public class TourGuideAssignment {
     public enum AssignmentStatus {
         assigned,
         completed,
-        cancelled
+        cancelled,
+        inprogress
     }
 } 

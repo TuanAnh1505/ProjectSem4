@@ -129,6 +129,7 @@ export default function AssignGuidePage() {
   const getStatusDisplayName = (status) => {
     switch(status) {
       case 'assigned': return 'Đã phân công';
+      case 'inprogress': return 'Đang diễn ra';
       case 'completed': return 'Hoàn thành';
       case 'cancelled': return 'Đã hủy';
       default: return status;
@@ -137,7 +138,7 @@ export default function AssignGuidePage() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', background: '#fff', borderRadius: 12, boxShadow: '0 4px 24px #e3e8f0', padding: 32 }}>
-      <h2 style={{ color: '#1976d2', fontWeight: 800, marginBottom: 24 }}>Phân công hướng dẫn viên cho lịch trình</h2>
+      <h2 style={{ fontFamily: "'Montserrat', sans-serif", color: '#1976d2', fontWeight: 800, marginBottom: 24 }}>Phân công hướng dẫn viên cho lịch trình</h2>
       
       {/* Form gán hướng dẫn viên */}
       <div style={{ background: '#f8f9fa', padding: 24, borderRadius: 8, marginBottom: 24 }}>
@@ -199,7 +200,7 @@ export default function AssignGuidePage() {
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="Nhập tên hướng dẫn viên..."
-              style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}
+              style={{ width: '98%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}
             />
           </div>
           <div style={{ minWidth: 150 }}>
@@ -216,6 +217,7 @@ export default function AssignGuidePage() {
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}>
               <option value="">Tất cả trạng thái</option>
               <option value="assigned">Đã phân công</option>
+              <option value="inprogress">Đang diễn ra</option>
               <option value="completed">Hoàn thành</option>
               <option value="cancelled">Đã hủy</option>
             </select>

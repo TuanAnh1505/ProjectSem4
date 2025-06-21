@@ -18,6 +18,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
   final ScrollController _scrollController = ScrollController();
 
   List<TourGuideAssignment> _assignments = [];
+  List<TourGuideAssignment> _allAssignments = []; // Store all assignments
   bool _isLoading = true;
   String? _error;
   String _searchTerm = '';
@@ -46,6 +47,34 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     }
   }
 
+  String _normalizeStatus(String status) {
+    return status.toLowerCase().trim();
+  }
+
+  String _getEffectiveStatus(TourGuideAssignment assignment) {
+    final isPast = assignment.endDate.isBefore(DateUtils.dateOnly(DateTime.now()));
+    final normalizedStatus = _normalizeStatus(assignment.status);
+
+    if (isPast && (normalizedStatus == 'assigned' || normalizedStatus == 'inprogress')) {
+      return 'completed'; // Coi các tour đã qua là "Hoàn thành"
+    }
+    return normalizedStatus;
+  }
+
+  Map<String, int> _getStatusCounts(List<TourGuideAssignment> assignments) {
+    final counts = <String, int>{'all': 0, 'inprogress': 0, 'assigned': 0, 'completed': 0, 'cancelled': 0};
+    counts['all'] = assignments.length;
+    
+    for (var assignment in assignments) {
+      final effectiveStatus = _getEffectiveStatus(assignment);
+      // Đảm bảo key tồn tại trước khi tăng
+      if (counts.containsKey(effectiveStatus)) {
+        counts[effectiveStatus] = counts[effectiveStatus]! + 1;
+      }
+    }
+    return counts;
+  }
+
   Future<void> _loadAssignments({bool refresh = false}) async {
     if (refresh) {
       setState(() {
@@ -55,34 +84,11 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     }
 
     try {
-      final assignments = await _guideService.fetchAllAssignments();
-      
-      // Filter by search term and status
-      List<TourGuideAssignment> filteredAssignments = assignments.where((assignment) {
-        // Status filter
-        if (_filterStatus != 'all' && assignment.status.toLowerCase() != _filterStatus) {
-          return false;
-        }
-        
-        // Search filter
-        if (_searchTerm.isNotEmpty) {
-          final searchLower = _searchTerm.toLowerCase();
-          return assignment.tourName?.toLowerCase().contains(searchLower) == true ||
-                 assignment.guideName?.toLowerCase().contains(searchLower) == true ||
-                 assignment.role.toLowerCase().contains(searchLower) == true ||
-                 assignment.tourDescription?.toLowerCase().contains(searchLower) == true;
-        }
-        
-        return true;
-      }).toList();
-
-      // Sort by start date (newest first)
-      filteredAssignments.sort((a, b) => b.startDate.compareTo(a.startDate));
-
+      final assignments = await _guideService.fetchCurrentGuideAssignments();
       setState(() {
-        _assignments = filteredAssignments;
-        _isLoading = false;
-        _error = null;
+        _allAssignments = assignments;
+        _isLoading = false; // Tải xong, ẩn loading
+        _applyFilters(); // Áp dụng bộ lọc
       });
     } catch (e) {
       setState(() {
@@ -92,13 +98,44 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     }
   }
 
+  void _applyFilters() {
+    List<TourGuideAssignment> filtered;
+
+    // Lọc theo trạng thái
+    if (_filterStatus == 'all') {
+      filtered = _allAssignments;
+    } else {
+      filtered = _allAssignments.where((assignment) {
+        return _getEffectiveStatus(assignment) == _filterStatus;
+      }).toList();
+    }
+
+    // Lọc theo từ khóa tìm kiếm
+    if (_searchTerm.isNotEmpty) {
+      final searchLower = _searchTerm.toLowerCase();
+      filtered = filtered.where((assignment) {
+        return (assignment.tourName?.toLowerCase().contains(searchLower) ?? false) ||
+               (assignment.guideName?.toLowerCase().contains(searchLower) ?? false) ||
+               (assignment.role.toLowerCase().contains(searchLower)) ||
+               (assignment.tourDescription?.toLowerCase().contains(searchLower) ?? false);
+      }).toList();
+    }
+
+    // Sắp xếp
+    filtered.sort((a, b) => b.startDate.compareTo(a.startDate));
+
+    setState(() {
+      _assignments = filtered;
+    });
+  }
+
   void _onSearchChanged(String value) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
       setState(() {
         _searchTerm = value;
       });
-      _loadAssignments(refresh: true);
+      _applyFilters();
     });
   }
 
@@ -106,7 +143,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     setState(() {
       _filterStatus = status;
     });
-    _loadAssignments(refresh: true);
+    _applyFilters();
   }
 
   Future<void> _deleteAssignment(TourGuideAssignment assignment) async {
@@ -148,12 +185,115 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     }
   }
 
+  Future<void> _updateAssignmentStatus(TourGuideAssignment assignment, String newStatus) async {
+    if (_normalizeStatus(assignment.status) == _normalizeStatus(newStatus)) return;
+    
+    try {
+      await _guideService.updateAssignmentStatus(assignment.assignmentId, newStatus);
+      _loadAssignments(refresh: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đã cập nhật trạng thái thành công')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi cập nhật trạng thái: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _showStatusUpdateDialog(TourGuideAssignment assignment) async {
+    final currentStatus = _normalizeStatus(assignment.status);
+
+    final newStatus = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        final List<Widget> options = [];
+
+        switch (currentStatus) {
+          case 'assigned':
+            options.add(_buildStatusOption(context, 'Bắt đầu (Đang diễn ra)', 'inprogress', Icons.play_circle_outline, color: const Color(0xFF059669)));
+            options.add(_buildStatusOption(context, 'Hoàn thành', 'completed', Icons.check_circle_outline, color: const Color(0xFF10B981)));
+            break;
+          case 'inprogress':
+            options.add(_buildStatusOption(context, 'Hoàn thành', 'completed', Icons.check_circle_outline, color: const Color(0xFF10B981)));
+            break;
+          case 'completed':
+            options.add(_buildStatusOption(context, 'Mở lại (Đã giao)', 'assigned', Icons.replay_circle_filled_outlined, color: Colors.orange));
+            break;
+        }
+
+        if (currentStatus != 'cancelled') {
+           options.add(const Divider(height: 1));
+           options.add(_buildStatusOption(context, 'Hủy', 'cancelled', Icons.cancel_outlined, isDestructive: true));
+        }
+
+        return AlertDialog(
+          title: const Text('Cập nhật trạng thái'),
+          contentPadding: const EdgeInsets.only(top: 16.0),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: RichText(
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15),
+                      children: <TextSpan>[
+                        const TextSpan(text: 'Trạng thái hiện tại: '),
+                        TextSpan(
+                          text: _getStatusText(assignment.status, false),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold, 
+                            color: _getStatusColor(assignment.status, false)
+                          )
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...options,
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Đóng'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (newStatus != null) {
+      await _updateAssignmentStatus(assignment, newStatus);
+    }
+  }
+
+  Widget _buildStatusOption(BuildContext context, String title, String? statusValue, IconData icon, {Color? color, bool isDestructive = false}) {
+    final textColor = isDestructive ? Colors.red : Theme.of(context).textTheme.bodyLarge?.color;
+    final iconColor = isDestructive ? Colors.red : color ?? Theme.of(context).colorScheme.primary;
+
+    return ListTile(
+      leading: Icon(icon, color: iconColor),
+      title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.w500, fontSize: 15)),
+      onTap: () {
+        Navigator.of(context).pop(statusValue);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Quản lý phân công tour',
+          'Quản lý tour của tôi',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -320,7 +460,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Các tour đã được giao cho hướng dẫn viên sẽ xuất hiện ở đây',
+                                      'Các tour đã được giao cho bạn sẽ xuất hiện ở đây',
                                       style: TextStyle(
                                         color: Colors.grey[500] ?? Colors.grey.shade500, 
                                         fontSize: 14,
@@ -371,7 +511,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
               controller: _searchController,
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Tìm kiếm tour, hướng dẫn viên...',
+                hintText: 'Tìm kiếm tour, vai trò...',
                 prefixIcon: const Icon(Icons.search, color: Color(0xFF6B7280)),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -392,13 +532,15 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildFilterChip('Tất cả', 'all', Icons.list_alt,),
+                _buildFilterChip('Tất cả', 'all', Icons.list_alt, _getStatusCounts(_allAssignments)['all'] ?? 0),
                 const SizedBox(width: 8),
-                _buildFilterChip('Đã giao', 'assigned', Icons.assignment),
+                _buildFilterChip('Đang diễn ra', 'inprogress', Icons.play_circle, _getStatusCounts(_allAssignments)['inprogress'] ?? 0),
                 const SizedBox(width: 8),
-                _buildFilterChip('Hoàn thành', 'completed', Icons.check_circle),
+                _buildFilterChip('Đã giao', 'assigned', Icons.assignment, _getStatusCounts(_allAssignments)['assigned'] ?? 0),
                 const SizedBox(width: 8),
-                _buildFilterChip('Đã hủy', 'cancelled', Icons.cancel),
+                _buildFilterChip('Hoàn thành', 'completed', Icons.check_circle, _getStatusCounts(_allAssignments)['completed'] ?? 0),
+                const SizedBox(width: 8),
+                _buildFilterChip('Đã hủy', 'cancelled', Icons.cancel, _getStatusCounts(_allAssignments)['cancelled'] ?? 0),
               ],
             ),
           ),
@@ -407,7 +549,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, String value, IconData icon) {
+  Widget _buildFilterChip(String label, String value, IconData icon, int count) {
     final isSelected = _filterStatus == value;
     return Material(
       color: Colors.transparent,
@@ -433,7 +575,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                label,
+                '$label ($count)',
                 style: TextStyle(
                   color: isSelected ? Colors.white : Colors.grey,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -447,9 +589,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
   }
 
   Widget _buildTourAssignmentCard(TourGuideAssignment assignment) {
-    final isPast = assignment.endDate.isBefore(DateTime.now());
-    final isOngoing = assignment.startDate.isBefore(DateTime.now()) && 
-                     assignment.endDate.isAfter(DateTime.now());
+    final isPast = assignment.endDate.isBefore(DateUtils.dateOnly(DateTime.now()));
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -457,7 +597,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: _getStatusColor(assignment.status, isPast, isOngoing).withOpacity(0.2),
+          color: _getStatusColor(assignment.status, isPast).withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -471,12 +611,12 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(assignment.status, isPast, isOngoing).withOpacity(0.1),
+                    color: _getStatusColor(assignment.status, isPast).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.tour,
-                    color: _getStatusColor(assignment.status, isPast, isOngoing),
+                    color: _getStatusColor(assignment.status, isPast),
                     size: 24,
                   ),
                 ),
@@ -485,7 +625,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildStatusBadge(assignment.status, isPast, isOngoing),
+                      _buildStatusBadge(assignment.status, isPast),
                       const SizedBox(height: 6),
                       Text(
                         assignment.tourName ?? 'Tour không xác định',
@@ -651,59 +791,63 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
               ],
             ),
           ),
-          if (assignment.status.toLowerCase() == 'assigned' && !isPast)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Color(0xFFE5E7EB)),
-                ),
+          // Show action buttons for all assignments (not just assigned status)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: Color(0xFFE5E7EB)),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  // OutlinedButton.icon(
-                  //   onPressed: () => _deleteAssignment(assignment),
-                  //   icon: const Icon(Icons.cancel, size: 18),
-                  //   label: const Text('Hủy phân công'),
-                  //   style: OutlinedButton.styleFrom(
-                  //     foregroundColor: Colors.red,
-                  //     side: const BorderSide(color: Colors.red),
-                  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  //     shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(8),
-                  //     ),
-                  //   ),
-                  // ),
-                  // ),
-                  const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => AssignmentDetailsScreen(assignment: assignment),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.info_outline, size: 18),
-                    label: const Text('Chi tiết'),
-                    style: ElevatedButton.styleFrom(
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Show status update button only for main_guide and appropriate statuses
+                if (assignment.role.toLowerCase() == 'main_guide' &&
+                    ['assigned', 'completed', 'inprogress'].contains(_normalizeStatus(assignment.status)) &&
+                    !isPast) ...[
+                  OutlinedButton.icon(
+                    onPressed: () => _showStatusUpdateDialog(assignment),
+                    icon: const Icon(Icons.update, size: 18),
+                    label: const Text('Cập nhật trạng thái'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: const BorderSide(color: Colors.blue),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
+                  const SizedBox(width: 12),
                 ],
-              ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => AssignmentDetailsScreen(assignment: assignment),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.info_outline, size: 18),
+                  label: const Text('Chi tiết'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusBadge(String status, bool isPast, bool isOngoing) {
-    final color = _getStatusColor(status, isPast, isOngoing);
+  Widget _buildStatusBadge(String status, bool isPast) {
+    final color = _getStatusColor(status, isPast);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -711,7 +855,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        _getStatusText(status, isPast, isOngoing),
+        _getStatusText(status, isPast),
         style: TextStyle(
           color: color,
           fontSize: 12,
@@ -721,27 +865,35 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     );
   }
 
-  Color _getStatusColor(String status, bool isPast, bool isOngoing) {
-    if (isOngoing) return const Color(0xFF059669);
-    if (isPast) return const Color(0xFF6B7280);
-    
-    switch (status.toLowerCase()) {
+  Color _getStatusColor(String status, bool isPast) {
+    final normalizedStatus = _normalizeStatus(status);
+    if (isPast && (normalizedStatus == 'assigned' || normalizedStatus == 'inprogress')) {
+      return const Color(0xFF6B7280); // Grey for finished
+    }
+
+    switch (normalizedStatus) {
+      case 'inprogress':
+        return const Color(0xFF059669); // Green
       case 'assigned':
-        return const Color(0xFF3B82F6);
+        return const Color(0xFF3B82F6); // Blue
       case 'completed':
-        return const Color(0xFF059669);
+        return const Color(0xFF10B981); // Light Green for completed
       case 'cancelled':
-        return const Color(0xFFEF4444);
+        return const Color(0xFFEF4444); // Red
       default:
-        return const Color(0xFF6B7280);
+        return const Color(0xFF6B7280); // Grey
     }
   }
 
-  String _getStatusText(String status, bool isPast, bool isOngoing) {
-    if (isOngoing) return 'Đang diễn ra';
-    if (isPast) return 'Đã kết thúc';
-    
-    switch (status.toLowerCase()) {
+  String _getStatusText(String status, bool isPast) {
+    final normalizedStatus = _normalizeStatus(status);
+    if (isPast && (normalizedStatus == 'assigned' || normalizedStatus == 'inprogress')) {
+      return 'Đã kết thúc';
+    }
+
+    switch (normalizedStatus) {
+      case 'inprogress':
+        return 'Đang diễn ra';
       case 'assigned':
         return 'Đã giao';
       case 'completed':

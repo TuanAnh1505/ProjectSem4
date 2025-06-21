@@ -397,4 +397,59 @@ class GuideService {
       return [];
     }
   }
+
+  // New method: Fetch current guide's assignments
+  Future<List<TourGuideAssignment>> fetchCurrentGuideAssignments() async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('Token not found. Please login again.');
+      }
+
+      final response = await http.get(
+        Uri.parse('$assignmentUrl/my-assignments'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        return data.map((json) => TourGuideAssignment.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load current guide assignments: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching current guide assignments: $e');
+    }
+  }
+
+  // New method: Update assignment status (only for main_guide)
+  Future<TourGuideAssignment> updateAssignmentStatus(int assignmentId, String newStatus) async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('Token not found. Please login again.');
+      }
+
+      final response = await http.put(
+        Uri.parse('$assignmentUrl/$assignmentId/status?newStatus=$newStatus'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return TourGuideAssignment.fromJson(json.decode(response.body));
+      } else {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['error'] ?? 'Failed to update assignment status';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      throw Exception('Error updating assignment status: $e');
+    }
+  }
 }

@@ -30,7 +30,7 @@ import java.util.UUID;
 
 @Service
 public class UserService {
-   
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -263,7 +263,8 @@ public class UserService {
         return user;
     }
 
-    public User createGuideUserAndSendMail(String fullName, String email, String password, String phone, String address) {
+    public User createGuideUserAndSendMail(String fullName, String email, String password, String phone,
+            String address) {
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email đã tồn tại!");
         }
@@ -283,13 +284,77 @@ public class UserService {
         }
         userRoleRepository.save(new UserRole(user.getUserid(), guideRole.getRoleid()));
         // Gửi mail thông tin tài khoản
-        String subject = "Thông tin tài khoản hướng dẫn viên";
-        String content = "<p>Xin chào,</p>"
-            + "<p>Admin đã tạo cho bạn tài khoản hướng dẫn viên trên hệ thống TravelTour.</p>"
-            + "<p><b>Email đăng nhập:</b> " + email + "<br/>"
-            + "<b>Mật khẩu:</b> " + password + "</p>"
-            + "<p>Hãy đăng nhập và đổi mật khẩu sau khi sử dụng lần đầu.</p>"
-            + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
+        String subject = "Thông tin tài khoản hướng dẫn viên TravelTour";
+        String content = String.format(
+                """
+                        <!DOCTYPE html>
+                        <html lang="vi">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Xin chào!</title>
+                        </head>
+                        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6;">
+                            <table width="100%%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f7f6;">
+                                <tr>
+                                    <td align="center">
+                                        <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; margin: 20px 0; border-collapse: collapse;">
+                                            <!-- Header -->
+                                            <tr>
+                                                <td style="background-color: #004a99; padding: 15px 30px; text-align: left;">
+                                                     <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">TravelTour</h1>
+                                                </td>
+                                            </tr>
+                                            <!-- Banner Image -->
+                                            <tr>
+                                                <td>
+                                                    <img src="https://images.unsplash.com/photo-1507525428034-b723a9ce6890?q=80&w=2070&auto=format&fit=crop" alt="Beach Banner" style="width: 100%%; height: auto; display: block;">
+                                                </td>
+                                            </tr>
+                                            <!-- Content -->
+                                            <tr>
+                                                <td style="padding: 40px 30px 30px 30px; text-align: center;">
+                                                    <h2 style="color: #004a99; font-size: 28px; margin: 0 0 10px 0;">Xin chào!</h2>
+                                                    <p style="color: #333333; font-size: 16px;">Admin đã tạo cho bạn tài khoản hướng dẫn viên trên hệ thống TravelTour.</p>
+                                                    <p style="font-size: 16px; margin-bottom: 30px;"><a href="http://localhost:3000/login" style="color: #007bff; text-decoration: none;">Hãy đăng nhập và đổi mật khẩu sau khi sử dụng lần đầu.</a></p>
+
+                                                    <!-- Credentials Box -->
+                                                    <table width="100%%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td align="center">
+                                                                <table width="80%%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f2f8fe; border-radius: 8px; padding: 25px;">
+                                                                    <tr>
+                                                                        <td style="font-size: 16px; color: #333333; line-height: 1.7;">
+                                                                            <p style="margin: 0;"><strong>Email đăng nhập:</strong> %s</p>
+                                                                            <p style="margin: 10px 0 0 0;"><strong>Mật khẩu:</strong> %s</p>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <!-- Footer -->
+                                            <tr>
+                                                <td style="padding: 20px 30px; text-align: center; color: #888888; font-size: 14px; border-top: 1px solid #eeeeee;">
+                                                    <p style="margin: 0;">Trân trọng,<br><strong style="color: #555555;">Đội ngũ TravelTour</strong></p>
+                                                    <p style="margin-top: 20px;">
+                                                        Cần hỗ trợ? Liên hệ với chúng tôi qua <a href="mailto:support@traveltour.com" style="color: #007bff; text-decoration: none;">support@traveltour.com</a>
+                                                    </p>
+                                                    <p style="font-size: 12px; color: #aaaaaa; margin-top: 15px;">
+                                                        &copy; 2025 TravelTour. Tất cả các quyền được bảo lưu.
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </body>
+                        </html>
+                        """,
+                email, password);
         emailService.sendHtmlEmail(email, subject, content);
         return user;
     }

@@ -7,8 +7,10 @@ import com.example.api.model.TourGuideAssignment;
 import com.example.api.repository.TourGuideAssignmentRepository;
 import com.example.api.repository.TourGuideRepository;
 import com.example.api.repository.TourRepository;
+import com.example.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,9 @@ public class TourGuideAssignmentService {
 
     @Autowired
     private TourGuideRepository tourGuideRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private EmailService emailService;
@@ -165,11 +170,66 @@ public class TourGuideAssignmentService {
                 .collect(Collectors.toList());
     }
 
+    // New method: Get current guide's assignments
+    public List<TourGuideAssignmentDTO> getCurrentGuideAssignments() {
+        // Get current user from security context
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        var currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+
+        // Find the tour guide record for current user
+        TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
+                .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
+
+        return assignmentRepository.findByGuideId(currentGuide.getGuideId().intValue()).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     public TourGuideAssignmentDTO updateAssignmentStatus(Integer assignmentId, TourGuideAssignment.AssignmentStatus newStatus) {
         TourGuideAssignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Assignment not found with id: " + assignmentId));
 
         assignment.setStatus(newStatus);
+        TourGuideAssignment updatedAssignment = assignmentRepository.save(assignment);
+        return convertToDTO(updatedAssignment);
+    }
+
+    // New method: Update assignment status (only for main_guide)
+    public TourGuideAssignmentDTO updateAssignmentStatusByMainGuide(Integer assignmentId, String newStatus) {
+        // Get current user from security context
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        var currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+
+        // Find the tour guide record for current user
+        TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
+                .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
+
+        // Find the assignment
+        TourGuideAssignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Assignment not found with id: " + assignmentId));
+
+        // Check if current guide is assigned to this assignment
+        if (!assignment.getGuideId().equals(currentGuide.getGuideId().intValue())) {
+            throw new IllegalStateException("Bạn không có quyền cập nhật trạng thái của assignment này!");
+        }
+
+        // Check if current guide has main_guide role for this assignment
+        if (assignment.getRole() != TourGuideAssignment.GuideRole.main_guide) {
+            throw new IllegalStateException("Chỉ hướng dẫn viên chính (main_guide) mới có quyền cập nhật trạng thái!");
+        }
+
+        // Parse and validate new status
+        TourGuideAssignment.AssignmentStatus status;
+        try {
+            status = TourGuideAssignment.AssignmentStatus.valueOf(newStatus.toLowerCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatus);
+        }
+
+        // Update the status
+        assignment.setStatus(status);
         TourGuideAssignment updatedAssignment = assignmentRepository.save(assignment);
         return convertToDTO(updatedAssignment);
     }
