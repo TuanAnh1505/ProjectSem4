@@ -1,12 +1,23 @@
 package com.example.api.service;
 
 import com.example.api.dto.TourGuideAssignmentDTO;
+import com.example.api.dto.TourDetailForGuideDTO;
+import com.example.api.dto.TourItineraryDTO;
+import com.example.api.dto.PassengerDetailDTO;
 import com.example.api.model.Tour;
 import com.example.api.model.TourGuide;
 import com.example.api.model.TourGuideAssignment;
+import com.example.api.model.TourSchedule;
+import com.example.api.model.TourItinerary;
+import com.example.api.model.Booking;
+import com.example.api.model.BookingPassenger;
 import com.example.api.repository.TourGuideAssignmentRepository;
 import com.example.api.repository.TourGuideRepository;
 import com.example.api.repository.TourRepository;
+import com.example.api.repository.TourScheduleRepository;
+import com.example.api.repository.TourItineraryRepository;
+import com.example.api.repository.BookingRepository;
+import com.example.api.repository.BookingPassengerRepository;
 import com.example.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -29,19 +41,31 @@ public class TourGuideAssignmentService {
     private final TourRepository tourRepository;
     private final TourGuideRepository tourGuideRepository;
     private final UserRepository userRepository;
+    private final TourScheduleRepository tourScheduleRepository;
     private final ApplicationContext applicationContext;
+    private final TourItineraryRepository tourItineraryRepository;
+    private final BookingRepository bookingRepository;
+    private final BookingPassengerRepository bookingPassengerRepository;
 
     @Autowired
     public TourGuideAssignmentService(TourGuideAssignmentRepository assignmentRepository,
                                       TourRepository tourRepository,
                                       TourGuideRepository tourGuideRepository,
                                       UserRepository userRepository,
-                                      ApplicationContext applicationContext) {
+                                      TourScheduleRepository tourScheduleRepository,
+                                      ApplicationContext applicationContext,
+                                      TourItineraryRepository tourItineraryRepository,
+                                      BookingRepository bookingRepository,
+                                      BookingPassengerRepository bookingPassengerRepository) {
         this.assignmentRepository = assignmentRepository;
         this.tourRepository = tourRepository;
         this.tourGuideRepository = tourGuideRepository;
         this.userRepository = userRepository;
+        this.tourScheduleRepository = tourScheduleRepository;
         this.applicationContext = applicationContext;
+        this.tourItineraryRepository = tourItineraryRepository;
+        this.bookingRepository = bookingRepository;
+        this.bookingPassengerRepository = bookingPassengerRepository;
     }
 
     private EmailService getEmailService() {
@@ -234,7 +258,11 @@ public class TourGuideAssignmentService {
                 assignmentDetail.put("tourPrice", tour.getPrice());
                 assignmentDetail.put("tourDuration", tour.getDuration());
             }
-            
+
+            // Add scheduleId by finding the schedule based on tourId and startDate
+            tourScheduleRepository.findByTourIdAndStartDate(assignment.getTourId(), assignment.getStartDate())
+                    .ifPresent(schedule -> assignmentDetail.put("scheduleId", schedule.getScheduleId()));
+
             // Add guide information
             if (assignment.getGuide() != null) {
                 TourGuide guide = assignment.getGuide();
@@ -341,6 +369,72 @@ public class TourGuideAssignmentService {
             dto.setGuideRating(guide.getRating());
         }
 
+        return dto;
+    }
+
+    // New method: Get detailed tour information for guide
+    public TourDetailForGuideDTO getTourDetailForGuide(Integer tourId, LocalDate startDate) {
+        // Get current user from security context
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        var currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+        TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
+                .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
+
+        // 1. Verify this guide is assigned to this tour schedule
+        assignmentRepository.findByTourIdAndGuideIdAndStartDate(tourId, currentGuide.getGuideId().intValue(), startDate)
+                .orElseThrow(() -> new IllegalStateException("Bạn không được phân công cho tour này vào ngày này."));
+
+        // 2. Fetch required entities
+        Tour tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tour với ID: " + tourId));
+        TourSchedule schedule = tourScheduleRepository.findByTourIdAndStartDate(tourId, startDate)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy lịch trình cho tour " + tourId + " vào ngày " + startDate));
+
+        // Correctly fetch itinerary using scheduleId
+        List<TourItinerary> itineraries = tourItineraryRepository.findByScheduleId(schedule.getScheduleId());
+
+        // 3. Fetch passengers for this specific schedule
+        List<Booking> confirmedBookings = bookingRepository.findByScheduleIdAndStatus_StatusName(schedule.getScheduleId(), "CONFIRMED");
+        List<BookingPassenger> passengers = confirmedBookings.stream()
+                .flatMap(booking -> bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId()).stream())
+                .collect(Collectors.toList());
+
+        // 4. Convert to DTO
+        TourDetailForGuideDTO dto = new TourDetailForGuideDTO();
+        dto.setTourId(tour.getTourId());
+        dto.setTourName(tour.getName());
+        dto.setTourDescription(tour.getDescription());
+        dto.setTourImage(tour.getImageUrls() != null && !tour.getImageUrls().isEmpty() ? tour.getImageUrls().get(0) : null);
+        dto.setStartDate(schedule.getStartDate());
+        dto.setEndDate(schedule.getEndDate());
+        dto.setScheduleStatus(schedule.getStatus() != null ? schedule.getStatus().getValue() : "N/A");
+        dto.setItinerary(itineraries.stream().map(this::convertToItineraryDTO).collect(Collectors.toList()));
+        dto.setPassengers(passengers.stream().map(this::convertToPassengerDTO).collect(Collectors.toList()));
+
+        return dto;
+    }
+
+    private TourItineraryDTO convertToItineraryDTO(TourItinerary itinerary) {
+        TourItineraryDTO dto = new TourItineraryDTO();
+        dto.setItineraryId(itinerary.getItineraryId());
+        dto.setScheduleId(itinerary.getScheduleId());
+        dto.setTitle(itinerary.getTitle());
+        dto.setDescription(itinerary.getDescription());
+        dto.setStartTime(itinerary.getStartTime());
+        dto.setEndTime(itinerary.getEndTime());
+        dto.setType(itinerary.getType());
+        return dto;
+    }
+
+    private PassengerDetailDTO convertToPassengerDTO(BookingPassenger passenger) {
+        PassengerDetailDTO dto = new PassengerDetailDTO();
+        dto.setFullName(passenger.getFullName());
+        dto.setEmail(passenger.getEmail());
+        dto.setPhone(passenger.getPhone());
+        dto.setBirthDate(passenger.getBirthDate());
+        dto.setGender(passenger.getGender());
+        dto.setPassengerType(passenger.getPassengerType() != null ? passenger.getPassengerType().name() : null);
         return dto;
     }
 } 

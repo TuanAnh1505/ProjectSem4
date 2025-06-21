@@ -67,6 +67,15 @@ public class BookingPassengerService {
                 .collect(Collectors.toList());
     }
 
+    public List<BookingPassengerDTO> getPassengersByScheduleId(Integer scheduleId) {
+        List<Booking> confirmedBookings = bookingRepo.findByScheduleIdAndStatus_StatusName(scheduleId, "CONFIRMED");
+
+        return confirmedBookings.stream()
+            .flatMap(booking -> bookingPassengerRepo.findByBooking_BookingId(booking.getBookingId()).stream())
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
+    }
+
     public List<BookingPassengerDTO> createPassengers(BookingPassengerRequestDTO request) {
         log.info("Received booking passenger request: {}", request);
         validateRequest(request);

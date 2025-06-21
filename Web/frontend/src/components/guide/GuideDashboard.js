@@ -1,334 +1,194 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import TourDetail from './TourDetail';
+import { useNavigate } from 'react-router-dom';
 import './GuideDashboard.css';
+import { CalendarCheck, Users, Star, Map, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import TourDetailForGuide from './TourDetailForGuide';
 
-const GuideDashboard = ({ demoData }) => {
+const GuideDashboard = () => {
     const [assignments, setAssignments] = useState([]);
+    const [filteredAssignments, setFilteredAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [activeFilter, setActiveFilter] = useState('all');
-    const [selectedTourId, setSelectedTourId] = useState(null);
+    const [error, setError] = useState('');
+    const [filter, setFilter] = useState('all');
+    const [selectedTour, setSelectedTour] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [guideRating, setGuideRating] = useState(0.0);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        if (demoData) {
-            // Sử dụng demo data nếu được truyền vào
-            setAssignments(demoData);
-            setLoading(false);
-        } else {
-            // Gọi API thực tế
-            fetchAssignments();
+    const fetchData = async () => {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
         }
-    }, [demoData]);
 
-    const fetchAssignments = async () => {
         try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8080/api/tour-guide-assignments/my-assignments-details', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            setAssignments(response.data);
-            setError(null);
+            const [assignmentsRes, profileRes] = await Promise.all([
+                axios.get("http://localhost:8080/api/tour-guide-assignments/my-assignments-details", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                axios.get("http://localhost:8080/api/tour-guides/me", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            ]);
+
+            const assignmentsWithDetails = assignmentsRes.data.map(a => ({
+                ...a,
+                category: new Date(a.startDate) >= new Date() ? 'upcoming' : 'completed'
+            }));
+            setAssignments(assignmentsWithDetails);
+            setFilteredAssignments(assignmentsWithDetails);
+
+            if (profileRes.data) {
+                setGuideRating(profileRes.data.rating || 0.0);
+            }
+            setError('');
         } catch (err) {
-            console.error('Error fetching assignments:', err);
-            setError('Không thể tải dữ liệu. Vui lòng thử lại sau.');
+            setError('Không thể tải dữ liệu. Vui lòng thử lại.');
+            if (err.response && err.response.status === 401) {
+                navigate('/login');
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const getStatusClass = (status) => {
-        switch (status?.toLowerCase()) {
-            case 'assigned':
-                return 'status-assigned';
-            case 'completed':
-                return 'status-completed';
-            case 'cancelled':
-                return 'status-cancelled';
-            case 'inprogress':
-                return 'status-inprogress';
-            default:
-                return 'status-assigned';
+    useEffect(() => {
+        fetchData();
+    }, [navigate]);
+
+    const handleFilter = (type) => {
+        setFilter(type);
+        if (type === 'all') {
+            setFilteredAssignments(assignments);
+        } else {
+            setFilteredAssignments(assignments.filter(a => a.category === type));
         }
     };
 
-    const getStatusText = (status) => {
-        switch (status?.toLowerCase()) {
-            case 'assigned':
-                return 'Đã phân công';
-            case 'completed':
-                return 'Hoàn thành';
-            case 'cancelled':
-                return 'Đã hủy';
-            case 'inprogress':
-                return 'Đang thực hiện';
-            default:
-                return 'Đã phân công';
-        }
+    const handleViewDetails = (tourId, startDate) => {
+        setSelectedTour({ tourId, startDate });
+        setIsModalOpen(true);
     };
 
-    const getRoleText = (role) => {
-        switch (role?.toLowerCase()) {
-            case 'main_guide':
-                return 'Hướng dẫn viên chính';
-            case 'assistant_guide':
-                return 'Hướng dẫn viên phụ';
-            case 'specialist':
-                return 'Chuyên gia';
-            default:
-                return role;
-        }
+    const closeModal = () => {
+        setSelectedTour(null);
+        setIsModalOpen(false);
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    };
+    const upcomingToursCount = assignments.filter(a => new Date(a.startDate) >= new Date()).length;
+    const completedToursCount = assignments.length - upcomingToursCount;
 
-    const formatPrice = (price) => {
-        if (!price) return 'N/A';
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(price);
-    };
-
-    const getFilteredAssignments = () => {
-        if (activeFilter === 'all') {
-            return assignments;
-        }
-        return assignments.filter(assignment => assignment.category === activeFilter);
-    };
-
-    const getStats = () => {
-        const stats = {
-            completed: assignments.filter(a => a.category === 'completed').length,
-            upcoming: assignments.filter(a => a.category === 'upcoming').length,
-            ongoing: assignments.filter(a => a.category === 'ongoing').length,
-            total: assignments.length
-        };
-        return stats;
-    };
-
-    const handleStatusUpdate = async (assignmentId, newStatus) => {
-        try {
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:8080/api/tour-guide-assignments/${assignmentId}/status`, 
-                { status: newStatus },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            // Refresh data
-            fetchAssignments();
-        } catch (err) {
-            console.error('Error updating status:', err);
-            alert('Không thể cập nhật trạng thái. Vui lòng thử lại.');
-        }
-    };
-
-    const handleViewTourDetail = (tourId) => {
-        setSelectedTourId(tourId);
-    };
-
-    const handleCloseTourDetail = () => {
-        setSelectedTourId(null);
-    };
-
-    if (loading) {
-        return (
-            <div className="loading-spinner">
-                <div className="spinner"></div>
+    const StatCard = ({ icon, label, value, color }) => (
+        <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: color }}>
+                {icon}
             </div>
-        );
-    }
+            <div className="stat-info">
+                <span className="stat-value">{value}</span>
+                <span className="stat-label">{label}</span>
+            </div>
+        </div>
+    );
 
-    if (error) {
+    const AssignmentCard = ({ assignment }) => {
+        const statusConfig = {
+            'Sắp diễn ra': {
+                className: 'status-upcoming',
+                icon: <Clock size={16} />
+            },
+            'Đã hoàn thành': {
+                className: 'status-completed',
+                icon: <CheckCircle size={16} />
+            }
+        };
+        const status = new Date(assignment.startDate) >= new Date() ? 'Sắp diễn ra' : 'Đã hoàn thành';
+        const config = statusConfig[status];
+
         return (
-            <div className="guide-dashboard">
-                <div className="empty-state">
-                    <div className="empty-state-icon">⚠️</div>
-                    <h3>Lỗi tải dữ liệu</h3>
-                    <p>{error}</p>
-                    <button onClick={fetchAssignments} className="action-btn btn-primary">
-                        Thử lại
+            <div className="assignment-card">
+                <div className="card-image-container">
+                    <img src={assignment.tourImage || 'https://placehold.co/600x400/EEE/31343C?text=Tour+Image'} alt={assignment.tourName} className="card-image" />
+                    <div className="card-image-overlay"></div>
+                    <span className={`card-status-badge ${config.className}`}>
+                        {config.icon} {status}
+                    </span>
+                </div>
+                <div className="card-content">
+                    <h3 className="card-title">{assignment.tourName}</h3>
+                    <div className="card-info-grid">
+                        <div className="info-item">
+                            <CalendarCheck size={16} />
+                            <span>{new Date(assignment.startDate).toLocaleDateString()}</span>
+                        </div>
+                        <div className="info-item">
+                            <Map size={16} />
+                            <span>{assignment.destinationName || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <p className="card-description">{assignment.tourDescription}</p>
+                    <button className="card-action-button" onClick={() => handleViewDetails(assignment.tourId, assignment.startDate)}>
+                        Xem chi tiết
                     </button>
                 </div>
             </div>
         );
-    }
+    };
 
-    const stats = getStats();
-    const filteredAssignments = getFilteredAssignments();
+    if (loading) return <div className="loading-spinner"></div>;
+    if (error) return (
+        <div className="error-message">
+            <p>{error}</p>
+            <button onClick={fetchData} className="card-action-button">Thử lại</button>
+        </div>
+    );
 
     return (
         <div className="guide-dashboard">
-            {/* Header */}
-            <div className="guide-dashboard-header">
-                <h1>Bảng điều khiển Hướng dẫn viên</h1>
-                <p>Quản lý và theo dõi các tour đã được phân công</p>
-            </div>
+            <header className="dashboard-header">
+                <h1>Bảng điều khiển</h1>
+                <p>Chào mừng trở lại! Dưới đây là tổng quan về các tour của bạn.</p>
+            </header>
 
-            {/* Statistics */}
-            <div className="dashboard-stats">
-                <div className="stat-card completed">
-                    <div className="stat-number">{stats.completed}</div>
-                    <div className="stat-label">Tour đã hoàn thành</div>
-                </div>
-                <div className="stat-card ongoing">
-                    <div className="stat-number">{stats.ongoing}</div>
-                    <div className="stat-label">Tour đang thực hiện</div>
-                </div>
-                <div className="stat-card upcoming">
-                    <div className="stat-number">{stats.upcoming}</div>
-                    <div className="stat-label">Tour sắp tới</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-number">{stats.total}</div>
-                    <div className="stat-label">Tổng số tour</div>
-                </div>
-            </div>
-
-            {/* Assignments Section */}
-            <div className="assignments-section">
+            <section className="stats-grid">
+                <StatCard icon={<CalendarCheck size={24} color="white" />} label="Tour sắp diễn ra" value={upcomingToursCount} color="#3b82f6" />
+                <StatCard icon={<CheckCircle size={24} color="white" />} label="Tour đã hoàn thành" value={completedToursCount} color="#16a34a" />
+                <StatCard icon={<Users size={24} color="white" />} label="Tổng khách đã dẫn" value={assignments.reduce((acc, a) => acc + (a.numberOfPassengers || 0), 0)} color="#f97316" />
+                <StatCard icon={<Star size={24} color="white" />} label="Đánh giá trung bình" value={guideRating.toFixed(1)} color="#f59e0b" />
+            </section>
+            
+            <section className="assignments-section">
                 <div className="section-header">
-                    <h2 className="section-title">Danh sách tour được phân công</h2>
+                    <h2>Tour được phân công</h2>
                     <div className="filter-buttons">
-                        <button 
-                            className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
-                            onClick={() => setActiveFilter('all')}
-                        >
-                            Tất cả
-                        </button>
-                        <button 
-                            className={`filter-btn ${activeFilter === 'upcoming' ? 'active' : ''}`}
-                            onClick={() => setActiveFilter('upcoming')}
-                        >
-                            Sắp tới
-                        </button>
-                        <button 
-                            className={`filter-btn ${activeFilter === 'ongoing' ? 'active' : ''}`}
-                            onClick={() => setActiveFilter('ongoing')}
-                        >
-                            Đang thực hiện
-                        </button>
-                        <button 
-                            className={`filter-btn ${activeFilter === 'completed' ? 'active' : ''}`}
-                            onClick={() => setActiveFilter('completed')}
-                        >
-                            Đã hoàn thành
-                        </button>
+                        <button onClick={() => handleFilter('upcoming')} className={filter === 'upcoming' ? 'active' : ''}>Sắp diễn ra</button>
+                        <button onClick={() => handleFilter('completed')} className={filter === 'completed' ? 'active' : ''}>Đã hoàn thành</button>
+                        <button onClick={() => handleFilter('all')} className={filter === 'all' ? 'active' : ''}>Tất cả</button>
                     </div>
                 </div>
 
-                {filteredAssignments.length === 0 ? (
-                    <div className="empty-state">
-                        <div className="empty-state-icon">📋</div>
-                        <h3>Chưa có tour nào</h3>
-                        <p>
-                            {activeFilter === 'all' 
-                                ? 'Bạn chưa được phân công tour nào.' 
-                                : `Không có tour nào trong danh mục "${activeFilter === 'upcoming' ? 'Sắp tới' : activeFilter === 'ongoing' ? 'Đang thực hiện' : 'Đã hoàn thành'}"`
-                            }
-                        </p>
-                    </div>
-                ) : (
-                    <div className="assignments-grid">
-                        {filteredAssignments.map((assignment) => (
-                            <div key={assignment.assignmentId} className="assignment-card">
-                                <img 
-                                    src={assignment.tourImage || '/default-tour-image.jpg'} 
-                                    alt={assignment.tourName}
-                                    className="assignment-image"
-                                    onError={(e) => {
-                                        e.target.src = '/default-tour-image.jpg';
-                                    }}
-                                />
-                                <div className="assignment-content">
-                                    <div className="assignment-header">
-                                        <h3 className="assignment-title">{assignment.tourName}</h3>
-                                        <span className={`assignment-status ${getStatusClass(assignment.status)}`}>
-                                            {getStatusText(assignment.status)}
-                                        </span>
-                                    </div>
+                <div className="assignments-grid">
+                    {filteredAssignments.length > 0 ? (
+                        filteredAssignments.map(assignment => (
+                            <AssignmentCard key={`${assignment.tourId}-${assignment.startDate}`} assignment={assignment} />
+                        ))
+                    ) : (
+                        <div className="no-assignments">
+                            <AlertTriangle size={48} className="no-assignments-icon" />
+                            <h3>Không có tour nào</h3>
+                            <p>Hiện tại không có tour nào phù hợp với bộ lọc đã chọn.</p>
+                        </div>
+                    )}
+                </div>
+            </section>
 
-                                    <div className="assignment-role">
-                                        {getRoleText(assignment.role)}
-                                    </div>
-
-                                    <div className="assignment-details">
-                                        <div className="detail-row">
-                                            <span className="detail-label">Ngày bắt đầu:</span>
-                                            <span className="detail-value">{formatDate(assignment.startDate)}</span>
-                                        </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Ngày kết thúc:</span>
-                                            <span className="detail-value">{formatDate(assignment.endDate)}</span>
-                                        </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Giá tour:</span>
-                                            <span className="detail-value">{formatPrice(assignment.tourPrice)}</span>
-                                        </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Thời gian:</span>
-                                            <span className="detail-value">{assignment.tourDuration || 'N/A'} ngày</span>
-                                        </div>
-                                    </div>
-
-                                    {assignment.tourDescription && (
-                                        <div className="assignment-details">
-                                            <div className="detail-row">
-                                                <span className="detail-label">Mô tả:</span>
-                                            </div>
-                                            <p style={{ fontSize: '0.9rem', color: '#666', margin: '5px 0 0 0' }}>
-                                                {assignment.tourDescription.length > 100 
-                                                    ? `${assignment.tourDescription.substring(0, 100)}...` 
-                                                    : assignment.tourDescription
-                                                }
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    <div className="assignment-actions">
-                                        <button 
-                                            className="action-btn btn-primary"
-                                            onClick={() => handleViewTourDetail(assignment.tourId)}
-                                        >
-                                            Xem chi tiết
-                                        </button>
-                                        {assignment.role === 'main_guide' && assignment.status === 'inprogress' && (
-                                            <button 
-                                                className="action-btn btn-success"
-                                                onClick={() => handleStatusUpdate(assignment.assignmentId, 'completed')}
-                                            >
-                                                Hoàn thành
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Tour Detail Modal */}
-            {selectedTourId && (
-                <TourDetail 
-                    tourId={selectedTourId} 
-                    onClose={handleCloseTourDetail} 
+            {isModalOpen && selectedTour && (
+                <TourDetailForGuide
+                    tourId={selectedTour.tourId}
+                    startDate={selectedTour.startDate}
+                    onClose={closeModal}
                 />
             )}
         </div>

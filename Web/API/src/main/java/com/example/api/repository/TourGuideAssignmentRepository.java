@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TourGuideAssignmentRepository extends JpaRepository<TourGuideAssignment, Integer> {
@@ -34,4 +35,9 @@ public interface TourGuideAssignmentRepository extends JpaRepository<TourGuideAs
     List<TourGuideAssignment> findByGuideIdAndTourStatus(
             @Param("guideId") Integer guideId,
             @Param("statusName") String statusName);
+
+    Optional<TourGuideAssignment> findByTourIdAndGuideIdAndStartDate(
+            @Param("tourId") Integer tourId,
+            @Param("guideId") Integer guideId,
+            @Param("startDate") LocalDate startDate);
 } 

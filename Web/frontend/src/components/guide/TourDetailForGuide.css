@@ -1,0 +1,406 @@
+/* Reusing root variables from GuidePage.css */
+
+/* === Modal Layout === */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-container {
+    background-color: var(--main-bg);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* === Modal Header === */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    color: var(--sidebar-active-bg);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modal-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0.25rem 0 0 0;
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin: -0.5rem; /* Offset padding for larger click area */
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.close-button:hover {
+    background-color: var(--main-bg);
+    color: var(--text-primary);
+}
+
+/* === Modal Tabs === */
+.modal-tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border: none;
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-button:hover {
+    background-color: var(--main-bg);
+    color: var(--text-primary);
+}
+
+.tab-button.active {
+    color: var(--sidebar-active-bg);
+    border-bottom: 2px solid var(--sidebar-active-bg);
+}
+
+
+/* === Modal Content === */
+.modal-content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* === Overview Tab === */
+.overview-tab {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-bg);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.info-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.status-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+.status-badge.status-available { background-color: #e8f5e8; color: #2e7d32; }
+.status-badge.status-ongoing { background-color: #fff3e0; color: #f57c00; }
+.status-badge.status-completed { background-color: #e0f2f1; color: #00695c; }
+.status-badge.status-cancelled { background-color: #ffebee; color: #c62828; }
+.status-badge.status-full { background-color: #fce4ec; color: #ad1457; }
+
+
+/* === Itinerary Tab === */
+.itinerary-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.itinerary-item {
+    display: flex;
+    gap: 1rem;
+}
+
+.itinerary-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--sidebar-active-bg);
+}
+
+.itinerary-day span {
+    font-weight: 600;
+}
+
+.itinerary-content {
+    flex-grow: 1;
+    background-color: var(--card-bg);
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.itinerary-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.itinerary-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* === Passengers Tab === */
+.passengers-tab {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.passenger-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+}
+
+.passenger-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.passenger-icon {
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: var(--main-bg);
+    color: var(--sidebar-active-bg);
+}
+
+.passenger-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.passenger-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.passenger-gender {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.passenger-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.passenger-contact .info-row {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+/* Loading and Error States */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    text-align: center;
+    padding: 40px;
+}
+
+.error-message h3 {
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 40px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .modal-container {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .modal-content {
+        padding: 20px;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .info-row span {
+        text-align: left;
+    }
+    
+    .passengers-tab {
+        grid-template-columns: 1fr;
+    }
+    
+    .itinerary-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .itinerary-content {
+        padding: 0;
+    }
+} 

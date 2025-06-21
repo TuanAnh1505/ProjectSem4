@@ -1,11 +1,13 @@
 package com.example.api.controller;
 
 import com.example.api.dto.TourGuideAssignmentDTO;
+import com.example.api.dto.TourDetailForGuideDTO;
 import com.example.api.service.TourGuideAssignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -86,17 +88,28 @@ public class TourGuideAssignmentController {
         }
     }
 
-    @PutMapping("/{assignmentId}/status")
-    public ResponseEntity<?> updateAssignmentStatus(
-            @PathVariable Integer assignmentId,
-            @RequestParam String newStatus) {
+    @GetMapping("/tour-detail/{tourId}")
+    public ResponseEntity<TourDetailForGuideDTO> getTourDetailForGuide(
+            @PathVariable Integer tourId,
+            @RequestParam LocalDate startDate) {
         try {
-            TourGuideAssignmentDTO updatedAssignment = assignmentService.updateAssignmentStatusByMainGuide(assignmentId, newStatus);
-            return ResponseEntity.ok(updatedAssignment);
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+            TourDetailForGuideDTO tourDetail = assignmentService.getTourDetailForGuide(tourId, startDate);
+            return ResponseEntity.ok(tourDetail);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Lỗi hệ thống: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @PutMapping("/{assignmentId}/status")
+    public ResponseEntity<TourGuideAssignmentDTO> updateAssignmentStatus(
+            @PathVariable Integer assignmentId,
+            @RequestBody Map<String, String> request) {
+        try {
+            String newStatus = request.get("status");
+            TourGuideAssignmentDTO updated = assignmentService.updateAssignmentStatusByMainGuide(assignmentId, newStatus);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
 

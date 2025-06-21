@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LayoutDashboard, BarChart3, User, LogOut } from 'lucide-react';
 import GuideDashboard from './GuideDashboard';
 import GuideProfile from './GuideProfile';
 import './GuidePage.css';
-import { useNavigate } from 'react-router-dom';
 
 const GuidePage = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -21,57 +22,52 @@ const GuidePage = () => {
             case 'profile':
                 return <GuideProfile />;
             case 'reports':
-                return <div className="guide-content">Báo cáo và thống kê (đang phát triển)</div>;
+                return (
+                    <div className="guide-content-placeholder">
+                        <h2>Báo cáo và Thống kê</h2>
+                        <p>Tính năng này đang được phát triển.</p>
+                    </div>
+                );
             default:
                 return <GuideDashboard />;
         }
     };
 
+    const NavItem = ({ icon, text, tabName }) => (
+        <button
+            className={`nav-item ${activeTab === tabName ? 'active' : ''}`}
+            onClick={() => setActiveTab(tabName)}
+        >
+            {icon}
+            <span className="nav-text">{text}</span>
+        </button>
+    );
+
     return (
-        <div className="guide-page">
-            <div className="guide-sidebar">
-                <div className="guide-sidebar-header">
-                    <h2>Hướng dẫn viên</h2>
-                    <p>Quản lý tour</p>
+        <div className="guide-page-container">
+            <aside className="guide-sidebar">
+                <div className="sidebar-header">
+                    <div className="sidebar-logo">T</div>
+                    <h2 className="sidebar-title">TourManager</h2>
                 </div>
                 
                 <nav className="guide-nav">
-                    <button 
-                        className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('dashboard')}
-                    >
-                        <span className="nav-icon">📊</span>
-                        <span className="nav-text">Bảng điều khiển</span>
-                    </button>
-                    
-                    <button 
-                        className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('reports')}
-                    >
-                        <span className="nav-icon">📈</span>
-                        <span className="nav-text">Báo cáo</span>
-                    </button>
-                    
-                    <button 
-                        className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('profile')}
-                    >
-                        <span className="nav-icon">👤</span>
-                        <span className="nav-text">Thông tin cá nhân</span>
-                    </button>
+                    <NavItem icon={<LayoutDashboard size={20} />} text="Bảng điều khiển" tabName="dashboard" />
+                    <NavItem icon={<BarChart3 size={20} />} text="Báo cáo" tabName="reports" />
+                    <NavItem icon={<User size={20} />} text="Hồ sơ" tabName="profile" />
                 </nav>
 
-                <div className="guide-sidebar-footer">
+                <div className="sidebar-footer">
                     <button className="nav-item logout-button" onClick={handleLogout}>
-                        <span className="nav-icon">🚪</span>
+                        <LogOut size={20} />
                         <span className="nav-text">Đăng xuất</span>
                     </button>
                 </div>
-            </div>
+            </aside>
             
-            <div className="guide-main-content">
+            <main className="guide-main-content">
                 {renderContent()}
-            </div>
+            </main>
         </div>
     );
 };
