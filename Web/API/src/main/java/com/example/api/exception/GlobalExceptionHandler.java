@@ -19,9 +19,8 @@ public class GlobalExceptionHandler {
         errors.put("status", HttpStatus.BAD_REQUEST.value());
         errors.put("error", "Validation Failed");
         Map<String, String> fieldErrors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                fieldErrors.put(error.getField(), error.getDefaultMessage())
-        );
+        ex.getBindingResult().getFieldErrors()
+                .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
         errors.put("errors", fieldErrors);
         errors.put("message", "Validation failed for request");
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
@@ -35,6 +34,7 @@ public class GlobalExceptionHandler {
         errors.put("message", ex.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Map<String, Object>> handleIOException(IOException ex) {
         Map<String, Object> errors = new HashMap<>();

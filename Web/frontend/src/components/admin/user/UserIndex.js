@@ -272,8 +272,13 @@ const UserIndex = () => {
                     }),
                   });
                   if (!response.ok) {
-                    const err = await response.text();
-                    throw new Error(err || "Tạo tài khoản thất bại");
+                    const errorText = await response.text();
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        throw new Error(errorData.message || "Tạo tài khoản thất bại");
+                    } catch (e) {
+                        throw new Error(errorText || "Tạo tài khoản thất bại");
+                    }
                   }
                   setMessage("Tạo tài khoản hướng dẫn viên thành công");
                   setShowGuideModal(false);
@@ -298,7 +303,14 @@ const UserIndex = () => {
                   setFilteredUsers(data2);
                   setTimeout(() => setMessage(""), 3000);
                 } catch (error) {
-                  setMessage(error.message || "Tạo tài khoản thất bại");
+                  let finalMessage;
+                  try {
+                    const errorObj = JSON.parse(error.message);
+                    finalMessage = errorObj.message || 'Có lỗi xảy ra.';
+                  } catch (e) {
+                    finalMessage = error.message;
+                  }
+                  setMessage(finalMessage || "Tạo tài khoản thất bại");
                   setTimeout(() => setMessage(""), 3000);
                 } finally {
                   setGuideLoading(false);
