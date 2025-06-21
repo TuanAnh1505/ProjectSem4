@@ -1,6 +1,7 @@
 package com.example.api.controller;
 
 import java.util.UUID;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,11 +10,13 @@ import com.example.api.dto.UserInfoDTO;
 import com.example.api.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.HttpStatus;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -68,6 +71,31 @@ public class UserController {
             return ResponseEntity.ok("Cập nhật thành công");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("Cập nhật thất bại: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/me/change-password")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, String> passwordRequest) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+        try {
+            String email = userDetails.getUsername();
+            String oldPassword = passwordRequest.get("oldPassword");
+            String newPassword = passwordRequest.get("newPassword");
+
+            if (oldPassword == null || newPassword == null) {
+                 return ResponseEntity.badRequest().body(Map.of("error", "Old and new passwords must be provided."));
+            }
+
+            userService.changePassword(email, oldPassword, newPassword);
+            return ResponseEntity.ok(Map.of("message", "Password updated successfully."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "An unexpected error occurred."));
         }
     }
 }

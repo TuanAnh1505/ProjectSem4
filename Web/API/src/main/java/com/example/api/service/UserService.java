@@ -174,11 +174,16 @@ public class UserService {
         throw new RuntimeException("Thông tin đăng nhập không hợp lệ.");
     }
 
-    public void changePassword(String email, String currentPassword, String newPassword) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+    public void changePassword(String email, String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
-            throw new RuntimeException("Mật khẩu hiện tại không chính xác.");
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không chính xác.");
+        }
+        
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Mật khẩu mới phải có ít nhất 6 ký tự.");
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));

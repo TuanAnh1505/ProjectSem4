@@ -19,6 +19,10 @@ import BookingPassenger from './components/booking/BookingPassenger';
 import MomoPaymentPage from './components/payment/MomoPaymentPage';
 import Payment from './pages/Payment';
 import UpdateInfoUser from './components/auth/UpdateInfoUser';
+import GuidePage from './components/guide/GuidePage';
+import GuideDemo from './components/guide/GuideDemo';
+import GuideAccessDenied from './components/guide/GuideAccessDenied';
+import AutoRedirect from './components/auth/AutoRedirect';
 import './App.css';
 import BookingConfirmation from './components/booking/BookingConfirmation';
 import { ToastContainer } from 'react-toastify';
@@ -36,6 +40,26 @@ const Layout = ({ children }) => {
   );
 };
 
+// Component to redirect users based on their role
+const RoleBasedRedirect = () => {
+  const userRole = localStorage.getItem('role');
+  
+  if (userRole === 'GUIDE') {
+    return <Navigate to="/guide" />;
+  }
+  
+  if (userRole === 'ADMIN') {
+    return <Navigate to="/admin/dashboard" />;
+  }
+  
+  // For regular users, show the home page
+  return (
+    <Layout>
+      <Home />
+    </Layout>
+  );
+};
+
 // ProtectedRoute component for authenticated routes
 const ProtectedRoute = ({ element, requiredRole }) => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -46,7 +70,16 @@ const ProtectedRoute = ({ element, requiredRole }) => {
   }
 
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to="/dashboard" />;
+    // Nếu user là GUIDE nhưng đang cố truy cập trang khác, hiển thị trang access denied
+    if (userRole === 'GUIDE') {
+      return <GuideAccessDenied />;
+    }
+    // Nếu user là ADMIN nhưng đang cố truy cập trang khác, redirect về admin dashboard
+    if (userRole === 'ADMIN') {
+      return <Navigate to="/admin/dashboard" />;
+    }
+    // Các trường hợp khác redirect về trang chính
+    return <Navigate to="/" />;
   }
 
   return element;
@@ -59,39 +92,35 @@ const App = () => {
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         <Routes>
           {/* Tourism-related routes */}
-          <Route path="/" element={
-            <Layout>
-              <Home />
-            </Layout>
-          } />
+          <Route path="/" element={<RoleBasedRedirect />} />
           <Route path="/live-fully" element={
             <Layout>
-              <Home />
+              <ProtectedRoute element={<Home />} />
             </Layout>
           } />
           <Route path="/places-to-go" element={
             <Layout>
-              <PlacesToGo />
+              <ProtectedRoute element={<PlacesToGo />} />
             </Layout>
           } />
           <Route path="/tour-dashboard" element={
             <Layout>
-              <TourDashboard />
+              <ProtectedRoute element={<TourDashboard />} />
             </Layout>
           } />
           <Route path="/tour-dashboard/detail/:tourId" element={
             <Layout>
-              <TourDetailDashboard />
+              <ProtectedRoute element={<TourDetailDashboard />} />
             </Layout>
           } />
           <Route path="/offers" element={
             <Layout>
-              <Home />
+              <ProtectedRoute element={<Home />} />
             </Layout>
           } />
           <Route path="/green-travel" element={
             <Layout>
-              <Home />
+              <ProtectedRoute element={<Home />} />
             </Layout>
           } />
 
@@ -343,6 +372,28 @@ const App = () => {
           <Route
             path="/admin/assignment"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          {/* Guide routes */}
+          <Route
+            path="/guide"
+            element={<ProtectedRoute element={<GuidePage />} requiredRole="GUIDE" />}
+          />
+          <Route
+            path="/guide/*"
+            element={<ProtectedRoute element={<GuidePage />} requiredRole="GUIDE" />}
+          />
+
+          {/* Guide Demo route */}
+          <Route
+            path="/guide-demo"
+            element={<GuideDemo />}
+          />
+
+          {/* Auto redirect route */}
+          <Route
+            path="/redirect"
+            element={<AutoRedirect />}
           />
         </Routes>
       </div>

@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tour-guides")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class TourGuideController {
 
     @Autowired
@@ -129,5 +130,16 @@ public class TourGuideController {
             dto.getLanguages()
         );
         return ResponseEntity.ok(guide);
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('GUIDE')")
+    public ResponseEntity<TourGuideDTO> getCurrentGuideDetails() {
+        try {
+            TourGuideDTO guideDetails = tourGuideService.getCurrentGuideDetails();
+            return ResponseEntity.ok(guideDetails);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

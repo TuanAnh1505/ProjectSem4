@@ -1,0 +1,159 @@
+.guide-page {
+    display: flex;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.guide-sidebar {
+    width: 280px;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.guide-sidebar-header {
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.guide-sidebar-header h2 {
+    margin: 0 0 5px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.guide-sidebar-header p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.guide-nav {
+    padding: 20px 0;
+    flex-grow: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 15px 25px;
+    border: none;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.nav-item:hover {
+    background: #f8f9fa;
+    color: #007bff;
+}
+
+.nav-item.logout-button:hover {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.nav-item.active {
+    background: #e3f2fd;
+    color: #007bff;
+    border-right: 3px solid #007bff;
+    font-weight: 500;
+}
+
+.nav-icon {
+    font-size: 1.2rem;
+    margin-right: 15px;
+    width: 20px;
+    text-align: center;
+}
+
+.nav-text {
+    font-weight: 500;
+}
+
+.guide-sidebar-footer {
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+}
+
+.guide-main-content {
+    flex: 1;
+    margin-left: 280px;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.guide-content {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    font-size: 1.2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .guide-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .guide-main-content {
+        margin-left: 0;
+    }
+    
+    .guide-nav {
+        display: flex;
+        overflow-x: auto;
+        padding: 15px;
+    }
+    
+    .nav-item {
+        flex-shrink: 0;
+        padding: 10px 15px;
+        border-radius: 20px;
+        margin-right: 10px;
+        white-space: nowrap;
+    }
+    
+    .nav-item.active {
+        border-right: none;
+        background: #007bff;
+        color: white;
+    }
+    
+    .nav-icon {
+        margin-right: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .guide-sidebar-header {
+        padding: 20px 15px;
+    }
+    
+    .guide-sidebar-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .nav-item {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .nav-icon {
+        font-size: 1rem;
+        margin-right: 6px;
+    }
+} 

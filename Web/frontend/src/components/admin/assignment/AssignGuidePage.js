@@ -166,10 +166,20 @@ export default function AssignGuidePage() {
             <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Chọn hướng dẫn viên</label>
             <select value={selectedGuide} onChange={e => setSelectedGuide(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}>
               <option value="">-- Chọn HDV --</option>
-              {guides.filter(g => g.isActive === true || g.isActive === undefined).map(g => (
-                <option key={g.guideId} value={g.guideId}>{g.userFullName}</option>
+              {guides.filter(g => g.isActive === true).map(g => (
+                <option 
+                  key={String(g.userId)} 
+                  value={g.guideId} 
+                  disabled={!g.guideId || g.guideId === 0}
+                  style={{ color: (!g.guideId || g.guideId === 0) ? '#aaa' : 'inherit' }}
+                >
+                  {g.userFullName}{(!g.guideId || g.guideId === 0) ? ' (*)' : ''}
+                </option>
               ))}
             </select>
+            <small style={{ color: '#888', marginTop: 4 }}>
+              (*) Hướng dẫn viên chưa có hồ sơ chi tiết.
+            </small>
           </div>
           <div style={{ flex: 1, minWidth: 140 }}>
             <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Vai trò</label>

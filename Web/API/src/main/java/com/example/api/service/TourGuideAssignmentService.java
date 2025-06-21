@@ -10,6 +10,7 @@ import com.example.api.repository.TourRepository;
 import com.example.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,25 +19,34 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @Service
 @Transactional
 public class TourGuideAssignmentService {
 
-    @Autowired
-    private TourGuideAssignmentRepository assignmentRepository;
+    private final TourGuideAssignmentRepository assignmentRepository;
+    private final TourRepository tourRepository;
+    private final TourGuideRepository tourGuideRepository;
+    private final UserRepository userRepository;
+    private final ApplicationContext applicationContext;
 
     @Autowired
-    private TourRepository tourRepository;
+    public TourGuideAssignmentService(TourGuideAssignmentRepository assignmentRepository,
+                                      TourRepository tourRepository,
+                                      TourGuideRepository tourGuideRepository,
+                                      UserRepository userRepository,
+                                      ApplicationContext applicationContext) {
+        this.assignmentRepository = assignmentRepository;
+        this.tourRepository = tourRepository;
+        this.tourGuideRepository = tourGuideRepository;
+        this.userRepository = userRepository;
+        this.applicationContext = applicationContext;
+    }
 
-    @Autowired
-    private TourGuideRepository tourGuideRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EmailService emailService;
+    private EmailService getEmailService() {
+        return applicationContext.getBean(EmailService.class);
+    }
 
     public TourGuideAssignmentDTO createAssignment(TourGuideAssignmentDTO dto) {
         // Check if tour exists
@@ -95,6 +105,7 @@ public class TourGuideAssignmentService {
         TourGuideAssignment savedAssignment = assignmentRepository.save(assignment);
 
         // Gửi email cho hướng dẫn viên
+        /*
         try {
             // Lấy thông tin user (hướng dẫn viên)
             String guideEmail = guide.getUser() != null ? guide.getUser().getEmail() : null;
@@ -124,7 +135,7 @@ public class TourGuideAssignmentService {
             // }
             //
             // Tạm thời gửi mail không có khách nếu chưa có bookingRepository
-            emailService.sendGuideAssignmentEmail(
+            getEmailService().sendGuideAssignmentEmail(
                 guideEmail,
                 guideName,
                 tourName,
@@ -137,6 +148,7 @@ public class TourGuideAssignmentService {
             // Log lỗi gửi mail nhưng không làm fail nghiệp vụ
             System.err.println("Lỗi gửi mail phân công HDV: " + ex.getMessage());
         }
+        */
         return convertToDTO(savedAssignment);
     }
 
@@ -184,6 +196,68 @@ public class TourGuideAssignmentService {
         return assignmentRepository.findByGuideId(currentGuide.getGuideId().intValue()).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    // New method: Get current guide's assignments with detailed information
+    public List<Map<String, Object>> getCurrentGuideAssignmentsWithDetails() {
+        // Get current user from security context
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        var currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+
+        // Find the tour guide record for current user
+        TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
+                .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
+
+        List<TourGuideAssignment> assignments = assignmentRepository.findByGuideId(currentGuide.getGuideId().intValue());
+        
+        return assignments.stream().map(assignment -> {
+            Map<String, Object> assignmentDetail = new HashMap<>();
+            assignmentDetail.put("assignmentId", assignment.getAssignmentId());
+            assignmentDetail.put("tourId", assignment.getTourId());
+            assignmentDetail.put("guideId", assignment.getGuideId());
+            assignmentDetail.put("role", assignment.getRole());
+            assignmentDetail.put("startDate", assignment.getStartDate());
+            assignmentDetail.put("endDate", assignment.getEndDate());
+            assignmentDetail.put("status", assignment.getStatus());
+            
+            // Add tour information
+            if (assignment.getTour() != null) {
+                Tour tour = assignment.getTour();
+                assignmentDetail.put("tourName", tour.getName());
+                assignmentDetail.put("tourDescription", tour.getDescription());
+                // Lấy ảnh đầu tiên từ list, hoặc null nếu list rỗng
+                String firstImageUrl = (tour.getImageUrls() != null && !tour.getImageUrls().isEmpty())
+                                        ? tour.getImageUrls().get(0)
+                                        : null;
+                assignmentDetail.put("tourImage", firstImageUrl);
+                assignmentDetail.put("tourPrice", tour.getPrice());
+                assignmentDetail.put("tourDuration", tour.getDuration());
+            }
+            
+            // Add guide information
+            if (assignment.getGuide() != null) {
+                TourGuide guide = assignment.getGuide();
+                assignmentDetail.put("guideName", guide.getUser() != null ? guide.getUser().getFullName() : null);
+                assignmentDetail.put("guideSpecialization", guide.getSpecialization());
+                assignmentDetail.put("guideLanguages", guide.getLanguages());
+                assignmentDetail.put("guideRating", guide.getRating());
+            }
+            
+            // Determine assignment category based on dates and status
+            LocalDate today = LocalDate.now();
+            String category;
+            if (assignment.getEndDate().isBefore(today)) {
+                category = "completed"; // Đã hoàn thành
+            } else if (assignment.getStartDate().isAfter(today)) {
+                category = "upcoming"; // Sắp tới
+            } else {
+                category = "ongoing"; // Đang diễn ra
+            }
+            assignmentDetail.put("category", category);
+            
+            return assignmentDetail;
+        }).collect(Collectors.toList());
     }
 
     public TourGuideAssignmentDTO updateAssignmentStatus(Integer assignmentId, TourGuideAssignment.AssignmentStatus newStatus) {

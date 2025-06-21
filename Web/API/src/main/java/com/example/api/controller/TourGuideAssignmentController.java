@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tour-guide-assignments")
@@ -69,6 +70,16 @@ public class TourGuideAssignmentController {
     public ResponseEntity<List<TourGuideAssignmentDTO>> getCurrentGuideAssignments() {
         try {
             List<TourGuideAssignmentDTO> assignments = assignmentService.getCurrentGuideAssignments();
+            return ResponseEntity.ok(assignments);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/my-assignments-details")
+    public ResponseEntity<List<Map<String, Object>>> getCurrentGuideAssignmentsWithDetails() {
+        try {
+            List<Map<String, Object>> assignments = assignmentService.getCurrentGuideAssignmentsWithDetails();
             return ResponseEntity.ok(assignments);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);
