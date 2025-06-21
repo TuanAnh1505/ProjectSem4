@@ -256,7 +256,7 @@ export default function TourDashboard() {
           maxWidth: 1200,
           margin: '0 auto'
         }}>
-          {filteredTours.slice(0, 6).map(tour => (
+          {filteredTours.map(tour => (
             <div
               key={tour.tourId}
               className="tour-card-hover"

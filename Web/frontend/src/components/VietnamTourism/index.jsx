@@ -67,9 +67,11 @@ const Home = () => {
   useEffect(() => {
     const fetchTours = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/api/tours');
-        setTours(res.data);
-        setFilteredTours(res.data);
+        const res = await axios.get('http://localhost:8080/api/tours?limit=6');
+        // Nếu API không hỗ trợ ?limit=6 thì dùng slice phía client:
+        const sixTours = Array.isArray(res.data) ? res.data.slice(0, 6) : [];
+        setTours(sixTours);
+        setFilteredTours(sixTours);
         setError('');
       } catch (err) {
         console.error('Failed to fetch tours:', err);
@@ -160,24 +162,15 @@ const Home = () => {
               <p style={{ color: '#888' }}>Try adjusting your search or filters</p>
             </div>
           ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '20px',
-              padding: '20px 0'
-            }}>
+            <div className={styles.tourList}>
               {filteredTours.map(tour => (
-                <div key={tour.tourId} className="tourCard">
-                  <div style={{
-                    position: 'relative',
-                    height: '200px',
-                    overflow: 'hidden'
-                  }}>
+                <div key={tour.tourId} className={styles.tourCard}>
+                  <div className={styles.tourCardImgWrap}>
                     {tour.imageUrl ? (
                       <img
                         src={`http://localhost:8080${tour.imageUrl}`}
                         alt={tour.name}
-                        className="tourCardImg"
+                        className={styles.tourCardImg}
                       />
                     ) : (
                       <div style={{
@@ -190,60 +183,24 @@ const Home = () => {
                         color: '#666'
                       }}>No Image</div>
                     )}
-                    <div style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      backgroundColor: 'rgba(0,0,0,0.7)',
-                      color: '#fff',
-                      padding: '5px 10px',
-                      borderRadius: '4px',
-                      fontSize: '14px'
-                    }}>${tour.price.toLocaleString()}</div>
+                    <div className={styles.tourCardPrice}>
+                      {tour.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 })}
+                    </div>
                   </div>
-                  <div style={{
-                    padding: '15px'
-                  }}>
-                    <h3 style={{
-                      margin: '0 0 10px 0',
-                      fontSize: '18px',
-                      color: '#333'
-                    }}>{tour.name}</h3>
-                    <div style={{
-                      display: 'flex',
-                      gap: '15px',
-                      marginBottom: '10px',
-                      color: '#666',
-                      fontSize: '14px'
-                    }}>
-                      <span style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '5px'
-                      }}>
-                        <FaCalendarAlt /> {tour.duration} days
-                      </span>
+                  <div className={styles.tourCardContent}>
+                    <h3 className={styles.tourCardTitle}>{tour.name}</h3>
+                    <div className={styles.tourCardMeta}>
+                      <span><FaCalendarAlt /> {tour.duration} days</span>
                       {tour.destinations?.length > 0 && (
-                        <span style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '5px'
-                        }}>
-                          <FaMapMarkerAlt /> {tour.destinations[0].name}
-                        </span>
+                        <span><FaMapMarkerAlt /> {tour.destinations[0].name}</span>
                       )}
                     </div>
-                    <p style={{
-                      color: '#666',
-                      fontSize: '14px',
-                      marginBottom: '15px',
-                      lineHeight: '1.4'
-                    }}>
+                    <div className={styles.tourCardDesc}>
                       {tour.description?.substring(0, 100)}...
-                    </p>
+                    </div>
                     <Link
                       to={`/tour-dashboard/detail/${tour.tourId}`}
-                      className="tourCardBtn"
+                      className={styles.tourCardBtn}
                     >
                       View Details
                     </Link>
