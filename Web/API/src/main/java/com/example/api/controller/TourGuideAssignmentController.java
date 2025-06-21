@@ -65,6 +65,30 @@ public class TourGuideAssignmentController {
         return ResponseEntity.ok(assignments);
     }
 
+    @GetMapping("/my-assignments")
+    public ResponseEntity<List<TourGuideAssignmentDTO>> getCurrentGuideAssignments() {
+        try {
+            List<TourGuideAssignmentDTO> assignments = assignmentService.getCurrentGuideAssignments();
+            return ResponseEntity.ok(assignments);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @PutMapping("/{assignmentId}/status")
+    public ResponseEntity<?> updateAssignmentStatus(
+            @PathVariable Integer assignmentId,
+            @RequestParam String newStatus) {
+        try {
+            TourGuideAssignmentDTO updatedAssignment = assignmentService.updateAssignmentStatusByMainGuide(assignmentId, newStatus);
+            return ResponseEntity.ok(updatedAssignment);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Lỗi hệ thống: " + e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/{assignmentId}")
     public ResponseEntity<Void> deleteAssignment(
             @PathVariable Integer assignmentId) {

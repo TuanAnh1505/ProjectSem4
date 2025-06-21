@@ -129,6 +129,7 @@ export default function AssignGuidePage() {
   const getStatusDisplayName = (status) => {
     switch(status) {
       case 'assigned': return 'Đã phân công';
+      case 'inprogress': return 'Đang diễn ra';
       case 'completed': return 'Hoàn thành';
       case 'cancelled': return 'Đã hủy';
       default: return status;
@@ -216,6 +217,7 @@ export default function AssignGuidePage() {
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}>
               <option value="">Tất cả trạng thái</option>
               <option value="assigned">Đã phân công</option>
+              <option value="inprogress">Đang diễn ra</option>
               <option value="completed">Hoàn thành</option>
               <option value="cancelled">Đã hủy</option>
             </select>
