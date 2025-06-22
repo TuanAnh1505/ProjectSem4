@@ -56,7 +56,8 @@ public class TourGuideAssignmentController {
     public ResponseEntity<List<TourGuideAssignmentDTO>> getAssignmentsByTourIdAndGuideMinRating(
             @PathVariable Integer tourId,
             @RequestParam Double minRating) {
-        List<TourGuideAssignmentDTO> assignments = assignmentService.getAssignmentsByTourIdAndGuideMinRating(tourId, minRating);
+        List<TourGuideAssignmentDTO> assignments = assignmentService.getAssignmentsByTourIdAndGuideMinRating(tourId,
+                minRating);
         return ResponseEntity.ok(assignments);
     }
 
@@ -64,7 +65,8 @@ public class TourGuideAssignmentController {
     public ResponseEntity<List<TourGuideAssignmentDTO>> getAssignmentsByGuideIdAndTourStatus(
             @PathVariable Integer guideId,
             @RequestParam String statusName) {
-        List<TourGuideAssignmentDTO> assignments = assignmentService.getAssignmentsByGuideIdAndTourStatus(guideId, statusName);
+        List<TourGuideAssignmentDTO> assignments = assignmentService.getAssignmentsByGuideIdAndTourStatus(guideId,
+                statusName);
         return ResponseEntity.ok(assignments);
     }
 
@@ -100,15 +102,15 @@ public class TourGuideAssignmentController {
         }
     }
 
-
-/////////
+    /////////
     @PutMapping("/{assignmentId}/status")
     public ResponseEntity<?> updateAssignmentStatus(
             @PathVariable Integer assignmentId,
             @RequestBody Map<String, String> request) {
         try {
             String newStatus = request.get("status");
-            TourGuideAssignmentDTO updated = assignmentService.updateAssignmentStatusByMainGuide(assignmentId, newStatus);
+            TourGuideAssignmentDTO updated = assignmentService.updateAssignmentStatusByMainGuide(assignmentId,
+                    newStatus);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
@@ -135,8 +137,7 @@ public class TourGuideAssignmentController {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         }
     }
-//////
-
+    //////
 
     @DeleteMapping("/{assignmentId}")
     public ResponseEntity<Void> deleteAssignment(
@@ -148,4 +149,4 @@ public class TourGuideAssignmentController {
             return ResponseEntity.notFound().build();
         }
     }
-} 
+}

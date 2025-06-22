@@ -49,14 +49,14 @@ public class TourGuideAssignmentService {
 
     @Autowired
     public TourGuideAssignmentService(TourGuideAssignmentRepository assignmentRepository,
-                                      TourRepository tourRepository,
-                                      TourGuideRepository tourGuideRepository,
-                                      UserRepository userRepository,
-                                      TourScheduleRepository tourScheduleRepository,
-                                      ApplicationContext applicationContext,
-                                      TourItineraryRepository tourItineraryRepository,
-                                      BookingRepository bookingRepository,
-                                      BookingPassengerRepository bookingPassengerRepository) {
+            TourRepository tourRepository,
+            TourGuideRepository tourGuideRepository,
+            UserRepository userRepository,
+            TourScheduleRepository tourScheduleRepository,
+            ApplicationContext applicationContext,
+            TourItineraryRepository tourItineraryRepository,
+            BookingRepository bookingRepository,
+            BookingPassengerRepository bookingPassengerRepository) {
         this.assignmentRepository = assignmentRepository;
         this.tourRepository = tourRepository;
         this.tourGuideRepository = tourGuideRepository;
@@ -103,9 +103,9 @@ public class TourGuideAssignmentService {
 
         // Check if guide has already been assigned to this tour & schedule
         boolean alreadyAssigned = assignmentRepository.findByTourId(dto.getTourId()).stream()
-            .anyMatch(a -> a.getGuideId().equals(dto.getGuideId()) &&
-                          a.getStartDate().equals(dto.getStartDate()) &&
-                          a.getEndDate().equals(dto.getEndDate()));
+                .anyMatch(a -> a.getGuideId().equals(dto.getGuideId()) &&
+                        a.getStartDate().equals(dto.getStartDate()) &&
+                        a.getEndDate().equals(dto.getEndDate()));
         if (alreadyAssigned) {
             throw new IllegalStateException("Hướng dẫn viên đã được gán vào lịch trình này!");
         }
@@ -130,49 +130,53 @@ public class TourGuideAssignmentService {
 
         // Gửi email cho hướng dẫn viên
         /*
-        try {
-            // Lấy thông tin user (hướng dẫn viên)
-            String guideEmail = guide.getUser() != null ? guide.getUser().getEmail() : null;
-            String guideName = guide.getUser() != null ? guide.getUser().getFullName() : "Hướng dẫn viên";
-            String tourName = tour.getName();
-            String tourDesc = tour.getDescription();
-            String startDate = assignment.getStartDate().toString();
-            String endDate = assignment.getEndDate().toString();
-            // Lấy danh sách khách hàng của tour/lịch trình này
-            List<Map<String, String>> customers = new java.util.ArrayList<>();
-            // (Giả sử bookingRepository có hàm findByTourIdAndScheduleId)
-            // Nếu không, bạn cần tự join hoặc query phù hợp
-            // Ở đây demo lấy tất cả booking CONFIRMED của tour này và lịch trình này
-            // (Bạn có thể cần chỉnh lại cho đúng logic thực tế)
-            // bookingRepository phải được @Autowired vào service này nếu chưa có
-            //
-            // Ví dụ:
-            // List<Booking> bookings = bookingRepository.findByTour_TourIdAndScheduleIdAndStatus_StatusName(
-            //     assignment.getTourId(), assignment.getStartDate(), "CONFIRMED");
-            // for (Booking b : bookings) {
-            //     for (BookingPassenger p : bookingPassengerRepository.findByBooking_BookingId(b.getBookingId())) {
-            //         Map<String, String> c = new java.util.HashMap<>();
-            //         c.put("name", p.getFullName());
-            //         c.put("phone", p.getPhone());
-            //         customers.add(c);
-            //     }
-            // }
-            //
-            // Tạm thời gửi mail không có khách nếu chưa có bookingRepository
-            getEmailService().sendGuideAssignmentEmail(
-                guideEmail,
-                guideName,
-                tourName,
-                tourDesc,
-                startDate,
-                endDate,
-                customers
-            );
-        } catch (Exception ex) {
-            // Log lỗi gửi mail nhưng không làm fail nghiệp vụ
-            System.err.println("Lỗi gửi mail phân công HDV: " + ex.getMessage());
-        }
-        */
+         * try {
+         * // Lấy thông tin user (hướng dẫn viên)
+         * String guideEmail = guide.getUser() != null ? guide.getUser().getEmail() :
+         * null;
+         * String guideName = guide.getUser() != null ? guide.getUser().getFullName() :
+         * "Hướng dẫn viên";
+         * String tourName = tour.getName();
+         * String tourDesc = tour.getDescription();
+         * String startDate = assignment.getStartDate().toString();
+         * String endDate = assignment.getEndDate().toString();
+         * // Lấy danh sách khách hàng của tour/lịch trình này
+         * List<Map<String, String>> customers = new java.util.ArrayList<>();
+         * // (Giả sử bookingRepository có hàm findByTourIdAndScheduleId)
+         * // Nếu không, bạn cần tự join hoặc query phù hợp
+         * // Ở đây demo lấy tất cả booking CONFIRMED của tour này và lịch trình này
+         * // (Bạn có thể cần chỉnh lại cho đúng logic thực tế)
+         * // bookingRepository phải được @Autowired vào service này nếu chưa có
+         * //
+         * // Ví dụ:
+         * // List<Booking> bookings =
+         * bookingRepository.findByTour_TourIdAndScheduleIdAndStatus_StatusName(
+         * // assignment.getTourId(), assignment.getStartDate(), "CONFIRMED");
+         * // for (Booking b : bookings) {
+         * // for (BookingPassenger p :
+         * bookingPassengerRepository.findByBooking_BookingId(b.getBookingId())) {
+         * // Map<String, String> c = new java.util.HashMap<>();
+         * // c.put("name", p.getFullName());
+         * // c.put("phone", p.getPhone());
+         * // customers.add(c);
+         * // }
+         * // }
+         * //
+         * // Tạm thời gửi mail không có khách nếu chưa có bookingRepository
+         * getEmailService().sendGuideAssignmentEmail(
+         * guideEmail,
+         * guideName,
+         * tourName,
+         * tourDesc,
+         * startDate,
+         * endDate,
+         * customers
+         * );
+         * } catch (Exception ex) {
+         * // Log lỗi gửi mail nhưng không làm fail nghiệp vụ
+         * System.err.println("Lỗi gửi mail phân công HDV: " + ex.getMessage());
+         * }
+         */
         return convertToDTO(savedAssignment);
     }
 
@@ -233,8 +237,9 @@ public class TourGuideAssignmentService {
         TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
                 .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
 
-        List<TourGuideAssignment> assignments = assignmentRepository.findByGuideId(currentGuide.getGuideId().intValue());
-        
+        List<TourGuideAssignment> assignments = assignmentRepository
+                .findByGuideId(currentGuide.getGuideId().intValue());
+
         return assignments.stream().map(assignment -> {
             Map<String, Object> assignmentDetail = new HashMap<>();
             assignmentDetail.put("assignmentId", assignment.getAssignmentId());
@@ -244,7 +249,7 @@ public class TourGuideAssignmentService {
             assignmentDetail.put("startDate", assignment.getStartDate());
             assignmentDetail.put("endDate", assignment.getEndDate());
             assignmentDetail.put("status", assignment.getStatus());
-            
+
             // Add tour information
             if (assignment.getTour() != null) {
                 Tour tour = assignment.getTour();
@@ -252,8 +257,8 @@ public class TourGuideAssignmentService {
                 assignmentDetail.put("tourDescription", tour.getDescription());
                 // Lấy ảnh đầu tiên từ list, hoặc null nếu list rỗng
                 String firstImageUrl = (tour.getImageUrls() != null && !tour.getImageUrls().isEmpty())
-                                        ? tour.getImageUrls().get(0)
-                                        : null;
+                        ? tour.getImageUrls().get(0)
+                        : null;
                 assignmentDetail.put("tourImage", firstImageUrl);
                 assignmentDetail.put("tourPrice", tour.getPrice());
                 assignmentDetail.put("tourDuration", tour.getDuration());
@@ -271,7 +276,7 @@ public class TourGuideAssignmentService {
                 assignmentDetail.put("guideLanguages", guide.getLanguages());
                 assignmentDetail.put("guideRating", guide.getRating());
             }
-            
+
             // Determine assignment category based on dates and status
             LocalDate today = LocalDate.now();
             String category;
@@ -283,12 +288,13 @@ public class TourGuideAssignmentService {
                 category = "ongoing"; // Đang diễn ra
             }
             assignmentDetail.put("category", category);
-            
+
             return assignmentDetail;
         }).collect(Collectors.toList());
     }
 
-    public TourGuideAssignmentDTO updateAssignmentStatus(Integer assignmentId, TourGuideAssignment.AssignmentStatus newStatus) {
+    public TourGuideAssignmentDTO updateAssignmentStatus(Integer assignmentId,
+            TourGuideAssignment.AssignmentStatus newStatus) {
         TourGuideAssignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Assignment not found with id: " + assignmentId));
 
@@ -389,13 +395,15 @@ public class TourGuideAssignmentService {
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tour với ID: " + tourId));
         TourSchedule schedule = tourScheduleRepository.findByTourIdAndStartDate(tourId, startDate)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy lịch trình cho tour " + tourId + " vào ngày " + startDate));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy lịch trình cho tour " + tourId + " vào ngày " + startDate));
 
         // Correctly fetch itinerary using scheduleId
         List<TourItinerary> itineraries = tourItineraryRepository.findByScheduleId(schedule.getScheduleId());
 
         // 3. Fetch passengers for this specific schedule
-        List<Booking> confirmedBookings = bookingRepository.findByScheduleIdAndStatus_StatusName(schedule.getScheduleId(), "CONFIRMED");
+        List<Booking> confirmedBookings = bookingRepository
+                .findByScheduleIdAndStatus_StatusName(schedule.getScheduleId(), "CONFIRMED");
         List<BookingPassenger> passengers = confirmedBookings.stream()
                 .flatMap(booking -> bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId()).stream())
                 .collect(Collectors.toList());
@@ -405,10 +413,15 @@ public class TourGuideAssignmentService {
         dto.setTourId(tour.getTourId());
         dto.setTourName(tour.getName());
         dto.setTourDescription(tour.getDescription());
-        dto.setTourImage(tour.getImageUrls() != null && !tour.getImageUrls().isEmpty() ? tour.getImageUrls().get(0) : null);
+        dto.setTourImage(
+                tour.getImageUrls() != null && !tour.getImageUrls().isEmpty() ? tour.getImageUrls().get(0) : null);
+        dto.setTourPrice(tour.getPrice());
+        dto.setTourDuration(tour.getDuration());
         dto.setStartDate(schedule.getStartDate());
         dto.setEndDate(schedule.getEndDate());
         dto.setScheduleStatus(schedule.getStatus() != null ? schedule.getStatus().getValue() : "N/A");
+        dto.setMaxCapacity(tour.getMaxParticipants());
+        dto.setCurrentBookings(confirmedBookings.size());
         dto.setItinerary(itineraries.stream().map(this::convertToItineraryDTO).collect(Collectors.toList()));
         dto.setPassengers(passengers.stream().map(this::convertToPassengerDTO).collect(Collectors.toList()));
 
@@ -438,8 +451,6 @@ public class TourGuideAssignmentService {
         return dto;
     }
 
-
-
     //////////////////////////////
     // New method: Auto update assignment status based on time
     public TourGuideAssignmentDTO autoUpdateAssignmentStatus(Integer assignmentId) {
@@ -462,7 +473,7 @@ public class TourGuideAssignmentService {
     public Map<String, Object> autoUpdateAllAssignments() {
         List<TourGuideAssignment> allAssignments = assignmentRepository.findAll();
         LocalDate today = LocalDate.now();
-        
+
         int updatedCount = 0;
         int totalCount = allAssignments.size();
 
@@ -479,7 +490,7 @@ public class TourGuideAssignmentService {
         result.put("totalAssignments", totalCount);
         result.put("updatedAssignments", updatedCount);
         result.put("message", "Auto-updated " + updatedCount + " out of " + totalCount + " assignments");
-        
+
         return result;
     }
 
@@ -509,4 +520,4 @@ public class TourGuideAssignmentService {
         return assignment.getStatus();
     }
     ////////////////////////////////
-} 
+}
