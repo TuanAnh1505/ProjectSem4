@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { FaPlus, FaTrash, FaExclamationTriangle, FaEye, FaEdit } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaExclamationTriangle, FaEye, FaEdit, FaCalendarAlt } from 'react-icons/fa';
 import '../../styles/tour/TourIndex.css';
 
 const MAX_RETRIES = 3;
@@ -134,9 +134,9 @@ export default function TourIndex() {
               <tr key={tour.tourId}>
                 <td>{tour.tourId}</td>
                 <td>
-                  {tour.imageUrl ? (
+                  {tour.imageUrls && tour.imageUrls.length > 0 ? (
                     <img
-                      src={`http://localhost:8080${tour.imageUrl}`}
+                      src={`http://localhost:8080${tour.imageUrls[0]}`}
                       alt={tour.name}
                       className="tour-thumbnail"
                     />
@@ -154,6 +154,9 @@ export default function TourIndex() {
                     </Link>
                     <Link to={`/admin/tour/edit/${tour.tourId}`} className="action-link" title="Chỉnh sửa" style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FaEdit />
+                    </Link>
+                    <Link to={`/admin/tour/schedules/${tour.tourId}`} className="action-link" title="Xem lịch trình" style={{ color: '#2ecc71', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FaCalendarAlt />
                     </Link>
                     <button className="delete-button" onClick={() => showDeleteAlert(tour.tourId, tour.name)} title="Xóa" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FaTrash />

@@ -25,6 +25,9 @@ class BookingConfirmationScreen extends StatefulWidget {
 }
 
 class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
+  int? openedItineraryIndex;
+  int _currentImageIndex = 0;
+
   // Hàm tính tuổi từ ngày sinh
   String getAge(String? birthDate) {
     if (birthDate == null) return '';
@@ -343,57 +346,105 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.tourInfo['imageUrl'] != null && (widget.tourInfo['imageUrl'] as String).isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    'http://10.0.2.2:8080${widget.tourInfo['imageUrl']}',
-                    width: 200,
-                    height: 150,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      print('Image load error: $error, url: http://10.0.2.2:8080${widget.tourInfo['imageUrl']}');
-                      return Container(
-                        width: 200,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.orange.shade100, Colors.orange.shade50],
+          // Gallery slider for tour images
+          if (widget.tourInfo['imageUrls'] != null && (widget.tourInfo['imageUrls'] as List).isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 220,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      PageView.builder(
+                        itemCount: (widget.tourInfo['imageUrls'] as List).length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentImageIndex = index;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          final imageUrl = widget.tourInfo['imageUrls'][index];
+                          return GestureDetector(
+                            onTap: () {
+                              // TODO: Implement full screen gallery view
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                'http://10.0.2.2:8080$imageUrl',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [Colors.orange.shade100, Colors.orange.shade50],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(Icons.error, size: 50, color: Colors.orange),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      if ((widget.tourInfo['imageUrls'] as List).length > 1)
+                        Positioned(
+                          bottom: 10,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              (widget.tourInfo['imageUrls'] as List).length,
+                              (index) => Container(
+                                width: 8,
+                                height: 8,
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _currentImageIndex == index
+                                      ? Colors.orange
+                                      : Colors.white.withOpacity(0.5),
+                                ),
+                              ),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.error, size: 50, color: Colors.orange),
-                      );
-                    },
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${_currentImageIndex + 1}/${(widget.tourInfo['imageUrls'] as List).length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                )
-              else
-                Container(
-                  width: 200,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.orange.shade100, Colors.orange.shade50],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(child: Text('No Image')),
                 ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
+                const SizedBox(height: 8),
+                Text(
                   widget.tourInfo['name'] ?? '',
                   style: const TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    color: Colors.blue,
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           const SizedBox(height: 20),
           _buildInfoRow('Mã booking:', widget.bookingCode.isNotEmpty ? widget.bookingCode : widget.bookingId, Icons.qr_code, valueColor: Colors.red),
           _buildInfoRow('Trạng thái:', 'Đã xác nhận',
@@ -407,7 +458,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade200),
               ),
-              height: 220,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -425,47 +475,60 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: widget.itineraries.length,
-                      itemBuilder: (context, index) {
-                        final itinerary = widget.itineraries[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade200),
+                  ...widget.itineraries.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final itinerary = entry.value;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade200),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.06),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                itinerary['title'] ?? 'Lịch trình ${index + 1}',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (openedItineraryIndex == index) {
+                                  openedItineraryIndex = null;
+                                } else {
+                                  openedItineraryIndex = index;
+                                }
+                              });
+                            },
+                            child: Text(
+                              'Ngày ${index + 1}: ${itinerary['title'] ?? 'Lịch trình'}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1976d2),
+                                fontSize: 15,
                               ),
-                              if (itinerary['startDate'] != null ||
-                                  itinerary['endDate'] != null)
-                                Text(
-                                  '${itinerary['startDate'] != null ? 'Bắt đầu: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(itinerary['startDate']))}' : ''}'
-                                  '${itinerary['startDate'] != null && itinerary['endDate'] != null ? ' - ' : ''}'
-                                  '${itinerary['endDate'] != null ? 'Kết thúc: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(itinerary['endDate']))}' : ''}',
-                                ),
-                              if (itinerary['startTime'] != null)
-                                Text('Giờ bắt đầu: ${itinerary['startTime']}'),
-                              if (itinerary['endTime'] != null)
-                                Text('Giờ kết thúc: ${itinerary['endTime']}'),
-                              if (itinerary['description'] != null)
-                                Text('Mô tả: ${itinerary['description']}'),
-                              if (itinerary['type'] != null)
-                                Text('Loại: ${itinerary['type']}'),
-                            ],
+                            ),
                           ),
-                        );
-                      },
-                    ),
-                  ),
+                          if (openedItineraryIndex == index) ...[
+                            if (itinerary['startTime'] != null)
+                              Text('Giờ bắt đầu: ${itinerary['startTime']}'),
+                            if (itinerary['endTime'] != null)
+                              Text('Giờ kết thúc: ${itinerary['endTime']}'),
+                            if (itinerary['description'] != null)
+                              Text('Mô tả: ${itinerary['description']}'),
+                            if (itinerary['type'] != null)
+                              Text('Loại: ${itinerary['type']}'),
+                          ],
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),

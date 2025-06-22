@@ -59,6 +59,12 @@ public class PaymentService {
     @Autowired
     private UserDiscountRepository userDiscountRepository;
 
+    @Autowired
+    private DiscountService discountService;
+
+    @Autowired
+    private DiscountRepository discountRepository;
+
     private static final String PARTNER_CODE = "MOMO";
     private static final String ACCESS_KEY = "F8BBA842ECF85";
     private static final String SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
@@ -152,6 +158,12 @@ public class PaymentService {
                 ud.setDiscountId(booking.getDiscountId());
                 ud.setUsed(true);
                 userDiscountRepository.save(ud);
+
+                // Cập nhật used_quantity cho discount
+                Discount discount = discountRepository.findById(booking.getDiscountId()).orElse(null);
+                if (discount != null) {
+                    discountService.checkAndUpdateDiscountQuantity(discount);
+                }
             }
 
             try {
@@ -159,6 +171,34 @@ public class PaymentService {
                         .orElseThrow(() -> new RuntimeException("User not found"));
                 List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
                 emailService.sendPaymentSuccessEmail(user, booking, payment, passengers);
+
+                // Gửi thông báo cho admin
+                java.util.List<User> admins = userRepository.findAdmins();
+                String subject = "[TravelTour] Có thanh toán mới cho tour: " + booking.getTour().getName();
+                String content = String.format(
+                    "<html><body>"
+                    + "<h2>Thông báo: Có khách hàng vừa thanh toán thành công!</h2>"
+                    + "<p><b>Khách hàng:</b> %s (%s)</p>"
+                    + "<p><b>Mã đặt tour:</b> %s</p>"
+                    + "<p><b>Tên tour:</b> %s</p>"
+                    + "<p><b>Ngày khởi hành:</b> %s</p>"
+                    + "<p><b>Số tiền:</b> %s VND</p>"
+                    + "<p><b>Phương thức thanh toán:</b> %s</p>"
+                    + "<p><b>Thời gian thanh toán:</b> %s</p>"
+                    + "</body></html>",
+                    user.getFullName(), user.getEmail(),
+                    booking.getBookingCode(),
+                    booking.getTour().getName(),
+                    booking.getScheduleId(),
+                    payment.getAmount(),
+                    payment.getPaymentMethod().getMethodName(),
+                    payment.getPaymentDate()
+                );
+                for (User admin : admins) {
+                    if (admin.getEmail() != null && !admin.getEmail().isEmpty()) {
+                        emailService.sendHtmlEmail(admin.getEmail(), subject, content);
+                    }
+                }
             } catch (Exception e) {
                 System.out.println("ERROR: Failed to send email: " + e.getMessage());
                 e.printStackTrace();

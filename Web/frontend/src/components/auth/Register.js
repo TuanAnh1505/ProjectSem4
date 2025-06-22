@@ -4,7 +4,11 @@ import { FaEye, FaEyeSlash, FaPlaneDeparture } from 'react-icons/fa';
 import axios from "axios";
 import "../styles/user/Register.css";
 
-const API_REGISTER_URL = "http://localhost:8080/api/auth/register";
+// Cấu hình axios
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://localhost:8080';
+
+const API_REGISTER_URL = "/api/auth/register";
 const SUCCESS_MESSAGE = "Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.";
 const ERROR_MESSAGE = "Có lỗi xảy ra!";
 
@@ -34,15 +38,32 @@ const Register = () => {
     setSuccess("");
 
     try {
-      await axios.post(API_REGISTER_URL, {
-        fullName,
-        email,
-        password,
-        phone,
-        address,
-      });
-      setSuccess(SUCCESS_MESSAGE);
+      const response = await axios.post(API_REGISTER_URL, 
+        {
+          fullName,
+          email,
+          password,
+          phone,
+          address,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          withCredentials: true
+        }
+      );
+      
+      if (response.data) {
+        setSuccess(SUCCESS_MESSAGE);
+        // Redirect sau 2 giây
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      }
     } catch (err) {
+      console.error('Registration error:', err);
       // Ưu tiên lấy message chi tiết từ backend nếu có
       const errorMessage =
         err.response?.data?.message ||

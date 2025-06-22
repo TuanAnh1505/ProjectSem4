@@ -294,9 +294,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                               children: [
                                                 ClipRRect(
                                                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                                                  child: tour.imageUrl != null && tour.imageUrl!.isNotEmpty
+                                                  child: tour.imageUrls.isNotEmpty
                                                       ? Image.network(
-                                                          'http://10.0.2.2:8080${tour.imageUrl}',
+                                                          'http://10.0.2.2:8080${tour.imageUrls[0]}',
                                                           width: 250,
                                                           height: 180,
                                                           fit: BoxFit.cover,
@@ -508,9 +508,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         ClipRRect(
                                           borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-                                          child: tour.imageUrl != null && tour.imageUrl!.isNotEmpty
+                                          child: tour.imageUrls.isNotEmpty
                                               ? Image.network(
-                                                  'http://10.0.2.2:8080${tour.imageUrl}',
+                                                  'http://10.0.2.2:8080${tour.imageUrls[0]}',
                                                   width: double.infinity,
                                                   height: 250,
                                                   fit: BoxFit.cover,

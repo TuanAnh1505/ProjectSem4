@@ -33,4 +33,5 @@ public class TourGuideDTO {
 
     private String userFullName;
     private String userEmail;
+    private Boolean isActive;
 }

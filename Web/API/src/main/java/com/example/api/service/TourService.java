@@ -9,6 +9,7 @@ import com.example.api.repository.DestinationRepository;
 import com.example.api.repository.EventRepository;
 import com.example.api.repository.TourRepository;
 
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -33,8 +34,11 @@ public class TourService {
     public Tour createTour(TourDTO dto) {
         Tour tour = new Tour();
         BeanUtils.copyProperties(dto, tour);
-        tour.setDestinations(destRepo.findAllById(dto.getDestinationIds()));
-        tour.setEvents(eventRepo.findAllById(dto.getEventIds()));
+        if (dto.getImageUrls() != null) {
+            tour.setImageUrls(dto.getImageUrls());
+        }
+        tour.setDestinations(destRepo.findAllById(dto.getDestinationIds() != null ? dto.getDestinationIds() : Collections.emptyList()));
+        tour.setEvents(eventRepo.findAllById(dto.getEventIds() != null ? dto.getEventIds() : Collections.emptyList()));
         return tourRepo.save(tour);
     }
 
@@ -42,8 +46,11 @@ public class TourService {
         Tour tour = tourRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tour not found"));
         BeanUtils.copyProperties(dto, tour, "tourId");
-        tour.setDestinations(destRepo.findAllById(dto.getDestinationIds()));
-        tour.setEvents(eventRepo.findAllById(dto.getEventIds()));
+        if (dto.getImageUrls() != null) {
+            tour.setImageUrls(dto.getImageUrls());
+        }
+        tour.setDestinations(destRepo.findAllById(dto.getDestinationIds() != null ? dto.getDestinationIds() : Collections.emptyList()));
+        tour.setEvents(eventRepo.findAllById(dto.getEventIds() != null ? dto.getEventIds() : Collections.emptyList()));
         return tourRepo.save(tour);
     }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from "react";
-import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import { FaTrash, FaExclamationTriangle, FaUserPlus } from "react-icons/fa";
 // import { useNavigate } from "react-router-dom";
 import "../../styles/admin/UserIndex.css";
 
@@ -11,8 +11,21 @@ const UserIndex = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterType, setFilterType] = useState("all");
   const [message, setMessage] = useState(""); // For success/error messages
   const [deleteAlert, setDeleteAlert] = useState({ show: false, userId: null, userName: "" });
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [guideForm, setGuideForm] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
+    experienceYears: "",
+    specialization: "",
+    languages: ""
+  });
+  const [guideLoading, setGuideLoading] = useState(false);
   // const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,13 +59,18 @@ const UserIndex = () => {
   useEffect(() => {
     let filtered = users;
     if (filterStatus === "active") {
-      filtered = users.filter((user) => user.isActive);
+      filtered = filtered.filter((user) => user.isActive);
     } else if (filterStatus === "inactive") {
-      filtered = users.filter((user) => !user.isActive);
+      filtered = filtered.filter((user) => !user.isActive);
+    }
+    if (filterType === "guide") {
+      filtered = filtered.filter((user) => user.isGuide);
+    } else if (filterType === "user") {
+      filtered = filtered.filter((user) => !user.isGuide);
     }
     setFilteredUsers(filtered);
     setCurrentPage(1);
-  }, [filterStatus, users]);
+  }, [filterStatus, filterType, users]);
 
   // Handle user deletion
   const handleDeleteUser = (userId, userName) => {
@@ -114,6 +132,15 @@ const UserIndex = () => {
   return (
     <div className="userindex-main-container">
       <h1 className="userindex-title text-center mb-4">Danh sách tài khoản</h1>
+      <div className="d-flex justify-content-end mb-3">
+        <button
+          className="userindex-btn userindex-btn-primary"
+          style={{ display: "flex", alignItems: "center", gap: 8 }}
+          onClick={() => setShowGuideModal(true)}
+        >
+          <FaUserPlus /> Tạo tài khoản hướng dẫn viên
+        </button>
+      </div>
       {/* Success/Error Message */}
       {message && (
         <div
@@ -141,10 +168,20 @@ const UserIndex = () => {
               className="userindex-filter-select"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
+              style={{ marginRight: 8 }}
             >
-                <option value="all">Tất cả</option>
+              <option value="all">Tất cả trạng thái</option>
               <option value="active">Hoạt động</option>
               <option value="inactive">Không hoạt động</option>
+            </select>
+            <select
+              className="userindex-filter-select"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="all">Tất cả loại</option>
+              <option value="user">User</option>
+              <option value="guide">Guide</option>
             </select>
           </div>
         </div>
@@ -159,11 +196,12 @@ const UserIndex = () => {
           <table className="userindex-table">
             <thead className="userindex-table-light">
               <tr>
-                <th>ID</th>
+             
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Address</th>
+                <th>Type</th>
                 <th>Status</th>
                 <th>Created At</th>
                 <th>Actions</th>
@@ -172,14 +210,15 @@ const UserIndex = () => {
             <tbody>
               {currentUsers.map((user) => (
                 <tr key={user.userid}>
-                  <td>{user.userid}</td>
+                  
                   <td>{user.fullName}</td>
                   <td>{user.email}</td>
                   <td>{user.phone}</td>
                   <td>{user.address}</td>
+                  <td>{user.isGuide ? "Guide" : "User"}</td>
                   <td>
                     {user.isActive ? (
-                        <span className="userindex-badge userindex-badge-success">Hoạt động</span>
+                      <span className="userindex-badge userindex-badge-success">Hoạt động</span>
                     ) : (
                       <span className="userindex-badge userindex-badge-secondary">Không hoạt động</span>
                     )}
@@ -207,6 +246,124 @@ const UserIndex = () => {
         paginate={paginate}
         currentPage={currentPage}
       />
+      {/* Modal tạo tài khoản hướng dẫn viên */}
+      {showGuideModal && (
+        <div className="destination-alert-overlay">
+          <div className="guide-modal">
+            <h2 className="guide-modal-title">
+              <FaUserPlus style={{marginRight:8, color:'#7b6ef6', verticalAlign:'middle'}}/> Tạo tài khoản hướng dẫn viên
+            </h2>
+            <form
+              className="guide-modal-form"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setGuideLoading(true);
+                try {
+                  const token = localStorage.getItem("token");
+                  const response = await fetch("http://localhost:8080/api/tour-guides/admin", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      ...guideForm,
+                      experienceYears: parseInt(guideForm.experienceYears),
+                    }),
+                  });
+                  if (!response.ok) {
+                    const errorText = await response.text();
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        throw new Error(errorData.message || "Tạo tài khoản thất bại");
+                    } catch (e) {
+                        throw new Error(errorText || "Tạo tài khoản thất bại");
+                    }
+                  }
+                  setMessage("Tạo tài khoản hướng dẫn viên thành công");
+                  setShowGuideModal(false);
+                  setGuideForm({
+                    fullName: "",
+                    email: "",
+                    password: "",
+                    phone: "",
+                    address: "",
+                    experienceYears: "",
+                    specialization: "",
+                    languages: ""
+                  });
+                  // Reload user list
+                  setLoading(true);
+                  const token2 = localStorage.getItem("token");
+                  const res2 = await fetch("http://localhost:8080/api/admin/users", {
+                    headers: { Authorization: `Bearer ${token2}` },
+                  });
+                  const data2 = await res2.json();
+                  setUsers(data2);
+                  setFilteredUsers(data2);
+                  setTimeout(() => setMessage(""), 3000);
+                } catch (error) {
+                  let finalMessage;
+                  try {
+                    const errorObj = JSON.parse(error.message);
+                    finalMessage = errorObj.message || 'Có lỗi xảy ra.';
+                  } catch (e) {
+                    finalMessage = error.message;
+                  }
+                  setMessage(finalMessage || "Tạo tài khoản thất bại");
+                  setTimeout(() => setMessage(""), 3000);
+                } finally {
+                  setGuideLoading(false);
+                }
+              }}
+            >
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Họ tên</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.fullName} onChange={e => setGuideForm(f => ({ ...f, fullName: e.target.value }))} />
+              </div>
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Email</label>
+                <input type="email" className="guide-modal-input" required value={guideForm.email} onChange={e => setGuideForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Mật khẩu</label>
+                <input type="password" className="guide-modal-input" required value={guideForm.password} onChange={e => setGuideForm(f => ({ ...f, password: e.target.value }))} />
+              </div>
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Số điện thoại</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.phone} onChange={e => setGuideForm(f => ({ ...f, phone: e.target.value }))} />
+              </div>
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Địa chỉ</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.address} onChange={e => setGuideForm(f => ({ ...f, address: e.target.value }))} />
+              </div>
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Số năm kinh nghiệm</label>
+                <input type="number" className="guide-modal-input" required min={0} value={guideForm.experienceYears} onChange={e => setGuideForm(f => ({ ...f, experienceYears: e.target.value }))} />
+              </div>
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Chuyên môn</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.specialization} onChange={e => setGuideForm(f => ({ ...f, specialization: e.target.value }))} />
+              </div>
+              <div className="guide-modal-field">
+                <label className="guide-modal-label">Ngôn ngữ</label>
+                <input type="text" className="guide-modal-input" required value={guideForm.languages} onChange={e => setGuideForm(f => ({ ...f, languages: e.target.value }))} />
+              </div>
+              <div className="guide-modal-btn-row">
+                <button type="button" className="guide-modal-btn guide-modal-btn-cancel" onClick={() => setShowGuideModal(false)} disabled={guideLoading}>Hủy</button>
+                <button type="submit" className="guide-modal-btn guide-modal-btn-create" disabled={guideLoading}>
+                  {guideLoading ? (
+                    <span className="guide-modal-loading">
+                      <span className="spinner-border spinner-border-sm" role="status" style={{marginRight:4}}></span>
+                      Đang tạo...
+                    </span>
+                  ) : "Tạo tài khoản"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Modal xác nhận xóa */}
       {deleteAlert.show && (
         <div className="destination-alert-overlay">

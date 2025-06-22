@@ -63,6 +63,10 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
   Map<String, dynamic>? _discountInfo;
   double _discountedPrice = 0;
 
+  bool showFullDescription = false;
+
+  int _currentImageIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -367,7 +371,8 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
               'duration': widget.tour.duration,
               'maxParticipants': widget.tour.maxParticipants,
               'statusId': widget.tour.statusId,
-              'imageUrl': widget.tour.imageUrl,
+              'imageUrl': widget.tour.imageUrls.isNotEmpty ? widget.tour.imageUrls[0] : null,
+              'imageUrls': widget.tour.imageUrls,
               'createdAt': widget.tour.createdAt?.toIso8601String(),
               'updatedAt': widget.tour.updatedAt?.toIso8601String(),
             },
@@ -432,21 +437,79 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (widget.tour.imageUrl != null && widget.tour.imageUrl!.isNotEmpty)
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(0)),
-                          child: Image.network(
-                            'http://10.0.2.2:8080${widget.tour.imageUrl}',
-                            width: double.infinity,
-                            height: 220,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 220,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.error),
-                              );
-                            },
+                      if (widget.tour.imageUrls.isNotEmpty)
+                        Container(
+                          height: 220,
+                          child: Stack(
+                            children: [
+                              PageView.builder(
+                                itemCount: widget.tour.imageUrls.length,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    _currentImageIndex = index;
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      // TODO: Implement full screen gallery view
+                                    },
+                                    child: Image.network(
+                                      'http://10.0.2.2:8080${widget.tour.imageUrls[index]}',
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey[300],
+                                          child: const Icon(Icons.error),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                              if (widget.tour.imageUrls.length > 1)
+                                Positioned(
+                                  bottom: 10,
+                                  left: 0,
+                                  right: 0,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(
+                                      widget.tour.imageUrls.length,
+                                      (index) => Container(
+                                        width: 8,
+                                        height: 8,
+                                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: _currentImageIndex == index
+                                              ? Colors.orange
+                                              : Colors.white.withOpacity(0.5),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.6),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${_currentImageIndex + 1}/${widget.tour.imageUrls.length}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       Padding(
@@ -466,7 +529,25 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             Text(
                               widget.tour.description ?? 'Không có mô tả',
                               style: const TextStyle(fontSize: 14),
+                              maxLines: showFullDescription ? null : 4,
+                              overflow: showFullDescription ? TextOverflow.visible : TextOverflow.ellipsis,
                             ),
+                            if ((widget.tour.description?.length ?? 0) > 120)
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    showFullDescription = !showFullDescription;
+                                  });
+                                },
+                                child: Text(
+                                  showFullDescription ? 'Thu gọn' : 'Xem thêm',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
@@ -484,7 +565,9 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                                 Icon(Icons.timer, size: 16, color: Colors.orange),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Thời gian: ${widget.tour.duration} ngày',
+                                  (widget.tour.duration ?? 1) > 1
+                                      ? '${widget.tour.duration} ngày ${widget.tour.duration - 1} đêm'
+                                      : '${widget.tour.duration} ngày',
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ],
@@ -492,7 +575,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.attach_money, size: 25, color: Colors.orange),
+                                // Icon(Icons.attach_money, size: 25, color: Colors.orange),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Giá: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(widget.tour.price)}',
@@ -927,6 +1010,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                               onPressed: _handleApplyDiscount,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white, 
                                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),

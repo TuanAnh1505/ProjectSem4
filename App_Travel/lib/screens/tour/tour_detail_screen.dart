@@ -26,6 +26,11 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   List<dynamic> relatedTours = [];
   Map<int, List<dynamic>> itineraries = {};
   List<dynamic> experiences = [];
+  List<dynamic> feedbacks = [];
+  bool feedbackLoading = true;
+  int currentFeedbackPage = 1;
+  int currentExperiencePage = 1;
+  int itemsPerPage = 4;
   int? selectedScheduleId;
   bool loading = true;
   bool bookingLoading = false;
@@ -42,6 +47,9 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   bool ratingLoading = true;
   bool showFullDescription = false;
   bool showExperienceForm = false;
+  int? openedItineraryId;
+  List<String>? galleryImages;
+  int galleryIndex = 0;
 
   String formatPrice(num? price) {
     if (price == null) return '';
@@ -56,6 +64,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     _loadUserId();
     fetchExperiences();
     fetchTourRating(widget.tourId);
+    fetchFeedbacks();
   }
 
   @override
@@ -159,6 +168,34 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     } catch (e) {
       setState(() {
         ratingLoading = false;
+      });
+    }
+  }
+
+  Future<void> fetchFeedbacks() async {
+    setState(() {
+      feedbackLoading = true;
+    });
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/feedbacks?tourId=${widget.tourId}'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          feedbacks = data is List ? data : [];
+          feedbackLoading = false;
+        });
+      } else {
+        setState(() {
+          feedbacks = [];
+          feedbackLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        feedbacks = [];
+        feedbackLoading = false;
       });
     }
   }
@@ -475,6 +512,135 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     }
   }
 
+  // Add pagination methods
+  List<dynamic> getPaginatedFeedbacks() {
+    final approvedFeedbacks = feedbacks
+        .where((fb) => (fb['statusName'] ?? '').toLowerCase() == 'approved')
+        .toList();
+    final startIndex = (currentFeedbackPage - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+    return approvedFeedbacks.length > startIndex
+        ? approvedFeedbacks.sublist(startIndex, endIndex > approvedFeedbacks.length ? approvedFeedbacks.length : endIndex)
+        : [];
+  }
+
+  List<dynamic> getPaginatedExperiences() {
+    final approvedExperiences = experiences
+        .where((exp) => (exp['status'] ?? '').toLowerCase() == 'approved')
+        .toList();
+    final startIndex = (currentExperiencePage - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+    return approvedExperiences.length > startIndex
+        ? approvedExperiences.sublist(startIndex, endIndex > approvedExperiences.length ? approvedExperiences.length : endIndex)
+        : [];
+  }
+
+  int getTotalFeedbackPages() {
+    final approvedFeedbacks = feedbacks
+        .where((fb) => (fb['statusName'] ?? '').toLowerCase() == 'approved')
+        .length;
+    return (approvedFeedbacks / itemsPerPage).ceil();
+  }
+
+  int getTotalExperiencePages() {
+    final approvedExperiences = experiences
+        .where((exp) => (exp['status'] ?? '').toLowerCase() == 'approved')
+        .length;
+    return (approvedExperiences / itemsPerPage).ceil();
+  }
+
+  void openGallery(List<String> images, int index) {
+    setState(() {
+      galleryImages = images;
+      galleryIndex = index;
+    });
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: SizedBox(
+          width: double.infinity,
+          height: 350,
+          child: Stack(
+            children: [
+              PageView.builder(
+                controller: PageController(initialPage: index),
+                itemCount: images.length,
+                onPageChanged: (i) => setState(() => galleryIndex = i),
+                itemBuilder: (_, i) => ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    images[i].startsWith('http') ? images[i] : 'http://10.0.2.2:8080${images[i]}',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 8, right: 8,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: Colors.white, size: 32),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<TextSpan> _buildDescriptionSpans(String text) {
+    final RegExp timeRegex = RegExp(r'(\(\d{2}:\d{2}\s*[–-]\s*\d{2}:\d{2}\)|\d{2}:\d{2}\s*[–-]\s*\d{2}:\d{2})');
+    final RegExp allCapsRegex = RegExp(r'[A-ZÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴĐÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸ\s]+');
+    final List<TextSpan> spans = [];
+    int lastIndex = 0;
+
+    // First handle time matches
+    for (Match match in timeRegex.allMatches(text)) {
+      // Add text before the match
+      if (match.start > lastIndex) {
+        String beforeText = text.substring(lastIndex, match.start);
+        _addTextWithCapsFormatting(beforeText, spans);
+      }
+      // Add the matched time in bold
+      spans.add(TextSpan(
+        text: match.group(0),
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ));
+      lastIndex = match.end;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      String remainingText = text.substring(lastIndex);
+      _addTextWithCapsFormatting(remainingText, spans);
+    }
+
+    return spans;
+  }
+
+  void _addTextWithCapsFormatting(String text, List<TextSpan> spans) {
+    int lastIndex = 0;
+    // Tìm các đoạn liên tiếp không xuống dòng
+    final RegExp lineRegex = RegExp(r'[^\n]+|\n');
+    for (final Match lineMatch in lineRegex.allMatches(text)) {
+      final String line = lineMatch.group(0) ?? '';
+      // Kiểm tra nếu là dòng xuống dòng thì giữ nguyên
+      if (line == '\n') {
+        spans.add(const TextSpan(text: '\n'));
+        continue;
+      }
+      // Nếu dòng không chứa ký tự thường và có ít nhất 2 ký tự in hoa thì in đậm
+      final int upperCount = RegExp(r'[A-ZÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴĐÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸ]').allMatches(line).length;
+      final bool hasLower = RegExp(r'[a-zàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹ]').hasMatch(line);
+      if (!hasLower && upperCount >= 2) {
+        spans.add(TextSpan(text: line, style: const TextStyle(fontWeight: FontWeight.bold)));
+      } else {
+        spans.add(TextSpan(text: line));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (loading) return const Center(child: CircularProgressIndicator());
@@ -517,15 +683,77 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                 ),
               ),
               // Ảnh tour
-              if (tour?.imageUrl != null && tour!.imageUrl!.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(0), bottom: Radius.circular(0)),
-                  child: Image.network(
-                    'http://10.0.2.2:8080${tour!.imageUrl}',
-                    width: double.infinity,
-                    height: 220,
-                    fit: BoxFit.cover,
-                  ),
+              if (tour?.imageUrls.isNotEmpty == true)
+                Stack(
+                  children: [
+                    Container(
+                      height: 220,
+                      child: PageView.builder(
+                        itemCount: tour!.imageUrls.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            galleryIndex = index;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              openGallery(tour!.imageUrls, index);
+                            },
+                            child: Image.network(
+                              'http://10.0.2.2:8080${tour!.imageUrls[index]}',
+                              width: double.infinity,
+                              height: 220,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    // Indicator dots
+                    if (tour!.imageUrls.length > 1)
+                      Positioned(
+                        bottom: 16,
+                        left: 0,
+                        right: 0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            tour!.imageUrls.length,
+                            (index) => Container(
+                              width: 8,
+                              height: 8,
+                              margin: EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: galleryIndex == index 
+                                    ? Colors.white 
+                                    : Colors.white.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Counter
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          '${galleryIndex + 1}/${tour!.imageUrls.length}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -756,17 +984,47 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       )
                     else if (itineraries[selectedScheduleId!] != null)
                       ...itineraries[selectedScheduleId!]!.map<Widget>((it) => Card(
-                        child: ListTile(
-                          title: Text(it['title'] ?? ''),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (it['startTime'] != null) Text('Bắt đầu: ${it['startTime']}'),
-                              if (it['endTime'] != null) Text('Kết thúc: ${it['endTime']}'),
-                              if (it['description'] != null) Text(it['description']),
-                              if (it['type'] != null) Text('Loại: ${it['type']}'),
-                            ],
-                          ),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (openedItineraryId == it['itineraryId']) {
+                                      openedItineraryId = null;
+                                    } else {
+                                      openedItineraryId = it['itineraryId'];
+                                    }
+                                  });
+                                },
+                                child: Text(
+                                  'Ngày ${itineraries[selectedScheduleId!]!.indexOf(it) + 1}: ${it['title'] ?? ''}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue[800],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (openedItineraryId == it['itineraryId'])
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (it['startTime'] != null) Text('Bắt đầu:  ${it['startTime']}'),
+                                    if (it['endTime'] != null) Text('Kết thúc:  ${it['endTime']}'),
+                                    if (it['description'] != null) RichText(
+                                      text: TextSpan(
+                                        style: TextStyle(color: Colors.black),
+                                        children: _buildDescriptionSpans(it['description']),
+                                      ),
+                                    ),
+                                    // if (it['type'] != null) Text('Loại:  ${it['type']}'),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
                       )).toList(),
                   ],
@@ -963,77 +1221,278 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       )
                     else
                       Column(
-                        children: experiences.map((exp) => Card(
-                          margin: EdgeInsets.only(bottom: 12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundColor: Colors.blue[100],
-                                      child: Text(
-                                        exp['userName']?.substring(0, 1).toUpperCase() ?? 'U',
-                                        style: TextStyle(color: Colors.blue[900]),
+                        children: [
+                          ...getPaginatedExperiences().map((exp) => Card(
+                                margin: EdgeInsets.only(bottom: 12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: Colors.blue[100],
+                                            child: Text(
+                                              (exp['userFullName'] ?? exp['userName'] ?? 'A').substring(0, 1).toUpperCase(),
+                                              style: TextStyle(color: Colors.blue[900]),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            exp['userFullName'] ?? exp['userName'] ?? 'Ẩn danh',
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue[800]),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          exp['userName'] ?? 'Anonymous',
-                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                      SizedBox(height: 8),
+                                      if (exp['title'] != null && exp['title'].toString().isNotEmpty)
+                                        Text(exp['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900])),
+                                      SizedBox(height: 4),
+                                      Text(exp['content'] ?? ''),
+                                      if (exp['media'] != null && exp['media'] is List && exp['media'].isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 8.0),
+                                          child: Wrap(
+                                            spacing: 8,
+                                            runSpacing: 8,
+                                            children: () {
+                                              final mediaList = exp['media'] as List;
+                                              final images = mediaList.where((m) => m['fileType'] == 'image').toList();
+                                              final maxShow = 4;
+                                              final showList = mediaList.take(maxShow).toList();
+                                              final extraCount = mediaList.length - maxShow;
+                                              return List<Widget>.generate(showList.length, (idx) {
+                                                final m = showList[idx];
+                                                final url = m['fileUrl']?.toString() ?? '';
+                                                final isImage = m['fileType'] == 'image';
+                                                if (idx == maxShow - 1 && extraCount > 0) {
+                                                  // Ảnh/video thứ 4 và còn dư
+                                                  return GestureDetector(
+                                                    onTap: isImage && images.isNotEmpty
+                                                        ? () {
+                                                            openGallery(
+                                                              images.map((img) => img['fileUrl']?.toString() ?? '').toList(),
+                                                              images.indexWhere((img) => img['fileUrl'] == m['fileUrl']),
+                                                            );
+                                                          }
+                                                        : null,
+                                                    child: Stack(
+                                                      children: [
+                                                        isImage
+                                                          ? Image.network(
+                                                              url.startsWith('http') ? url : 'http://10.0.2.2:8080$url',
+                                                              width: 80,
+                                                              height: 80,
+                                                              fit: BoxFit.cover,
+                                                            )
+                                                          : Container(
+                                                              width: 80,
+                                                              height: 80,
+                                                              color: Colors.black12,
+                                                              child: Icon(Icons.videocam, color: Colors.blue, size: 40),
+                                                            ),
+                                                        Container(
+                                                          width: 80,
+                                                          height: 80,
+                                                          color: Colors.black.withOpacity(0.5),
+                                                          alignment: Alignment.center,
+                                                          child: Text(
+                                                            '+$extraCount',
+                                                            style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 28,
+                                                              shadows: [
+                                                                Shadow(
+                                                                  blurRadius: 4,
+                                                                  color: Colors.black,
+                                                                  offset: Offset(1, 1),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                } else {
+                                                  // Ảnh/video bình thường
+                                                  return isImage
+                                                      ? GestureDetector(
+                                                          onTap: images.isNotEmpty
+                                                              ? () {
+                                                                  openGallery(
+                                                                    images.map((img) => img['fileUrl']?.toString() ?? '').toList(),
+                                                                    images.indexWhere((img) => img['fileUrl'] == m['fileUrl']),
+                                                                  );
+                                                                }
+                                                              : null,
+                                                          child: Image.network(
+                                                            url.startsWith('http') ? url : 'http://10.0.2.2:8080$url',
+                                                            width: 80,
+                                                            height: 80,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        )
+                                                      : Container(
+                                                          width: 80,
+                                                          height: 80,
+                                                          color: Colors.black12,
+                                                          child: Icon(Icons.videocam, color: Colors.blue, size: 40),
+                                                        );
+                                                }
+                                              });
+                                            }(),
+                                          ),
                                         ),
-                                        Text(
-                                          exp['createdAt'] != null 
-                                            ? DateFormat('dd/MM/yyyy').format(DateTime.parse(exp['createdAt']))
-                                            : '',
-                                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                if (exp['title'] != null && exp['title'].toString().isNotEmpty)
-                                  Text(exp['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900])),
-                                SizedBox(height: 4),
-                                Text(exp['content'] ?? ''),
-                                if (exp['media'] != null && exp['media'] is List && exp['media'].isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: (exp['media'] as List).map<Widget>((m) {
-                                        print('media item: $m'); // Log để debug
-                                        final url = m['fileUrl']?.toString() ?? '';
-                                        final isImage = m['fileType'] == 'image';
-                                        if (isImage) {
-                                          return Image.network(
-                                            url.startsWith('http') ? url : 'http://10.0.2.2:8080$url',
-                                            width: 80,
-                                            height: 80,
-                                            fit: BoxFit.cover,
-                                          );
-                                        } else {
-                                          return Container(
-                                            width: 80,
-                                            height: 80,
-                                            color: Colors.black12,
-                                            child: Icon(Icons.videocam, color: Colors.blue, size: 40),
-                                          );
-                                        }
-                                      }).toList(),
-                                    ),
+                                    ],
                                   ),
-                              ],
+                                ),
+                              )).toList(),
+                          // Pagination
+                          if (getTotalExperiencePages() > 1)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.chevron_left),
+                                    onPressed: currentExperiencePage > 1
+                                        ? () => setState(() => currentExperiencePage--)
+                                        : null,
+                                  ),
+                                  Text(
+                                    'Trang $currentExperiencePage/${getTotalExperiencePages()}',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.chevron_right),
+                                    onPressed: currentExperiencePage < getTotalExperiencePages()
+                                        ? () => setState(() => currentExperiencePage++)
+                                        : null,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        )).toList(),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+              // Add Feedback Section
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(top: 12),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.amber, size: 20),
+                        SizedBox(width: 6),
+                        Text('Đánh giá của khách hàng về tour này.', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900])),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    if (feedbackLoading)
+                      Center(child: CircularProgressIndicator())
+                    else if (feedbacks.isEmpty)
+                      Center(
+                        child: Text(
+                          'Chưa có đánh giá nào cho tour này',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      )
+                    else
+                      Column(
+                        children: [
+                          ...getPaginatedFeedbacks().map((fb) => Card(
+                                margin: EdgeInsets.only(bottom: 12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Rating stars
+                                      Row(
+                                        children: [
+                                          ...List.generate(
+                                            (fb['rating'] ?? 0).toInt(),
+                                            (index) => Icon(Icons.star, color: Colors.amber, size: 24),
+                                          ),
+                                          ...List.generate(
+                                            (5 - (fb['rating'] ?? 0).toInt()).toInt(),
+                                            (index) => Icon(Icons.star_border, color: Colors.grey[400], size: 24),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
+                                      // User name
+                                      Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: Colors.blue[100],
+                                            child: Text(
+                                              (fb['userFullName'] ?? 'A').substring(0, 1).toUpperCase(),
+                                              style: TextStyle(color: Colors.blue[900]),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            fb['userFullName'] ?? 'Ẩn danh',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 4),
+                                      // Date
+                                      Text(
+                                        fb['createdAt'] != null
+                                            ? DateFormat('dd/MM/yyyy').format(DateTime.parse(fb['createdAt']))
+                                            : '',
+                                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                      ),
+                                      SizedBox(height: 8),
+                                      // Message
+                                      Text(
+                                        fb['message'] ?? '',
+                                        style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )).toList(),
+                          // Pagination
+                          if (getTotalFeedbackPages() > 1)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.chevron_left),
+                                    onPressed: currentFeedbackPage > 1
+                                        ? () => setState(() => currentFeedbackPage--)
+                                        : null,
+                                  ),
+                                  Text(
+                                    'Trang $currentFeedbackPage/${getTotalFeedbackPages()}',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.chevron_right),
+                                    onPressed: currentFeedbackPage < getTotalFeedbackPages()
+                                        ? () => setState(() => currentFeedbackPage++)
+                                        : null,
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
                   ],
                 ),
@@ -1059,44 +1518,71 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: relatedTours.map((tour) => Container(
-                            width: 260,
-                            margin: EdgeInsets.only(right: 16),
+                            width: 250,
+                            margin: EdgeInsets.only(right: 18),
                             child: Card(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (tour['imageUrl'] != null)
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-                                      child: Image.network(
-                                        'http://10.0.2.2:8080${tour['imageUrl']}',
-                                        height: 120,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Container(
+                                height: 300,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (tour['imageUrls'] != null && (tour['imageUrls'] as List).isNotEmpty)
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                                        child: Image.network(
+                                          'http://10.0.2.2:8080${(tour['imageUrls'] as List).first}',
+                                          height: 140,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            print('Error loading image: $error');
+                                            return Container(
+                                              height: 140,
+                                              width: double.infinity,
+                                              color: Colors.grey[200],
+                                              child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              tour['name'] ?? '',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                                color: Colors.black87,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            SizedBox(height: 6),
+                                            Text(
+                                              'Giá từ ${formatPrice(tour['price'])}đ',
+                                              style: TextStyle(
+                                                color: Colors.green[700],
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  Padding(
-                                    padding: EdgeInsets.all(12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          tour['name'] ?? '',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Giá từ ${formatPrice(tour['price'])}đ',
-                                          style: TextStyle(
-                                            color: Colors.green[700],
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        SizedBox(height: 8),
-                                        ElevatedButton(
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      child: SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton(
                                           onPressed: () {
                                             Navigator.pushReplacement(
                                               context,
@@ -1110,13 +1596,19 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                           child: Text('Xem chi tiết'),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.orange,
-                                            foregroundColor: Colors.white,  
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(30),
+                                            ),
+                                            padding: EdgeInsets.symmetric(vertical: 10),
+                                            textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                            elevation: 0,
                                           ),
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           )).toList(),

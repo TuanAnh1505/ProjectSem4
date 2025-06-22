@@ -1,7 +1,9 @@
 package com.example.api.controller;
 
+import com.example.api.dto.CreateGuideRequestDTO;
 import com.example.api.dto.TourGuideDTO;
 import com.example.api.service.TourGuideService;
+import com.example.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,14 +11,18 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tour-guides")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class TourGuideController {
 
     @Autowired
     private TourGuideService tourGuideService;
+
+    @Autowired
+    private UserService userService;
 
     // Create new tour guide - only admin can create
     @PostMapping
@@ -103,5 +109,37 @@ public class TourGuideController {
             @RequestParam(required = false) Boolean isAvailable) {
         List<TourGuideDTO> tourGuides = tourGuideService.searchTourGuides(minRating, minExperience, specialization, language, isAvailable);
         return ResponseEntity.ok(tourGuides);
+    }
+
+    @PostMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createGuideAccount(@RequestBody CreateGuideRequestDTO dto) {
+        // 1. Tạo user mới với role GUIDE, gửi mail thông tin tài khoản
+        var user = userService.createGuideUserAndSendMail(
+            dto.getFullName(),
+            dto.getEmail(),
+            dto.getPassword(),
+            dto.getPhone(),
+            dto.getAddress()
+        );
+        // 2. Tạo bản ghi tour_guides
+        var guide = tourGuideService.createTourGuideForUser(
+            user.getUserid(),
+            dto.getExperienceYears(),
+            dto.getSpecialization(),
+            dto.getLanguages()
+        );
+        return ResponseEntity.ok(guide);
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('GUIDE')")
+    public ResponseEntity<TourGuideDTO> getCurrentGuideDetails() {
+        try {
+            TourGuideDTO guideDetails = tourGuideService.getCurrentGuideDetails();
+            return ResponseEntity.ok(guideDetails);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.example.api.repository;
 
 import com.example.api.model.Booking;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,7 +53,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     @Query("SELECT b FROM Booking b " +
            "WHERE b.scheduleId = :scheduleId " +
-           "AND b.status.statusName = 'CONFIRMED' " +
+           "AND b.status.statusName = 'Confirmed' " +
            "/* DEBUG: Getting all confirmed bookings for schedule */")
     List<Booking> findConfirmedBookingsForSchedule(@Param("scheduleId") Integer scheduleId);
 
@@ -64,4 +65,16 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Optional<Booking> findByUser_UseridAndTour_TourIdAndScheduleIdAndStatus_StatusName(Long userId, Integer tourId, Integer scheduleId, String statusName);
 
     List<Booking> findByStatus_StatusName(String statusName);
+
+    List<Booking> findByScheduleIdAndStatus_StatusName(Integer scheduleId, String statusName);
+
+    @Query("SELECT b FROM Booking b " +
+           "JOIN TourSchedule ts ON b.scheduleId = ts.scheduleId " +
+           "WHERE b.tour.tourId = :tourId " +
+           "AND ts.startDate = :startDate " +
+           "AND b.status.statusName = :statusName")
+    List<Booking> findByTourTourIdAndScheduleStartDateAndStatusStatusName(
+            @Param("tourId") Integer tourId, 
+            @Param("startDate") LocalDate startDate, 
+            @Param("statusName") String statusName);
 }

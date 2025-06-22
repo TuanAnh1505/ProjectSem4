@@ -60,4 +60,16 @@ public class TourScheduleController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/send-reminders")
+    public ResponseEntity<String> sendTourReminders() {
+        try {
+            logger.info("Received request to send tour reminders");
+            service.sendTourReminders();
+            return ResponseEntity.ok("Tour reminders sent successfully");
+        } catch (Exception e) {
+            logger.error("Error sending tour reminders", e);
+            return ResponseEntity.internalServerError().body("Failed to send tour reminders: " + e.getMessage());
+        }
+    }
 }

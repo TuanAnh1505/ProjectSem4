@@ -119,131 +119,133 @@ const UpdateDestination = () => {
     };
     
     return (
-        <div style={{ background: '#f6f7fb', minHeight: '100vh', padding: '32px 0' }}>
-            <div className="container" style={{ maxWidth: 900, margin: '0 auto', background: 'transparent', boxShadow: 'none' }}>
+        <div className="update-destination-wrapper">
+            <div className="update-destination-card">
                 <Link to="/admin/destination" className="back-button" style={{ marginBottom: 24, display: 'inline-block' }}>
                     Quay lại
                 </Link>
-                <div style={{ background: '#fff', borderRadius: 18, boxShadow: '0 2px 16px rgba(25,118,210,0.08)', padding: '32px 32px 24px 32px', marginBottom: 32 }}>
-                    <h2 className="form-title" style={{ textAlign: 'center', fontWeight: 700, fontSize: 28, color: '#222', marginBottom: 32 }}>Cập nhật điểm đến</h2>
-                    {error && <div className="error-message">{error}</div>}
-                    <form onSubmit={handleSubmit}>
-                        <div className="update-destination-form-row">
-                            <div className="update-destination-form-group">
-                                <label className="form-label">Name</label>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-section">
+                        <div className="section-title">Thông tin tour</div>
+                        <div className="form-row">
+                            <div>
+                                <label className="form-label">Tên tour</label>
                                 <input
                                     type="text"
-                                    className={`update-destination-form-input ${fieldErrors.name ? 'error' : ''}`}
+                                    className="form-input"
                                     name="name"
                                     value={destination.name}
-                                    onChange={(e) => setDestination({ ...destination, name: e.target.value })}
+                                    onChange={handleChange}
                                     required
                                 />
                             </div>
-                            <div className="update-destination-form-group">
-                                <label className="form-label">Category</label>
+                            <div>
+                                <label className="form-label">Giá</label>
                                 <input
                                     type="text"
-                                    className="update-destination-form-control"
+                                    className="form-input"
                                     name="category"
                                     value={destination.category}
-                                    onChange={(e) => setDestination({ ...destination, category: e.target.value })}
+                                    onChange={handleChange}
                                     required
                                 />
                             </div>
                         </div>
-                        <div className="update-destination-form-row">
-                            <div className="update-destination-form-group">
-                                <label className="form-label">Location</label>
+                        <div className="form-row">
+                            <div>
+                                <label className="form-label">Thời gian</label>
                                 <input
                                     type="text"
-                                    className="update-destination-form-control"
+                                    className="form-input"
                                     name="location"
                                     value={destination.location}
-                                    onChange={(e) => setDestination({ ...destination, location: e.target.value })}
+                                    onChange={handleChange}
                                     required
                                 />
                             </div>
-                            <div className="update-destination-form-group">
-                                <label className="form-label">Rating</label>
+                            <div>
+                                <label className="form-label">Số lượng người tham gia</label>
                                 <input
                                     type="number"
-                                    className="update-destination-form-control"
+                                    className="form-input"
                                     name="rating"
                                     value={destination.rating}
-                                    onChange={(e) => setDestination({ ...destination, rating: e.target.value })}
+                                    onChange={handleChange}
                                     min="0"
-                                    max="5"
-                                    step="0.1"
+                                    max="100"
                                     required
                                 />
                             </div>
                         </div>
-                        <div className="update-destination-form-group full-width">
-                            <label htmlFor="description" className="form-label">Description</label>
-                            <textarea
-                                id="description"
-                                className={`update-destination-form-input ${fieldErrors.description ? 'error' : ''}`}
-                                name="description"
-                                value={destination.description}
-                                onChange={handleChange}
-                                required
-                                style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                            />
-                            {fieldErrors.description && <div className="error-message">{fieldErrors.description}</div>}
-                        </div>
-                        <div className="update-destination-form-group">
-                            <div className="file-input-container">
-                                <label htmlFor="files" className="file-input-label">
-                                    Choose Images/Videos
-                                </label>
+                    </div>
+                    <div className="form-section">
+                        <div className="section-title">Thông tin chi tiết</div>
+                        <label className="form-label">Mô tả</label>
+                        <textarea
+                            className="description-form-input"
+                            name="description"
+                            value={destination.description}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-section-status">
+                        <div className="section-title">Cài đặt</div>
+                        <div className="form-row">
+                            <div>
+                                <label className="form-label">Trạng thái</label>
                                 <input
-                                    id="files"
-                                    type="file"
-                                    className="file-input"
-                                    onChange={handleFileChange}
-                                    multiple
-                                    accept="image/jpeg,image/jpg,image/png,video/mp4,video/quicktime"
+                                    type="text"
+                                    className="form-input-status"
+                                    name="status"
+                                    value={destination.status || 'Published'}
+                                    readOnly
                                 />
                             </div>
                         </div>
-                        {previewUrls.length > 0 && (
-                            <div className="preview-container-add">
-                                {previewUrls.map((url, index) => (
-                                    <div key={index} className="preview-item">
-                                        <button 
-                                            type="button"
-                                            className="delete-preview"
-                                            onClick={() => handleDeleteFile(index)}
-                                        >
-                                            ×
-                                        </button>
-                                        {files[index]?.type.startsWith('image/') || url.match(/\.(jpg|jpeg|png)$/i) ? (
-                                            <img src={url} alt={`Preview ${index + 1}`} />
-                                        ) : (
-                                            <video src={url} controls />
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
+                        {/* Thêm các mục điểm đến, sự kiện nếu có */}
+                    </div>
+                    <div className="form-section file-upload-section">
+                        <div className="section-title">Hình ảnh tour</div>
+                        <label htmlFor="files" className="upload-box">
+                            <span className="upload-icon">📷</span>
+                            <div className="upload-text">Click to upload tour image</div>
+                            <div className="upload-note">PNG, JPG up to 5MB</div>
+                            <input
+                                id="files"
+                                type="file"
+                                className="form-input"
+                                onChange={handleFileChange}
+                                multiple
+                                accept="image/jpeg,image/jpg,image/png"
+                                style={{ display: 'none' }}
+                            />
+                        </label>
+                        <div className="preview-list">
+                            {previewUrls.map((url, index) => (
+                                <div key={index} style={{ position: 'relative' }}>
+                                    <button type="button" className="delete-preview" onClick={() => handleDeleteFile(index)}>
+                                        ×
+                                    </button>
+                                    <img src={url} alt={`Preview ${index + 1}`} />
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ textAlign: 'right', marginTop: 8 }}>
+                            <span style={{ color: '#6366f1', cursor: 'pointer', fontSize: 14 }}>+ Add more</span>
+                        </div>
+                    </div>
+                    <button type="submit" className="submit-btn" disabled={isLoading}>
+                        {isLoading ? (
+                            <>
+                                Updating...
+                                <span className="loading-spinner"></span>
+                            </>
+                        ) : (
+                            'Update Tour'
                         )}
-                        <button
-                            type="submit"
-                            className="submit-button"
-                            disabled={isLoading}
-                            style={{ marginTop: 24 }}
-                        >
-                            {isLoading ? (
-                                <>
-                                    Updating...
-                                    <span className="loading-spinner"></span>
-                                </>
-                            ) : (
-                                'Update Destination'
-                            )}
-                        </button>
-                    </form>
-                </div>
+                    </button>
+                </form>
             </div>
         </div>
     );

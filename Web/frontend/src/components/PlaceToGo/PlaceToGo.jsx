@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./PlacesToGo.module.css";
 
 const regions = [
@@ -226,7 +226,62 @@ const regions = [
     },
   ];
 
+const DestinationDetail = ({ destination, onClose }) => {
+  if (!destination) return null;
+
+  return (
+    <div className={styles.detailOverlay} onClick={onClose}>
+      <div className={styles.detailContent} onClick={e => e.stopPropagation()}>
+        <button className={styles.closeButton} onClick={onClose}>×</button>
+        <img src={destination.image} alt={destination.name} className={styles.detailImageTop} />
+        <div className={styles.detailInfoBelow}>
+          <h2 className={styles.detailTitleBelow}>{destination.name}</h2>
+          <p className={styles.regionTag}>{destination.region}</p>
+          <p className={styles.detailDescription}>{destination.description}</p>
+          <div className={styles.detailGrid}>
+            <div className={styles.detailSection}>
+              <h3>Best Experiences</h3>
+              <ul>
+                {destination.experiences.map((exp, index) => (
+                  <li key={index}><span className={styles.experienceIcon}>✦</span>{exp}</li>
+                ))}
+              </ul>
+            </div>
+            <div className={styles.detailSection}>
+              <h3>Best Time to Visit</h3>
+              <ul>
+                {destination.seasons.map((season, index) => (
+                  <li key={index}><span className={styles.seasonIcon}>🌤</span>{season}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className={styles.additionalInfo}>
+            <h3>Why Visit {destination.name}?</h3>
+            <p>
+              {destination.name} offers a unique blend of {destination.experiences.join(', ')} experiences, 
+              making it an ideal destination for travelers seeking {destination.experiences[0]}. 
+              The best time to visit is during {destination.seasons.join(' and ')}, when the weather is 
+              perfect for exploring all that this amazing destination has to offer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function PlacesToGo() {
+  const [selectedDestination, setSelectedDestination] = useState(null);
+
+  const handleDestinationClick = (destination) => {
+    setSelectedDestination(destination);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedDestination(null);
+  };
+
   return (
     <main>
       {/* Hero Section */}
@@ -415,6 +470,14 @@ export default function PlacesToGo() {
           </div>
         </div>
       </section>
+
+      {/* Detail View */}
+      {selectedDestination && (
+        <DestinationDetail
+          destination={selectedDestination}
+          onClose={handleCloseDetail}
+        />
+      )}
     </main>
   );
 }

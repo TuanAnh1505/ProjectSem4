@@ -10,8 +10,10 @@ public class BookingDTO {
     private String bookingDate;
     private String statusName;
     private BigDecimal totalPrice;
+    private Integer scheduleId;
+    
 
-    public BookingDTO(Integer bookingId, String bookingCode, String userFullName, String tourName, String bookingDate, String statusName, BigDecimal totalPrice) {
+    public BookingDTO(Integer bookingId, String bookingCode, String userFullName, String tourName, String bookingDate, String statusName, BigDecimal totalPrice, Integer scheduleId) {
         this.bookingId = bookingId;
         this.bookingCode = bookingCode;
         this.userFullName = userFullName;
@@ -19,6 +21,7 @@ public class BookingDTO {
         this.bookingDate = bookingDate;
         this.statusName = statusName;
         this.totalPrice = totalPrice;
+        this.scheduleId = scheduleId;
     }
 
     // Getters và setters (có thể dùng Lombok @Data nếu muốn)
@@ -36,4 +39,6 @@ public class BookingDTO {
     public void setStatusName(String statusName) { this.statusName = statusName; }
     public BigDecimal getTotalPrice() { return totalPrice; }
     public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
+    public Integer getScheduleId() { return scheduleId; }
+    public void setScheduleId(Integer scheduleId) { this.scheduleId = scheduleId; }
 }

@@ -33,6 +33,8 @@ public class BookingService {
     private final TourScheduleRepository tourScheduleRepository;
     @Autowired
     private PaymentRepository paymentRepository;
+    @Autowired
+    private DiscountService discountService;
 
     public Booking createBooking(TourBookingRequest request) {
         try {
@@ -112,6 +114,11 @@ public class BookingService {
                             "Bạn đã sử dụng mã giảm giá này cho tour này: " + request.getDiscountCode());
                 }
 
+                // Kiểm tra số lượng mã giảm giá còn lại
+                if (!discountService.isDiscountAvailable(discount)) {
+                    throw new RuntimeException("Mã giảm giá đã hết số lượng: " + request.getDiscountCode());
+                }
+
                 BigDecimal discountAmount = price.multiply(BigDecimal.valueOf(discount.getDiscountPercent()))
                         .divide(BigDecimal.valueOf(100));
                 price = price.subtract(discountAmount);
@@ -145,6 +152,10 @@ public class BookingService {
                     if (discount != null) {
                         booking.setDiscountCode(discount.getCode());
                         booking.setDiscountId(discount.getDiscountId());
+                        // Cập nhật số lượng mã giảm giá đã dùng
+                        if (!discountService.checkAndUpdateDiscountQuantity(discount)) {
+                            throw new RuntimeException("Mã giảm giá đã hết số lượng!");
+                        }
                     }
                     String bookingCode;
                     do {
@@ -172,6 +183,10 @@ public class BookingService {
                 if (discount != null) {
                     booking.setDiscountCode(discount.getCode());
                     booking.setDiscountId(discount.getDiscountId());
+                    // Cập nhật số lượng mã giảm giá đã dùng
+                    if (!discountService.checkAndUpdateDiscountQuantity(discount)) {
+                        throw new RuntimeException("Mã giảm giá đã hết số lượng!");
+                    }
                 }
                 String bookingCode;
                 do {
@@ -206,7 +221,9 @@ public class BookingService {
                 b.getTour() != null ? b.getTour().getName() : null,
                 b.getBookingDate() != null ? b.getBookingDate().toString() : null,
                 b.getStatus() != null ? b.getStatus().getStatusName() : null,
-                b.getTotalPrice())).collect(Collectors.toList());
+                b.getTotalPrice(),
+                b.getScheduleId())).collect(Collectors.toList());
+                
     }
 
     public Map<String, Object> getBookingDetail(Integer bookingId) {
@@ -253,7 +270,8 @@ public class BookingService {
             tourDetails.put("tourId", booking.getTour().getTourId());
             tourDetails.put("name", booking.getTour().getName());
             tourDetails.put("price", booking.getTour().getPrice());
-            tourDetails.put("imageUrl", booking.getTour().getImageUrl());
+            List<String> imageUrls = booking.getTour().getImageUrls();
+            tourDetails.put("imageUrl", (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls.get(0) : null);
             tourDetails.put("description", booking.getTour().getDescription());
             bookingDetails.put("tour", tourDetails);
         }

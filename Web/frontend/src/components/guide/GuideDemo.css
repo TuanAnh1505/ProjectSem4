@@ -1,0 +1,57 @@
+.guide-demo {
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.demo-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+    margin-bottom: 0;
+}
+
+.demo-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.demo-header p {
+    margin: 0 0 20px 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.demo-toggle-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.demo-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .demo-header h1 {
+        font-size: 2rem;
+    }
+    
+    .demo-header p {
+        font-size: 1rem;
+    }
+    
+    .demo-toggle-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+} 

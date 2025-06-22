@@ -29,7 +29,7 @@ public interface TourGuideRepository extends JpaRepository<TourGuide, Long> {
 
     List<TourGuide> findByIsAvailable(Boolean isAvailable);
 
-    @Query("SELECT tg FROM TourGuide tg JOIN tg.user u JOIN u.roles r WHERE r.roleName = 'ROLE_TOUR_GUIDE'")
+    @Query("SELECT tg FROM TourGuide tg JOIN tg.user u JOIN u.roles r WHERE r.roleName = 'GUIDE'")
     List<TourGuide> findAllTourGuidesWithRole();
 }
 

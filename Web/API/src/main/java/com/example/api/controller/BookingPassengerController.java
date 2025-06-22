@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.example.api.dto.BookingPassengerDTO;
 import com.example.api.dto.BookingPassengerRequestDTO;
+import com.example.api.dto.PassengerDetailDTO;
 import com.example.api.service.BookingPassengerService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import lombok.Data;
 
 @RestController
 @RequestMapping("/api/booking-passengers")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequiredArgsConstructor
 public class BookingPassengerController {
 
@@ -57,6 +60,13 @@ public class BookingPassengerController {
                     .badRequest()
                     .body(new ErrorResponse("Failed to create passengers: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/schedule/{scheduleId}")
+    @PreAuthorize("hasRole('GUIDE') or hasRole('ADMIN')")
+    public ResponseEntity<List<BookingPassengerDTO>> getPassengersBySchedule(@PathVariable Integer scheduleId) {
+        List<BookingPassengerDTO> passengers = bookingPassengerService.getPassengersByScheduleId(scheduleId);
+        return ResponseEntity.ok(passengers);
     }
 }
 

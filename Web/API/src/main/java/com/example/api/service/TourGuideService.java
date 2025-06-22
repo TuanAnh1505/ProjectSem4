@@ -7,6 +7,7 @@ import com.example.api.repository.TourGuideRepository;
 import com.example.api.repository.UserRepository;
 import com.example.api.repository.RoleRepository;
 import com.example.api.model.Role;
+import com.example.api.repository.UserRoleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,7 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +32,9 @@ public class TourGuideService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
     public TourGuideDTO createTourGuide(TourGuideDTO tourGuideDTO) {
         // Check if current user has ADMIN role
@@ -63,10 +69,12 @@ public class TourGuideService {
         TourGuide savedTourGuide = tourGuideRepository.save(tourGuide);
 
         // Gán role hướng dẫn viên nếu chưa có
-        Role guideRole = roleRepository.findByRoleName("ROLE_TOUR_GUIDE");
-        if (guideRole != null && !user.getRoles().contains(guideRole)) {
+        Role guideRole = roleRepository.findByRoleName("GUIDE");
+        if (guideRole != null && user.getRoles().stream().noneMatch(r -> r.getRoleName().equalsIgnoreCase("GUIDE"))) {
             user.getRoles().add(guideRole);
             userRepository.save(user);
+            // Bổ sung: luôn lưu vào userroles
+            userRoleRepository.save(new com.example.api.model.UserRole(user.getUserid(), guideRole.getRoleid()));
         }
 
         return convertToDTO(savedTourGuide);
@@ -79,10 +87,34 @@ public class TourGuideService {
     }
 
     public List<TourGuideDTO> getAllTourGuides() {
-        // Chỉ lấy các hướng dẫn viên có role là ROLE_TOUR_GUIDE
-        return tourGuideRepository.findAllTourGuidesWithRole().stream()
-                .map(this::convertToDTO)
+        // Lấy tất cả user có role là GUIDE
+        List<User> guideUsers = userRepository.findAll().stream()
+                .filter(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getRoleName().equalsIgnoreCase("GUIDE")))
                 .collect(Collectors.toList());
+
+        // Chuyển đổi sang DTO
+        return guideUsers.stream().map(user -> {
+            Optional<TourGuide> tourGuideOpt = tourGuideRepository.findByUserId(user.getUserid());
+            if (tourGuideOpt.isPresent()) {
+                // Nếu có hồ sơ guide, dùng convertToDTO hiện có
+                return convertToDTO(tourGuideOpt.get());
+            } else {
+                // Nếu chưa có hồ sơ, tạo DTO từ thông tin User
+                TourGuideDTO dto = new TourGuideDTO();
+                dto.setUserId(user.getUserid());
+                dto.setUserFullName(user.getFullName());
+                dto.setUserEmail(user.getEmail());
+                dto.setIsAvailable(user.getIsActive()); // Dùng trạng thái active của user
+                dto.setIsActive(user.getIsActive());
+                
+                // Đánh dấu là chưa có hồ sơ guide
+                dto.setGuideId(0L); // Dùng 0L để đánh dấu chưa có guideId
+                dto.setSpecialization("Chưa có hồ sơ");
+
+                return dto;
+            }
+        }).collect(Collectors.toList());
     }
 
     public TourGuideDTO updateTourGuide(Long id, TourGuideDTO tourGuideDTO) {
@@ -183,6 +215,30 @@ public class TourGuideService {
                 .collect(Collectors.toList());
     }
 
+    public TourGuideDTO createTourGuideForUser(Long userId, Integer experienceYears, String specialization, String languages) {
+        TourGuide guide = new TourGuide();
+        guide.setUserId(userId);
+        guide.setExperienceYears(experienceYears);
+        guide.setSpecialization(specialization);
+        guide.setLanguages(languages);
+        guide.setIsAvailable(true);
+        guide.setRating(0.0);
+        guide.setCreatedAt(LocalDateTime.now());
+        guide = tourGuideRepository.save(guide);
+        return convertToDTO(guide);
+    }
+
+    public TourGuideDTO getCurrentGuideDetails() {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new EntityNotFoundException("User not found for email: " + currentUserEmail));
+
+        TourGuide tourGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
+                .orElseThrow(() -> new EntityNotFoundException("Tour guide profile not found for user ID: " + currentUser.getUserid()));
+
+        return convertToDTO(tourGuide);
+    }
+
     private TourGuideDTO convertToDTO(TourGuide tourGuide) {
         TourGuideDTO dto = new TourGuideDTO();
         dto.setGuideId(tourGuide.getGuideId());
@@ -191,11 +247,12 @@ public class TourGuideService {
         dto.setSpecialization(tourGuide.getSpecialization());
         dto.setLanguages(tourGuide.getLanguages());
         dto.setRating(tourGuide.getRating());
-        dto.setIsAvailable(tourGuide.getIsAvailable());
+        dto.setIsAvailable(tourGuide.getIsAvailable() != null ? tourGuide.getIsAvailable() : true);
         dto.setCreatedAt(tourGuide.getCreatedAt());
         if (tourGuide.getUser() != null) {
             dto.setUserFullName(tourGuide.getUser().getFullName());
             dto.setUserEmail(tourGuide.getUser().getEmail());
+            dto.setIsActive(tourGuide.getUser().getIsActive());
         }
         return dto;
     }

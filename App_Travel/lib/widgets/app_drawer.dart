@@ -16,22 +16,58 @@ class AppDrawer extends StatelessWidget {
 
           final prefs = snapshot.data!;
           final token = prefs.getString('auth_token');
-          final userName = prefs.getString('user_name') ?? '';
+          final email = prefs.getString('email') ?? '';
           final userRole = prefs.getString('user_role') ?? '';
 
           return ListView(
             padding: EdgeInsets.zero,
             children: [
               if (token != null)
-                UserAccountsDrawerHeader(
-                  accountName: Text(userName),
-                  accountEmail: Text(userRole),
-                  currentAccountPicture: const CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 40),
-                  ),
-                  decoration: const BoxDecoration(
-                    color: Colors.orange,
+                Container(
+                  color: Colors.orange,
+                  padding: const EdgeInsets.only(top: 80, bottom: 50, left: 16, right: 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const CircleAvatar(
+                        radius: 32,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              email.isNotEmpty ? email : 'User',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Vai trò: ${userRole.isNotEmpty ? userRole : "USER"}',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 )
               else
@@ -88,7 +124,14 @@ class AppDrawer extends StatelessWidget {
                 title: const Text('Trang chủ'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context, '/home');
+                  Navigator.pushReplacementNamed(
+                    context,
+                    '/home',
+                    arguments: {
+                      'userRole': userRole,
+                      'fullName': email,
+                    },
+                  );
                 },
               ),
               ListTile(
@@ -113,7 +156,7 @@ class AppDrawer extends StatelessWidget {
                   title: const Text('Cài đặt'),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, '/settings');
+                    Navigator.pushReplacementNamed(context, '/setting-screen');
                   },
                 ),
                 ListTile(

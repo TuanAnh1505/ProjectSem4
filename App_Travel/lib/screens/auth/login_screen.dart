@@ -55,16 +55,26 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
         await prefs.setString('public_id', publicId);
+        await prefs.setString('user_role', role);
+        await prefs.setString('email', _emailController.text);
         
         // Verify saved data
         final savedToken = prefs.getString('auth_token');
         final savedPublicId = prefs.getString('public_id');
+        final savedRole = prefs.getString('user_role');
+        final savedEmail = prefs.getString('email');
         print('Saved token: $savedToken');
         print('Saved publicId: $savedPublicId');
+        print('Saved role: $savedRole');
+        print('Saved email: $savedEmail');
         
         Navigator.pushReplacementNamed(
           context,
           '/home',
+          arguments: {
+            'userRole': role,
+            'email': _emailController.text,
+          },
         );
       } catch (e) {
         if (!mounted) return;
