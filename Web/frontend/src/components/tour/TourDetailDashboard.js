@@ -160,6 +160,7 @@ export default function TourDetailDashboard() {
   const handleBooking = async () => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
+
     if (!token) {
       toast.info(
         <div>
@@ -175,10 +176,12 @@ export default function TourDetailDashboard() {
       );
       return;
     }
+
     if (!userId) {
       toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
       return;
     }
+
     if (!selectedScheduleId) {
       toast.error("Vui lòng chọn một lịch trình trước khi đặt tour.");
       return;
@@ -194,7 +197,21 @@ export default function TourDetailDashboard() {
         await fetchItineraries();
         const finalPrice = res.data.finalPrice;
         const selectedSchedule = itineraries.find(sch => sch.scheduleId === selectedScheduleId);
-        navigate("/booking-passenger", { state: { bookingId: res.data.bookingId, bookingCode: res.data.bookingCode, tourInfo: tour, selectedDate: selectedSchedule?.startDate, itineraries: selectedSchedule?.itineraries || [], finalPrice } });
+        navigate("/booking-passenger", { 
+          state: { 
+            bookingId: res.data.bookingId, 
+            bookingCode: res.data.bookingCode, 
+            tourInfo: tour, 
+            selectedDate: selectedSchedule?.startDate, 
+            itineraries: selectedSchedule?.itineraries || [], 
+            finalPrice,
+            passengerCounts: {
+              adult: 1,
+              child: 0,
+              infant: 0
+            }
+          } 
+        });
       } else {
         toast.error("Invalid response from server");
         return;

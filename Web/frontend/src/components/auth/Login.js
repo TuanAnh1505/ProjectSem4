@@ -13,7 +13,6 @@ const Login = () => {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -33,6 +32,13 @@ const Login = () => {
         email,
         password
       });
+      setSuccess("Đăng nhập thành công!");
+      const { token, role, userId, publicId } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("email", email);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem("publicId", publicId);
+      localStorage.setItem("role", role);
 
       const { token, role, user } = response.data;
       
@@ -46,17 +52,14 @@ const Login = () => {
         // navigate('/guide');
         navigate('/');
       } else {
-        // Admin và user thường đều có thể truy cập trang chính
-        navigate('/');
+        navigate("/");
       }
 
       toast.success('Đăng nhập thành công!');
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
-      toast.error('Đăng nhập thất bại!');
-    } finally {
-      setLoading(false);
+      const errorMsg = err.response?.data?.message || "Có lỗi xảy ra!";
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -131,7 +134,7 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" className="login-btn" disabled={loading}>
+            <button type="submit" className="login-btn">
               Đăng nhập
             </button>
           </form>
