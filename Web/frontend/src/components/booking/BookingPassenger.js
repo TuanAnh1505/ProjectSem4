@@ -390,148 +390,371 @@ const BookingPassenger = () => {
     }
   };
 
-  if (!bookedTour) return <div className="loading">Đang tải thông tin tour...</div>;
+  if (!bookedTour) {
+    return <div style={{ padding: 32, textAlign: 'center', fontSize: 20 }}>Đang tải dữ liệu tour...</div>;
+  }
 
   return (
     <div className="booking-layout">
-      {/* LEFT: Thông tin liên hệ & hành khách */}
       <div className="booking-left">
-        <h2>Thông tin liên hệ</h2>
-        <div className="use-logged-in-toggle">
-          <label htmlFor="toggle-user-info">Dùng thông tin tài khoản</label>
-          <div className="toggle-switch">
-            <input id="toggle-user-info" type="checkbox" checked={useLoggedInInfo} onChange={handleToggleUserInfo} />
-            <span className="toggle-slider"></span>
-          </div>
-        </div>
+        <h2>THÔNG TIN LIÊN LẠC</h2>
         <div className="contact-info">
+          <div className="use-logged-in-toggle">
+            <label className="toggle-switch">
+              <input type="checkbox" checked={useLoggedInInfo} onChange={handleToggleUserInfo} />
+              <span className="toggle-slider"></span>
+            </label>
+            <span>Sử dụng thông tin tài khoản đang đăng nhập</span>
+          </div>
+
           <div className="form-row">
-            <div className="form-group form-group-booking-passenger">
+            <div className="form-group-booking-passenger">
               <label>Họ tên <span className="asterisk">*</span></label>
-              <input name="fullName" value={contactInfo.fullName} onChange={handleContactChange} placeholder="Họ và tên" required />
+              <input type="text" name="fullName" value={contactInfo.fullName} onChange={handleContactChange} placeholder="Liên hệ" />
             </div>
-            <div className="form-group form-group-booking-passenger">
-              <label>Số điện thoại <span className="asterisk">*</span></label>
-              <input name="phoneNumber" value={contactInfo.phoneNumber} onChange={handleContactChange} placeholder="Số điện thoại" required />
+            <div className="form-group-booking-passenger">
+              <label>Điện thoại <span className="asterisk">*</span></label>
+              <input type="tel" name="phoneNumber" value={contactInfo.phoneNumber} onChange={handleContactChange} placeholder="Nhập số điện thoại" />
             </div>
           </div>
           <div className="form-row">
-            <div className="form-group form-group-booking-passenger">
+            <div className="form-group-booking-passenger">
               <label>Email <span className="asterisk">*</span></label>
-              <input name="email" value={contactInfo.email} onChange={handleContactChange} placeholder="Email" required />
+              <input type="email" name="email" value={contactInfo.email} onChange={handleContactChange} placeholder="Nhập email" />
             </div>
-            <div className="form-group form-group-booking-passenger">
+            <div className="form-group-booking-passenger">
               <label>Địa chỉ</label>
-              <input name="address" value={contactInfo.address} onChange={handleContactChange} placeholder="Địa chỉ" />
+              <input type="text" name="address" value={contactInfo.address} onChange={handleContactChange} placeholder="Nhập địa chỉ" />
             </div>
           </div>
           <div className="form-row">
-            <div className="form-group form-group-booking-passenger">
-              <label>Giới tính</label>
+            <div className="form-group-booking-passenger">
+              <label>Giới tính: <span className="asterisk">*</span></label>
               <select name="gender" value={contactInfo.gender} onChange={handleContactChange}>
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
-                <option value="Khác">Khác</option>
               </select>
             </div>
-            <div className="form-group form-group-booking-passenger">
-              <label>Ngày sinh <span className="asterisk">*</span></label>
-              <input name="birthDate" type="date" value={contactInfo.birthDate} onChange={handleContactChange} required />
+            <div className="form-group-booking-passenger">
+              <label>Ngày sinh: <span className="asterisk">*</span></label>
+              <input type="date" name="birthDate" value={contactInfo.birthDate} onChange={handleContactChange} />
             </div>
           </div>
         </div>
 
-        {/* Bộ đếm hành khách */}
+        <h2>HÀNH KHÁCH</h2>
         <div className="passenger-counters-group">
           <div className="passenger-counters-row">
-            {['adult', 'child', 'infant'].map(type => (
-              <div key={type} className={`passenger-counter passenger-counter-${type}${type === 'infant' && passengerCounts.adult === 0 ? ' disabled' : ''}`}> 
-                <div className="passenger-label">
-                  {type === 'adult' ? 'Người lớn' : type === 'child' ? 'Trẻ em' : 'Em bé'}
-                  <small>
-                    {type === 'adult' ? '>= 12 tuổi' : type === 'child' ? '2-11 tuổi' : '< 2 tuổi'}
-                  </small>
-                </div>
-                <div className="counter-controls">
-                  <button type="button" onClick={() => handlePassengerCountChange(type, 'sub')} disabled={type === 'adult' ? passengerCounts[type] <= 1 : passengerCounts[type] <= 0}>-</button>
-                  <span>{passengerCounts[type]}</span>
-                  <button type="button" onClick={() => handlePassengerCountChange(type, 'add')}>+</button>
+            <div className="passenger-counter passenger-counter-adult">
+              <div className="passenger-label">
+                Người lớn <small>(Từ 12 trở lên) <span className="info-icon" title="Từ 12 tuổi trở lên">&#9432;</span></small>
+              </div>
+              <div className="counter-controls">
+                <button onClick={() => handlePassengerCountChange('adult', 'subtract')}>-</button>
+                <span>{passengerCounts.adult}</span>
+                <button onClick={() => handlePassengerCountChange('adult', 'add')}>+</button>
+              </div>
+            </div>
+            <div className="passenger-counter passenger-counter-child">
+              <div className="passenger-label">
+                Trẻ em <small>(Từ 2 - 11 tuổi) <span className="info-icon" title="Từ 2 đến 11 tuổi">&#9432;</span></small>
+              </div>
+              <div className="counter-controls">
+                <button onClick={() => handlePassengerCountChange('child', 'subtract')}>-</button>
+                <span>{passengerCounts.child}</span>
+                <button onClick={() => handlePassengerCountChange('child', 'add')}>+</button>
+              </div>
+            </div>
+          </div>
+          <div className="passenger-counter passenger-counter-infant">
+            <div className="passenger-label">
+              Em bé <small>(Dưới 2 tuổi) <span className="info-icon" title="Dưới 2 tuổi">&#9432;</span></small>
+            </div>
+            <div className="counter-controls">
+              <button onClick={() => handlePassengerCountChange('infant', 'subtract')}>-</button>
+              <span>{passengerCounts.infant}</span>
+              <button onClick={() => handlePassengerCountChange('infant', 'add')}>+</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Form nhập thông tin hành khách phụ */}
+        {passengerCounts.adult > 1 && (
+          <div className="passenger-type-section">
+            <h3 className="passenger-type-title">
+              <Users size={20} />
+              Người lớn
+              <small className="passenger-type-desc">(Từ 12 trở lên)</small>
+            </h3>
+            {additionalPassengers.adult.map((passenger, index) => (
+              <div className="passenger-form" key={`adult-${index + 2}`}>
+                <div className="passenger-form-row">
+                  <div className="passenger-form-group" style={{ flex: 2 }}>
+                    <label className="passenger-form-label">Người lớn {index + 2} - Họ tên <span className="asterisk">*</span></label>
+                    <input
+                      className="passenger-form-input"
+                      type="text"
+                      value={passenger.fullName}
+                      onChange={(e) => handleAdditionalPassengerChange('adult', index, 'fullName', e.target.value)}
+                      placeholder="Nhập họ tên"
+                    />
+                  </div>
+                  <div className="passenger-form-group" style={{ flex: 1 }}>
+                    <label className="passenger-form-label">Giới tính: <span className="asterisk">*</span></label>
+                    <select
+                      className="passenger-form-select"
+                      value={passenger.gender}
+                      onChange={(e) => handleAdditionalPassengerChange('adult', index, 'gender', e.target.value)}
+                    >
+                      <option value="Nam">Nam</option>
+                      <option value="Nữ">Nữ</option>
+                    </select>
+                  </div>
+                  <div className="passenger-form-group" style={{ flex: 1 }}>
+                    <label className="passenger-form-label">Ngày sinh: <span className="asterisk">*</span></label>
+                    <input
+                      className="passenger-form-input"
+                      type="date"
+                      value={passenger.birthDate}
+                      onChange={(e) => handleAdditionalPassengerChange('adult', index, 'birthDate', e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        )}
 
-        {/* Thông tin từng hành khách phụ */}
-        {['adult', 'child', 'infant'].map(type => (
-          additionalPassengers[type].length > 0 && (
-            <div key={type} className="passenger-type-section">
-              <div className="passenger-type-title">
-                {type === 'adult' ? 'Người lớn' : type === 'child' ? 'Trẻ em' : 'Em bé'} bổ sung
-                <span className="passenger-type-desc">(Vui lòng nhập đủ thông tin)</span>
-              </div>
-              {additionalPassengers[type].map((p, idx) => (
-                <div key={idx} className="passenger-form passenger-form-row">
-                  <div className="passenger-form-group">
-                    <label className="passenger-form-label">Họ tên <span className="asterisk">*</span></label>
-                    <input className="passenger-form-input" value={p.fullName} onChange={e => handleAdditionalPassengerChange(type, idx, 'fullName', e.target.value)} placeholder="Họ và tên" required />
+        {passengerCounts.child > 0 && (
+          <div className="passenger-type-section">
+            <h3 className="passenger-type-title">
+              <User size={20} />
+              Trẻ em
+              <small className="passenger-type-desc">(Từ 2 - 11 tuổi)</small>
+            </h3>
+            {additionalPassengers.child.map((passenger, index) => (
+              <div className="passenger-form" key={`child-${index}`}>
+                <div className="passenger-form-row">
+                  <div className="passenger-form-group" style={{ flex: 2 }}>
+                    <label className="passenger-form-label">Trẻ em {index + 1} - Họ tên <span className="asterisk">*</span></label>
+                    <input
+                      className="passenger-form-input"
+                      type="text"
+                      value={passenger.fullName}
+                      onChange={(e) => handleAdditionalPassengerChange('child', index, 'fullName', e.target.value)}
+                      placeholder="Nhập họ tên"
+                    />
                   </div>
-                  <div className="passenger-form-group">
-                    <label className="passenger-form-label">Giới tính</label>
-                    <select className="passenger-form-select" value={p.gender} onChange={e => handleAdditionalPassengerChange(type, idx, 'gender', e.target.value)}>
+                  <div className="passenger-form-group" style={{ flex: 1 }}>
+                    <label className="passenger-form-label">Giới tính: <span className="asterisk">*</span></label>
+                    <select
+                      className="passenger-form-select"
+                      value={passenger.gender}
+                      onChange={(e) => handleAdditionalPassengerChange('child', index, 'gender', e.target.value)}
+                    >
                       <option value="Nam">Nam</option>
                       <option value="Nữ">Nữ</option>
-                      <option value="Khác">Khác</option>
                     </select>
                   </div>
-                  <div className="passenger-form-group">
-                    <label className="passenger-form-label">Ngày sinh <span className="asterisk">*</span></label>
-                    <input className="passenger-form-input" type="date" value={p.birthDate} onChange={e => handleAdditionalPassengerChange(type, idx, 'birthDate', e.target.value)} required />
+                  <div className="passenger-form-group" style={{ flex: 1 }}>
+                    <label className="passenger-form-label">Ngày sinh: <span className="asterisk">*</span></label>
+                    <input
+                      className="passenger-form-input"
+                      type="date"
+                      value={passenger.birthDate}
+                      onChange={(e) => handleAdditionalPassengerChange('child', index, 'birthDate', e.target.value)}
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-          )
-        ))}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {passengerCounts.infant > 0 && (
+          <div className="passenger-type-section">
+            <h3 className="passenger-type-title">
+              <Smile size={20} />
+              Em bé
+              <small className="passenger-type-desc">(Dưới 2 tuổi)</small>
+            </h3>
+            {additionalPassengers.infant.map((passenger, index) => (
+              <div className="passenger-form" key={`infant-${index}`}>
+                <div className="passenger-form-row">
+                  <div className="passenger-form-group" style={{ flex: 2 }}>
+                    <label className="passenger-form-label">Em bé {index + 1} - Họ tên <span className="asterisk">*</span></label>
+                    <input
+                      className="passenger-form-input"
+                      type="text"
+                      value={passenger.fullName}
+                      onChange={(e) => handleAdditionalPassengerChange('infant', index, 'fullName', e.target.value)}
+                      placeholder="Nhập họ tên"
+                    />
+                  </div>
+                  <div className="passenger-form-group" style={{ flex: 1 }}>
+                    <label className="passenger-form-label">Giới tính: <span className="asterisk">*</span></label>
+                    <select
+                      className="passenger-form-select"
+                      value={passenger.gender}
+                      onChange={(e) => handleAdditionalPassengerChange('infant', index, 'gender', e.target.value)}
+                    >
+                      <option value="Nam">Nam</option>
+                      <option value="Nữ">Nữ</option>
+                    </select>
+                  </div>
+                  <div className="passenger-form-group" style={{ flex: 1 }}>
+                    <label className="passenger-form-label">Ngày sinh: <span className="asterisk">*</span></label>
+                    <input
+                      className="passenger-form-input"
+                      type="date"
+                      value={passenger.birthDate}
+                      onChange={(e) => handleAdditionalPassengerChange('infant', index, 'birthDate', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* RIGHT: Thông tin tour đã đặt & tổng giá */}
       <div className="booking-right">
-        <div className="booked-tour-summary">
-          <div className="tour-summary">
-            <div className="tour-image-booking-passenger">
-              <img src={bookedTour.imageUrl ? `http://localhost:8080${bookedTour.imageUrl}` : '/no-image.png'} alt="tour" />
+        {bookedTour && (
+          <div className="booked-tour-summary">
+            <h2>THÔNG TIN TOUR ĐÃ ĐẶT</h2>
+            <div className="tour-summary">
+              <div className="tour-image-booking-passenger">
+                <img src={`http://localhost:8080${bookedTour.imageUrl}`} alt={bookedTour.name} />
+              </div>
+              <div className="tour-details">
+                <h3>{bookedTour.name}</h3>
+                <p>Ngày khởi hành: {new Date(selectedDate).toLocaleDateString('vi-VN')}</p>
+                <p>Giá: {location.state.finalPrice.toLocaleString()}đ</p>
+                <p>Mã đặt tour: {bookingCode}</p>
+              </div>
             </div>
-            <div className="tour-details">
-              <h3>{bookedTour.name}</h3>
-              <p><b>Ngày khởi hành:</b> {selectedDate}</p>
-              <p><b>Mã booking:</b> {bookingCode}</p>
-              <p><b>Thời gian:</b> {bookedTour.duration} ngày</p>
-              <p><b>Điểm đến:</b> {bookedTour.destinationName || '-'}</p>
+            <div>
+              {/* Hiển thị danh sách lịch trình đã chọn nếu có */}
+              {itineraries && itineraries.length > 0 && (
+                <div className="itinerary-summary" style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  background: '#f8f9fa',
+                  borderRadius: 8,
+                  height: 220,
+                  overflowY: 'auto',
+                  boxSizing: 'border-box',
+                  transition: 'height 0.2s',
+                  minHeight: 120,
+                  maxHeight: 300
+                }}>
+                  <h4 style={{fontWeight: 'bold'}}>Lịch trình đã chọn</h4>
+                  {itineraries.map((itinerary, idx) => (
+                    <div key={itinerary.itineraryId} style={{marginBottom: 12}}>
+                      <div><b>{itinerary.title || `Lịch trình ${idx + 1}`}</b></div>
+                      {(itinerary.startDate || itinerary.endDate) && (
+                        <div>
+                          {itinerary.startDate && (
+                            <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
+                          )}
+                          {itinerary.startDate && itinerary.endDate && ' - '}
+                          {itinerary.endDate && (
+                            <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
+                          )}
+                        </div>
+                      )}
+                      {itinerary.startTime && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Giờ bắt đầu:</b> {formatTime(itinerary.startTime)}</div>
+                        </div>
+                      )}
+                      {itinerary.endTime && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Giờ kết thúc:</b> {formatTime(itinerary.endTime)}</div>
+                        </div>
+                      )}
+                      {itinerary.description && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Mô tả:</b> {itinerary.description}</div>
+                        </div>
+                      )}
+                      {itinerary.type && (
+                        <div style={{marginTop: 8}}>
+                          <div><b>Loại:</b> {itinerary.type}</div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="price-breakdown">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 'bold', fontSize: 15 }}>
+                    <span role="img" aria-label="user">👥</span> KHÁCH HÀNG + PHỤ THU
+                  </span>
+                  <span style={{ color: 'red', fontWeight: 'bold', fontSize: 24, marginLeft: 70 }}>
+                    {totalPrice.toLocaleString()} đ
+                  </span>
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  {passengerCounts.adult > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Người lớn</span>
+                      <span>{passengerCounts.adult} x {location.state.finalPrice.toLocaleString()} đ</span>
+                    </div>
+                  )}
+                  {passengerCounts.child > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Trẻ em</span>
+                      <span>{passengerCounts.child} x {(location.state.finalPrice * 0.5).toLocaleString()} đ</span>
+                    </div>
+                  )}
+                  {passengerCounts.infant > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Em bé</span>
+                      <span>{passengerCounts.infant} x {(location.state.finalPrice * 0.25).toLocaleString()} đ</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div style={{ margin: '16px 0' }}>
+                <label style={{ fontWeight: 600 }}>Mã giảm giá (nếu có):</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="VD: NEWUSER10"
+                    value={discountCode}
+                    onChange={e => setDiscountCode(e.target.value)}
+                    style={{ flex: 1, padding: 8, borderRadius: 6, border: '1px solid #1976d2' }}
+                  />
+                  <button onClick={handleApplyDiscount} style={{ padding: '8px 16px', borderRadius: 6, background: '#1976d2', color: '#fff', border: 'none' }}>Áp dụng</button>
+                </div>
+                {discountError && <div style={{ color: 'red', marginTop: 4 }}>{discountError}</div>}
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                {discountInfo ? (
+                  <>
+                    <span style={{ textDecoration: 'line-through', color: '#888', marginRight: 8 }}>
+                      {bookedTour.price.toLocaleString()} đ
+                    </span>
+                    <span style={{ color: '#388e3c', fontWeight: 700, fontSize: 20 }}>
+                      {discountedPrice.toLocaleString()} đ
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ color: '#388e3c', fontWeight: 700, fontSize: 20 }}>
+                    {bookedTour.price.toLocaleString()} đ
+                  </span>
+                )}
+              </div>
+              <div className="submit-section">
+                <button className="submit-button" onClick={handleSubmitPassengers} disabled={isSubmitting}>
+                  {isSubmitting ? 'Đang xử lý...' : 'Đặt ngay'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="price-summary" style={{marginTop: 32, marginBottom: 24, background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px #e3e8f0', padding: 20}}>
-          <div style={{fontSize: 18, fontWeight: 700, marginBottom: 8}}>Tổng giá</div>
-          <div style={{fontSize: 28, fontWeight: 800, color: '#ff5722', marginBottom: 8}}>
-            {discountedPrice?.toLocaleString()}đ
-          </div>
-          {discountInfo && (
-            <div style={{color: '#388e3c', fontWeight: 600, marginBottom: 8}}>
-              Đã áp dụng mã giảm giá: {discountInfo.code} (-{discountInfo.discountPercent}%)
-            </div>
-          )}
-          <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
-            <input type="text" value={discountCode} onChange={e => setDiscountCode(e.target.value)} placeholder="Nhập mã giảm giá" style={{padding: '6px 12px', borderRadius: 6, border: '1px solid #bbb', fontSize: 15}} />
-            <button type="button" onClick={handleApplyDiscount} style={{padding: '6px 18px', borderRadius: 6, background: '#1976d2', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer'}}>Áp dụng</button>
-          </div>
-          {discountError && <div style={{color: '#e53935', marginTop: 6}}>{discountError}</div>}
-        </div>
-        <div className="submit-section">
-          <button className="submit-button" onClick={handleSubmitPassengers} disabled={isSubmitting}>
-            {isSubmitting ? 'Đang gửi...' : 'Xác nhận & Tiếp tục'}
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

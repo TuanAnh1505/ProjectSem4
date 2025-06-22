@@ -3,88 +3,80 @@
 /* Layout tổng */
 .booking-layout {
     display: flex;
-    flex-wrap: wrap; /* Sửa từ nowrap thành wrap để tránh đè lên nhau */
-    gap: 24px; /* Tăng gap cho thoáng hơn */
-    padding: 88px 16px 24px 16px; /* Giảm padding ngang cho vừa màn hình nhỏ */
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding: 24px 32px;
     width: 100%;
     max-width: 1400px;
-    background: linear-gradient(135deg, #f5fafd 0%, #e3f0ff 100%);
-    transition: background 0.5s;
+    background-color: #f5f5f5;
     align-items: stretch;
     justify-content: center;
     margin: 0 auto;
-    box-sizing: border-box;
-}
+  }
   
-.booking-left {
-    flex: 2 1 400px;
+  /* Bố cục trái và phải */
+  .booking-left {
+    flex: 2 1 65%;
     max-width: 740px;
-    min-width: 280px; /* Giảm min-width để không bị tràn */
+    min-width: 320px;
     background: #fff;
     padding: 28px;
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     margin-right: 0;
-    transition: box-shadow 0.3s, transform 0.3s;
-    box-sizing: border-box;
-}
+  }
   
-.booking-right {
-    flex: 1 1 320px;
+  .booking-right {
+    flex: 1 1 35%;
     max-width: 520px;
-    min-width: 260px; /* Giảm min-width để không bị tràn */
+    min-width: 480px;
+    /* background: #fff; */
     padding: 28px;
     border-radius: 16px;
+    /* box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); */
     height: 100%;
     display: flex;
     flex-direction: column;
-    transition: box-shadow 0.3s, transform 0.3s;
-    box-sizing: border-box;
-}
+  }
   
-.booking-left:hover, .booking-right:hover {
-    box-shadow: 0 8px 32px rgba(25, 118, 210, 0.12), 0 1.5px 8px #b3c6e0;
-    transform: translateY(-2px) scale(1.01);
-}
-  
-/* TIÊU ĐỀ CHÍNH */
-.booking-left h2 {
+  /* TIÊU ĐỀ CHÍNH */
+  .booking-left h2 {
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 20px;
     color: #1a1a1a;
     text-transform: uppercase;
-}
+  }
   
-/* Toggle sử dụng thông tin người dùng */
-.use-logged-in-toggle {
+  /* Toggle sử dụng thông tin người dùng */
+  .use-logged-in-toggle {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 24px;
-}
+  }
   
-.toggle-switch {
+  .toggle-switch {
     position: relative;
     width: 48px;
     height: 24px;
-}
+  }
   
-.toggle-switch input {
+  .toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
-}
+  }
   
-.toggle-slider {
+  .toggle-slider {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background-color: #ccc;
     border-radius: 24px;
     transition: 0.4s;
-}
+  }
   
-.toggle-slider::before {
+  .toggle-slider::before {
     position: absolute;
     content: "";
     height: 18px;
@@ -94,58 +86,41 @@
     background-color: white;
     border-radius: 50%;
     transition: 0.4s;
-}
+  }
   
-.toggle-switch input:checked + .toggle-slider {
+  .toggle-switch input:checked + .toggle-slider {
     background-color: #28a745;
-}
+  }
   
-.toggle-switch input:checked + .toggle-slider::before {
+  .toggle-switch input:checked + .toggle-slider::before {
     transform: translateX(24px);
-}
+  }
   
-/* Form liên hệ */
-.contact-info {
+  /* Form liên hệ */
+  .contact-info {
     display: flex;
     flex-direction: column;
     gap: 24px;
-}
+  }
   
-.form-row {
-    display: flex;
-    flex-wrap: wrap;
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0;
-    width: 100%;
-}
+  }
   
-.form-row > .form-group {
-    flex: 1 1 180px;
-    min-width: 160px;
-    max-width: 100%;
-    padding: 0 16px 0 0;
+  .form-row > .form-group {
+    padding: 0 24px 0 0;
     border-right: 1px solid #eee;
-    box-sizing: border-box;
-}
+  }
   
-.form-row > .form-group:last-child {
+  .form-row > .form-group-booking-passenger:last-child {
     border-right: none;
     padding-right: 0;
-    padding-left: 16px;
-}
+    padding-left: 24px;
+  }
   
-/* Đảm bảo các dòng cuối không bị padding-left nếu chỉ có 1 trường */
-.form-row:only-child > .form-group:last-child {
-    padding-left: 0;
-}
-  
-/* Fix cho trường hợp dòng cuối cùng chỉ có 1 input (ví dụ: ngày sinh) */
-.form-row > .form-group:only-child {
-    border-right: none;
-    padding-right: 0;
-    padding-left: 0;
-}
-  
-.form-group-booking-passenger label {
+  .form-group-booking-passenger label {
     font-weight: 700;
     font-size: 17px;
     color: #111;
@@ -153,77 +128,84 @@
     display: flex;
     align-items: center;
     gap: 2px;
-}
+  }
   
-.form-group-booking-passenger label .asterisk {
+  .form-group-booking-passenger label .asterisk {
     color: red;
     margin-left: 1px; /* hoặc 0 nếu muốn sát hẳn */
     font-size: 18px;
-}
+  }
   
-.form-group-booking-passenger input,
-.form-group-booking-passenger select {
+  .form-group-booking-passenger input,
+  .form-group-booking-passenger select {
     padding: 10px 0 0 0;
     font-size: 15px;
     border: none;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    transition: border 0.25s, box-shadow 0.25s, background 0.25s;
-    background: #fafdff;
-}
+  }
   
-.form-group-booking-passenger input:focus,
-.form-group-booking-passenger select:focus {
-    border-bottom: 2px solid #1976d2;
-    background: #e3f0ff;
-    box-shadow: 0 2px 8px #e3e8f0;
+  .form-group-booking-passenger input:focus,
+  .form-group-booking-passenger select:focus {
+    border: none;
+    border-bottom: 1.5px solid #1976d2;
     outline: none;
-}
+    box-shadow: none;
+  }
   
-.form-group-booking-passenger input::placeholder {
+  .form-group-booking-passenger input::placeholder {
     color: #aaa;
     font-size: 15px;
     font-weight: 400;
-}
+  }
   
-/* Bộ đếm hành khách */
-.passenger-counters-group {
+  /* Bộ đếm hành khách */
+  .passenger-counters-group {
     width: 100%;
-}
+  }
   
-.passenger-counters-row {
+  .passenger-counters-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    width: 100%;
-}
+    gap: 32px;
+    margin-bottom: 20px;
+  }
   
-.passenger-counter {
-    flex: 1 1 180px;
-    min-width: 140px;
+  .passenger-counter {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #bbbbbb;
+    border-radius: 8px;
+    padding: 10px 10px;
+    background: #fff;
+    margin-bottom: 0;
+    min-width: 260px;
     max-width: 100%;
     box-sizing: border-box;
-}
+    transition: box-shadow 0.2s, border 0.2s;
+  }
   
-.passenger-counter-infant.disabled {
+  .passenger-counter-infant.disabled {
     background: #fafbfc !important;
     /* border-color: #ddd !important; */
     /* color: #aaa; */
     filter: grayscale(0.5);
     /* opacity: 0.6; */
-}
+  }
   
-.passenger-label {
+  .passenger-label {
     font-weight: bold;
     font-size: 17px;
     margin-bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-}
+  }
   
-.passenger-label small {
+  .passenger-label small {
     font-size: 15px;
     color: #555;
     font-weight: 400;
@@ -232,24 +214,24 @@
     display: flex;
     align-items: center;
     gap: 4px;
-}
+  }
   
-.info-icon {
+  .info-icon {
     font-size: 15px;
     color: #888;
     margin-left: 2px;
     cursor: pointer;
     vertical-align: middle;
-}
+  }
   
-.counter-controls {
+  .counter-controls {
     display: flex;
     align-items: center;
     gap: 24px;
     margin-top: 0;
-}
+  }
   
-.counter-controls button {
+  .counter-controls button {
     margin-top: 15px;
     width: 40px;
     height: 40px;
@@ -262,78 +244,72 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, color 0.2s, border 0.2s, transform 0.15s;
-}
+    transition: background 0.2s, color 0.2s, border 0.2s;
+  }
   
-.counter-controls button:disabled {
+  .counter-controls button:disabled {
     color: #ccc;
     border-color: #eee;
     cursor: not-allowed;
-}
+  }
   
-.counter-controls button:hover:not(:disabled) {
+  .counter-controls button:hover:not(:disabled) {
     background: #f5f5f5;
     border-color: #1976d2;
     color: #1976d2;
-}
+  }
   
-.counter-controls button:active {
-    background: #1976d2;
-    color: #fff;
-    transform: scale(1.12);
-}
-  
-.counter-controls span {
+  .counter-controls span {
     /* font-weight: bold; */
     font-size: 20px;
     min-width: 32px;
     text-align: center;
-}
+  }
   
-/* Thông tin hành khách */
-.passenger-type-section {
+  /* Thông tin hành khách */
+  .passenger-type-section {
     margin-top: 32px;
-}
+  }
   
-.passenger-type-title {
+  .passenger-type-title {
     font-size: 22px;
     font-weight: bold;
     margin-bottom: 18px;
     display: flex;
     align-items: center;
     gap: 8px;
-}
+  }
   
-.passenger-type-desc {
+  .passenger-type-desc {
     font-size: 15px;
     color: #555;
     font-weight: 400;
     margin-left: 8px;
     font-style: italic;
-}
+  }
   
-.passenger-form {
+  .passenger-form {
     margin-bottom: 18px;
     background: none;
     box-shadow: none;
     border: none;
     padding: 0;
-}
+  }
   
-.passenger-form-row {
+  .passenger-form-row {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
     gap: 24px;
     align-items: flex-start;
-}
+  }
   
-.passenger-form-group {
+  .passenger-form-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
-}
+  }
   
-.passenger-form-label {
+  .passenger-form-label {
     font-weight: 700;
     font-size: 15px;
     color: #222;
@@ -341,16 +317,16 @@
     display: flex;
     align-items: center;
     gap: 2px;
-}
+  }
   
-.passenger-form-label .asterisk {
+  .passenger-form-label .asterisk {
     color: #e53935;
     margin-left: 2px;
     font-size: 16px;
-}
+  }
   
-.passenger-form-input,
-.passenger-form-select {
+  .passenger-form-input,
+  .passenger-form-select {
     border: none;
     border-bottom: 1.5px solid #eee;
     background: transparent;
@@ -359,57 +335,57 @@
     border-radius: 0;
     box-shadow: none;
     transition: border 0.2s;
-}
+  }
   
-.passenger-form-input:focus,
-.passenger-form-select:focus {
+  .passenger-form-input:focus,
+  .passenger-form-select:focus {
     border-bottom: 1.5px solid #1976d2;
     outline: none;
-}
+  }
   
-.passenger-form-input::placeholder {
+  .passenger-form-input::placeholder {
     color: #bdbdbd;
     font-size: 15px;
-}
+  }
   
-/* Thông tin tour đã đặt */
-.booked-tour-summary {
+  /* Thông tin tour đã đặt */
+  .booked-tour-summary {
     background: #fff;
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+  }
   
-.tour-summary {
+  .tour-summary {
     display: flex;
     gap: 16px;
-}
+  }
   
-.tour-image-booking-passenger img {
+  .tour-image-booking-passenger img {
     width: 160px;
     height: 120px;
     object-fit: cover;
     border-radius: 8px;
-}
+  }
   
-.tour-details h3 {
+  .tour-details h3 {
     margin-bottom: 8px;
     font-size: 18px;
     font-weight: bold;
-}
+  }
   
-.tour-details p {
+  .tour-details p {
     margin: 4px 0;
     font-size: 14px;
-}
+  }
   
-/* Nút gửi thông tin */
-.submit-section {
+  /* Nút gửi thông tin */
+  .submit-section {
     margin-top: 20px;
     text-align: center;
-}
+  }
   
-.submit-button {
+  .submit-button {
     padding: 12px 24px;
     background-color: #ff5722;
     border: none;
@@ -418,92 +394,62 @@
     font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s, transform 0.18s;
-    box-shadow: 0 2px 12px #ff572244;
-}
+    transition: background-color 0.3s ease;
+  }
   
-.submit-button:hover:not(:disabled) {
-    background-color: #ff784e;
-    box-shadow: 0 6px 24px #ff572277;
-    transform: translateY(-2px) scale(1.03);
-}
+  .submit-button:hover:not(:disabled) {
+    background-color: #e64a19;
+  }
   
-.submit-button:disabled {
+  .submit-button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
-}
+  }
   
-.price-summary {
-    animation: fadeInUp 0.7s cubic-bezier(.23,1.01,.32,1) 0.1s both;
-}
-  
-@keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(32px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-}
-  
-input, select, button {
-    outline: none;
-}
-  
-input:disabled, select:disabled, button:disabled {
-    filter: grayscale(0.2);
-    opacity: 0.7;
-}
-  
-/* Responsive cho thiết bị nhỏ */
-@media (max-width: 1200px) {
+ /* Responsive cho thiết bị nhỏ */
+ @media (max-width: 1200px) {
     .booking-layout {
       flex-direction: column;
       align-items: center;
       gap: 24px;
-      padding: 76px 8px 12px 8px;
+      padding: 12px;
       max-width: 100vw;
     }
     .booking-left, .booking-right {
+      max-width: 98vw;
+      min-width: 0;
+      margin-right: 0;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .form-row,
+    .passenger-form {
+      grid-template-columns: 1fr;
+    }
+    .booking-layout {
+      padding: 4px;
+      gap: 10px;
+    }
+    .booking-left, .booking-right {
+      padding: 8px;
       max-width: 100vw;
       min-width: 0;
       margin-right: 0;
-      padding: 12px;
     }
-    .form-row > .form-group {
-      padding: 0 8px 0 0;
-    }
-    .form-row > .form-group:last-child {
-      padding-left: 8px;
-    }
-}
+  }
   
-@media (max-width: 900px) {
+  @media (max-width: 900px) {
     .passenger-counters-row {
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
     .passenger-counter {
       min-width: 0;
-      padding: 12px 8px;
+      padding: 18px 12px;
     }
-    .form-row {
-      flex-direction: column;
-      gap: 8px;
+    .passenger-form-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
-}
-  
-@media (max-width: 768px) {
-    .booking-layout {
-      padding: 64px 2px 4px 2px;
-      gap: 8px;
-    }
-    .booking-left, .booking-right {
-      padding: 6px;
-      max-width: 100vw;
-      min-width: 0;
-      margin-right: 0;
-    }
-}
+  }
