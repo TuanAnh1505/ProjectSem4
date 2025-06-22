@@ -13,7 +13,6 @@ const Login = () => {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -25,37 +24,35 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
+    setError("");
+    setSuccess("");
 
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
+      const response = await axios.post("http://localhost:8080/api/auth/login", {
         email,
-        password
+        password,
       });
+      setSuccess("Đăng nhập thành công!");
+      const { token, role, userId, publicId } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("email", email);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem("publicId", publicId);
+      localStorage.setItem("role", role); 
 
-      const { token, role, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', role);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      // Redirect based on role
-      if (role === 'GUIDE') {
-        navigate('/guide');
-      } else if (role === 'ADMIN') {
-        navigate('/admin/dashboard');
+      // Nếu có state (hoặc query) chứa tourId thì quay lại trang tour đó, ngược lại thì chuyển hướng theo role.
+      const tourId = location.state?.tourId;
+      if (tourId) {
+        navigate(`/tour-dashboard/detail/${tourId}`);
+      } else if (role === "ADMIN") {
+        navigate("/admin/about");
       } else {
-        navigate('/');
+        navigate("/");
       }
-
-      toast.success('Đăng nhập thành công!');
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
-      toast.error('Đăng nhập thất bại!');
-    } finally {
-      setLoading(false);
+      const errorMsg = err.response?.data?.message || "Có lỗi xảy ra!";
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -130,7 +127,7 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" className="login-btn" disabled={loading}>
+            <button type="submit" className="login-btn">
               Đăng nhập
             </button>
           </form>
