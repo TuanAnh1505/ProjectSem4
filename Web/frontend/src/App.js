@@ -109,12 +109,12 @@ const App = () => {
           } />
           <Route path="/tour-dashboard" element={
             <Layout>
-              <ProtectedRoute element={<TourDashboard />} />
+              <TourDashboard />
             </Layout>
           } />
           <Route path="/tour-dashboard/detail/:tourId" element={
             <Layout>
-              <ProtectedRoute element={<TourDetailDashboard />} />
+              <TourDetailDashboard />
             </Layout>
           } />
           <Route path="/offers" element={

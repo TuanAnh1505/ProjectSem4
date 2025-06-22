@@ -11,6 +11,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,17 +34,13 @@ const Login = () => {
         password
       });
       setSuccess("Đăng nhập thành công!");
-      const { token, role, userId, publicId } = response.data;
+      const { token, role, userId, publicId, user } = response.data;
+      
       localStorage.setItem("token", token);
       localStorage.setItem("email", email);
       localStorage.setItem('userId', userId);
       localStorage.setItem("publicId", publicId);
       localStorage.setItem("role", role);
-
-      const { token, role, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', role);
       localStorage.setItem('user', JSON.stringify(user));
 
       // Redirect based on role
@@ -60,6 +57,8 @@ const Login = () => {
       const errorMsg = err.response?.data?.message || "Có lỗi xảy ra!";
       setError(errorMsg);
       toast.error(errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
