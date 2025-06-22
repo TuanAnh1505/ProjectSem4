@@ -817,42 +817,50 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
                 top: BorderSide(color: Color(0xFFE5E7EB)),
               ),
             ),
-            child: Wrap(
-              alignment: WrapAlignment.end,
-              spacing: 8.0,
-              runSpacing: 8.0,
+            child: Row(
               children: [
-                // Show manual status update button only for main_guide and when manual update is needed
-                if (assignment.role.toLowerCase() == 'main_guide' &&
-                    _shouldShowManualUpdateButton(assignment))
-                  OutlinedButton.icon(
-                    onPressed: () => _showStatusUpdateDialog(assignment),
-                    icon: const Icon(Icons.tune_outlined, size: 18),
-                    label: const Text('Tùy chỉnh'), // Clarified label
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.deepPurple,
-                      side: const BorderSide(color: Colors.deepPurple),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => AssignmentDetailsScreen(assignment: assignment),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.info_outline, size: 18),
-                  label: const Text('Chi tiết'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                Expanded(
+                  child: Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: [
+                      // Show manual status update button only for main_guide and when manual update is needed
+                      if (assignment.role.toLowerCase() == 'main_guide' &&
+                          _shouldShowManualUpdateButton(assignment))
+                        OutlinedButton.icon(
+                          onPressed: () => _showStatusUpdateDialog(assignment),
+                          icon: const Icon(Icons.tune_outlined, size: 18),
+                          label: const Text('Tùy chỉnh'), // Clarified label
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.deepPurple,
+                            side: const BorderSide(color: Colors.deepPurple),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      // Show details button only when not completed
+                      if (_shouldShowDetailsButton(assignment))
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => AssignmentDetailsScreen(assignment: assignment),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.info_outline, size: 18),
+                          label: const Text('Chi tiết'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -1003,6 +1011,18 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     }
 
     // Show manual update for active tours that need status changes
+    return true;
+  }
+
+  bool _shouldShowDetailsButton(TourGuideAssignment assignment) {
+    final currentStatus = _normalizeStatus(assignment.status);
+    
+    // Don't show details button for completed tours
+    if (currentStatus == 'completed') {
+      return false;
+    }
+    
+    // Show details button for all other statuses
     return true;
   }
 }
