@@ -29,10 +29,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    localStorage.removeItem('user');
-    localStorage.removeItem('publicId');
-    localStorage.removeItem('name');
-    navigate('/');
+    navigate('/login');
   };
 
   return (
@@ -63,14 +60,9 @@ const Header = () => {
               <li>
                 <Link to="/tour-dashboard">Tour booking</Link>
               </li>
-              {isAuthenticated && userRole === 'GUIDE' && (
-                <li>
-                  <Link to="/guide">Guide Dashboard</Link>
-                </li>
-              )}
               {isAuthenticated && userRole === 'ADMIN' && (
                 <li>
-                  <Link to="/admin/dashboard">Admin Dashboard</Link>
+                  <Link to="/admin/about">Admin Dashboard</Link>
                 </li>
               )}
             </ul>

@@ -282,9 +282,9 @@ export default function TourDashboard() {
                 borderTopLeftRadius: 22,
                 borderTopRightRadius: 22,
               }}>
-                {tour.imageUrls && tour.imageUrls.length > 0 ? (
+                {tour.imageUrl ? (
                   <img
-                    src={`http://localhost:8080${tour.imageUrls[0]}`}
+                    src={`http://localhost:8080${tour.imageUrl}`}
                     alt={tour.name}
                     style={{
                       width: '100%',
