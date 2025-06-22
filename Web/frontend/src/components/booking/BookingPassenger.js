@@ -624,7 +624,7 @@ const BookingPassenger = () => {
             <h2>THÔNG TIN TOUR ĐÃ ĐẶT</h2>
             <div className="tour-summary">
               <div className="tour-image-booking-passenger">
-                <img src={`http://localhost:8080${bookedTour.imageUrl}`} alt={bookedTour.name} />
+                <img src={`http://localhost:8080${bookedTour.imageUrls && bookedTour.imageUrls.length > 0 ? bookedTour.imageUrls[0] : ''}`} alt={bookedTour.name} />
               </div>
               <div className="tour-details">
                 <h3>{bookedTour.name}</h3>

@@ -26,6 +26,8 @@ export default function TourDetailDashboard() {
   const [modalGallery, setModalGallery] = useState({ images: [], index: 0, open: false });
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [openItineraryDay, setOpenItineraryDay] = useState(0);
+  const [guideAssignments, setGuideAssignments] = useState([]);
+  const [destinations, setDestinations] = useState([]);
 
   const showThumbs = galleryImages.length > 1;
   const maxThumbs = 5;
@@ -58,6 +60,10 @@ export default function TourDetailDashboard() {
         }
         setItineraries(schedulesWithItineraries);
 
+        // Fetch Destinations
+        const destinationsRes = await axios.get(`http://localhost:8080/api/tours/${tourId}/destinations`);
+        setDestinations(destinationsRes.data || []);
+
         // Fetch Experiences
         const expRes = await axios.get(`http://localhost:8080/api/experiences/tour/${tourId}`, config);
         setExperiences(Array.isArray(expRes.data) ? expRes.data : []);
@@ -82,11 +88,28 @@ export default function TourDetailDashboard() {
 
     if (tourId) {
       fetchAllData();
+      // If user is a guide, fetch their assignments
+      const role = localStorage.getItem('role');
+      if (role === 'GUIDE') {
+        fetchGuideAssignments();
+      }
     } else {
       setError('Invalid tour ID');
       setLoading(false);
     }
   }, [tourId, navigate]);
+
+  const fetchGuideAssignments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`http://localhost:8080/api/tour-guide-assignments/my-assignments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setGuideAssignments(res.data.map(a => a.scheduleId));
+    } catch (err) {
+      console.error("Failed to fetch guide assignments", err);
+    }
+  };
 
   const formatItineraryText = (text) => {
     if (!text) return null;
@@ -219,6 +242,7 @@ export default function TourDetailDashboard() {
   if (!tour) return null;
 
   const selectedScheduleDetails = itineraries.find(s => s.scheduleId === selectedScheduleId);
+  const isGuideAssignedToSelectedSchedule = selectedScheduleId && guideAssignments.includes(selectedScheduleId);
 
   return (
     <div className={styles.pageContainer}>
@@ -280,7 +304,6 @@ export default function TourDetailDashboard() {
               {isDescriptionExpanded ? 'Thu gọn' : 'Xem thêm'}
             </button>
             <div className={styles.infoGrid}>
-              <div className={styles.infoItem}><span>Điểm nổi bật</span><strong>Chùa Bái Đính</strong></div>
               <div className={styles.infoItem}><span>Thời gian</span><strong>{tour.duration} ngày</strong></div>
               <div className={styles.infoItem}><span>Số lượng khách</span><strong>Tối đa {tour.maxParticipants}</strong></div>
               <div className={styles.infoItem}><span>Giá tour</span><strong>{tour.price?.toLocaleString()}đ</strong></div>
@@ -288,6 +311,56 @@ export default function TourDetailDashboard() {
               <div className={styles.infoItem}><span>Hướng dẫn viên</span><strong>Chuyên nghiệp</strong></div>
             </div>
           </div>
+
+          {/* Destinations Card */}
+          {destinations.length > 0 && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '10px', verticalAlign: 'bottom' }}>
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                Địa điểm nổi bật
+              </h2>
+              <div className={styles.destinationsGrid}>
+                {destinations.map(destination => (
+                  <div key={destination.id} className={styles.destinationCard}>
+                    {destination.imageUrls && destination.imageUrls.length > 0 ? (
+                      <div 
+                        className={styles.destinationImageContainer}
+                        onClick={() => setModalGallery({ 
+                          images: destination.imageUrls.map(i => `http://localhost:8080${i}`), 
+                          index: 0, 
+                          open: true 
+                        })}
+                      >
+                        <img 
+                          src={`http://localhost:8080${destination.imageUrls[0]}`} 
+                          alt={destination.name} 
+                          className={styles.destinationImage}
+                        />
+                        {destination.imageUrls.length > 1 && (
+                          <div className={styles.imageCountOverlay}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                              <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm4.21 3.555a.5.5 0 0 1 .59.082l2.648 3.178-2.618 3.143a.5.5 0 0 1-.806-.59l2.182-2.618-2.182-2.618a.5.5 0 0 1 .224-.672z"/>
+                            </svg>
+                            <span>{destination.imageUrls.length}</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className={styles.destinationImagePlaceholder}>
+                        <span>No Image</span>
+                      </div>
+                    )}
+                    <div className={styles.destinationInfo}>
+                      <h3 className={styles.destinationName}>{destination.name}</h3>
+                      <p className={styles.destinationDescription}>{destination.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Itinerary Card */}
           <div className={styles.card}>
@@ -522,13 +595,21 @@ export default function TourDetailDashboard() {
 
                 <button
                   onClick={handleBooking}
-                  disabled={bookingLoading || !selectedScheduleId ||
+                  disabled={
+                    bookingLoading || 
+                    !selectedScheduleId ||
                     ['full', 'closed'].includes(
                       itineraries.find(sch => sch.scheduleId === selectedScheduleId)?.status
-                    )}
-                  className={styles.bookingButton}
+                    ) ||
+                    isGuideAssignedToSelectedSchedule
+                  }
+                  className={`${styles.bookingButton} ${isGuideAssignedToSelectedSchedule ? styles.disabledButton : ''}`}
                 >
-                  {bookingLoading ? 'Đang xử lý...' : 'Đặt ngay'}
+                  {bookingLoading
+                    ? 'Đang xử lý...'
+                    : isGuideAssignedToSelectedSchedule
+                    ? 'Đã được phân công'
+                    : 'Đặt ngay'}
                 </button>
             </div>
           </div>

@@ -61,18 +61,6 @@ public class BookingService {
                     .orElseThrow(
                             () -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
 
-            // Check if user is a guide and is already assigned to this schedule
-            boolean isGuide = user.getRoles().stream()
-                                  .anyMatch(role -> role.getRoleName().equalsIgnoreCase("GUIDE"));
-
-            if (isGuide) {
-                boolean isAssigned = tourGuideAssignmentRepository.isGuideAssignedToSchedule(
-                        user.getUserid(), request.getScheduleId());
-                if (isAssigned) {
-                    throw new RuntimeException("Bạn đã được phân công vào lịch trình này và không thể đặt tour.");
-                }
-            }
-
             // Find and validate tour
             Tour tour = tourRepository.findById(request.getTourId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với ID: " + request.getTourId()));
@@ -83,6 +71,25 @@ public class BookingService {
                 throw new RuntimeException("Không tìm thấy lịch trình với ID: " + request.getScheduleId());
             }
             TourSchedule schedule = scheduleOpt.get();
+
+            // Check if user is a guide and is already assigned to this schedule
+            boolean isGuide = user.getRoles().stream()
+                                  .anyMatch(role -> role.getRoleName().equalsIgnoreCase("GUIDE"));
+            if (isGuide) {
+                List<TourGuideAssignment> assignments = tourGuideAssignmentRepository.findByGuide_User_Userid(user.getUserid());
+                boolean isAlreadyAssigned = assignments.stream().anyMatch(assignment -> {
+                    if (assignment.getTourSchedule() != null) {
+                        return assignment.getTourSchedule().getScheduleId().equals(schedule.getScheduleId());
+                    }
+                    return assignment.getTour().getTourId().equals(schedule.getTourId()) &&
+                           assignment.getStartDate().equals(schedule.getStartDate()) &&
+                           assignment.getEndDate().equals(schedule.getEndDate());
+                });
+
+                if (isAlreadyAssigned) {
+                    throw new RuntimeException("Bạn đã được phân công vào lịch trình này và không thể đặt tour.");
+                }
+            }
 
             // Validate schedule belongs to tour
             if (!schedule.getTourId().equals(tour.getTourId())) {

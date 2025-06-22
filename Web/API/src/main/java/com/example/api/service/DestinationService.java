@@ -53,7 +53,7 @@ public class DestinationService {
             }
 
             // Create and save destination
-            destinationDTO.setFilePaths(filePaths);
+            destinationDTO.setImageUrls(filePaths);
             Destination destination = mapToEntity(destinationDTO);
             Destination savedDestination = destinationRepository.save(destination);
             return mapToDTO(savedDestination);
@@ -140,10 +140,10 @@ public class DestinationService {
 
     private DestinationDTO mapToDTO(Destination destination) {
         DestinationDTO dto = new DestinationDTO();
-        dto.setDestinationId(destination.getDestinationId());
+        dto.setId(destination.getDestinationId());
         dto.setName(destination.getName());
         dto.setCategory(destination.getCategory());
-        dto.setFilePaths(destination.getFilePaths());
+        dto.setImageUrls(destination.getFilePaths());
         dto.setDescription(destination.getDescription());
         dto.setLocation(destination.getLocation());
         dto.setRating(destination.getRating());
@@ -153,7 +153,7 @@ public class DestinationService {
     private void updateEntityFromDTO(Destination destination, DestinationDTO dto) {
         destination.setName(dto.getName());
         destination.setCategory(dto.getCategory());
-        destination.setFilePaths(dto.getFilePaths());
+        destination.setFilePaths(dto.getImageUrls());
         destination.setDescription(dto.getDescription());
         destination.setLocation(dto.getLocation());
         destination.setRating(dto.getRating());
@@ -163,7 +163,7 @@ public class DestinationService {
         Destination destination = new Destination();
         destination.setName(dto.getName());
         destination.setCategory(dto.getCategory());
-        destination.setFilePaths(dto.getFilePaths());
+        destination.setFilePaths(dto.getImageUrls());
         destination.setDescription(dto.getDescription());
         destination.setLocation(dto.getLocation());
         destination.setRating(dto.getRating());

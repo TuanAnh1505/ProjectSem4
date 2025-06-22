@@ -149,9 +149,100 @@ body {
   font-size: 14px;
   color: #6c757d;
 }
-.infoItem strong {
-  font-size: 15px;
+.infoItem > strong {
   font-weight: 500;
+  color: #333;
+}
+
+/* Destinations Section */
+.destinationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.destinationCard {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.destinationCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.destinationImageContainer {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.destinationImageContainer:hover .destinationImage {
+  transform: scale(1.05);
+}
+
+.destinationImageContainer:hover .imageCountOverlay {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.imageCountOverlay {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.destinationImage {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.destinationImagePlaceholder {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f2f5;
+  color: #a8b0b9;
+  font-weight: 500;
+}
+
+.destinationInfo {
+  padding: 16px;
+  flex-grow: 1;
+}
+
+.destinationName {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.destinationDescription {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
 }
 
 /* Itinerary Card */
@@ -159,6 +250,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 15px;
 }
 .itineraryItem {
   border-bottom: 1px solid #eee;

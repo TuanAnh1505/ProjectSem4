@@ -1,5 +1,6 @@
 package com.example.api.controller;
 
+import com.example.api.dto.DestinationDTO;
 import com.example.api.dto.TourDTO;
 import com.example.api.model.Tour;
 import com.example.api.service.TourService;
@@ -108,13 +109,13 @@ public class TourController {
     }
 
     @GetMapping("/{tourId}/destinations")
-    public ResponseEntity<?> getTourDestinations(@PathVariable Integer tourId) {
+    public ResponseEntity<List<DestinationDTO>> getTourDestinations(@PathVariable Integer tourId) {
         try {
             return ResponseEntity.ok(tourService.getTourDestinations(tourId));
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body("Invalid tour ID format");
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error fetching destinations");
+            return ResponseEntity.internalServerError().build();
         }
     }
 

@@ -101,13 +101,12 @@ public class TourGuideAssignmentService {
             throw new IllegalStateException("Không thể gán hướng dẫn viên cho lịch trình đã kết thúc!");
         }
 
-        // Check if guide has already been assigned to this tour & schedule
-        boolean alreadyAssigned = assignmentRepository.findByTourId(dto.getTourId()).stream()
-                .anyMatch(a -> a.getGuideId().equals(dto.getGuideId()) &&
-                        a.getStartDate().equals(dto.getStartDate()) &&
-                        a.getEndDate().equals(dto.getEndDate()));
+        // Check if guide has already been assigned to this specific schedule
+        boolean alreadyAssigned = assignmentRepository.existsByGuideIdAndTourSchedule_ScheduleId(
+            dto.getGuideId(), dto.getScheduleId()
+        );
         if (alreadyAssigned) {
-            throw new IllegalStateException("Hướng dẫn viên đã được gán vào lịch trình này!");
+            throw new IllegalStateException("Hướng dẫn viên đã được phân công vào lịch trình này rồi!");
         }
 
         // Check if guide has any overlapping assignments

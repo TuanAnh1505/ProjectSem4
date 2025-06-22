@@ -1,13 +1,9 @@
 package com.example.api.service;
 
+import com.example.api.dto.DestinationDTO;
 import com.example.api.dto.TourDTO;
-import com.example.api.model.Destination;
-import com.example.api.model.Event;
-import com.example.api.model.Tour;
-import com.example.api.model.TourStatus;
-import com.example.api.repository.DestinationRepository;
-import com.example.api.repository.EventRepository;
-import com.example.api.repository.TourRepository;
+import com.example.api.model.*;
+import com.example.api.repository.*;
 
 
 import jakarta.persistence.EntityManager;
@@ -19,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -74,15 +71,28 @@ public class TourService {
                 .getResultList();
     }
 
-    public List<Destination> getTourDestinations(Integer tourId) {
-        return tourRepo.findById(tourId)
-            .map(Tour::getDestinations)
-            .orElse(Collections.emptyList());
+    public List<DestinationDTO> getTourDestinations(Integer tourId) {
+        List<Destination> destinations = tourRepo.findById(tourId)
+                .map(Tour::getDestinations)
+                .orElse(Collections.emptyList());
+
+        return destinations.stream()
+                .map(this::convertToDestinationDTO)
+                .collect(Collectors.toList());
+    }
+
+    private DestinationDTO convertToDestinationDTO(Destination destination) {
+        DestinationDTO dto = new DestinationDTO();
+        dto.setId(destination.getDestinationId());
+        dto.setName(destination.getName());
+        dto.setDescription(destination.getDescription());
+        dto.setImageUrls(destination.getFilePaths());
+        return dto;
     }
 
     public List<Event> getTourEvents(Integer tourId) {
         return tourRepo.findById(tourId)
-            .map(Tour::getEvents)
-            .orElse(Collections.emptyList());
+                .map(Tour::getEvents)
+                .orElse(Collections.emptyList());
     }
 }
