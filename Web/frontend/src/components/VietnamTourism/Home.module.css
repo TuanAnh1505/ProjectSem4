@@ -896,69 +896,47 @@
 
 .tourCardBtn {
   display: inline-block;
-  background: linear-gradient(90deg, #ff9800 0%, #ff5722 100%);
-  color: #fff;
-  padding: 14px 36px;
-  border-radius: 12px;
+  padding: 10px 20px;
+  background-color: #e31837;
+  color: white;
+  text-align: center;
+  border-radius: 5px;
   text-decoration: none;
-  font-size: 22px;
-  font-weight: 900;
-  box-shadow: 0 8px 32px #ff9800cc, 0 2px 12px #ff980077;
-  border: 3px solid #fff3e0;
-  outline: 3px solid #ff9800;
-  outline-offset: 2px;
-  letter-spacing: 2px;
-  transition: background 0.25s, box-shadow 0.25s, transform 0.18s, color 0.18s, outline 0.18s;
-  margin-top: 24px;
-  position: relative;
-  z-index: 2;
-  text-shadow: 0 4px 16px #ff980088, 0 1px 1px #ff5722;
-  text-transform: uppercase;
-  filter: drop-shadow(0 0 8px #ff9800cc);
-  animation: btnPop 0.7s cubic-bezier(.23,1.01,.32,1);
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
 .tourCardBtn:hover, .tourCardBtn:focus {
-  background: linear-gradient(90deg, #ff5722 0%, #ff9800 100%);
-  color: #fff;
-  box-shadow: 0 16px 48px #ff9800ee, 0 4px 24px #ff980088;
-  transform: translateY(-6px) scale(1.12) rotate(-2deg);
-  text-shadow: 0 8px 32px #ff9800cc, 0 2px 2px #ff5722;
-  outline: 4px solid #ff5722;
-  filter: drop-shadow(0 0 16px #ff9800ee);
-}
-@keyframes btnPop {
-  0% { transform: scale(0.7); opacity: 0; }
-  80% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1); }
+  background-color: #c4142d;
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: white;
+  outline: none;
 }
 
 .smoothBtn {
   display: inline-block;
-  background: linear-gradient(90deg, #ff9800 0%, #ff5722 100%);
-  color: #fff;
-  padding: 22px 64px;
-  border-radius: 40px;
+  padding: 12px 28px;
+  background-color: #1a1a1a;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
   text-decoration: none;
-  font-size: 28px;
-  font-weight: 900;
-  box-shadow: 0 12px 48px #ff9800cc, 0 4px 24px #ff980077;
-  border: 3px solid #fff3e0;
-  outline: 3px solid #ff9800;
-  outline-offset: 2px;
-  letter-spacing: 3px;
-  transition: all 0.3s cubic-bezier(.23,1.01,.32,1);
-  text-transform: uppercase;
-  margin-top: 32px;
-  text-shadow: 0 4px 16px #ff980088, 0 1px 1px #ff5722;
-  filter: drop-shadow(0 0 12px #ff9800cc);
-  animation: btnPop 0.7s cubic-bezier(.23,1.01,.32,1);
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
 .smoothBtn:hover, .smoothBtn:focus {
-  background: linear-gradient(90deg, #ff5722 0%, #ff9800 100%);
-  color: #fff;
-  box-shadow: 0 24px 64px #ff9800ee, 0 8px 32px #ff980088;
-  transform: translateY(-8px) scale(1.13) rotate(1.5deg);
-  text-shadow: 0 12px 48px #ff9800cc, 0 2px 2px #ff5722;
-  outline: 5px solid #ff5722;
-  filter: drop-shadow(0 0 24px #ff9800ee);
+  background-color: #333;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  text-decoration: none;
+  color: white;
+  outline: none;
 }

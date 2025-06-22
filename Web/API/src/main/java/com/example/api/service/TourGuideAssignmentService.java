@@ -118,9 +118,18 @@ public class TourGuideAssignmentService {
             throw new IllegalStateException("Hướng dẫn viên đã có tour khác trong khoảng thời gian này!");
         }
 
+        TourSchedule schedule = tourScheduleRepository.findById(dto.getScheduleId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Schedule ID: " + dto.getScheduleId()));
+        
+        // Check if schedule matches tour
+        if (!schedule.getTourId().equals(dto.getTourId())) {
+            throw new IllegalArgumentException("Schedule does not belong to the specified tour.");
+        }
+
         TourGuideAssignment assignment = new TourGuideAssignment();
-        assignment.setTourId(dto.getTourId());
-        assignment.setGuideId(dto.getGuideId());
+        assignment.setTour(tour);
+        assignment.setGuide(guide);
+        assignment.setTourSchedule(schedule);
         assignment.setRole(dto.getRole());
         assignment.setStartDate(dto.getStartDate());
         assignment.setEndDate(dto.getEndDate());

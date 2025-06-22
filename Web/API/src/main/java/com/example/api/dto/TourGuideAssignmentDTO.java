@@ -15,6 +15,9 @@ public class TourGuideAssignmentDTO {
     @NotNull(message = "Guide ID cannot be null")
     private Integer guideId;
 
+    @NotNull(message = "Schedule ID cannot be null")
+    private Integer scheduleId;
+
     @NotNull(message = "Role cannot be null")
     private TourGuideAssignment.GuideRole role;
 

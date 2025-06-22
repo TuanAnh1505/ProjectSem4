@@ -31,6 +31,7 @@ public class BookingService {
     private final BookingStatusRepository bookingStatusRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
     private final TourScheduleRepository tourScheduleRepository;
+    private final TourGuideAssignmentRepository tourGuideAssignmentRepository;
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
@@ -59,6 +60,18 @@ public class BookingService {
             User user = userRepository.findById(request.getUserId())
                     .orElseThrow(
                             () -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
+
+            // Check if user is a guide and is already assigned to this schedule
+            boolean isGuide = user.getRoles().stream()
+                                  .anyMatch(role -> role.getRoleName().equalsIgnoreCase("GUIDE"));
+
+            if (isGuide) {
+                boolean isAssigned = tourGuideAssignmentRepository.isGuideAssignedToSchedule(
+                        user.getUserid(), request.getScheduleId());
+                if (isAssigned) {
+                    throw new RuntimeException("Bạn đã được phân công vào lịch trình này và không thể đặt tour.");
+                }
+            }
 
             // Find and validate tour
             Tour tour = tourRepository.findById(request.getTourId())

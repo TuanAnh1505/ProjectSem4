@@ -30,6 +30,10 @@ public class TourGuideAssignment {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id", nullable = true)
+    private TourSchedule tourSchedule;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private AssignmentStatus status;

@@ -219,6 +219,7 @@ export default function TourDetailDashboard() {
     } catch (err) {
       toast.error(err.response?.data?.message || "Có lỗi xảy ra khi đặt tour");
       console.error("Booking error:", err);
+      return;
     } finally {
       setBookingLoading(false);
     }

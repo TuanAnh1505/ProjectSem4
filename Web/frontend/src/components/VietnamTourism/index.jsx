@@ -167,7 +167,7 @@ const Home = () => {
               padding: '20px 0'
             }}>
               {filteredTours.map(tour => (
-                <div key={tour.tourId} className="tourCard">
+                <div key={tour.tourId} className={styles.tourCard}>
                   <div style={{
                     position: 'relative',
                     height: '200px',
@@ -253,7 +253,7 @@ const Home = () => {
                     </p>
                     <Link
                       to={`/tour-dashboard/detail/${tour.tourId}`}
-                      className="tourCardBtn"
+                      className={styles.tourCardBtn}
                     >
                       View Details
                     </Link>
@@ -271,7 +271,7 @@ const Home = () => {
         }}>
           <Link 
             to="/tour-dashboard"
-            className="smoothBtn"
+            className={styles.smoothBtn}
           >
             View All Tours
           </Link>

@@ -40,4 +40,9 @@ public interface TourGuideAssignmentRepository extends JpaRepository<TourGuideAs
             @Param("tourId") Integer tourId,
             @Param("guideId") Integer guideId,
             @Param("startDate") LocalDate startDate);
+
+    @Query("SELECT COUNT(a) > 0 FROM TourGuideAssignment a WHERE a.guide.user.userid = :userId AND a.tourSchedule.scheduleId = :scheduleId")
+    boolean isGuideAssignedToSchedule(@Param("userId") Long userId, @Param("scheduleId") Integer scheduleId);
+
+    List<TourGuideAssignment> findByTourSchedule_TourId(Integer tourId);
 } 
