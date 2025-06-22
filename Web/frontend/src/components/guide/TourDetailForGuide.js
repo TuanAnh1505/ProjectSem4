@@ -119,10 +119,62 @@ const TabButton = ({ icon, label, tabName, activeTab, onClick }) => (
     </button>
 );
 
+const DescriptionSection = ({ description }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [needsButton, setNeedsButton] = useState(false);
+    const contentRef = useRef(null);
+
+    useEffect(() => {
+        // After the component mounts, we check if the content is overflowing.
+        // If scrollHeight > clientHeight, it means the text has been truncated by CSS.
+        if (contentRef.current && contentRef.current.scrollHeight > contentRef.current.clientHeight) {
+            setNeedsButton(true);
+        }
+        // We only need to run this check once when the description is first rendered.
+    }, [description]);
+
+    if (!description) {
+        return (
+            <div className="description-section">
+                <div className="description-header">
+                    <Info size={16} />
+                    <span>Mô tả</span>
+                </div>
+                <div className="description-content">
+                    <p>Không có mô tả.</p>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="description-section">
+            <div className="description-header">
+                <Info size={16} />
+                <span>Mô tả</span>
+            </div>
+            <div className={`description-content ${!isExpanded ? 'truncated' : ''}`}>
+                <p style={{ whiteSpace: 'pre-wrap' }} ref={contentRef}>
+                    {description}
+                </p>
+            </div>
+            {needsButton && (
+                <div className="description-footer">
+                    <button onClick={() => setIsExpanded(!isExpanded)} className="expand-button">
+                        {isExpanded ? 'Thu gọn' : 'Xem thêm'}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const OverviewTab = ({ tour }) => (
     <div className="overview-tab">
         <InfoRow icon={<MapPin size={16} />} label="Tên tour" value={tour.tourName} />
-        <InfoRow icon={<Info size={16} />} label="Mô tả" value={tour.tourDescription} />
+        
+        <DescriptionSection description={tour.tourDescription} />
+
         <InfoRow icon={<Calendar size={16} />} label="Ngày bắt đầu" value={formatDate(tour.startDate)} />
         <InfoRow icon={<Calendar size={16} />} label="Ngày kết thúc" value={formatDate(tour.endDate)} />
         <InfoRow icon={<Users size={16} />} label="Số lượng hành khách" value={`${tour.currentBookings || 0}/${tour.maxCapacity || 0}`} />
@@ -134,6 +186,27 @@ const OverviewTab = ({ tour }) => (
 
 const ItineraryTab = ({ itinerary }) => {
     const [openIndex, setOpenIndex] = useState(0);
+
+    // Function to detect and highlight time patterns
+    const highlightTimeInText = (text) => {
+        if (!text) return text;
+        
+        // Regex patterns for time detection
+        const timePatterns = [
+            /(\d{1,2}:\d{2}(?:\s*[AP]M)?)/gi,  // 9:30, 14:30, 9:30 AM
+            /(\d{1,2}h\d{2})/gi,                // 9h30, 14h30
+            /(\d{1,2}\s*giờ\s*\d{1,2})/gi,      // 9 giờ 30
+            /(\d{1,2}\s*:\s*\d{2}\s*giờ)/gi,    // 9 : 30 giờ
+        ];
+
+        let highlightedText = text;
+        
+        timePatterns.forEach(pattern => {
+            highlightedText = highlightedText.replace(pattern, '<span class="time-highlight">$1</span>');
+        });
+
+        return highlightedText;
+    };
 
     if (!itinerary || itinerary.length === 0) {
         return (
@@ -155,14 +228,25 @@ const ItineraryTab = ({ itinerary }) => {
                         <h3 className="itinerary-day-title">
                             <span className="day-label">Ngày {index + 1}:</span>
                             <span className="title-text">{item.title}</span>
+                            <br />
+                            <span className="time-highlight"> Bắt đầu: {formatTime(item.startTime)} - Kết thúc: {formatTime(item.endTime)}</span>
                         </h3>
+                      
                         <ChevronDown size={20} className="accordion-icon" />
                     </button>
                     {openIndex === index && (
                         <div className="itinerary-detail-form">
                             <div className="itinerary-detail-scroll">
                                 {item.description && item.description.split('\n').map((line, i) => (
-                                    line.trim() && <p className="itinerary-paragraph" key={i}>{line}</p>
+                                    line.trim() && (
+                                        <p 
+                                            className="itinerary-paragraph" 
+                                            key={i}
+                                            dangerouslySetInnerHTML={{ 
+                                                __html: highlightTimeInText(line) 
+                                            }}
+                                        />
+                                    )
                                 ))}
                             </div>
                         </div>
@@ -173,25 +257,44 @@ const ItineraryTab = ({ itinerary }) => {
     );
 };
 
-const PassengersTab = ({ passengers }) => (
-    <div className="passengers-tab">
-        {(passengers || []).map((passenger) => (
-            <div key={passenger.passengerId} className="passenger-card">
-                <div className="passenger-info">
-                    <User size={24} className="passenger-icon" />
-                    <div className="passenger-details">
-                        <span className="passenger-name">{passenger.fullName}</span>
-                        <span className="passenger-gender">{passenger.gender}</span>
+const PassengersTab = ({ passengers }) => {
+    if (!passengers || passengers.length === 0) {
+        return (
+            <div className="passengers-tab-empty">
+                <Users size={40} className="empty-icon" />
+                <p>Chưa có thông tin hành khách cho chuyến đi này.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="passengers-tab">
+            {passengers.map((passenger) => (
+                <div key={passenger.passengerId} className="passenger-card">
+                    <div className="passenger-card-header">
+                        <div className="passenger-avatar">
+                            {passenger.fullName ? passenger.fullName.charAt(0).toUpperCase() : '?'}
+                        </div>
+                        <div className="passenger-main-info">
+                            <span className="passenger-name">{passenger.fullName}</span>
+                            <span className={`passenger-gender-badge gender-${passenger.gender?.toLowerCase()}`}>{passenger.gender || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <div className="passenger-card-body">
+                        <div className="passenger-contact-item">
+                            <Mail size={16} className="contact-icon" />
+                            <span>{passenger.email || 'Không có email'}</span>
+                        </div>
+                        <div className="passenger-contact-item">
+                            <Phone size={16} className="contact-icon" />
+                            <span>{formatPhone(passenger.phone) || 'Không có SĐT'}</span>
+                        </div>
                     </div>
                 </div>
-                <div className="passenger-contact">
-                    <InfoRow icon={<Mail size={14} />} value={passenger.email} />
-                    <InfoRow icon={<Phone size={14} />} value={passenger.phone} />
-                </div>
-            </div>
-        ))}
-    </div>
-);
+            ))}
+        </div>
+    );
+};
 
 const InfoRow = ({ icon, label, value }) => (
     <div className="info-row">

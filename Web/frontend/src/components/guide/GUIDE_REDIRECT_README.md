@@ -1,27 +1,30 @@
-# Hệ thống Redirect cho Guide
+# Hệ thống Redirect cho Guide và Admin
 
 ## Tổng quan
-Hệ thống đã được cập nhật để guide có thể truy cập trực tiếp vào trang guide mà không cần đi qua trang chính.
+Hệ thống đã được cập nhật để:
+- Guide có thể truy cập cả trang chính `/` và trang guide `/guide`
+- Admin có thể truy cập cả trang chính `/` và trang admin `/admin/dashboard`
+- User thường chỉ có thể truy cập trang chính `/`
 
 ## Các thay đổi chính
 
 ### 1. Redirect tự động khi đăng nhập
-- **Guide**: Tự động chuyển đến `/guide` sau khi đăng nhập
-- **Admin**: Tự động chuyển đến `/admin/dashboard` sau khi đăng nhập
+- **Guide**: Tự động chuyển đến trang chính `/` sau khi đăng nhập (có thể truy cập Guide Dashboard qua menu)
+- **Admin**: Tự động chuyển đến trang chính `/` sau khi đăng nhập (có thể truy cập Admin Dashboard qua menu)
 - **User thường**: Chuyển đến trang chính `/`
 
 ### 2. Redirect khi truy cập trang chính
-- **Guide**: Tự động chuyển đến `/guide` khi truy cập `/`
-- **Admin**: Tự động chuyển đến `/admin/dashboard` khi truy cập `/`
+- **Guide**: Hiển thị trang chính bình thường khi truy cập `/`
+- **Admin**: Hiển thị trang chính bình thường khi truy cập `/`
 - **User thường**: Hiển thị trang chính bình thường
 
 ### 3. Bảo vệ các trang du lịch
-- **Guide**: Không thể truy cập các trang du lịch thông thường
-- **Admin**: Không thể truy cập các trang du lịch thông thường
+- **Guide**: Có thể truy cập tất cả các trang du lịch thông thường
+- **Admin**: Có thể truy cập tất cả các trang du lịch thông thường
 - **User thường**: Có thể truy cập bình thường
 
 ### 4. Trang Access Denied
-- Hiển thị khi guide cố gắng truy cập trang không được phép
+- Hiển thị khi guide cố gắng truy cập trang admin không được phép
 - Có nút để chuyển đến trang guide hoặc đăng xuất
 
 ## Luồng hoạt động
@@ -29,22 +32,65 @@ Hệ thống đã được cập nhật để guide có thể truy cập trực 
 ### Khi Guide đăng nhập:
 1. Guide nhập email/password
 2. Hệ thống kiểm tra role
-3. Nếu role = "GUIDE" → Redirect đến `/guide`
-4. Nếu role = "ADMIN" → Redirect đến `/admin/dashboard`
-5. Nếu role khác → Redirect đến `/`
+3. Nếu role = "GUIDE" → Redirect đến `/` (trang chính)
+4. Guide có thể truy cập Guide Dashboard qua menu "Guide Dashboard" trong header
 
 ### Khi Guide truy cập trang chính:
 1. Guide truy cập `http://localhost:3000/`
 2. `RoleBasedRedirect` component kiểm tra role
-3. Nếu role = "GUIDE" → Redirect đến `/guide`
-4. Nếu role = "ADMIN" → Redirect đến `/admin/dashboard`
-5. Nếu role khác → Hiển thị trang chính
+3. Nếu role = "GUIDE" → Hiển thị trang chính bình thường
+4. Guide có thể điều hướng đến Guide Dashboard qua menu
 
-### Khi Guide cố truy cập trang không được phép:
-1. Guide cố truy cập `/tour-dashboard` hoặc trang du lịch khác
-2. `ProtectedRoute` kiểm tra role
-3. Nếu role = "GUIDE" → Hiển thị `GuideAccessDenied`
-4. Guide có thể click "Đi đến trang Hướng dẫn viên" hoặc "Đăng xuất"
+### Khi Guide truy cập các trang du lịch:
+1. Guide có thể truy cập `/live-fully`, `/places-to-go`, `/tour-dashboard`, etc.
+2. `ProtectedRoute` cho phép guide truy cập tất cả các trang du lịch
+3. Guide có thể sử dụng đầy đủ tính năng của website
+
+### Khi Admin đăng nhập:
+1. Admin nhập email/password
+2. Hệ thống kiểm tra role
+3. Nếu role = "ADMIN" → Redirect đến `/` (trang chính)
+4. Admin có thể truy cập Admin Dashboard qua menu "Admin Dashboard" trong header
+
+### Khi Admin truy cập trang chính:
+1. Admin truy cập `http://localhost:3000/`
+2. `RoleBasedRedirect` component kiểm tra role
+3. Nếu role = "ADMIN" → Hiển thị trang chính bình thường
+4. Admin có thể điều hướng đến Admin Dashboard qua menu
+
+### Khi Admin truy cập các trang du lịch:
+1. Admin có thể truy cập `/live-fully`, `/places-to-go`, `/tour-dashboard`, etc.
+2. `ProtectedRoute` cho phép admin truy cập tất cả các trang
+3. Admin có thể sử dụng đầy đủ tính năng của website
+
+## Quyền truy cập
+
+### Guide:
+- ✅ `/` - Trang chính (có thể truy cập)
+- ✅ `/guide` - Trang chính của guide (có thể truy cập)
+- ✅ `/live-fully` - Trang du lịch (có thể truy cập)
+- ✅ `/places-to-go` - Trang địa điểm (có thể truy cập)
+- ✅ `/tour-dashboard` - Trang đặt tour (có thể truy cập)
+- ✅ Tất cả các trang du lịch khác (có thể truy cập)
+- ❌ `/admin/dashboard` - Trang admin (không thể truy cập)
+
+### Admin:
+- ✅ `/` - Trang chính (có thể truy cập)
+- ✅ `/admin/dashboard` - Trang admin (có thể truy cập)
+- ✅ `/live-fully` - Trang du lịch (có thể truy cập)
+- ✅ `/places-to-go` - Trang địa điểm (có thể truy cập)
+- ✅ `/tour-dashboard` - Trang đặt tour (có thể truy cập)
+- ✅ Tất cả các trang du lịch khác (có thể truy cập)
+- ❌ `/guide` - Trang guide (không thể truy cập)
+
+### User thường:
+- ✅ `/` - Trang chính (có thể truy cập)
+- ✅ `/live-fully` - Trang du lịch (có thể truy cập)
+- ✅ `/places-to-go` - Trang địa điểm (có thể truy cập)
+- ✅ `/tour-dashboard` - Trang đặt tour (có thể truy cập)
+- ✅ Tất cả các trang du lịch khác (có thể truy cập)
+- ❌ `/admin/dashboard` - Trang admin (không thể truy cập)
+- ❌ `/guide` - Trang guide (không thể truy cập)
 
 ## Các component đã tạo/cập nhật
 

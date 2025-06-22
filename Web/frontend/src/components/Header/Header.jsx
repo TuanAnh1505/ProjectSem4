@@ -103,7 +103,8 @@ const Header = () => {
                           {localStorage.getItem('name') || 'My Account'}
                         </span>
                         <span className={styles.userRole}>
-                          {userRole === 'ADMIN' ? 'Administrator' : 'User'}
+                          {userRole === 'ADMIN' ? 'Administrator' : 
+                           userRole === 'GUIDE' ? 'Tour Guide' : 'User'}
                         </span>
                       </div>
                     </div>

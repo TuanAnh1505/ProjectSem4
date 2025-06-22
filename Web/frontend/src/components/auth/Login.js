@@ -42,10 +42,11 @@ const Login = () => {
 
       // Redirect based on role
       if (role === 'GUIDE') {
-        navigate('/guide');
-      } else if (role === 'ADMIN') {
-        navigate('/admin/dashboard');
+        // Guide có thể truy cập trang chính, không redirect ngay lập tức
+        // navigate('/guide');
+        navigate('/');
       } else {
+        // Admin và user thường đều có thể truy cập trang chính
         navigate('/');
       }
 

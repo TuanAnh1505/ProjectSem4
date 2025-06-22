@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './GuideDashboard.css';
 import { CalendarCheck, Users, Star, Map, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import TourDetailForGuide from './TourDetailForGuide';
+import AuthenticatedImage from './AuthenticatedImage';
 
 const GuideDashboard = () => {
     const [assignments, setAssignments] = useState([]);
@@ -110,7 +111,11 @@ const GuideDashboard = () => {
         return (
             <div className="assignment-card">
                 <div className="card-image-container">
-                    <img src={assignment.tourImage || 'https://placehold.co/600x400/EEE/31343C?text=Tour+Image'} alt={assignment.tourName} className="card-image" />
+                    <AuthenticatedImage 
+                        src={assignment.tourImage} 
+                        alt={assignment.tourName} 
+                        className="card-image" 
+                    />
                     <div className="card-image-overlay"></div>
                     <span className={`card-status-badge ${config.className}`}>
                         {config.icon} {status}

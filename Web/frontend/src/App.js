@@ -44,15 +44,17 @@ const Layout = ({ children }) => {
 const RoleBasedRedirect = () => {
   const userRole = localStorage.getItem('role');
   
-  if (userRole === 'GUIDE') {
-    return <Navigate to="/guide" />;
-  }
+  // Guide và Admin đều có thể truy cập trang chính, không redirect ngay lập tức
+  // if (userRole === 'GUIDE') {
+  //   return <Navigate to="/guide" />;
+  // }
   
-  if (userRole === 'ADMIN') {
-    return <Navigate to="/admin/dashboard" />;
-  }
+  // Admin có thể truy cập trang chính, không redirect ngay lập tức
+  // if (userRole === 'ADMIN') {
+  //   return <Navigate to="/admin/dashboard" />;
+  // }
   
-  // For regular users, show the home page
+  // For all users (including guide and admin), show the home page
   return (
     <Layout>
       <Home />
@@ -70,11 +72,11 @@ const ProtectedRoute = ({ element, requiredRole }) => {
   }
 
   if (requiredRole && userRole !== requiredRole) {
-    // Nếu user là GUIDE nhưng đang cố truy cập trang khác, hiển thị trang access denied
-    if (userRole === 'GUIDE') {
+    // Nếu user là GUIDE nhưng đang cố truy cập trang admin, hiển thị trang access denied
+    if (userRole === 'GUIDE' && requiredRole === 'ADMIN') {
       return <GuideAccessDenied />;
     }
-    // Nếu user là ADMIN nhưng đang cố truy cập trang khác, redirect về admin dashboard
+    // Nếu user là ADMIN nhưng đang cố truy cập trang admin mà không có quyền, redirect về admin dashboard
     if (userRole === 'ADMIN') {
       return <Navigate to="/admin/dashboard" />;
     }
@@ -82,6 +84,8 @@ const ProtectedRoute = ({ element, requiredRole }) => {
     return <Navigate to="/" />;
   }
 
+  // Nếu không có requiredRole hoặc user có đúng role, cho phép truy cập
+  // Admin và Guide có thể truy cập tất cả các trang (cả trang du lịch và trang admin/guide)
   return element;
 };
 
