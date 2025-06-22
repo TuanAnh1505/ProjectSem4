@@ -434,11 +434,12 @@ class GuideService {
       }
 
       final response = await http.put(
-        Uri.parse('$assignmentUrl/$assignmentId/status?newStatus=$newStatus'),
+        Uri.parse('$assignmentUrl/$assignmentId/status'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
+        body: json.encode({'status': newStatus}),
       );
 
       if (response.statusCode == 200) {
@@ -450,6 +451,62 @@ class GuideService {
       }
     } catch (e) {
       throw Exception('Error updating assignment status: $e');
+    }
+  }
+
+  // New method: Auto update assignment status based on time
+  Future<TourGuideAssignment> autoUpdateAssignmentStatus(int assignmentId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('Token not found. Please login again.');
+      }
+
+      final response = await http.put(
+        Uri.parse('$assignmentUrl/$assignmentId/auto-status'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return TourGuideAssignment.fromJson(json.decode(response.body));
+      } else {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['error'] ?? 'Failed to auto update assignment status';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      throw Exception('Error auto updating assignment status: $e');
+    }
+  }
+
+  // New method: Auto update all assignments
+  Future<Map<String, dynamic>> autoUpdateAllAssignments() async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('Token not found. Please login again.');
+      }
+
+      final response = await http.put(
+        Uri.parse('$assignmentUrl/auto-update-all'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['error'] ?? 'Failed to auto update all assignments';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      throw Exception('Error auto updating all assignments: $e');
     }
   }
 }

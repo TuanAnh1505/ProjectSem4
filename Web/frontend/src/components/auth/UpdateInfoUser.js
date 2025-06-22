@@ -213,6 +213,25 @@ const UpdateInfoUser = () => {
         }
     };
 
+    // Helper function to format schedule info
+    const formatScheduleInfo = (scheduleInfo) => {
+        if (!scheduleInfo) return 'Chưa có lịch trình';
+        
+        try {
+            const dateRange = scheduleInfo.split(' - ');
+            if (dateRange.length >= 2) {
+                const startDate = new Date(dateRange[0].trim());
+                const endDate = new Date(dateRange[1].trim());
+                if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                    return `${startDate.toLocaleDateString('vi-VN')} - ${endDate.toLocaleDateString('vi-VN')}`;
+                }
+            }
+            return scheduleInfo;
+        } catch (error) {
+            return scheduleInfo;
+        }
+    };
+
     // Thống kê booking
     const totalBooked = bookings.length;
     const totalCompleted = bookings.filter(b => b.status === 'COMPLETED').length;
@@ -366,15 +385,28 @@ const UpdateInfoUser = () => {
                                                 <MUICard sx={{ p: 3, textAlign: 'center', color: '#888' }}>Chưa có booking nào</MUICard>
                                             ) : (
                                                 pagedBookings.map((booking, idx) => {
-                                                    // Tính thời gian còn lại để hủy tour (giả sử có trường deadline hoặc startDate)
+                                                    // Tính thời gian còn lại để hủy tour
                                                     let cancelDeadline = null;
                                                     let daysLeft = null;
-                                                    if (booking.schedule && booking.schedule.startDate) {
-                                                        // Giả sử hạn chót hủy là 3 ngày trước ngày khởi hành
-                                                        cancelDeadline = new Date(booking.schedule.startDate);
-                                                        cancelDeadline.setDate(cancelDeadline.getDate() - 3);
-                                                        const now = new Date();
-                                                        daysLeft = Math.ceil((cancelDeadline - now) / (1000 * 60 * 60 * 24));
+                                                    if (booking.scheduleInfo) {
+                                                        // Parse scheduleInfo string "startDate - endDate" to get startDate
+                                                        const dateRange = booking.scheduleInfo.split(' - ');
+                                                        if (dateRange.length >= 1) {
+                                                            const startDateStr = dateRange[0].trim();
+                                                            try {
+                                                                // Parse the date string (assuming format like "2024-01-15")
+                                                                const startDate = new Date(startDateStr);
+                                                                if (!isNaN(startDate.getTime())) {
+                                                                    // Giả sử hạn chót hủy là 3 ngày trước ngày khởi hành
+                                                                    cancelDeadline = new Date(startDate);
+                                                                    cancelDeadline.setDate(cancelDeadline.getDate() - 3);
+                                                                    const now = new Date();
+                                                                    daysLeft = Math.ceil((cancelDeadline - now) / (1000 * 60 * 60 * 24));
+                                                                }
+                                                            } catch (error) {
+                                                                console.error('Error parsing date:', startDateStr, error);
+                                                            }
+                                                        }
                                                     }
                                                     return (
                                                         <MUICard key={booking.bookingId} sx={{ p: 2, borderRadius: 3, boxShadow: '0 2px 12px #e3e8f0', border: '1px solid #e3e8f0' }}>
@@ -393,7 +425,9 @@ const UpdateInfoUser = () => {
                                                                     <Grid item xs={12} sm={6} md={3}>
                                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                                             <FaRegCalendarAlt style={{ color: '#1976d2' }} />
-                                                                            <Typography variant="body2">{booking.schedule?.startDate}</Typography>
+                                                                            <Typography variant="body2">
+                                                                                {formatScheduleInfo(booking.scheduleInfo)}
+                                                                            </Typography>
                                                                         </Box>
                                                                     </Grid>
                                                                     <Grid item xs={12} sm={6} md={3}>
@@ -420,7 +454,7 @@ const UpdateInfoUser = () => {
                                                                 {daysLeft !== null && daysLeft >= 0 && booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
                                                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, color: '#1976d2', fontWeight: 500 }}>
                                                                         <FaClock style={{ marginRight: 6 }} />
-                                                                        Thời gian còn lại để hủy tour: Còn {daysLeft} ngày (hạn chót: {cancelDeadline.toLocaleDateString('vi-VN')})
+                                                                        Thời gian còn lại để hủy tour: Còn {daysLeft} ngày (hạn chót: {cancelDeadline?.toLocaleDateString('vi-VN')})
                                                                     </Box>
                                                                 )}
                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
@@ -633,9 +667,7 @@ const UpdateInfoUser = () => {
                                         Lịch trình:
                                     </Typography>
                                     <Typography>
-                                        {selectedBooking.scheduleInfo || 
-                                         (selectedBooking.schedule && 
-                                          `${selectedBooking.schedule.startDate} - ${selectedBooking.schedule.endDate}`)}
+                                        {formatScheduleInfo(selectedBooking.scheduleInfo)}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12}>

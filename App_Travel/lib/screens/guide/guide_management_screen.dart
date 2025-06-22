@@ -30,6 +30,12 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
     super.initState();
     _loadAssignments();
     _scrollController.addListener(_onScroll);
+    // Auto refresh every 5 minutes to update statuses
+    Timer.periodic(const Duration(minutes: 5), (timer) {
+      if (mounted) {
+        _autoUpdateStatuses();
+      }
+    });
   }
 
   @override
@@ -319,6 +325,18 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
               onPressed: () => _loadAssignments(refresh: true),
               icon: const Icon(Icons.refresh),
               tooltip: 'Làm mới',
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: () => _autoUpdateStatuses(),
+              icon: const Icon(Icons.auto_awesome),
+              tooltip: 'Tự động cập nhật trạng thái dựa trên thời gian',
             ),
           ),
         ],
@@ -799,28 +817,27 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
                 top: BorderSide(color: Color(0xFFE5E7EB)),
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8.0,
+              runSpacing: 8.0,
               children: [
-                // Show status update button only for main_guide and appropriate statuses
+                // Show manual status update button only for main_guide and when manual update is needed
                 if (assignment.role.toLowerCase() == 'main_guide' &&
-                    ['assigned', 'completed', 'inprogress'].contains(_normalizeStatus(assignment.status)) &&
-                    !isPast) ...[
+                    _shouldShowManualUpdateButton(assignment))
                   OutlinedButton.icon(
                     onPressed: () => _showStatusUpdateDialog(assignment),
-                    icon: const Icon(Icons.update, size: 18),
-                    label: const Text('Cập nhật trạng thái'),
+                    icon: const Icon(Icons.tune_outlined, size: 18),
+                    label: const Text('Tùy chỉnh'), // Clarified label
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
-                      side: const BorderSide(color: Colors.blue),
+                      foregroundColor: Colors.deepPurple,
+                      side: const BorderSide(color: Colors.deepPurple),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                ],
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -848,19 +865,35 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
 
   Widget _buildStatusBadge(String status, bool isPast) {
     final color = _getStatusColor(status, isPast);
+    final isAutoUpdated = isPast && (_normalizeStatus(status) == 'assigned' || _normalizeStatus(status) == 'inprogress');
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
+        border: isAutoUpdated ? Border.all(color: color, width: 1) : null,
       ),
-      child: Text(
-        _getStatusText(status, isPast),
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _getStatusText(status, isPast),
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (isAutoUpdated) ...[
+            const SizedBox(width: 4),
+            Icon(
+              Icons.auto_awesome,
+              size: 12,
+              color: color,
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -888,7 +921,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
   String _getStatusText(String status, bool isPast) {
     final normalizedStatus = _normalizeStatus(status);
     if (isPast && (normalizedStatus == 'assigned' || normalizedStatus == 'inprogress')) {
-      return 'Đã kết thúc';
+      return 'Đã kết thúc (Tự động)';
     }
 
     switch (normalizedStatus) {
@@ -911,6 +944,66 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
 
   void _showAssignmentDetails(TourGuideAssignment assignment) {
     // No longer used, navigation is now handled in the button.
+  }
+
+  // New method: Auto update statuses for all assignments
+  Future<void> _autoUpdateStatuses() async {
+    try {
+      final result = await _guideService.autoUpdateAllAssignments();
+      // Refresh the assignments list to show updated statuses
+      _loadAssignments(refresh: true);
+      
+      if (mounted) {
+        final updatedCount = result['updatedAssignments'] ?? 0;
+        if (updatedCount > 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Đã tự động cập nhật $updatedCount trạng thái'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tất cả trạng thái đã được cập nhật'),
+              backgroundColor: Colors.blue,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Silently handle errors for auto updates
+      print('Auto update error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi tự động cập nhật: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  bool _shouldShowManualUpdateButton(TourGuideAssignment assignment) {
+    final currentStatus = _normalizeStatus(assignment.status);
+    final isPast = assignment.endDate.isBefore(DateUtils.dateOnly(DateTime.now()));
+
+    // Don't show manual update for completed or cancelled tours
+    if (currentStatus == 'completed' || currentStatus == 'cancelled') {
+      return false;
+    }
+
+    // Don't show manual update for past tours that should be auto-completed
+    if (isPast && (currentStatus == 'assigned' || currentStatus == 'inprogress')) {
+      return false;
+    }
+
+    // Show manual update for active tours that need status changes
+    return true;
   }
 }
 

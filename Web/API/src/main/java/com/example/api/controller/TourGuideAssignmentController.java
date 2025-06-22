@@ -100,8 +100,10 @@ public class TourGuideAssignmentController {
         }
     }
 
+
+/////////
     @PutMapping("/{assignmentId}/status")
-    public ResponseEntity<TourGuideAssignmentDTO> updateAssignmentStatus(
+    public ResponseEntity<?> updateAssignmentStatus(
             @PathVariable Integer assignmentId,
             @RequestBody Map<String, String> request) {
         try {
@@ -109,9 +111,32 @@ public class TourGuideAssignmentController {
             TourGuideAssignmentDTO updated = assignmentService.updateAssignmentStatusByMainGuide(assignmentId, newStatus);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         }
     }
+
+    @PutMapping("/{assignmentId}/auto-status")
+    public ResponseEntity<?> autoUpdateAssignmentStatus(
+            @PathVariable Integer assignmentId) {
+        try {
+            TourGuideAssignmentDTO updated = assignmentService.autoUpdateAssignmentStatus(assignmentId);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/auto-update-all")
+    public ResponseEntity<?> autoUpdateAllAssignments() {
+        try {
+            Map<String, Object> result = assignmentService.autoUpdateAllAssignments();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+//////
+
 
     @DeleteMapping("/{assignmentId}")
     public ResponseEntity<Void> deleteAssignment(

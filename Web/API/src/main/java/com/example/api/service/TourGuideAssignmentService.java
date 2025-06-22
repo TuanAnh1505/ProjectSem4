@@ -437,4 +437,76 @@ public class TourGuideAssignmentService {
         dto.setPassengerType(passenger.getPassengerType() != null ? passenger.getPassengerType().name() : null);
         return dto;
     }
+
+
+
+    //////////////////////////////
+    // New method: Auto update assignment status based on time
+    public TourGuideAssignmentDTO autoUpdateAssignmentStatus(Integer assignmentId) {
+        TourGuideAssignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Assignment not found with id: " + assignmentId));
+
+        LocalDate today = LocalDate.now();
+        TourGuideAssignment.AssignmentStatus newStatus = determineAutoStatus(assignment, today);
+
+        if (newStatus != assignment.getStatus()) {
+            assignment.setStatus(newStatus);
+            TourGuideAssignment updatedAssignment = assignmentRepository.save(assignment);
+            return convertToDTO(updatedAssignment);
+        }
+
+        return convertToDTO(assignment);
+    }
+
+    // New method: Auto update all assignments
+    public Map<String, Object> autoUpdateAllAssignments() {
+        List<TourGuideAssignment> allAssignments = assignmentRepository.findAll();
+        LocalDate today = LocalDate.now();
+        
+        int updatedCount = 0;
+        int totalCount = allAssignments.size();
+
+        for (TourGuideAssignment assignment : allAssignments) {
+            TourGuideAssignment.AssignmentStatus newStatus = determineAutoStatus(assignment, today);
+            if (newStatus != assignment.getStatus()) {
+                assignment.setStatus(newStatus);
+                assignmentRepository.save(assignment);
+                updatedCount++;
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalAssignments", totalCount);
+        result.put("updatedAssignments", updatedCount);
+        result.put("message", "Auto-updated " + updatedCount + " out of " + totalCount + " assignments");
+        
+        return result;
+    }
+
+    // Helper method to determine status based on time
+    private TourGuideAssignment.AssignmentStatus determineAutoStatus(TourGuideAssignment assignment, LocalDate today) {
+        // If assignment is already cancelled, don't change it
+        if (assignment.getStatus() == TourGuideAssignment.AssignmentStatus.cancelled) {
+            return assignment.getStatus();
+        }
+
+        // If assignment has ended, mark as completed
+        if (assignment.getEndDate().isBefore(today)) {
+            return TourGuideAssignment.AssignmentStatus.completed;
+        }
+
+        // If assignment is currently ongoing (today is between start and end date)
+        if (!assignment.getStartDate().isAfter(today) && !assignment.getEndDate().isBefore(today)) {
+            return TourGuideAssignment.AssignmentStatus.inprogress;
+        }
+
+        // If assignment hasn't started yet, keep as assigned
+        if (assignment.getStartDate().isAfter(today)) {
+            return TourGuideAssignment.AssignmentStatus.assigned;
+        }
+
+        // Default case
+        return assignment.getStatus();
+    }
+    ////////////////////////////////
 } 
