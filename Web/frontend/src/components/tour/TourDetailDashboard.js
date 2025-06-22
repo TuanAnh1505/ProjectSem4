@@ -42,6 +42,11 @@ export default function TourDetailDashboard() {
   // State để điều khiển hiển thị form chia sẻ trải nghiệm
   const [showExpForm, setShowExpForm] = useState(false);
 
+  // Các tour khác
+  const [otherTours, setOtherTours] = useState([]);
+  const [otherToursLoading, setOtherToursLoading] = useState(true);
+  const [otherToursError, setOtherToursError] = useState('');
+
   useEffect(() => {
     const fetchTour = async () => {
       try {
@@ -278,6 +283,22 @@ export default function TourDetailDashboard() {
     };
     if (tourId) fetchFeedbacks();
   }, [tourId]);
+
+  useEffect(() => {
+    const fetchTours = async () => {
+      try {
+        const res = await axios.get('http://localhost:8080/api/tours?limit=6');
+        const sixTours = Array.isArray(res.data) ? res.data.slice(0, 6) : [];
+        setOtherTours(sixTours);
+        setOtherToursError('');
+      } catch (err) {
+        setOtherToursError('Không thể tải các tour khác.');
+      } finally {
+        setOtherToursLoading(false);
+      }
+    };
+    fetchTours();
+  }, []);
 
   if (loading) return <div className="loading">Loading tour details...</div>;
   if (error) return <div className="error-box">{error}</div>;
@@ -644,16 +665,37 @@ export default function TourDetailDashboard() {
       </div>
 
       {/* Hiển thị danh sách trải nghiệm đã chia sẻ */}
-      <div className={styles['tdd-sharedExpSection']}>
-        <h3 className={styles['tdd-sharedExpTitle']} style={{ fontFamily: 'Inter, Segoe UI, Arial, sans-serif', fontWeight: 800, color: '#222' }}>
-          Các trải nghiệm đã chia sẻ
-        </h3>
+      <div className={styles['tdd-sharedExpSection']} style={{ marginTop: 56 }}>
+        <h3 style={{
+          fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+          fontWeight: 900,
+          color: '#222',
+          fontSize: 26,
+          textAlign: 'center',
+          marginBottom: 8,
+          letterSpacing: 1.1,
+        }}>Các trải nghiệm đã chia sẻ</h3>
+        <div style={{
+          width: 54,
+          height: 3,
+          background: 'linear-gradient(90deg, #1976d2 60%, #00b4d8 100%)',
+          borderRadius: 2,
+          margin: '0 auto 32px auto',
+        }} />
         {(!Array.isArray(experiences) || experiences.length === 0) ? (
-          <div className={styles['tdd-noExp']} style={{ fontFamily: 'inherit', color: '#888', fontWeight: 500 }}>
+          <div style={{ textAlign: 'center', color: '#b0bec5', fontWeight: 600, fontSize: 20, padding: '36px 0' }}>
+            <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>😔</span>
             Chưa có trải nghiệm nào cho tour này.
           </div>
         ) : (
-          <div className={styles['tdd-sharedExpList']}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 32,
+            width: '100%',
+            maxWidth: 1100,
+            margin: '0 auto',
+          }}>
             {(Array.isArray(experiences) ? experiences : [])
               .filter(exp => (exp.status || '').toLowerCase() === 'approved')
               .slice()
@@ -663,28 +705,40 @@ export default function TourDetailDashboard() {
                 const images = (exp.mediaList || []).filter(m => m.fileType === 'image');
                 const videos = (exp.mediaList || []).filter(m => m.fileType === 'video');
                 return (
-                  <div key={exp.experienceId} className={styles['tdd-sharedExpCard']} style={{ background: '#fff', border: '1.5px solid #e0e0e0', borderRadius: 16, boxShadow: '0 2px 12px #e3e8f0', marginBottom: 24, padding: 20, fontFamily: 'Inter, Segoe UI, Arial, sans-serif' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 700, color: '#1976d2' }}>
+                  <div key={exp.experienceId} style={{
+                    background: '#fff',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 22,
+                    boxShadow: '0 4px 24px #e3e8f0',
+                    padding: 28,
+                    fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    minHeight: 220,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
+                      <div style={{ width: 54, height: 54, borderRadius: '50%', background: '#e3f2fd', border: '3px solid #1976d2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#1976d2' }}>
                         {exp.userFullName ? exp.userFullName[0].toUpperCase() : 'A'}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: 17, color: '#222' }}>{exp.userFullName || 'Ẩn danh'}</div>
-                        <div style={{ fontSize: 13, color: '#888', fontWeight: 500 }}>{exp.createdAt && (new Date(exp.createdAt).toLocaleString())}</div>
+                        <div style={{ fontWeight: 800, fontSize: 18, color: '#1976d2', marginBottom: 2 }}>{exp.userFullName || 'Ẩn danh'}</div>
+                        <div style={{ fontSize: 14, color: '#90a4ae', fontWeight: 600 }}>{exp.createdAt && (new Date(exp.createdAt).toLocaleString())}</div>
                       </div>
                     </div>
-                    <div className={styles['tdd-sharedExpCardTitle']} style={{ fontWeight: 800, fontSize: 18, color: '#1976d2', marginBottom: 6, fontFamily: 'inherit' }}>{exp.title || 'Trải nghiệm'}</div>
-                    <div className={styles['tdd-sharedExpCardContent']} style={{ color: '#222', fontSize: 16, marginBottom: 10, fontFamily: 'inherit' }}>{exp.content}</div>
+                    <div style={{ fontWeight: 800, fontSize: 19, color: '#222', marginBottom: 8, fontFamily: 'inherit' }}>{exp.title || 'Trải nghiệm'}</div>
+                    <div style={{ color: '#444', fontSize: 16, marginBottom: 12, fontFamily: 'inherit', lineHeight: 1.6 }}>{exp.content}</div>
                     {(images.length > 0 || videos.length > 0) && (
-                      <div className={styles['tdd-sharedExpCardMedia']} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
+                      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 4 }}>
                         {images.slice(0, 3).map((m, idx) => (
                           <img
                             key={m.mediaId}
                             src={m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}`}
                             alt="exp-img"
-                            className={styles['tdd-sharedExpCardImg']}
-                            style={{ cursor: 'pointer', width: 90, height: 90, objectFit: 'cover', borderRadius: 8, border: '2px solid #e0e0e0', background: '#fafafa' }}
+                            style={{ cursor: 'pointer', width: 92, height: 92, objectFit: 'cover', borderRadius: 12, border: '2px solid #e0e0e0', background: '#fafafa', transition: 'transform 0.18s', boxShadow: '0 2px 8px #e3e8f0' }}
                             onClick={() => setMediaOverlay({ open: true, type: 'image', url: m.fileUrl.startsWith('/uploads/media/') ? m.fileUrl : `/uploads/media/${m.fileUrl}` })}
+                            onMouseOver={e => e.currentTarget.style.transform = 'scale(1.08)'}
+                            onMouseOut={e => e.currentTarget.style.transform = 'none'}
                           />
                         ))}
                         {videos.map(m => {
@@ -694,9 +748,10 @@ export default function TourDetailDashboard() {
                               key={m.mediaId}
                               src={url}
                               controls
-                              className={styles['tdd-sharedExpCardVideo']}
-                              style={{ cursor: 'pointer', width: 90, height: 90, objectFit: 'cover', borderRadius: 8, border: '2px solid #e0e0e0', background: '#fafafa' }}
+                              style={{ cursor: 'pointer', width: 92, height: 92, objectFit: 'cover', borderRadius: 12, border: '2px solid #e0e0e0', background: '#fafafa', transition: 'transform 0.18s', boxShadow: '0 2px 8px #e3e8f0' }}
                               onClick={e => { e.preventDefault(); setMediaOverlay({ open: true, type: 'video', url }); }}
+                              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.08)'}
+                              onMouseOut={e => e.currentTarget.style.transform = 'none'}
                             />
                           );
                         })}
@@ -710,42 +765,70 @@ export default function TourDetailDashboard() {
       </div>
 
       {/* Hiển thị danh sách feedback (đánh giá) */}
-      <div className={styles['tdd-feedbackSection']}>
-        <h3 className={styles['tdd-feedbackTitle']} style={{ fontFamily: 'Inter, Segoe UI, Arial, sans-serif', fontWeight: 800, color: '#222' }}>
-          Đánh giá của khách hàng
-        </h3>
+      <div className={styles['tdd-feedbackSection']} style={{ marginTop: 56 }}>
+        <h3 style={{
+          fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+          fontWeight: 900,
+          color: '#222',
+          fontSize: 26,
+          textAlign: 'center',
+          marginBottom: 8,
+          letterSpacing: 1.1,
+        }}>Đánh giá của khách hàng</h3>
+        <div style={{
+          width: 54,
+          height: 3,
+          background: 'linear-gradient(90deg, #1976d2 60%, #00b4d8 100%)',
+          borderRadius: 2,
+          margin: '0 auto 32px auto',
+        }} />
         {feedbackLoading ? (
-          <div style={{ fontFamily: 'inherit', color: '#888', fontWeight: 500 }}>Đang tải đánh giá...</div>
+          <div style={{ fontFamily: 'inherit', color: '#b0bec5', fontWeight: 600, textAlign: 'center', fontSize: 20, padding: '36px 0' }}>Đang tải đánh giá...</div>
         ) : feedbacks.length === 0 ? (
-          <div className={styles['tdd-noFeedback']} style={{ fontFamily: 'inherit', color: '#888', fontWeight: 500 }}>
+          <div style={{ fontFamily: 'inherit', color: '#b0bec5', fontWeight: 600, textAlign: 'center', fontSize: 20, padding: '36px 0' }}>
+            <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>📝</span>
             Chưa có đánh giá nào cho tour này.
           </div>
         ) : (
-          <div className={styles['tdd-feedbackList']}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 32,
+            width: '100%',
+            maxWidth: 1100,
+            margin: '0 auto',
+          }}>
             {feedbacks
               .filter(fb => (fb.statusName || '').toLowerCase() === 'approved')
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
               .slice(0, 4)
               .map(fb => (
-                <div key={fb.feedbackId} className={styles['tdd-feedbackCard']} style={{ background: '#fff', border: '1.5px solid #e0e0e0', borderRadius: 16, boxShadow: '0 2px 12px #e3e8f0', marginBottom: 24, padding: 20, fontFamily: 'Inter, Segoe UI, Arial, sans-serif' }}>
-                  <div className={styles['tdd-feedbackCardStars']} style={{ marginBottom: 6 }}>
-                    {Array.from({ length: fb.rating }, (_, i) => <span key={i} style={{ color: '#FFD700', fontSize: 22 }}>★</span>)}
-                    {Array.from({ length: 5 - fb.rating }, (_, i) => <span key={i} style={{ color: '#e0e0e0', fontSize: 22 }}>★</span>)}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: '#1976d2' }}>
+                <div key={fb.feedbackId} style={{
+                  background: '#fff',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: 22,
+                  boxShadow: '0 4px 24px #e3e8f0',
+                  padding: 28,
+                  fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  minHeight: 180,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#f5f5f5', border: '3px solid #1976d2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: '#1976d2' }}>
                       {fb.userFullName ? fb.userFullName[0].toUpperCase() : 'A'}
                     </div>
-                    <div className={styles['tdd-feedbackCardUser']} style={{ fontWeight: 700, color: '#222', fontSize: 15, fontFamily: 'inherit' }}>
-                      👤 {fb.userFullName || 'Ẩn danh'}
+                    <div>
+                      <div style={{ fontWeight: 800, color: '#1976d2', fontSize: 17 }}>{fb.userFullName || 'Ẩn danh'}</div>
+                      <div style={{ color: '#90a4ae', fontSize: 13, fontWeight: 600 }}>{fb.createdAt && (new Date(fb.createdAt).toLocaleString())}</div>
                     </div>
                   </div>
-                  <div className={styles['tdd-feedbackCardDate']} style={{ color: '#888', fontSize: 13, fontWeight: 500, fontFamily: 'inherit', marginBottom: 8 }}>
-                    {fb.createdAt && (new Date(fb.createdAt).toLocaleString())}
+                  <div style={{ marginBottom: 8 }}>
+                    {Array.from({ length: fb.rating }, (_, i) => <span key={i} style={{ color: '#FFD700', fontSize: 22, marginRight: 2 }}>★</span>)}
+                    {Array.from({ length: 5 - fb.rating }, (_, i) => <span key={i} style={{ color: '#e0e0e0', fontSize: 22, marginRight: 2 }}>★</span>)}
                   </div>
-                  <div className={styles['tdd-feedbackCardContent']} style={{ color: '#222', fontSize: 16, fontFamily: 'inherit' }}>
-                    {fb.message}
-                  </div>
+                  <div style={{ color: '#222', fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{fb.message}</div>
                 </div>
               ))}
           </div>
@@ -842,6 +925,139 @@ export default function TourDetailDashboard() {
           </div>
         </div>
       )}
+
+      {/* Các tour khác */}
+      <div style={{ margin: '56px 0 0 0', width: '100%' }}>
+        <h2 style={{
+          fontWeight: 900,
+          fontSize: 28,
+          color: '#222',
+          marginBottom: 8,
+          fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+          textAlign: 'center',
+          letterSpacing: 1.2,
+        }}>Các tour khác</h2>
+        <div style={{
+          width: 60,
+          height: 4,
+          background: 'linear-gradient(90deg, #1976d2 60%, #00b4d8 100%)',
+          borderRadius: 2,
+          margin: '0 auto 32px auto',
+        }} />
+        {otherToursLoading ? (
+          <div style={{ color: '#888', fontWeight: 500, textAlign: 'center' }}>Đang tải...</div>
+        ) : otherToursError ? (
+          <div style={{ color: '#d32f2f', fontWeight: 600, textAlign: 'center' }}>{otherToursError}</div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: 36,
+            width: '100%',
+            maxWidth: 1100,
+            margin: '0 auto',
+          }}>
+            {otherTours.slice(0, 3).map(tour => (
+              <div
+                key={tour.tourId}
+                style={{
+                  background: '#fff',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: 28,
+                  boxShadow: '0 6px 32px #e3e8f0',
+                  padding: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                  transition: 'box-shadow 0.22s, transform 0.22s, border 0.22s',
+                  cursor: 'pointer',
+                  minHeight: 340,
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+                onClick={() => navigate(`/tours/${tour.tourId}`)}
+                onMouseOver={e => {
+                  e.currentTarget.style.boxShadow = '0 12px 40px #b0e0ff55';
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.025)';
+                  e.currentTarget.style.border = '1.5px solid #1976d2';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.boxShadow = '0 6px 32px #e3e8f0';
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.border = '1px solid #e0e0e0';
+                }}
+              >
+                <div style={{ width: '100%', height: 150, overflow: 'hidden', borderTopLeftRadius: 28, borderTopRightRadius: 28, position: 'relative' }}>
+                  <img
+                    src={tour.imageUrl ? `http://localhost:8080${tour.imageUrl}` : '/no-image.png'}
+                    alt={tour.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderTopLeftRadius: 28, borderTopRightRadius: 28, transition: 'filter 0.2s', filter: 'brightness(0.96)' }}
+                    onMouseOver={e => e.currentTarget.style.filter = 'brightness(1.08)'}
+                    onMouseOut={e => e.currentTarget.style.filter = 'brightness(0.96)'}
+                  />
+                  {/* Price badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 14,
+                    right: 14,
+                    background: 'linear-gradient(90deg, #ffb300 60%, #ff7043 100%)',
+                    color: '#fff',
+                    fontWeight: 900,
+                    fontSize: 16,
+                    padding: '6px 16px',
+                    borderRadius: 16,
+                    boxShadow: '0 2px 8px #ffb30033',
+                    letterSpacing: 0.5,
+                  }}>{tour.price?.toLocaleString()} đ</div>
+                  {/* Overlay gradient for text readability */}
+                  <div style={{
+                    position: 'absolute',
+                    left: 0, right: 0, bottom: 0, height: 38,
+                    background: 'linear-gradient(0deg, #fff 60%, #fff0 100%)',
+                  }} />
+                </div>
+                <div style={{ padding: '18px 18px 14px 18px', width: '100%', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                  <div style={{ fontWeight: 800, fontSize: 18, color: '#222', marginBottom: 8, textAlign: 'left', fontFamily: 'inherit', minHeight: 44, display: 'flex', alignItems: 'center' }}>{tour.name}</div>
+                  <div style={{ color: '#888', fontSize: 15, marginBottom: 10, textAlign: 'left', fontWeight: 500, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {tour.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>📍<span>{tour.location}</span></span>}
+                    {tour.duration && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>🕒<span>{tour.duration} ngày</span></span>}
+                    {tour.maxParticipants && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>👥<span>{tour.maxParticipants} khách</span></span>}
+                  </div>
+                  <button
+                    style={{
+                      background: 'transparent',
+                      color: '#1976d2',
+                      border: '2px solid #1976d2',
+                      borderRadius: 18,
+                      padding: '10px 0',
+                      fontWeight: 800,
+                      fontSize: 16,
+                      width: '100%',
+                      marginTop: 'auto',
+                      boxShadow: 'none',
+                      letterSpacing: 1,
+                      transition: 'background 0.18s, color 0.18s',
+                      cursor: 'pointer',
+                    }}
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`/tours/${tour.tourId}`);
+                    }}
+                    onMouseOver={e => {
+                      e.currentTarget.style.background = '#1976d2';
+                      e.currentTarget.style.color = '#fff';
+                    }}
+                    onMouseOut={e => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = '#1976d2';
+                    }}
+                  >Xem chi tiết</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

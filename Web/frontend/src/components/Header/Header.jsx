@@ -105,17 +105,12 @@ const Header = () => {
                     <button
                       className={styles.userMenuItem}
                       onClick={() => {
-                        const publicId = localStorage.getItem('publicId');
                         setUserMenuOpen(false);
-                        if (publicId) {
-                          navigate(`/account/${publicId}`);
-                        } else {
-                          navigate('/login');
-                        }
+                        navigate('/account');
                       }}
                     >
-                      <SettingsIcon className={styles.menuIcon} />
-                      <span>Account Settings</span>
+                      <LogoutIcon className={styles.menuIcon} />
+                      <span>Booking</span>
                     </button>
                     
                     <button
