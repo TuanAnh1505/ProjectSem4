@@ -123,76 +123,105 @@
 
 /* === Overview Tab === */
 .overview-tab {
-    display: grid;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 }
 
 .info-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    background-color: var(--card-bg);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f2f5;
 }
 
 .info-label {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 8px;
     font-weight: 500;
-    color: var(--text-secondary);
+    color: #5a6a7b;
+    flex-shrink: 0;
 }
 
 .info-value {
-    font-weight: 600;
     color: var(--text-primary);
+    text-align: right;
+    font-weight: 500;
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 .status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
     font-size: 0.8rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: #53c462;
+    font-size: 18px;
 }
 
-.status-available {
-    background-color: #10b981;
-    color: white;
+.status-badge.status-completed { background-color: #28a745; }
+.status-badge.status-ongoing { background-color: #007bff; }
+.status-badge.status-upcoming { background-color: #ffc107; color: #333; }
+.status-badge.status-cancelled { background-color: #dc3545; }
+
+/* New Description Section Styles */
+.description-section {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin: 8px 0;
+    overflow: hidden;
 }
 
-.status-full {
-    background-color: #f59e0b;
-    color: white;
+.description-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #343a40;
+    border-bottom: 1px solid #e9ecef;
 }
 
-.status-cancelled {
-    background-color: #ef4444;
-    color: white;
+.description-content {
+    padding: 12px 16px;
+    line-height: 1.6;
+    color: #495057;
+    font-size: 0.95rem;
 }
 
-.status-pending {
-    background-color: #6b7280;
-    color: white;
+.description-content.truncated p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 6; /* Limits the text to 6 lines */
+    -webkit-box-orient: vertical;
 }
 
-.status-completed {
-    background-color: #3b82f6;
-    color: white;
+.description-content p {
+    margin: 0;
 }
 
-.status-closed {
-    background-color: #1f2937;
-    color: white;
+.description-footer {
+    padding: 0 16px 12px;
+    text-align: right;
 }
 
-.status-n/a {
-    background-color: #9ca3af;
-    color: white;
+.description-footer .expand-button {
+    background-color: transparent;
+    border: none;
+    color: #007bff;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 0.9rem;
+}
+
+.description-footer .expand-button:hover {
+    text-decoration: underline;
 }
 
 /* === Itinerary Tab === */
@@ -299,61 +328,104 @@
 /* === Passengers Tab === */
 .passengers-tab {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+
+    
+}
+
+.passengers-tab-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #8696a7;
+    text-align: center;
+    min-height: 200px;
+}
+
+.passengers-tab-empty .empty-icon {
+    margin-bottom: 16px;
+    color: #b0c0d1;
 }
 
 .passenger-card {
     background-color: var(--card-bg);
-    border-radius: 8px;
     border: 1px solid var(--border-color);
-    padding: 1rem;
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.passenger-info {
+.passenger-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.passenger-card-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
+    gap: 16px;
     border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
 }
 
-.passenger-icon {
-    width: 40px;
-    height: 40px;
-    padding: 8px;
+.passenger-avatar {
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background-color: var(--main-bg);
-    color: var(--sidebar-active-bg);
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 600;
 }
 
-.passenger-details {
+.passenger-main-info {
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 .passenger-name {
     font-weight: 600;
     color: var(--text-primary);
+    font-size: 1.05rem;
 }
 
-.passenger-gender {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
+.passenger-gender-badge {
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 10px;
+    width: fit-content;
+    font-weight: 500;
 }
 
-.passenger-contact {
+.gender-nam { background-color: #e7f3ff; color: #007bff; }
+.gender-nữ { background-color: #fce8f3; color: #d63384; }
+.gender-khác { background-color: #e9ecef; color: #495057; }
+
+.passenger-card-body {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    font-size: 0.9rem;
+    gap: 12px;
 }
 
-.passenger-contact .info-row {
-    background: transparent;
-    border: none;
-    padding: 0;
+.passenger-contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.contact-icon {
+    flex-shrink: 0;
+    color: #8696a7;
 }
 
 /* Modal Footer */
@@ -514,4 +586,15 @@
 .itinerary-day-title .day-label {
     color: #007bff;
     font-weight: 700;
+}
+
+.time-highlight {
+    font-weight: 700;
+    color: #1a2533;
+}
+
+.itinerary-paragraph {
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+    color: #2c3e50;
 } 
