@@ -173,9 +173,9 @@ const BookingConfirmation = () => {
           <div className="confirmation-box" style={{ border: '1px solid #bbbbbb', background: '#fff', borderRadius: 8, padding: 20, boxShadow: '0 2px 8px #eee' }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', gap: 16, marginBottom: 16, alignItems: 'center' }}>
-                {tourInfo.imageUrl ? (
+                {tourInfo.imageUrls && tourInfo.imageUrls.length > 0 ? (
                   <img 
-                    src={`http://localhost:8080${tourInfo.imageUrl}`} 
+                    src={`http://localhost:8080${tourInfo.imageUrls[0]}`} 
                     alt={tourInfo.name} 
                     style={{ 
                       width: 200, 

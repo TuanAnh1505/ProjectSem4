@@ -10,23 +10,31 @@ const DetailTour = () => {
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [destinations, setDestinations] = useState([]);
 
   useEffect(() => {
-    const fetchTour = async () => {
+    const fetchTourData = async () => {
+      setLoading(true);
       try {
-        
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const response = await axios.get(`http://localhost:8080/api/tours/${tourId}`, config);
-        setTour(response.data);
-        setLoading(false);
+        
+        // Fetch main tour details
+        const tourResponse = await axios.get(`http://localhost:8080/api/tours/${tourId}`, config);
+        setTour(tourResponse.data);
+
+        // Fetch tour destinations with images
+        const destinationsResponse = await axios.get(`http://localhost:8080/api/tours/${tourId}/destinations`, config);
+        setDestinations(destinationsResponse.data);
+
       } catch (err) {
         setError('Không thể tải thông tin tour. Vui lòng thử lại sau.');
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchTour();
+    fetchTourData();
   }, [tourId]);
 
   if (loading) {
@@ -48,11 +56,17 @@ const DetailTour = () => {
   return (
     <div className="tour-detail-container">
       <div className="tour-detail-hero">
-        <img 
-          src={tour.imageUrl} 
-          alt={tour.name} 
-          className="tour-detail-hero-image"
-        />
+        {tour.imageUrls && tour.imageUrls.length > 0 ? (
+          <img 
+            src={`http://localhost:8080${tour.imageUrls[0]}`} 
+            alt={tour.name} 
+            className="tour-detail-hero-image"
+          />
+        ) : (
+          <div className="tour-detail-hero-placeholder">
+            <span>No Image Available</span>
+          </div>
+        )}
         <div className="tour-detail-hero-content">
           <h1 className="tour-detail-title" style={{color: 'white'}}>{tour.name}</h1>
           {/* <p className="tour-detail-subtitle" style={{color: 'white'}}>{tour.description}</p> */}
@@ -93,16 +107,29 @@ const DetailTour = () => {
             </div>
           </div>
 
-          {tour.destinations && tour.destinations.length > 0 && (
+          {destinations && destinations.length > 0 && (
             <div className="tour-detail-section">
               <h2 className="tour-detail-section-title">
-                <FaMapMarkerAlt /> Điểm đến
+                <FaMapMarkerAlt /> Địa điểm nổi bật
               </h2>
-              <div className="tour-detail-list">
-                {tour.destinations.map((destination) => (
-                  <div key={destination.id} className="tour-detail-list-item">
-                    <h3 className="tour-detail-list-item-title">{destination.name}</h3>
-                    <p className="tour-detail-list-item-date">{destination.description}</p>
+              <div className="destinationsGrid">
+                {destinations.map((destination) => (
+                  <div key={destination.id} className="destinationCard">
+                     {destination.imageUrls && destination.imageUrls.length > 0 ? (
+                      <img 
+                        src={`http://localhost:8080${destination.imageUrls[0]}`} 
+                        alt={destination.name} 
+                        className="destinationImage"
+                      />
+                    ) : (
+                      <div className="destinationImagePlaceholder">
+                        <span>No Image</span>
+                      </div>
+                    )}
+                    <div className="destinationInfo">
+                      <h3 className="destinationName">{destination.name}</h3>
+                      <p className="destinationDescription">{destination.description}</p>
+                    </div>
                   </div>
                 ))}
               </div>

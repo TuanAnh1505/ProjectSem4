@@ -35,7 +35,17 @@ public class TourController {
     private final FeedbackService feedbackService;
 
     @GetMapping
-    public ResponseEntity<List<Tour>> getAllTours() {
+    public ResponseEntity<List<Tour>> getAllTours(
+            @RequestParam(required = false) Integer destinationId,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice
+    ) {
+        boolean hasFilter = destinationId != null || month != null || year != null || minPrice != null || maxPrice != null;
+        if (hasFilter) {
+            return ResponseEntity.ok(tourService.getFilteredTours(destinationId, month, year, minPrice, maxPrice));
+        }
         return ResponseEntity.ok(tourService.getAllTours());
     }
 
