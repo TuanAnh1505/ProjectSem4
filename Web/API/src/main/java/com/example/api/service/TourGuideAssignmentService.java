@@ -127,7 +127,9 @@ public class TourGuideAssignmentService {
 
         TourGuideAssignment assignment = new TourGuideAssignment();
         assignment.setTour(tour);
+        assignment.setTourId(dto.getTourId());
         assignment.setGuide(guide);
+        assignment.setGuideId(dto.getGuideId());
         assignment.setTourSchedule(schedule);
         assignment.setRole(dto.getRole());
         assignment.setStartDate(dto.getStartDate());
@@ -362,6 +364,7 @@ public class TourGuideAssignmentService {
         dto.setAssignmentId(assignment.getAssignmentId());
         dto.setTourId(assignment.getTourId());
         dto.setGuideId(assignment.getGuideId());
+        dto.setScheduleId(assignment.getTourSchedule() != null ? assignment.getTourSchedule().getScheduleId() : null);
         dto.setRole(assignment.getRole());
         dto.setStartDate(assignment.getStartDate());
         dto.setEndDate(assignment.getEndDate());

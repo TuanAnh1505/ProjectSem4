@@ -30,7 +30,15 @@ const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   console.log('BookingConfirmation location.state:', location.state);
-  const { bookingId, bookingCode, passengers, tourInfo, contactInfo, itineraries = [] } = location.state || {};
+  const { bookingId, bookingCode, passengers, tourInfo, contactInfo, itineraries = [], finalPrice, basePrice, passengerCounts } = location.state || {};
+
+  // Log để debug giá nhận được
+  console.log('BookingConfirmation - Giá nhận được:', {
+    finalPrice,
+    basePrice,
+    passengerCounts,
+    tourInfo: tourInfo?.price
+  });
 
   // Thêm state để lưu booking lấy từ backend
   const [bookingFromApi, setBookingFromApi] = React.useState(null);
@@ -59,39 +67,37 @@ const BookingConfirmation = () => {
   const contact = contactInfo || passengers[0] || {};
 
   const calculateTotal = () => {
-    if (!tourInfo || !passengers) return 0;
+    if (!tourInfo || !passengerCounts) return 0;
     
-    // Lấy giá đã giảm từ state, nếu không có thì lấy giá gốc
-    const basePrice = location.state?.finalPrice || location.state?.basePrice || tourInfo.price;
+    // Sử dụng finalPrice đã được tính toán từ BookingPassenger
+    if (finalPrice !== undefined) {
+      console.log('BookingConfirmation - Using finalPrice:', finalPrice);
+      return finalPrice;
+    }
     
-    // Đếm số lượng từng loại hành khách
-    const counts = passengers.reduce((acc, p) => {
-      acc[p.passengerType] = (acc[p.passengerType] || 0) + 1;
-      return acc;
-    }, {});
-
-    // Tính tổng tiền cho từng loại khách
-    const adultPrice = basePrice;
-    const childPrice = basePrice * 0.5; // Trẻ em 50% giá người lớn
+    // Fallback: tính toán lại nếu không có finalPrice
+    const adultPrice = basePrice || tourInfo.price;
+    const childPrice = adultPrice * 0.5;
     const infantPrice = 0; // Em bé miễn phí
 
-    const adultTotal = (counts.adult || 0) * adultPrice;
-    const childTotal = (counts.child || 0) * childPrice;
-    const infantTotal = (counts.infant || 0) * infantPrice;
+    const adultTotal = (passengerCounts?.adult || 0) * adultPrice;
+    const childTotal = (passengerCounts?.child || 0) * childPrice;
+    const infantTotal = (passengerCounts?.infant || 0) * infantPrice;
 
     const total = adultTotal + childTotal + infantTotal;
 
     // Log để debug
-    console.log('Price calculation:', {
-      basePrice,
-      counts,
+    console.log('BookingConfirmation - Price calculation:', {
+      basePrice: adultPrice,
+      passengerCounts,
       adultPrice,
       childPrice,
       infantPrice,
       adultTotal,
       childTotal,
       infantTotal,
-      total
+      total,
+      finalPrice
     });
 
     return total;
@@ -103,13 +109,28 @@ const BookingConfirmation = () => {
   const flightInfo = 'Thông tin chuyến bay';
 
   const handlePayment = () => {
+    const calculatedAmount = calculateTotal();
+    
+    // Debug log để kiểm tra giá tiền
+    console.log('BookingConfirmation - handlePayment:', {
+      finalPrice,
+      calculatedAmount,
+      basePrice,
+      tourInfoPrice: tourInfo?.price,
+      passengerCounts,
+      amountToSend: finalPrice !== undefined ? finalPrice : calculatedAmount
+    });
+    
     // Chuyển hướng đến trang lựa chọn phương thức thanh toán
     navigate(`/payment/${bookingId}`, {
       state: {
         bookingId,
-        amount: calculateTotal(),
+        amount: finalPrice !== undefined ? finalPrice : calculatedAmount,
         tourInfo,
-        passengers
+        passengers,
+        passengerCounts,
+        basePrice,
+        finalPrice
       }
     });
   };
@@ -134,7 +155,7 @@ const BookingConfirmation = () => {
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Mã đặt chỗ:</b> <span style={{ color: 'red', flex: 1 }}>{bookingCode}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Ngày đặt:</b> <span style={{ flex: 1 }}>{new Date().toLocaleString('vi-VN')}</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Số khách:</b> <span style={{ flex: 1 }}>{passengers.length}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold', flex: 1 }}>{(bookingFromApi?.totalPrice || calculateTotal()).toLocaleString()} đ</span></div>
+            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold', flex: 1 }}>{calculateTotal().toLocaleString()} đ</span></div>
             <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Trạng thái:</b> <span style={{ color: '#388e3c', fontWeight: 'bold', flex: 1 }}>{bookingStatus}</span></div>
             {/* <div><b>Ghi chú:</b> {bookingNote}</div> */}
           </div>
@@ -164,7 +185,7 @@ const BookingConfirmation = () => {
             </table>
             <hr/>
             <div style={{ textAlign: 'right', fontWeight: 'bold', color: 'red', fontSize: 20 }}>
-              Tổng cộng: {(bookingFromApi?.totalPrice || calculateTotal()).toLocaleString()} đ
+              Tổng cộng: {calculateTotal().toLocaleString()} đ
             </div>
           </div>
         </div>
@@ -208,6 +229,14 @@ const BookingConfirmation = () => {
               </div>
               <div style={{ marginBottom: 8 }}><b>Mã booking:</b> <span style={{ color: 'red' }}>{bookingCode}</span></div>
               <div style={{ marginBottom: 8 }}><b>Trạng thái:</b> <span style={{ color: '#388e3c', fontWeight: 'bold' }}>{bookingStatus}</span></div>
+              
+              {/* Thông tin giá chi tiết */}
+              <div style={{ marginBottom: 8, padding: '8px', background: '#f8f9fa', borderRadius: 4 }}>
+                <div style={{ marginBottom: 4 }}><b>Giá tour:</b> {(basePrice || tourInfo?.price || 0).toLocaleString()} đ</div>
+                <div style={{ marginBottom: 4 }}><b>Số khách:</b> {passengerCounts?.adult || 0} người lớn, {passengerCounts?.child || 0} trẻ em, {passengerCounts?.infant || 0} em bé</div>
+                <div style={{ marginBottom: 4 }}><b>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold' }}>{calculateTotal().toLocaleString()} đ</span></div>
+              </div>
+              
               {/* <div style={{ marginBottom: 8 }}><b>Thông tin chuyến bay:</b> {flightInfo}</div> */}
               {/* Lịch trình đã chọn */}
               {itineraries && itineraries.length > 0 && (

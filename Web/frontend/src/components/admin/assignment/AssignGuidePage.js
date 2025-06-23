@@ -66,6 +66,7 @@ export default function AssignGuidePage() {
     const payload = {
       tourId: Number(selectedTour),
       guideId: Number(selectedGuide),
+      scheduleId: Number(selectedSchedule),
       role,
       startDate: schedule.startDate,
       endDate: schedule.endDate,

@@ -19,6 +19,21 @@ const Payment = () => {
   const [showPaidModal, setShowPaidModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
 
+  // Lấy giá tiền từ location.state (được truyền từ BookingConfirmation)
+  const amountFromState = location.state?.amount;
+  const finalPriceFromState = location.state?.finalPrice;
+  const basePriceFromState = location.state?.basePrice;
+  const passengerCountsFromState = location.state?.passengerCounts;
+
+  // Debug log để kiểm tra dữ liệu nhận được
+  console.log('Payment - location.state:', location.state);
+  console.log('Payment - amount values:', {
+    amountFromState,
+    finalPriceFromState,
+    basePriceFromState,
+    passengerCountsFromState
+  });
+
   useEffect(() => {
     const fetchBookingDetails = async () => {
       const token = localStorage.getItem('token');
@@ -68,7 +83,21 @@ const Payment = () => {
 
       // Lấy số điện thoại user từ booking (giả sử booking.booking.user.phone)
       const userPhone = booking?.booking?.user?.phone || '0123456789';
-      const amount = booking?.booking?.totalPrice || booking?.totalAmount;
+      
+      // Ưu tiên sử dụng giá tiền từ location.state, nếu không có thì lấy từ API
+      // Ưu tiên: finalPriceFromState > amountFromState > booking API
+      const amount = finalPriceFromState !== undefined ? finalPriceFromState : 
+                    amountFromState || 
+                    booking?.booking?.totalPrice || 
+                    booking?.totalAmount;
+
+      console.log('Payment amount:', {
+        finalPriceFromState,
+        amountFromState,
+        bookingTotalPrice: booking?.booking?.totalPrice,
+        bookingTotalAmount: booking?.totalAmount,
+        finalAmount: amount
+      });
 
       // Kiểm tra payment đã tồn tại cho booking này chưa
       const paymentRes = await axios.get(
@@ -222,6 +251,48 @@ const Payment = () => {
     <div className="payment-page">
       <div className="payment-container">
         <h1 className="payment-title">Thanh toán</h1>
+        
+        {/* Hiển thị thông tin giá tiền */}
+        {/* <div style={{
+          background: '#f8f9fa',
+          padding: '16px',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          border: '1px solid #dee2e6'
+        }}>
+          <h3 style={{ margin: '0 0 12px 0', color: '#1976d2' }}>Thông tin thanh toán</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div><strong>Mã booking:</strong> {bookingId}</div>
+              <div><strong>Số tiền cần thanh toán:</strong></div>
+            </div>
+            <div style={{ 
+              fontSize: '24px', 
+              fontWeight: 'bold', 
+              color: '#d32f2f',
+              textAlign: 'right'
+            }}>
+              {(finalPriceFromState !== undefined ? finalPriceFromState : 
+                amountFromState || 
+                booking?.booking?.totalPrice || 
+                booking?.totalAmount || 0).toLocaleString()} VND
+            </div>
+          </div>
+          {amountFromState && (
+            <div style={{ 
+              fontSize: '12px', 
+              color: '#666', 
+              marginTop: '8px',
+              fontStyle: 'italic'
+            }}>
+              * Giá tiền được tính từ thông tin đặt tour
+              {finalPriceFromState !== undefined && finalPriceFromState !== amountFromState && 
+                ` (Final price: ${finalPriceFromState.toLocaleString()} VND)`
+              }
+            </div>
+          )}
+        </div> */}
+
         <div className="payment-content">
           <div className="payment-left">
             <PaymentMethodSelector

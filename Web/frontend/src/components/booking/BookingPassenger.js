@@ -130,6 +130,7 @@ const BookingPassenger = () => {
       (passengerCounts.adult * adultPrice) +
       (passengerCounts.child * childPrice) +
       (passengerCounts.infant * infantPrice);
+    
     if (discountInfo && discountInfo.discountPercent) {
       const percent = discountInfo.discountPercent;
       const newTotal = Math.round(totalBeforeDiscount - (totalBeforeDiscount * percent / 100));
@@ -345,16 +346,33 @@ const BookingPassenger = () => {
       });
       
       toast.success('Đăng ký thông tin hành khách thành công!');
+      
+      // Tính toán lại giá cuối cùng để đảm bảo chính xác
+      const adultPrice = bookedTour.price;
+      const childPrice = bookedTour.price * 0.5;
+      const infantPrice = bookedTour.price * 0.25;
+      const totalBeforeDiscount =
+        (passengerCounts.adult * adultPrice) +
+        (passengerCounts.child * childPrice) +
+        (passengerCounts.infant * infantPrice);
+      
+      let finalPrice = totalBeforeDiscount;
+      if (discountInfo && discountInfo.discountPercent) {
+        const percent = discountInfo.discountPercent;
+        finalPrice = Math.round(totalBeforeDiscount - (totalBeforeDiscount * percent / 100));
+      }
+      
       navigate('/booking-confirmation', {
         state: {
           bookingId,
           bookingCode: location.state.bookingCode,
           passengers: res.data,
           tourInfo: bookedTour,
-          finalPrice: discountedPrice,
+          finalPrice: finalPrice,
           basePrice: bookedTour.price,
           itineraries,
-          passengerCounts
+          passengerCounts,
+          contactInfo
         }
       });
     } catch (err) {
@@ -569,7 +587,7 @@ const BookingPassenger = () => {
                 <h4 className={styles.priceTitle}>Chi tiết giá</h4>
                 <div className={styles.priceRow}>
                   <span>Giá tour</span>
-                  <span>{totalPrice.toLocaleString('vi-VN')}đ</span>
+                  <span>{bookedTour.price.toLocaleString('vi-VN')}đ</span>
                 </div>
                 {discountInfo && (
                    <div className={`${styles.priceRow} ${styles.discountApplied}`}>
