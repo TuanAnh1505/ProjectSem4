@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/schedules/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/schedules/send-reminders").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/feedbacks/**").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/payment/momo-notification").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, exep) -> {
