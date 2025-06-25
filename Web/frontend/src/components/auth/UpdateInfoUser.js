@@ -238,6 +238,21 @@ const UpdateInfoUser = () => {
     const totalPending = bookings.filter(b => b.status === 'CONFIRMED').length;
     const totalCancelled = bookings.filter(b => b.status === 'CANCELLED').length;
 
+    // Hàm lấy paymentId chưa thanh toán cho booking
+    const getUnpaidPaymentId = async (bookingId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`http://localhost:8080/api/payments/booking/${bookingId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            // Ưu tiên payment có status PENDING hoặc SUPPORT_CONTACT
+            const unpaid = res.data.find(p => ['PENDING', 'SUPPORT_CONTACT'].includes((p.statusName || '').toUpperCase()));
+            return unpaid ? unpaid.paymentId : null;
+        } catch (e) {
+            return null;
+        }
+    };
+
     if (loading) {
         return (
             <Box sx={{ 
@@ -462,6 +477,30 @@ const UpdateInfoUser = () => {
                                                                     {booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && booking.status !== 'Request Refund' && (
                                                                         <Button variant="outlined" color="warning" startIcon={<FaTimesCircle />} sx={{ borderRadius: 2 }} onClick={() => handleRequestRefund(booking.bookingId)}>
                                                                             Yêu cầu hoàn tiền
+                                                                        </Button>
+                                                                    )}
+                                                                    {(booking.paymentStatus || '').trim().toUpperCase() !== 'COMPLETED' && booking.status !== 'CANCELLED' && booking.status !== 'Request Refund' && (
+                                                                        <Button variant="contained" color="primary" sx={{ borderRadius: 2 }}
+                                                                            onClick={async () => {
+                                                                                const token = localStorage.getItem('token');
+                                                                                try {
+                                                                                    // Lấy payment chưa thanh toán
+                                                                                    const res = await axios.get(`http://localhost:8080/api/payments/booking/${booking.bookingId}`, {
+                                                                                        headers: { 'Authorization': `Bearer ${token}` }
+                                                                                    });
+                                                                                    const payment = res.data.find(p => ['SUPPORT_CONTACT', 'PENDING'].includes((p.statusName || '').toUpperCase()));
+                                                                                    if (payment && payment.statusName.toUpperCase() === 'SUPPORT_CONTACT') {
+                                                                                        // Gọi API chuyển về PENDING (id = 1)
+                                                                                        await axios.put(`http://localhost:8080/api/payments/${payment.paymentId}/status?statusId=1`, {}, {
+                                                                                            headers: { 'Authorization': `Bearer ${token}` }
+                                                                                        });
+                                                                                    }
+                                                                                } catch (e) {
+                                                                                    // Bỏ qua lỗi, vẫn cho phép chuyển hướng
+                                                                                }
+                                                                                navigate(`/payment/${booking.bookingId}`);
+                                                                            }}>
+                                                                            Tiếp tục thanh toán
                                                                         </Button>
                                                                     )}
                                                                 </Box>

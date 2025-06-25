@@ -138,55 +138,7 @@ public class TourGuideAssignmentService {
 
         TourGuideAssignment savedAssignment = assignmentRepository.save(assignment);
 
-        // Gửi email cho hướng dẫn viên
-        /*
-         * try {
-         * // Lấy thông tin user (hướng dẫn viên)
-         * String guideEmail = guide.getUser() != null ? guide.getUser().getEmail() :
-         * null;
-         * String guideName = guide.getUser() != null ? guide.getUser().getFullName() :
-         * "Hướng dẫn viên";
-         * String tourName = tour.getName();
-         * String tourDesc = tour.getDescription();
-         * String startDate = assignment.getStartDate().toString();
-         * String endDate = assignment.getEndDate().toString();
-         * // Lấy danh sách khách hàng của tour/lịch trình này
-         * List<Map<String, String>> customers = new java.util.ArrayList<>();
-         * // (Giả sử bookingRepository có hàm findByTourIdAndScheduleId)
-         * // Nếu không, bạn cần tự join hoặc query phù hợp
-         * // Ở đây demo lấy tất cả booking CONFIRMED của tour này và lịch trình này
-         * // (Bạn có thể cần chỉnh lại cho đúng logic thực tế)
-         * // bookingRepository phải được @Autowired vào service này nếu chưa có
-         * //
-         * // Ví dụ:
-         * // List<Booking> bookings =
-         * bookingRepository.findByTour_TourIdAndScheduleIdAndStatus_StatusName(
-         * // assignment.getTourId(), assignment.getStartDate(), "CONFIRMED");
-         * // for (Booking b : bookings) {
-         * // for (BookingPassenger p :
-         * bookingPassengerRepository.findByBooking_BookingId(b.getBookingId())) {
-         * // Map<String, String> c = new java.util.HashMap<>();
-         * // c.put("name", p.getFullName());
-         * // c.put("phone", p.getPhone());
-         * // customers.add(c);
-         * // }
-         * // }
-         * //
-         * // Tạm thời gửi mail không có khách nếu chưa có bookingRepository
-         * getEmailService().sendGuideAssignmentEmail(
-         * guideEmail,
-         * guideName,
-         * tourName,
-         * tourDesc,
-         * startDate,
-         * endDate,
-         * customers
-         * );
-         * } catch (Exception ex) {
-         * // Log lỗi gửi mail nhưng không làm fail nghiệp vụ
-         * System.err.println("Lỗi gửi mail phân công HDV: " + ex.getMessage());
-         * }
-         */
+        
         return convertToDTO(savedAssignment);
     }
 

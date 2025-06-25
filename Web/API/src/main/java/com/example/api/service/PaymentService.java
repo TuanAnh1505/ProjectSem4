@@ -319,6 +319,26 @@ public class PaymentService {
         return convertToDTO(payment);
     }
 
+    /**
+     * Chuyển trạng thái payment sang SUPPORT_CONTACT (liên hệ khách hàng)
+     */
+    @Transactional
+    public PaymentResponseDTO updatePaymentStatusToSupportContact(Integer paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
+        PaymentStatus supportContactStatus = paymentStatusRepository.findByStatusName("SUPPORT_CONTACT")
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái SUPPORT_CONTACT"));
+        payment.setStatus(supportContactStatus);
+        payment = paymentRepository.save(payment);
+        // Lưu lịch sử
+        PaymentHistory history = new PaymentHistory();
+        history.setPayment(payment);
+        history.setStatus(supportContactStatus);
+        history.setNotes("Auto chuyển sang SUPPORT_CONTACT do quá hạn thanh toán");
+        paymentHistoryRepository.save(history);
+        return convertToDTO(payment);
+    }
+
     private PaymentResponseDTO convertToDTO(Payment payment) {
         PaymentResponseDTO dto = new PaymentResponseDTO();
         dto.setPaymentId(payment.getPaymentId());

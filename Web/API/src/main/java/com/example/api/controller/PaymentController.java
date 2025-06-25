@@ -233,4 +233,16 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    // Chuyển trạng thái payment sang SUPPORT_CONTACT (liên hệ khách hàng)
+    @PutMapping("/{id}/support-contact")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updatePaymentStatusToSupportContact(@PathVariable Integer id) {
+        try {
+            var updated = paymentService.updatePaymentStatusToSupportContact(id);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

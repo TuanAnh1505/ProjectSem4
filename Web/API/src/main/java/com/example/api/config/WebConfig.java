@@ -14,6 +14,21 @@ public class WebConfig implements WebMvcConfigurer {
         private static final Logger logger = LoggerFactory.getLogger(WebConfig.class);
 
         @Override
+        public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/api/**")
+                                .allowedOrigins("http://localhost:3000")
+                                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                                .allowedHeaders("*")
+                                .allowCredentials(true);
+
+                registry.addMapping("/uploads/**")
+                                .allowedOrigins("http://localhost:3000")
+                                .allowedMethods("GET")
+                                .allowedHeaders("*")
+                                .allowCredentials(true);
+        }
+
+        @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
                 // Lấy đường dẫn tuyệt đối của thư mục gốc
                 String rootPath = System.getProperty("user.dir");

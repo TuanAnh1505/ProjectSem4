@@ -36,14 +36,6 @@ const PaymentStatusManager = () => {
     fetchStatuses();
   }, []);
 
-  // Tự động cập nhật danh sách payment mỗi 5 giây
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchPayments();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
   const fetchPayments = async () => {
     setLoading(true);
     try {
@@ -51,7 +43,34 @@ const PaymentStatusManager = () => {
       const res = await axios.get('http://localhost:8080/api/payments', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      setPayments(res.data);
+      const paymentsData = res.data;
+      // Kiểm tra payment PENDING quá 30 giây thì chuyển trạng thái
+      for (const p of paymentsData) {
+        if (p.statusName && p.statusName.toLowerCase() === 'pending' && p.paymentDate) {
+          const paymentDate = new Date(p.paymentDate);
+          const now = new Date();
+          const diffMs = now - paymentDate;
+          const diffSeconds = diffMs / 1000;
+          console.log('Check payment:', p.paymentId, p.statusName, p.paymentDate, 'diffSeconds:', diffSeconds, 'now:', now.toISOString(), 'paymentDate:', paymentDate.toISOString());
+          if (diffSeconds > 30) {
+            // Gọi API chuyển trạng thái payment sang SUPPORT_CONTACT
+            try {
+              await axios.put(
+                `http://localhost:8080/api/payments/${p.paymentId}/support-contact`,
+                {},
+                { headers: { 'Authorization': `Bearer ${token}` } }
+              );
+              console.log('Called support-contact for payment', p.paymentId);
+            } catch (e) {
+              console.error('Error calling support-contact for payment', p.paymentId, e);
+            }
+          }
+        } else {
+          console.log('Skip payment:', p.paymentId, p.statusName, p.paymentDate);
+        }
+      }
+      // Sau khi chuyển trạng thái, reload lại danh sách
+      setPayments(paymentsData);
     } catch (err) {
       setError('Không thể tải danh sách thanh toán');
     } finally {
@@ -93,19 +112,8 @@ const PaymentStatusManager = () => {
     }
   };
 
-  // Thêm các trạng thái bổ sung nếu chưa có trong danh sách từ API
-  const extraStatuses = [
-    { paymentStatusId: 'active', statusName: 'Active' },
-    { paymentStatusId: 'inactive', statusName: 'Inactive' },
-    { paymentStatusId: 'waiting', statusName: 'Waiting' },
-    { paymentStatusId: 'processing', statusName: 'Processing' },
-  ];
-  const allStatuses = [
-    ...extraStatuses.filter(
-      es => !statuses.some(s => s.statusName?.toLowerCase() === es.statusName.toLowerCase())
-    ),
-    ...statuses
-  ];
+  // Chỉ dùng danh sách trạng thái lấy từ API
+  const allStatuses = statuses;
 
   // Filter + search + pagination
   const filteredPayments = payments.filter(p => {

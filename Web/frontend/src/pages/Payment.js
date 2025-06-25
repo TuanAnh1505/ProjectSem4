@@ -51,6 +51,30 @@ const Payment = () => {
           }
         );
         setBooking(response.data);
+
+        // Kiểm tra trạng thái PENDING quá 1 tiếng
+        const bookingObj = response.data?.booking;
+        if (bookingObj && bookingObj.status?.statusName === 'PENDING') {
+          const bookingDate = new Date(bookingObj.bookingDate);
+          const now = new Date();
+          const diffMs = now - bookingDate;
+          const diffHours = diffMs / (1000 * 60 * 60);
+          if (diffHours > 1) {
+            // Gọi API chuyển trạng thái sang SUPPORT_CONTACT
+            await axios.put(
+              `http://localhost:8080/api/bookings/${bookingId}/support-contact`,
+              {},
+              { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            // Reload lại booking
+            const updated = await axios.get(
+              `http://localhost:8080/api/bookings/${bookingId}/detail`,
+              { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            setBooking(updated.data);
+            alert('Đơn đặt tour của bạn đã được chuyển sang trạng thái "Nhân viên hỗ trợ liên hệ" do chưa thanh toán sau 1 tiếng. Vui lòng chờ nhân viên liên hệ hoặc đặt lại tour mới.');
+          }
+        }
       } catch (err) {
         setError('Không thể tải thông tin đặt phòng');
         console.error('Error fetching booking:', err);
