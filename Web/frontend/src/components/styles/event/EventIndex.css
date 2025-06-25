@@ -333,3 +333,43 @@
   border-radius: 0 4px 0 4px;
   font-weight: bold;
 }
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.event-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1976d2;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.event-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #1976d2;
+    color: #fff !important;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 32px;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(25,118,210,0.10);
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer;
+}
+.event-add-btn svg {
+    color: #fff !important;
+    font-size: 1.2em;
+}
+.event-add-btn:hover {
+    background: #1253a2;
+    color: #fff !important;
+}

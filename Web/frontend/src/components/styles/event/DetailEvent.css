@@ -205,3 +205,127 @@
 .modal-nav-button.next {
     right: 10px;
 }
+
+/* Nền ngoài cùng */
+.event-detail-admin-bg {
+    background: #e3eafc;
+    min-height: 100vh;
+    padding: 32px 0;
+}
+
+/* Box chi tiết */
+.event-detail-admin {
+    max-width: 650px;
+    margin: 32px auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(25, 118, 210, 0.10);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-detail-admin-imgbox {
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    background: #f0f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.media-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0 0 0 0;
+    background-color: #f0f4ff;
+}
+
+.event-detail-admin-content {
+    padding: 36px 36px 24px 36px;
+}
+
+.event-detail-admin-title {
+    font-weight: 700;
+    font-size: 32px;
+    margin-bottom: 8px;
+    font-family: 'Segoe UI', serif;
+    color: #1a237e;
+}
+
+.event-detail-admin-hr {
+    margin: 0 0 18px 0;
+    border: 0;
+    border-top: 1.5px solid #e3eafc;
+}
+
+.event-detail-admin-name {
+    font-weight: 700;
+    font-size: 26px;
+    margin-bottom: 24px;
+    font-family: 'Segoe UI', serif;
+    color: #222;
+}
+
+.event-detail-admin-info {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    gap: 32px;
+}
+
+.event-detail-admin-label {
+    font-weight: 600;
+    color: #1976d2;
+    min-width: 110px;
+    margin-bottom: 4px;
+}
+
+.event-detail-admin-value {
+    color: #222;
+    margin-bottom: 10px;
+}
+
+.event-detail-admin-status {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.event-detail-admin-status.active {
+    color: #388e3c;
+}
+.event-detail-admin-status.pending {
+    color: #bfa700;
+}
+
+.event-detail-admin-desc-label {
+    font-weight: 700;
+    margin-bottom: 6px;
+    font-size: 18px;
+    color: #222;
+}
+.event-detail-admin-desc {
+    color: #222;
+    line-height: 1.7;
+}
+
+.back-button-admin {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0 0 24px 48px;
+    box-shadow: 0 2px 8px rgba(25,118,210,0.10);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.back-button-admin:hover {
+    background: #1253a2;
+}
