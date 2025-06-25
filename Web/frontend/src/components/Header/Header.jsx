@@ -4,6 +4,7 @@ import styles from './Header.module.css';
 import logo from '../../assets/images/logo.png';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
+import PasswordIcon from '@mui/icons-material/Password';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 const Header = () => {
@@ -46,7 +47,6 @@ const Header = () => {
                 src={logo} 
                 alt="Vietnam Tourism Logo" 
                 className={styles.logoImg}
-                style={{ height: '60px' }} // Increased logo size
               />
             </Link>
           </div>
@@ -100,7 +100,7 @@ const Header = () => {
                       </div>
                       <div className={styles.userInfo}>
                         <span className={styles.userName}>
-                          {localStorage.getItem('name') || 'My Account'}
+                          {localStorage.getItem('name') || 'Tài khoản'}
                         </span>
                         <span className={styles.userRole}>
                           {userRole === 'ADMIN' ? 'Administrator' : 
@@ -123,8 +123,18 @@ const Header = () => {
                         }
                       }}
                     >
-                      <SettingsIcon className={styles.menuIcon} />
-                      <span>Account Settings</span>
+                      <PersonIcon className={styles.menuIcon} />
+                      <span>Thông tin khách hàng</span>
+                    </button>
+
+                    <button
+                      className={styles.userMenuItem}
+                      onClick={() => {
+                        navigate('/change-password');
+                      }}
+                    >
+                      <PasswordIcon className={styles.menuIcon} />
+                      <span>Đổi mật khẩu</span>
                     </button>
                     
                     <button
@@ -135,7 +145,7 @@ const Header = () => {
                       }}
                     >
                       <LogoutIcon className={styles.menuIcon} />
-                      <span>Logout</span>
+                      <span>Đăng xuất</span>
                     </button>
                   </div>
                 )}

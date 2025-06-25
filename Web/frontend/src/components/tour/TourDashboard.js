@@ -157,18 +157,22 @@ export default function TourDashboard() {
                     </div>
                  </Link>
                  <div className="card-content">
+                    
+                    <Link to={`/tour-dashboard/detail/${tour.tourId}`} className="card-title-link">
+                        <h3 className="card-title">{tour.name}</h3>
+                    </Link>
+                    
+                    <p className="card-description">
+                        <FaInfoCircle /> {tour.description}
+                    </p>
                     <div className="card-info-top">
-                        <span className="info-item"><FaClock /> {tour.duration} ngày</span>
+                        <span className="info-item">
+                          <FaClock /> {tour.duration} ngày {tour.duration > 1 ? `${tour.duration - 1} đêm` : ''}
+                        </span>
                         {tour.schedules && tour.schedules.length > 0 && 
                             <span className="info-item"><FaCalendarAlt /> {new Date(tour.schedules[0].startDate).toLocaleDateString('vi-VN')}</span>
                         }
                     </div>
-                    <Link to={`/tour-dashboard/detail/${tour.tourId}`} className="card-title-link">
-                        <h3 className="card-title">{tour.name}</h3>
-                    </Link>
-                    <p className="card-description">
-                        <FaInfoCircle /> {tour.description}
-                    </p>
                     <div className="card-footer">
                         <div className="price-section">
                             <span className="price-label">Giá từ</span>

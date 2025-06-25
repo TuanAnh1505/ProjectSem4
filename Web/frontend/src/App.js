@@ -154,6 +154,11 @@ const App = () => {
               <ProtectedRoute element={<Feedback />} />
             </Layout>
           } />
+          <Route path="/change-password" element={
+            <Layout>
+              <ProtectedRoute element={<ChangePassword />} />
+            </Layout>
+          } />
 
           {/* Authentication and user routes */}
           <Route path="/login" element={<Login />} />

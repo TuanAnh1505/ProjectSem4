@@ -1,7 +1,7 @@
 /* --- General Layout --- */
 .pageContainer {
   background-color: #f0f2f5;
-  padding: 32px;
+  padding: 120px;
   min-height: 100vh;
 }
 
@@ -101,7 +101,7 @@
     text-align: right;
 }
 .submitButton {
-  background-color: #2c6ecb;
+  background-color: #d32f2f;
   color: white;
   padding: 12px 24px;
   border: none;
@@ -113,7 +113,7 @@
 }
 
 .submitButton:hover {
-  background-color: #2b6cb0;
+  background-color: #d32f2f;
 }
 .submitButton:disabled {
     background-color: #a0aec0;
@@ -147,8 +147,12 @@
 
 .summaryBookingCode {
   font-size: 14px;
-  color: #718096;
+  color: #000000;
   margin-bottom: 16px;
+}
+
+.summaryBookingCode strong {
+  color: red;
 }
 
 .summaryDetail p {
@@ -215,6 +219,7 @@
     border-top: 1px solid #e2e8f0;
     padding-top: 12px;
     margin-top: 12px;
+    color: #e74c3c;
 }
 
 /* Discount */
@@ -284,4 +289,58 @@
     .mainContent {
         padding: 16px;
     }
+}
+
+.priceBreakdownBox {
+  border-top: 1px solid #eee;
+  margin-top: 10px;
+  padding-top: 8px;
+  font-size: 0.97em;
+  
+}
+
+
+.priceBreakdownTitle {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.priceBreakdownRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.priceDisplayWrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.priceDiscounted {
+  color: #ff3b30;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  letter-spacing: 1px;
+}
+
+.discountIcon {
+  display: inline-flex;
+  align-items: center;
+  /* background: #fff0f6; */
+  border-radius: 50%;
+  padding: 2px 6px;
+  margin-left: 8px;
+  font-size: 1em;
+  /* color: #ff3b30; */
+  /* box-shadow: 0 1px 4px #ffe0e6; */
+}
+
+.priceOriginal {
+  text-decoration: line-through;
+  color: #b0b0b0;
+  font-size: 1.1em;
+  margin-left: 12px;
+  font-weight: 400;
 } 

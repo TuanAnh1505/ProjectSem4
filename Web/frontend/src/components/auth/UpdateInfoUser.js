@@ -270,9 +270,10 @@ const UpdateInfoUser = () => {
     return (
         <Box sx={{
             minHeight: '100vh',
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
+            background: '#fff',
             py: 4,
-            px: 2
+            px: 2,
+            mt: '100px'
         }}>
             <Container maxWidth="xl" sx={{ px: { xs: 0, md: 2 } }}>
                 <Grid container spacing={2}>
