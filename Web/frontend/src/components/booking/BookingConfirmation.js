@@ -26,6 +26,13 @@ function getTypeAndAge(passenger) {
   return `${type} (${age ? age + ' Tuổi' : ''})`;
 }
 
+// Hàm che số điện thoại, chỉ hiện 3 số cuối
+function maskPhone(phone) {
+  if (!phone) return '';
+  const str = phone.toString();
+  return str.length > 3 ? '*'.repeat(str.length - 3) + str.slice(-3) : str;
+}
+
 const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,6 +49,17 @@ const BookingConfirmation = () => {
 
   // Thêm state để lưu booking lấy từ backend
   const [bookingFromApi, setBookingFromApi] = React.useState(null);
+
+  // Đặt ở đầu component, sau các khai báo React.useState khác:
+  const [currentImage, setCurrentImage] = React.useState(0);
+
+  // Đặt imageCount sau khi đã có tourInfo:
+  const imageCount = tourInfo && tourInfo.imageUrls ? tourInfo.imageUrls.length : 0;
+
+  // Thêm state cho swipe
+  const [touchStartX, setTouchStartX] = React.useState(null);
+  const [touchEndX, setTouchEndX] = React.useState(null);
+  const [dragging, setDragging] = React.useState(false);
 
   React.useEffect(() => {
     if (bookingId) {
@@ -135,181 +153,206 @@ const BookingConfirmation = () => {
     });
   };
 
+  const handlePrevImage = () => {
+    setCurrentImage((prevImage) => (prevImage === 0 ? imageCount - 1 : prevImage - 1));
+  };
+
+  const handleNextImage = () => {
+    setCurrentImage((prevImage) => (prevImage === imageCount - 1 ? 0 : prevImage + 1));
+  };
+
+  // Mobile
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+  const handleTouchMove = (e) => {
+    setTouchEndX(e.touches[0].clientX);
+  };
+  const handleTouchEnd = () => {
+    if (touchStartX !== null && touchEndX !== null) {
+      const diff = touchEndX - touchStartX;
+      if (diff > 40) handlePrevImage();
+      else if (diff < -40) handleNextImage();
+    }
+    setTouchStartX(null);
+    setTouchEndX(null);
+  };
+
+  // Desktop
+  const handleMouseDown = (e) => {
+    setDragging(true);
+    setTouchStartX(e.clientX);
+  };
+  const handleMouseMove = (e) => {
+    if (!dragging) return;
+    setTouchEndX(e.clientX);
+  };
+  const handleMouseUp = () => {
+    if (dragging && touchStartX !== null && touchEndX !== null) {
+      const diff = touchEndX - touchStartX;
+      if (diff > 40) handlePrevImage();
+      else if (diff < -40) handleNextImage();
+    }
+    setDragging(false);
+    setTouchStartX(null);
+    setTouchEndX(null);
+  };
+
   return (
     <div className="confirmation-container">
-      <div className="confirmation-main-layout" style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+      <div className="confirmation-main-layout">
         {/* Cột trái */}
-        <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Thông tin liên lạc */}
-          <div className="confirmation-box" style={{border: '1px solid #bbbbbb', background: '#fff', borderRadius: 8, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px #eee' }}>
-            <h4 style={{ marginBottom: 12, color: '#1976d2' }}>THÔNG TIN LIÊN LẠC</h4>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Họ tên:</b> <span style={{ flex: 1 }}>{contact.fullName}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Email:</b> <span style={{ flex: 1 }}>{contact.email}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Điện thoại:</b> <span style={{ flex: 1 }}>{contact.phone || contact.phoneNumber}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Địa chỉ:</b> <span style={{ flex: 1 }}>{contact.address}</span></div>
-            {/* <div><b>Ghi chú:</b> {bookingNote}</div> */}
+          <div className="confirmation-box">
+            <h4 className="confirmation-title">Thông tin liên lạc</h4>
+            <div className="confirmation-info-row">
+              <div className="confirmation-info-item"><b>Họ tên:</b> {contact.fullName}</div>
+              <div className="confirmation-info-item"><b>Email:</b> {contact.email}</div>
+            </div>
+            <div className="confirmation-info-row">
+            <div className="confirmation-info-item"><b>Điện thoại:</b> {maskPhone(contact.phone || contact.phoneNumber)}</div>
+              <div className="confirmation-info-item"><b>Địa chỉ:</b> {contact.address}</div>
+            </div>
           </div>
           {/* Chi tiết booking */}
-          <div className="confirmation-box" style={{ border: '1px solid #bbbbbb', background: '#fff', borderRadius: 8, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px #eee' }}>
-            <h4 style={{ marginBottom: 12, color: '#1976d2' }}>CHI TIẾT BOOKING</h4>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Mã đặt chỗ:</b> <span style={{ color: 'red', flex: 1 }}>{bookingCode}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Ngày đặt:</b> <span style={{ flex: 1 }}>{new Date().toLocaleString('vi-VN')}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Số khách:</b> <span style={{ flex: 1 }}>{passengers.length}</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold', flex: 1 }}>{calculateTotal().toLocaleString()} đ</span></div>
-            <div style={{ display: 'flex', marginBottom: 4 }}><b style={{ minWidth: 150 }}>Trạng thái:</b> <span style={{ color: '#388e3c', fontWeight: 'bold', flex: 1 }}>{bookingStatus}</span></div>
-            {/* <div><b>Ghi chú:</b> {bookingNote}</div> */}
+          <div className="confirmation-box">
+            <h4 className="confirmation-title">Chi tiết booking</h4>
+            <div className="confirmation-info-row">
+              <div className="confirmation-info-item"><b>Mã đặt chỗ:</b> <span style={{ color: 'red' }}>{bookingCode}</span></div>
+              <div className="confirmation-info-item"><b>Ngày đặt:</b> {new Date().toLocaleString('vi-VN')}</div>
+            </div>
+            <div className="confirmation-info-row">
+              <div className="confirmation-info-item"><b>Số khách:</b> {passengers.length}</div>
+              <div className="confirmation-info-item"><b>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold' }}>{calculateTotal().toLocaleString()} đ</span></div>
+              <div className="confirmation-info-item"><b>Trạng thái:</b> <span className="confirmation-status">{bookingStatus}</span></div>
+            </div>
           </div>
           {/* Danh sách hành khách */}
-          <div className="confirmation-box" style={{ border: '1px solid #bbbbbb', borderRadius: 8, padding: 20 }}>
-            <h4 style={{ marginBottom: 12, color: '#1976d2' }}>DANH SÁCH HÀNH KHÁCH</h4>
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 12 }}>
-              <thead>
-                <tr style={{ background: '#f5f5f5', textAlign: 'left' }}>
-                  <th style={{ padding: 8 }}>Họ tên</th>
-                  <th style={{ padding: 8 }}>Ngày sinh</th>
-                  <th style={{ padding: 8 }}>Giới tính</th>
-                  <th style={{ padding: 8 }}>Độ tuổi</th>
-                  
-                </tr>
-              </thead>
-              <tbody>
-                {passengers.map((p, i) => (
-                  <tr key={i}>
-                    <td style={{ padding: 8 }}>{p.fullName}</td>
-                    <td style={{ padding: 8 }}>{p.birthDate}</td>
-                    <td style={{ padding: 8 }}>{p.gender}</td>
-                    <td style={{ padding: 8 }}>{getTypeAndAge(p)}</td>
+          <div className="confirmation-box">
+            <h4 className="confirmation-title">Danh sách hành khách</h4>
+            <div className="confirmation-table-wrapper">
+              <table className="confirmation-table">
+                <thead>
+                  <tr>
+                    <th>Họ tên</th>
+                    <th>Ngày sinh</th>
+                    <th>Giới tính</th>
+                    <th>Độ tuổi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <hr/>
-            <div style={{ textAlign: 'right', fontWeight: 'bold', color: 'red', fontSize: 20 }}>
+                </thead>
+                <tbody>
+                  {passengers.map((p, i) => (
+                    <tr key={i}>
+                      <td>{p.fullName}</td>
+                      <td>{p.birthDate}</td>
+                      <td>{p.gender}</td>
+                      <td>{getTypeAndAge(p)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="confirmation-total">
               Tổng cộng: {calculateTotal().toLocaleString()} đ
             </div>
           </div>
         </div>
         {/* Cột phải */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className="confirmation-box" style={{ border: '1px solid #bbbbbb', background: '#fff', borderRadius: 8, padding: 20, boxShadow: '0 2px 8px #eee' }}>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', gap: 16, marginBottom: 16, alignItems: 'center' }}>
-                {tourInfo.imageUrls && tourInfo.imageUrls.length > 0 ? (
-                  <img 
-                    src={`http://localhost:8080${tourInfo.imageUrls[0]}`} 
-                    alt={tourInfo.name} 
-                    style={{ 
-                      width: 200, 
-                      height: 150, 
-                      borderRadius: 8, 
-                      objectFit: 'cover' 
-                    }} 
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div className="confirmation-box" style={{ minWidth: 340 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {/* Slider ảnh tour */}
+              <div className="confirmation-slider-wrapper">
+                {imageCount > 0 ? (
+                  <img
+                    src={`http://localhost:8080${tourInfo.imageUrls[currentImage]}`}
+                    alt={tourInfo.name}
+                    className="confirmation-slider-image"
+                    onClick={handleNextImage}
+                    style={{ cursor: imageCount > 1 ? 'pointer' : 'default' }}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
                   />
                 ) : (
-                  <div style={{ 
-                    width: 200, 
-                    height: 150, 
-                    borderRadius: 8, 
-                    background: '#f5f5f5', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    border: '1px dashed #bbb'
-                  }}>
-                    No Image
+                  <div className="confirmation-tour-noimage">No Image</div>
+                )}
+                {imageCount > 1 && (
+                  <div className="slider-dots">
+                    {tourInfo.imageUrls.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`slider-dot${idx === currentImage ? ' active' : ''}`}
+                        onClick={() => setCurrentImage(idx)}
+                      ></span>
+                    ))}
                   </div>
                 )}
-                <div style={{ 
-                  fontWeight: 'bold', 
-                  fontSize: 16, 
-                  flex: 1 
-                }}>
-                  {tourInfo.name}
-                </div>
               </div>
-              <div style={{ marginBottom: 8 }}><b>Mã booking:</b> <span style={{ color: 'red' }}>{bookingCode}</span></div>
-              <div style={{ marginBottom: 8 }}><b>Trạng thái:</b> <span style={{ color: '#388e3c', fontWeight: 'bold' }}>{bookingStatus}</span></div>
-              
-              {/* Thông tin giá chi tiết */}
-              <div style={{ marginBottom: 8, padding: '8px', background: '#f8f9fa', borderRadius: 4 }}>
-                <div style={{ marginBottom: 4 }}><b>Giá tour:</b> {(basePrice || tourInfo?.price || 0).toLocaleString()} đ</div>
-                <div style={{ marginBottom: 4 }}><b>Số khách:</b> {passengerCounts?.adult || 0} người lớn, {passengerCounts?.child || 0} trẻ em, {passengerCounts?.infant || 0} em bé</div>
-                <div style={{ marginBottom: 4 }}><b>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold' }}>{calculateTotal().toLocaleString()} đ</span></div>
+              {/* Kết thúc slider ảnh tour */}
+              <div className="confirmation-tour-name">
+                {tourInfo.name}
               </div>
-              
-              {/* <div style={{ marginBottom: 8 }}><b>Thông tin chuyến bay:</b> {flightInfo}</div> */}
-              {/* Lịch trình đã chọn */}
-              {itineraries && itineraries.length > 0 && (
-                <div className="itinerary-summary" style={{
-                  marginTop: '1rem',
-                  padding: '1rem',
-                  background: '#f8f9fa',
-                  borderRadius: 8,
-                  height: 220,
-                  overflowY: 'auto',
-                  boxSizing: 'border-box',
-                  transition: 'height 0.2s',
-                  minHeight: 120,
-                  maxHeight: 300
-                }}>
-                  <h4 style={{fontWeight: 'bold'}}>Lịch trình đã chọn</h4>
-                  {itineraries.map((itinerary, idx) => (
-                    <div key={itinerary.itineraryId} style={{marginBottom: 12}}>
-                      <div><b>{itinerary.title || `Lịch trình ${idx + 1}`}</b></div>
-                      {(itinerary.startDate || itinerary.endDate) && (
-                        <div>
-                          {itinerary.startDate && (
-                            <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
-                          )}
-                          {itinerary.startDate && itinerary.endDate && ' - '}
-                          {itinerary.endDate && (
-                            <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
-                          )}
-                        </div>
-                      )}
-                      {itinerary.startTime && (
-                        <div style={{marginTop: 8}}>
-                          <div><b>Giờ bắt đầu:</b> {itinerary.startTime}</div>
-                        </div>
-                      )}
-                      {itinerary.endTime && (
-                        <div style={{marginTop: 8}}>
-                          <div><b>Giờ kết thúc:</b> {itinerary.endTime}</div>
-                        </div>
-                      )}
-                      {itinerary.description && (
-                        <div style={{marginTop: 8}}>
-                          <div><b>Mô tả:</b> {itinerary.description}</div>
-                        </div>
-                      )}
-                      {itinerary.type && (
-                        <div style={{marginTop: 8}}>
-                          <div><b>Loại:</b> {itinerary.type}</div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-              <button 
-                onClick={handlePayment}
-                style={{ 
-                  background: '#d32f2f', 
-                  color: '#fff', 
-                  border: 'none', 
-                  borderRadius: 4, 
-                  padding: '10px 24px', 
-                  fontWeight: 'bold', 
-                  marginTop: 12, 
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s ease'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#b71c1c'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#d32f2f'}
-              >
-                Thanh toán ngay
-              </button>
             </div>
+            <div className="confirmation-tour-detail"><b>Mã booking:</b> <span style={{ color: 'red' }}>{bookingCode}</span></div>
+            <div style={{ marginBottom: 8 }}><b>Trạng thái:</b> <span className="confirmation-status">{bookingStatus}</span></div>
+            <div className="confirmation-tour-pricebox">
+              {/* <div style={{ marginBottom: 4 }}><b>Giá tour:</b> {(basePrice || tourInfo?.price || 0).toLocaleString()} đ</div> */}
+              <div style={{ marginBottom: 4 }}><b>Số khách:</b> {passengerCounts?.adult || 0} người lớn, {passengerCounts?.child || 0} trẻ em, {passengerCounts?.infant || 0} em bé</div>
+              <div style={{ marginBottom: 4 }}><b>Tổng cộng:</b> <span style={{ color: 'red', fontWeight: 'bold' }}>{calculateTotal().toLocaleString()} đ</span></div>
+            </div>
+            {/* {itineraries && itineraries.length > 0 && (
+              <div className="confirmation-itinerary-summary">
+                <h4 className="confirmation-itinerary-title">Lịch trình đã chọn</h4>
+                {itineraries.map((itinerary, idx) => (
+                  <div key={itinerary.itineraryId} style={{marginBottom: 12}}>
+                    <div><b>{itinerary.title || `Lịch trình ${idx + 1}`}</b></div>
+                    {(itinerary.startDate || itinerary.endDate) && (
+                      <div>
+                        {itinerary.startDate && (
+                          <span>Bắt đầu: {new Date(itinerary.startDate).toLocaleDateString('vi-VN')}</span>
+                        )}
+                        {itinerary.startDate && itinerary.endDate && ' - '}
+                        {itinerary.endDate && (
+                          <span>Kết thúc: {new Date(itinerary.endDate).toLocaleDateString('vi-VN')}</span>
+                        )}
+                      </div>
+                    )}
+                    {itinerary.startTime && (
+                      <div style={{marginTop: 8}}>
+                        <div><b>Giờ bắt đầu:</b> {itinerary.startTime}</div>
+                      </div>
+                    )}
+                    {itinerary.endTime && (
+                      <div style={{marginTop: 8}}>
+                        <div><b>Giờ kết thúc:</b> {itinerary.endTime}</div>
+                      </div>
+                    )}
+                    {itinerary.description && (
+                      <div style={{marginTop: 8}}>
+                        <div><b>Mô tả:</b> {itinerary.description}</div>
+                      </div>
+                    )}
+                    {itinerary.type && (
+                      <div style={{marginTop: 8}}>
+                        <div><b>Loại:</b> {itinerary.type}</div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )} */}
+            <button 
+              onClick={handlePayment}
+              className="confirmation-pay-btn"
+            >
+              Thanh toán ngay
+            </button>
           </div>
         </div>
       </div>

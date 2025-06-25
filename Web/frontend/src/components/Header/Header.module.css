@@ -20,7 +20,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
+  height: 80px;
 }
 
 .logoWrap {
@@ -30,7 +30,7 @@
 }
 
 .logoImg {
-  height: 60px; /* Increased logo size */
+  height: 80px;
   width: auto;
   display: block;
 }
@@ -115,7 +115,7 @@
   background: #fff;
   box-shadow: 0 8px 32px rgba(60,60,60,0.18);
   border-radius: 14px;
-  min-width: 210px;
+  min-width: 260px;
   z-index: 1001;
   overflow: hidden;
   border: 1px solid #ececec;

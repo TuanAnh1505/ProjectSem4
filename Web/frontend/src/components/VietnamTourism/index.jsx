@@ -166,100 +166,104 @@ const Home = () => {
               gap: '20px',
               padding: '20px 0'
             }}>
-              {filteredTours.map(tour => (
-                <div key={tour.tourId} className={styles.tourCard}>
-                  <div style={{
-                    position: 'relative',
-                    height: '200px',
-                    overflow: 'hidden'
-                  }}>
-                    {tour.imageUrls && tour.imageUrls.length > 0 ? (
-                      <img
-                        src={`http://localhost:8080${tour.imageUrls[0]}`}
-                        alt={tour.name}
-                        style={{
+              {filteredTours
+                .slice()
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 6)
+                .map(tour => (
+                  <div key={tour.tourId} className={styles.tourCard}>
+                    <div style={{
+                      position: 'relative',
+                      height: '200px',
+                      overflow: 'hidden'
+                    }}>
+                      {tour.imageUrls && tour.imageUrls.length > 0 ? (
+                        <img
+                          src={`http://localhost:8080${tour.imageUrls[0]}`}
+                          alt={tour.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      ) : tour.imageUrl ? (
+                        <img
+                          src={`http://localhost:8080${tour.imageUrl}`}
+                          alt={tour.name}
+                          className="tourCardImg"
+                        />
+                      ) : (
+                        <div style={{
                           width: '100%',
                           height: '100%',
-                          objectFit: 'cover'
-                        }}
-                      />
-                    ) : tour.imageUrl ? (
-                      <img
-                        src={`http://localhost:8080${tour.imageUrl}`}
-                        alt={tour.name}
-                        className="tourCardImg"
-                      />
-                    ) : (
+                          backgroundColor: '#f0f0f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#666'
+                        }}>No Image</div>
+                      )}
                       <div style={{
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: '#f0f0f0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#666'
-                      }}>No Image</div>
-                    )}
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        color: '#fff',
+                        padding: '5px 10px',
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                      }}>{tour.price.toLocaleString()} đ</div>
+                    </div>
                     <div style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      backgroundColor: 'rgba(0,0,0,0.7)',
-                      color: '#fff',
-                      padding: '5px 10px',
-                      borderRadius: '4px',
-                      fontSize: '14px'
-                    }}>${tour.price.toLocaleString()}</div>
-                  </div>
-                  <div style={{
-                    padding: '15px'
-                  }}>
-                    <h3 style={{
-                      margin: '0 0 10px 0',
-                      fontSize: '18px',
-                      color: '#333'
-                    }}>{tour.name}</h3>
-                    <div style={{
-                      display: 'flex',
-                      gap: '15px',
-                      marginBottom: '10px',
-                      color: '#666',
-                      fontSize: '14px'
+                      padding: '15px'
                     }}>
-                      <span style={{
+                      <h3 style={{
+                        margin: '0 0 10px 0',
+                        fontSize: '18px',
+                        color: '#333'
+                      }}>{tour.name}</h3>
+                      <div style={{
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: '5px'
+                        gap: '15px',
+                        marginBottom: '10px',
+                        color: '#666',
+                        fontSize: '14px'
                       }}>
-                        <FaCalendarAlt /> {tour.duration} days
-                      </span>
-                      {tour.destinations?.length > 0 && (
                         <span style={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: '5px'
                         }}>
-                          <FaMapMarkerAlt /> {tour.destinations[0].name}
+                          <FaCalendarAlt /> {tour.duration} ngày {tour.duration > 1 ? `${tour.duration - 1} đêm` : ''}
                         </span>
-                      )}
+                        {tour.destinations?.length > 0 && (
+                          <span style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}>
+                            <FaMapMarkerAlt /> {tour.destinations[0].name}
+                          </span>
+                        )}
+                      </div>
+                      <p style={{
+                        color: '#666',
+                        fontSize: '14px',
+                        marginBottom: '15px',
+                        lineHeight: '1.4'
+                      }}>
+                        {tour.description?.substring(0, 100)}...
+                      </p>
+                      <Link
+                        to={`/tour-dashboard/detail/${tour.tourId}`}
+                        className={styles.tourCardBtn}
+                      >
+                        View Details
+                      </Link>
                     </div>
-                    <p style={{
-                      color: '#666',
-                      fontSize: '14px',
-                      marginBottom: '15px',
-                      lineHeight: '1.4'
-                    }}>
-                      {tour.description?.substring(0, 100)}...
-                    </p>
-                    <Link
-                      to={`/tour-dashboard/detail/${tour.tourId}`}
-                      className={styles.tourCardBtn}
-                    >
-                      View Details
-                    </Link>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           )}
         </div>

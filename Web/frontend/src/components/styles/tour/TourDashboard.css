@@ -11,7 +11,7 @@
 
 .tour-dashboard-container {
   background-color: var(--background-color);
-  padding: 20px;
+  padding: 120px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -129,14 +129,22 @@
 
 .card-image-link { display: block; }
 .card-image {
-  height: 200px;
+  width: 100%;
+  height: 220px;
+  aspect-ratio: 16/10;
   overflow: hidden;
   border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
 }
 .card-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  display: block;
   transition: transform 0.4s ease;
 }
 .tour-card:hover .card-image img {

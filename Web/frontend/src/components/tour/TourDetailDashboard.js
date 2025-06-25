@@ -304,11 +304,66 @@ export default function TourDetailDashboard() {
               {isDescriptionExpanded ? 'Thu gọn' : 'Xem thêm'}
             </button>
             <div className={styles.infoGrid}>
-              <div className={styles.infoItem}><span>Thời gian</span><strong>{tour.duration} ngày</strong></div>
-              <div className={styles.infoItem}><span>Số lượng khách</span><strong>Tối đa {tour.maxParticipants}</strong></div>
-              <div className={styles.infoItem}><span>Giá tour</span><strong>{tour.price?.toLocaleString()}đ</strong></div>
-              <div className={styles.infoItem}><span>Phương tiện</span><strong>Ô tô cao cấp</strong></div>
-              <div className={styles.infoItem}><span>Hướng dẫn viên</span><strong>Chuyên nghiệp</strong></div>
+              <div className={styles.infoItem}>
+                <span>
+                  {/* Clock Icon */}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '6px', verticalAlign: 'middle'}}>
+                    <circle cx="12" cy="12" r="10" stroke="#888" strokeWidth="2"/>
+                    <path d="M12 6v6l4 2" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Thời gian :
+                </span>
+                <strong>
+                  {tour.duration} ngày{tour.duration > 1 ? ` ${tour.duration - 1} đêm` : ''}
+                </strong>
+              </div>
+              <div className={styles.infoItem}>
+                <span>
+                  {/* User Icon */}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '6px', verticalAlign: 'middle'}}>
+                    <circle cx="12" cy="8" r="4" stroke="#888" strokeWidth="2"/>
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#888" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  Số lượng khách tối đa :
+                </span>
+                <strong>{tour.maxParticipants}</strong>
+              </div>
+              <div className={styles.infoItem}>
+                <span>
+                  {/* Money Icon */}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '6px', verticalAlign: 'middle'}}>
+                    <rect x="2" y="6" width="20" height="12" rx="2" stroke="#888" strokeWidth="2"/>
+                    <circle cx="12" cy="12" r="3" stroke="#888" strokeWidth="2"/>
+                  </svg>
+                  Giá tour :
+                </span>
+                <strong>{tour.price?.toLocaleString()} đ</strong>
+              </div>
+              <div className={styles.infoItem}>
+                <span>
+                  {/* Car Icon */}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '6px', verticalAlign: 'middle'}}>
+                    <rect x="3" y="11" width="18" height="5" rx="2" stroke="#888" strokeWidth="2"/>
+                    <path d="M5 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" stroke="#888" strokeWidth="2"/>
+                    <circle cx="7.5" cy="17.5" r="1.5" fill="#888"/>
+                    <circle cx="16.5" cy="17.5" r="1.5" fill="#888"/>
+                  </svg>
+                  Phương tiện :
+                </span>
+                <strong>Ô tô cao cấp</strong>
+              </div>
+              <div className={styles.infoItem}>
+                <span>
+                  {/* Guide Icon */}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '6px', verticalAlign: 'middle'}}>
+                    <circle cx="12" cy="8" r="4" stroke="#888" strokeWidth="2"/>
+                    <path d="M2 20c0-4 4-6 10-6s10 2 10 6" stroke="#888" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M12 2v2" stroke="#888" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  Hướng dẫn viên :
+                </span>
+                <strong>Chuyên nghiệp</strong>
+              </div>
             </div>
           </div>
 
@@ -563,7 +618,9 @@ export default function TourDetailDashboard() {
               </div>
               <div className={styles.bookingInfoItem}>
                 <span>Thời gian</span>
-                <strong>{tour.duration} ngày</strong>
+                <strong>
+                  {tour.duration} ngày{tour.duration > 1 ? ` ${tour.duration - 1} đêm` : ''}
+                </strong>
               </div>
               <div className={styles.bookingInfoItem}>
                 <span>Số khách</span>

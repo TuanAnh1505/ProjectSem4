@@ -142,16 +142,23 @@ body {
 }
 .infoItem {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 .infoItem span {
   font-size: 14px;
   color: #6c757d;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 .infoItem > strong {
   font-weight: 500;
   color: #333;
+  margin-left: 0;
+  margin-top: 0;
+  display: block;
 }
 
 /* Destinations Section */
@@ -393,7 +400,7 @@ body {
 .submitButton {
   align-self: flex-start;
   padding: 12px 24px;
-  background-color: #00AEEF;
+  background-color: #d32f2f;
   color: white;
   border: none;
   border-radius: 4px;
@@ -404,7 +411,7 @@ body {
 }
 
 .submitButton:hover:not(:disabled) {
-  background-color: #008fbf;
+  background-color: #d32f2f;
 }
 
 .submitButton:disabled {
@@ -566,7 +573,7 @@ body {
   background-color: #fff;
 }
 .bookingButton {
-  background-color: #3694e7;
+  background-color: #d32f2f;
   color: white;
   border: none;
   padding: 12px;
@@ -577,7 +584,7 @@ body {
   transition: background-color 0.2s;
 }
 .bookingButton:hover:not(:disabled) {
-  background-color: #5a6268;
+  background-color: #d32f2f;
 }
 .bookingButton:disabled {
   background-color: #ccc;

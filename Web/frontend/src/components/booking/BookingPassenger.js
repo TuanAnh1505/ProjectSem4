@@ -62,6 +62,31 @@ const BookingPassenger = () => {
   const [discountError, setDiscountError] = useState('');
   const [discountedPrice, setDiscountedPrice] = useState(location.state?.finalPrice || 0);
 
+  // Thêm hàm tính giá đã giảm, kiểm tra bookedTour tồn tại
+  const discountPercent = discountInfo?.discountPercent || 0;
+  const discountedBasePrice = bookedTour ? Math.round(bookedTour.price * (1 - discountPercent / 100)) : 0;
+  const getDiscountedPrice = (base, ratio = 1) => bookedTour ? Math.round(base * ratio * (1 - discountPercent / 100)) : 0;
+
+  // Tính tổng gốc (chưa giảm)
+  const totalOriginal = bookedTour
+    ? passengerCounts.adult * bookedTour.price +
+      passengerCounts.child * bookedTour.price * 0.5 +
+      passengerCounts.infant * bookedTour.price * 0.25
+    : 0;
+
+  // Helper: Tính tuổi tại ngày khởi hành
+  function getAgeAtDate(birthDateStr, refDateStr) {
+    if (!birthDateStr || !refDateStr) return null;
+    const birth = new Date(birthDateStr);
+    const ref = new Date(refDateStr);
+    let age = ref.getFullYear() - birth.getFullYear();
+    const m = ref.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && ref.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
   function formatTime(timeStr) {
     if (!timeStr) return '';
     const [h, m] = timeStr.split(':');
@@ -233,11 +258,30 @@ const BookingPassenger = () => {
     if (!contactInfo.email?.trim()) errors.push("Email không được để trống");
     if (!contactInfo.phoneNumber?.trim()) errors.push("Số điện thoại không được để trống");
     if (!contactInfo.birthDate) errors.push("Ngày sinh không được để trống");
+    // Kiểm tra tuổi người lớn (người liên hệ)
+    if (contactInfo.birthDate && selectedDate) {
+      const age = getAgeAtDate(contactInfo.birthDate, selectedDate);
+      if (age === null || isNaN(age)) {
+        errors.push("Ngày sinh người liên hệ không hợp lệ");
+      } else if (age < 16) {
+        errors.push("Người liên hệ phải trên 16 tuổi tại ngày khởi hành");
+      }
+    }
 
     // Validate thông tin hành khách phụ
     additionalPassengers.adult.forEach((p, index) => {
       if (!p.fullName?.trim()) {
         errors.push(`Vui lòng nhập tên cho Người lớn ${index + 2}`);
+      }
+      if (!p.birthDate) {
+        errors.push(`Vui lòng nhập ngày sinh cho Người lớn ${index + 2}`);
+      } else if (selectedDate) {
+        const age = getAgeAtDate(p.birthDate, selectedDate);
+        if (age === null || isNaN(age)) {
+          errors.push(`Ngày sinh của Người lớn ${index + 2} không hợp lệ`);
+        } else if (age < 16) {
+          errors.push(`Người lớn ${index + 2} phải trên 16 tuổi tại ngày khởi hành`);
+        }
       }
     });
 
@@ -245,11 +289,31 @@ const BookingPassenger = () => {
       if (!p.fullName?.trim()) {
         errors.push(`Vui lòng nhập tên cho Trẻ em ${index + 1}`);
       }
+      if (!p.birthDate) {
+        errors.push(`Vui lòng nhập ngày sinh cho Trẻ em ${index + 1}`);
+      } else if (selectedDate) {
+        const age = getAgeAtDate(p.birthDate, selectedDate);
+        if (age === null || isNaN(age)) {
+          errors.push(`Ngày sinh của Trẻ em ${index + 1} không hợp lệ`);
+        } else if (age < 2 || age >= 16) {
+          errors.push(`Trẻ em ${index + 1} phải từ 2 đến dưới 16 tuổi tại ngày khởi hành`);
+        }
+      }
     });
 
     additionalPassengers.infant.forEach((p, index) => {
       if (!p.fullName?.trim()) {
         errors.push(`Vui lòng nhập tên cho Em bé ${index + 1}`);
+      }
+      if (!p.birthDate) {
+        errors.push(`Vui lòng nhập ngày sinh cho Em bé ${index + 1}`);
+      } else if (selectedDate) {
+        const age = getAgeAtDate(p.birthDate, selectedDate);
+        if (age === null || isNaN(age)) {
+          errors.push(`Ngày sinh của Em bé ${index + 1} không hợp lệ`);
+        } else if (age >= 2) {
+          errors.push(`Em bé ${index + 1} phải dưới 2 tuổi tại ngày khởi hành`);
+        }
       }
     });
 
@@ -452,7 +516,7 @@ const BookingPassenger = () => {
               <InputField label="Email" id="email" name="email" type="email" value={contactInfo.email} onChange={handleContactChange} placeholder="email@example.com" required />
               <InputField label="Địa chỉ" id="address" name="address" value={contactInfo.address} onChange={handleContactChange} placeholder="Số nhà, đường, phường/xã,..." />
               <div className={styles.inputGroup}>
-                <label htmlFor="birthDate" className={styles.label}>Ngày sinh</label>
+                <label htmlFor="birthDate" className={styles.label}>Ngày sinh (trên 16 tuổi)</label>
                 <DatePicker 
                     id="birthDate"
                     value={contactInfo.birthDate} 
@@ -477,7 +541,7 @@ const BookingPassenger = () => {
                 <div className={styles.gridForm}>
                   <InputField label="Họ và tên" id={`adult-fullName-${index}`} value={p.fullName} onChange={(e) => handleAdditionalPassengerChange('adult', index, 'fullName', e.target.value)} placeholder="Nguyễn Văn B" required />
                   <div className={styles.inputGroup}>
-                    <label htmlFor={`adult-birthDate-${index}`} className={styles.label}>Ngày sinh</label>
+                    <label htmlFor={`adult-birthDate-${index}`} className={styles.label}>Ngày sinh (trên 16 tuổi)</label>
                     <DatePicker 
                         id={`adult-birthDate-${index}`}
                         value={p.birthDate} 
@@ -499,7 +563,7 @@ const BookingPassenger = () => {
                 <div className={styles.gridForm}>
                   <InputField label="Họ và tên" id={`child-fullName-${index}`} value={p.fullName} onChange={(e) => handleAdditionalPassengerChange('child', index, 'fullName', e.target.value)} placeholder="Nguyễn Thị C" required />
                   <div className={styles.inputGroup}>
-                    <label htmlFor={`child-birthDate-${index}`} className={styles.label}>Ngày sinh</label>
+                    <label htmlFor={`child-birthDate-${index}`} className={styles.label}>Ngày sinh (từ 2 đến dưới 16 tuổi)</label>
                     <DatePicker 
                         id={`child-birthDate-${index}`}
                         value={p.birthDate} 
@@ -521,7 +585,7 @@ const BookingPassenger = () => {
                 <div className={styles.gridForm}>
                   <InputField label="Họ và tên" id={`infant-fullName-${index}`} value={p.fullName} onChange={(e) => handleAdditionalPassengerChange('infant', index, 'fullName', e.target.value)} placeholder="Nguyễn Văn D" required />
                   <div className={styles.inputGroup}>
-                    <label htmlFor={`infant-birthDate-${index}`} className={styles.label}>Ngày sinh</label>
+                    <label htmlFor={`infant-birthDate-${index}`} className={styles.label}>Ngày sinh (dưới 2 tuổi)</label>
                     <DatePicker 
                         id={`infant-birthDate-${index}`}
                         value={p.birthDate} 
@@ -558,7 +622,7 @@ const BookingPassenger = () => {
 
               <div className={styles.passengerCounter}>
                  <div className={styles.passengerType}>
-                  <span>Người lớn</span>
+                  <span>Người lớn (100%)</span>
                   <div className={styles.counterControls}>
                     <button onClick={() => handlePassengerCountChange('adult', 'subtract')}>-</button>
                     <span>{passengerCounts.adult}</span>
@@ -566,7 +630,7 @@ const BookingPassenger = () => {
                   </div>
                 </div>
                  <div className={styles.passengerType}>
-                  <span>Trẻ em (Dưới 12 tuổi)</span>
+                  <span>Trẻ em (50%)</span>
                   <div className={styles.counterControls}>
                     <button onClick={() => handlePassengerCountChange('child', 'subtract')}>-</button>
                     <span>{passengerCounts.child}</span>
@@ -574,7 +638,7 @@ const BookingPassenger = () => {
                   </div>
                 </div>
                  <div className={styles.passengerType}>
-                  <span>Em bé (Dưới 2 tuổi)</span>
+                  <span>Em bé (25%)</span>
                   <div className={styles.counterControls}>
                     <button onClick={() => handlePassengerCountChange('infant', 'subtract')}>-</button>
                     <span>{passengerCounts.infant}</span>
@@ -582,13 +646,60 @@ const BookingPassenger = () => {
                   </div>
                 </div>
               </div>
+              {/* Bảng chi tiết giá từng loại hành khách */}
+              {bookedTour && (
+                <div className={styles.priceBreakdownBox}>
+                  <div className={styles.priceBreakdownTitle}>Chi tiết giá:</div>
+                  <div className={styles.priceRow}>
+                    <span>Giá tour :</span>
+                    {discountPercent > 0 ? (
+                      <span className={styles.priceDisplayWrap}>
+                        <span className={styles.priceDiscounted}>
+                          {discountedBasePrice.toLocaleString('vi-VN')} đ
+                          <span className={styles.discountIcon}>
+                            <svg width="16" height="16" fill="#ff3b30" viewBox="0 0 24 24" style={{ display: 'block' }}>
+                              <path d="M20.59 13.41l-8-8A2 2 0 0 0 10 4H4a2 2 0 0 0-2 2v6a2 2 0 0 0 .59 1.41l8 8a2 2 0 0 0 2.82 0l7.18-7.18a2 2 0 0 0 0-2.82zM7 7a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                            </svg>
+                          </span>
+                        </span>
+                        <span className={styles.priceOriginal}>
+                          {bookedTour.price.toLocaleString('vi-VN')} đ
+                        </span>
+                      </span>
+                    ) : (
+                      <span>{bookedTour.price.toLocaleString('vi-VN')} đ</span>
+                    )}
+                  </div>
+                  {passengerCounts.adult > 0 && (
+                    <div className={styles.priceBreakdownRow}>
+                      <span>Người lớn :</span>
+                      <span>
+                        {getDiscountedPrice(bookedTour.price).toLocaleString('vi-VN')} đ
+                      </span>
+                    </div>
+                  )}
+                  {passengerCounts.child > 0 && (
+                    <div className={styles.priceBreakdownRow}>
+                      <span>Trẻ em :</span>
+                      <span>
+                        {getDiscountedPrice(bookedTour.price, 0.5).toLocaleString('vi-VN')} đ
+                      </span>
+                    </div>
+                  )}
+                  {passengerCounts.infant > 0 && (
+                    <div className={styles.priceBreakdownRow}>
+                      <span>Em bé :</span>
+                      <span>
+                       {getDiscountedPrice(bookedTour.price, 0.25).toLocaleString('vi-VN')} đ
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className={styles.priceSection}>
-                <h4 className={styles.priceTitle}>Chi tiết giá</h4>
-                <div className={styles.priceRow}>
-                  <span>Giá tour</span>
-                  <span>{bookedTour.price.toLocaleString('vi-VN')}đ</span>
-                </div>
+                {/* <h4 className={styles.priceTitle}>Chi tiết giá</h4> */}
+               
                 {discountInfo && (
                    <div className={`${styles.priceRow} ${styles.discountApplied}`}>
                     <span>Giảm giá ({discountInfo.discountPercent}%)</span>
@@ -601,9 +712,28 @@ const BookingPassenger = () => {
                 </div>
                 {discountError && <p className={styles.discountError}>{discountError}</p>}
 
-                <div className={`${styles.priceRow} ${styles.totalPrice}`}>
-                  <span>Tổng cộng</span>
-                  <span>{discountedPrice.toLocaleString('vi-VN')}đ</span>
+                {/* Tổng cộng */}
+                <div className={styles.priceRow} style={{ marginTop: 12 }}>
+                  <span>Tổng cộng :</span>
+                  {discountPercent > 0 ? (
+                    <span className={styles.priceDisplayWrap}>
+                      <span className={styles.priceDiscounted}>
+                        {discountedPrice.toLocaleString('vi-VN')} đ
+                        <span className={styles.discountIcon}>
+                          <svg width="16" height="16" fill="#ff3b30" viewBox="0 0 24 24" style={{ display: 'block' }}>
+                            <path d="M20.59 13.41l-8-8A2 2 0 0 0 10 4H4a2 2 0 0 0-2 2v6a2 2 0 0 0 .59 1.41l8 8a2 2 0 0 0 2.82 0l7.18-7.18a2 2 0 0 0 0-2.82zM7 7a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                          </svg>
+                        </span>
+                      </span>
+                      <span className={styles.priceOriginal}>
+                        {totalOriginal.toLocaleString('vi-VN')} đ
+                      </span>
+                    </span>
+                  ) : (
+                    <span className={styles.priceDiscounted}>
+                      {totalOriginal.toLocaleString('vi-VN')} đ
+                    </span>
+                  )}
                 </div>
               </div>
 

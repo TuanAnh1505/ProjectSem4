@@ -1,127 +1,241 @@
-.payment-page {
+/* Nền ngoài gradient */
+.payment-bg-gradient {
   min-height: 100vh;
-  background: #f8f9fa;
-  padding: 40px 20px;
-}
-
-.payment-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-}
-
-.payment-title {
-  text-align: center;
-  color: #333;
-  margin-bottom: 30px;
-  font-size: 2rem;
-}
-
-.payment-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-}
-
-.payment-left,
-.payment-right {
-  min-width: 0;
-}
-
-.payment-actions {
-  margin-top: 30px;
+  /* background: linear-gradient(135deg, #e3f0ff 0%, #f8f9fa 100%); */
   display: flex;
-  gap: 15px;
+  align-items: center;
+  justify-content: center;
 }
 
-.payment-button,
-.cancel-button {
-  flex: 1;
-  padding: 12px 24px;
-  border-radius: 6px;
+/* Khung chính */
+.payment-main-card {
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 8px 40px rgba(25, 118, 210, 0.10), 0 1.5px 8px #e3e8f0;
+  padding: 40px 36px 32px 36px;
+  max-width: 900px;
+  width: 100%;
+  margin: 32px 0;
+  margin-top: 130px;
+}
+
+.payment-title.fintech {
+  text-align: center;
+  color: #1976d2;
+  margin-bottom: 36px;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.payment-content.fintech {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 36px;
+}
+
+.payment-methods.fintech {
+  flex: 1.2;
+  background: #f7fafd;
+  border-radius: 18px;
+  padding: 28px 18px;
+  box-shadow: 0 2px 8px #e3e8f0;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.payment-qr.fintech {
+  flex: 1.5;
+  background: #f7fafd;
+  border-radius: 18px;
+  padding: 28px 18px;
+  box-shadow: 0 2px 8px #e3e8f0;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bank-transfer-qr.fintech {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.qr-title.fintech {
+  color: #d32f2f;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+.qr-image.fintech {
+  max-width: 240px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px #e3e8f0;
+  margin-bottom: 18px;
+  background: #fff;
+}
+.qr-info.fintech {
+  font-size: 1.08rem;
+  margin-bottom: 6px;
+  color: #222;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
   font-weight: 500;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+}
+.qr-info.fintech b {
+  min-width: 140px;
+  color: #1976d2;
+  font-weight: 700;
+}
+.qr-warning.fintech {
+  color: #d32f2f;
+  font-size: 1.05rem;
+  margin-top: 12px;
+  font-weight: 600;
+  /* text-align: center; */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+.qr-warning-icon {
+  font-size: 1.2em;
+  margin-right: 2px;
 }
 
-.payment-button {
-  background: #007bff;
+.payment-actions.fintech {
+  margin-top: 24px;
+  display: flex;
+  gap: 22px;
+}
+.payment-btn.fintech {
+  flex: 1;
+  padding: 16px 0;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 1.13rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  box-shadow: 0 1.5px 8px #e3e8f0;
+}
+.payment-btn.fintech.payment-pay {
+  background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+  color: #fff;
+}
+.payment-btn.fintech.payment-pay:disabled {
+  background: #b0c4de;
+  color: #fff;
+  cursor: not-allowed;
+}
+.payment-btn.fintech.payment-pay:hover:not(:disabled) {
+  background: linear-gradient(90deg, #1256a3 60%, #1976d2 100%);
+}
+.payment-btn.fintech.payment-confirm {
+  background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%);
+  color: #fff;
+}
+.payment-btn.fintech.payment-confirm:disabled {
+  background: #b7e0c2;
+  color: #fff;
+  cursor: not-allowed;
+}
+.payment-btn.fintech.payment-confirm:hover:not(:disabled) {
+  background: linear-gradient(90deg, #1e7e34 60%, #43a047 100%);
+}
+.payment-btn.fintech.cancel-btn {
+  background: #fff;
+  color: #d32f2f;
+  border: 2px solid #d32f2f;
+}
+.payment-btn.fintech.cancel-btn:hover {
+  background: #fbe9e7;
+}
+.payment-loading.fintech {
+  text-align: center;
+  padding: 32px 0;
+  font-size: 1.1rem;
+  color: #1976d2;
+}
+.payment-modal-overlay.fintech {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.payment-modal.fintech {
+  background: #fff;
+  border-radius: 22px;
+  padding: 44px 54px 36px 54px;
+  box-shadow: 0 8px 40px rgba(25, 118, 210, 0.13);
+  text-align: center;
+  min-width: 320px;
+  max-width: 90vw;
+}
+.payment-modal.fintech.success .modal-icon.fintech {
+  font-size: 64px;
+  color: #43a047;
+  margin-bottom: 16px;
+}
+.payment-modal.fintech.failed .modal-icon.fintech {
+  font-size: 64px;
+  color: #d32f2f;
+  margin-bottom: 16px;
+}
+.modal-title.fintech {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 22px;
+  color: #222;
+}
+.modal-close-btn.fintech {
+  margin-top: 10px;
+  padding: 12px 36px;
+  background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
   color: #fff;
   border: none;
+  border-radius: 10px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
-
-.payment-button:hover:not(:disabled) {
-  background: #0056b3;
+.modal-close-btn.fintech:hover {
+  background: linear-gradient(90deg, #1256a3 60%, #1976d2 100%);
 }
-
-.payment-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.cancel-button {
-  background: #fff;
-  color: #333;
-  border: 1px solid #ddd;
-}
-
-.cancel-button:hover:not(:disabled) {
-  background: #f8f9fa;
-}
-
-.cancel-button:disabled {
-  color: #ccc;
-  border-color: #eee;
-  cursor: not-allowed;
-}
-
-.payment-error-message {
-  margin-top: 15px;
-  padding: 10px 15px;
-  background: #f8d7da;
-  color: #721c24;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.payment-loading,
-.payment-error {
-  text-align: center;
-  padding: 40px;
-  font-size: 1.1rem;
-  color: #666;
-}
-
-.payment-error {
-  color: #dc3545;
-}
-
-@media (max-width: 992px) {
-  .payment-content {
-    grid-template-columns: 1fr;
+@media (max-width: 900px) {
+  .payment-main-card {
+    padding: 18px 6px;
   }
-
-  .payment-left,
-  .payment-right {
-    width: 100%;
+  .payment-content.fintech {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .payment-methods.fintech, .payment-qr.fintech {
+    padding: 18px 8px;
+    min-width: unset;
   }
 }
-
-@media (max-width: 768px) {
-  .payment-page {
-    padding: 20px 15px;
+@media (max-width: 600px) {
+  .payment-modal.fintech {
+    padding: 18px 6px 18px 6px;
+    min-width: unset;
   }
-
-  .payment-container {
-    padding: 20px;
+  .payment-title.fintech {
+    font-size: 1.2rem;
   }
-
-  .payment-title {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+  .payment-main-card {
+    padding: 8px 2px;
   }
 } 
