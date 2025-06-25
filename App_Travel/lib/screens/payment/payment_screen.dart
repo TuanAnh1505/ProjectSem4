@@ -305,7 +305,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 Text('Tổng tiền:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                 const SizedBox(width: 8),
                 Text(
-                  NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(total) + ' VNĐ',
+                  NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(total) + ' đ',
                   style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
                 ),
               ],
@@ -353,7 +353,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             _buildInfoRow('Ngân hàng:', bankQr!['bankName']),
             _buildInfoRow('Số tài khoản:', bankQr!['accountNumber']),
             _buildInfoRow('Tên tài khoản:', bankQr!['accountName']),
-            _buildInfoRow('Số tiền:', NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(bankQr!['amount']) + ' VNĐ'),
+            _buildInfoRow('Số tiền:', NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(bankQr!['amount']) + ' đ'),
             _buildInfoRow('Nội dung:', bankQr!['transferContent']),
             const SizedBox(height: 10),
             const Text('Vui lòng chuyển khoản đúng nội dung để được xác nhận tự động!', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
