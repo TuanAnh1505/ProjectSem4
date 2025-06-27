@@ -143,14 +143,14 @@ class AppDrawer extends StatelessWidget {
                 },
               ),
               if (token != null) ...[
-                ListTile(
-                  leading: const Icon(Icons.book_online),
-                  title: const Text('Tours đã đặt'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, '/bookings');
-                  },
-                ),
+                // ListTile(
+                //   leading: const Icon(Icons.book_online),
+                //   title: const Text('Tours đã đặt'),
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     Navigator.pushReplacementNamed(context, '/history-user-booking-tour-screen');
+                //   },
+                // ),
                 ListTile(
                   leading: const Icon(Icons.settings),
                   title: const Text('Cài đặt'),

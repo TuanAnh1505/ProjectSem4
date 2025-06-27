@@ -412,6 +412,20 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     }
   }
 
+  int calculateAge(String birthDate) {
+    try {
+      final date = DateTime.parse(birthDate);
+      final now = DateTime.now();
+      int age = now.year - date.year;
+      if (now.month < date.month || (now.month == date.month && now.day < date.day)) {
+        age--;
+      }
+      return age;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -636,7 +650,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
+                          color: Colors.white,
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(16),
                             topRight: Radius.circular(16),
@@ -647,7 +661,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.orange.shade100,
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(Icons.person_outline, color: Colors.orange.shade800, size: 24),
@@ -852,6 +866,23 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                                       fillColor: Colors.grey.shade50,
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                     ),
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return 'Vui lòng chọn ngày sinh';
+                                      }
+                                      final date = DateTime.tryParse(value);
+                                      if (date == null) {
+                                        return 'Ngày sinh không hợp lệ';
+                                      }
+                                      if (date.isAfter(DateTime.now())) {
+                                        return 'Ngày sinh không được lớn hơn ngày hiện tại';
+                                      }
+                                      int age = calculateAge(value);
+                                      if (age < 16) {
+                                        return 'Người liên hệ phải từ 16 tuổi trở lên!';
+                                      }
+                                      return null;
+                                    },
                                     onTap: () async {
                                       final date = await showDatePicker(
                                         context: context,
@@ -876,6 +907,12 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                                         setState(() {
                                           _birthDate = date.toString().split(' ')[0];
                                           _birthDateController.text = _birthDate;
+                                          int age = calculateAge(_birthDate);
+                                          if (age < 16) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Người liên hệ phải từ 16 tuổi trở lên!')),
+                                            );
+                                          }
                                         });
                                       }
                                     },
@@ -903,11 +940,11 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
-                        _buildPassengerCountRow('Người lớn', 'adult'),
+                        _buildPassengerCountRow('Người lớn (100%)', 'adult'),
                         const Divider(),
-                        _buildPassengerCountRow('Trẻ em (2-11 tuổi)', 'child'),
+                        _buildPassengerCountRow('Trẻ em (50%)', 'child'),
                         const Divider(),
-                        _buildPassengerCountRow('Em bé (< 2 tuổi)', 'infant'),
+                        _buildPassengerCountRow('Em bé (25%)', 'infant'),
                       ],
                     ),
                   ),
@@ -936,7 +973,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
+                            color: Colors.white,
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(16),
                               topRight: Radius.circular(16),
@@ -947,7 +984,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.orange.shade100,
+                                  color: Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(Icons.group, color: Colors.orange.shade800, size: 24),
@@ -975,18 +1012,18 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                   ),
                 const SizedBox(height: 20),
 
-                // Discount code section
+                // Total price, discount code, and submit button in one Card
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Mã giảm giá',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                        Text('Chi tiết giá:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        ..._buildPriceDetails(),
                         const SizedBox(height: 16),
+                        // Form nhập mã giảm giá
                         Row(
                           children: [
                             Expanded(
@@ -1009,8 +1046,8 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             ElevatedButton(
                               onPressed: _handleApplyDiscount,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                                foregroundColor: Colors.white, 
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.black, 
                                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -1028,36 +1065,45 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                               style: const TextStyle(color: Colors.red),
                             ),
                           ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Total price and submit button
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
+                        const Divider(),
+                        const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              'Tổng tiền:',
+                              'Tổng cộng :',
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
-                            Text(
-                              NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(_totalPrice),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(_totalPrice),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                if (_discountInfo != null && _discountInfo!['discountPercent'] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: Text(
+                                      NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(
+                                        (_passengerCounts['adult'] ?? 0) * (widget.tour.price ?? 0.0) +
+                                        (_passengerCounts['child'] ?? 0) * ((widget.tour.price ?? 0.0) * 0.5)
+                                      ),
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                        decoration: TextDecoration.lineThrough,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 25),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -1079,6 +1125,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -1101,7 +1148,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
               ),
               if (type == 'adult')
                 const Text(
-                  '(Từ 12 tuổi trở lên)',
+                  '(Từ 16 tuổi trở lên)',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
             ],
@@ -1274,6 +1321,27 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                                 fillColor: Colors.grey.shade50,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Vui lòng chọn ngày sinh';
+                                }
+                                final date = DateTime.tryParse(value);
+                                if (date == null) {
+                                  return 'Ngày sinh không hợp lệ';
+                                }
+                                if (date.isAfter(DateTime.now())) {
+                                  return 'Ngày sinh không được lớn hơn ngày hiện tại';
+                                }
+                                int age = calculateAge(value);
+                                if (type == 'adult' && age < 16) {
+                                  return 'Người lớn phải từ 16 tuổi trở lên!';
+                                } else if (type == 'child' && (age < 2 || age >= 16)) {
+                                  return 'Trẻ em phải từ 2 đến dưới 16 tuổi!';
+                                } else if (type == 'infant' && age >= 2) {
+                                  return 'Em bé phải dưới 2 tuổi!';
+                                }
+                                return null;
+                              },
                               onTap: () async {
                                 final date = await showDatePicker(
                                   context: context,
@@ -1298,6 +1366,20 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                                   setState(() {
                                     passenger['birthDate'] = date.toString().split(' ')[0];
                                     passenger['birthDateController'].text = passenger['birthDate'];
+                                    int age = calculateAge(passenger['birthDate']);
+                                    String warning = '';
+                                    if (type == 'adult' && age < 16) {
+                                      warning = 'Người lớn phải từ 16 tuổi trở lên!';
+                                    } else if (type == 'child' && (age < 2 || age >= 16)) {
+                                      warning = 'Trẻ em phải từ 2 đến dưới 16 tuổi!';
+                                    } else if (type == 'infant' && age >= 2) {
+                                      warning = 'Em bé phải dưới 2 tuổi!';
+                                    }
+                                    if (warning.isNotEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(warning)),
+                                      );
+                                    }
                                   });
                                 }
                               },
@@ -1320,5 +1402,153 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
     addPassengerFields('infant', 'Em bé', _additionalPassengers['infant']!);
 
     return widgets;
+  }
+
+  List<Widget> _buildPriceDetails() {
+    double basePrice = widget.tour.price ?? 0.0;
+    int adultCount = _passengerCounts['adult'] ?? 0;
+    int childCount = _passengerCounts['child'] ?? 0;
+    int infantCount = _passengerCounts['infant'] ?? 0;
+
+    double discountPercent = _discountInfo?['discountPercent']?.toDouble() ?? 0;
+    double adultUnitPrice = basePrice * (1 - discountPercent / 100);
+    double childUnitPrice = basePrice * 0.5 * (1 - discountPercent / 100);
+    double infantUnitPrice = basePrice * 0.25 * (1 - discountPercent / 100);
+
+    double adultTotal = adultCount * adultUnitPrice;
+    double childTotal = childCount * childUnitPrice;
+    double infantTotal = infantCount * infantUnitPrice;
+    double totalBeforeDiscount = (adultCount * basePrice) + (childCount * (basePrice * 0.5)) + (infantCount * (basePrice * 0.25));
+    double discountAmount = totalBeforeDiscount * (discountPercent / 100);
+    double totalAfterDiscount = totalBeforeDiscount - discountAmount;
+
+    List<Widget> details = [];
+
+    // Giá tour (giá đã giảm, giá gốc gạch ngang)
+    details.add(Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.price_change, color: Colors.red, size: 20),
+            const SizedBox(width: 6),
+            Text('Giá tour :', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        Row(
+          children: [
+            Text(
+              NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(totalAfterDiscount),
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            if (discountPercent > 0) ...[
+              const SizedBox(width: 8),
+              Text(
+                NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(totalBeforeDiscount),
+                style: TextStyle(
+                  color: Colors.grey,
+                  decoration: TextDecoration.lineThrough,
+                  fontSize: 16,
+                ),
+              ),
+            ]
+          ],
+        ),
+      ],
+    ));
+    details.add(const SizedBox(height: 6));
+
+    // Người lớn
+    if (adultCount > 0) {
+      details.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.person, color: Colors.blue, size: 18),
+              const SizedBox(width: 6),
+              Text('Người lớn :'),
+            ],
+          ),
+          Text(
+            NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(adultTotal),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ));
+      details.add(const SizedBox(height: 6));
+    }
+
+    // Trẻ em
+    if (childCount > 0) {
+      details.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.child_friendly, color: Colors.blue, size: 18),
+              const SizedBox(width: 6),
+              Text('Trẻ em :'),
+            ],
+          ),
+          Text(
+            NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(childTotal),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ));
+      details.add(const SizedBox(height: 6));
+    }
+
+    // Em bé
+    if (infantCount > 0) {
+      details.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.child_care, color: Colors.blue, size: 18),
+              const SizedBox(width: 6),
+              Text('Em bé :'),
+            ],
+          ),
+          Text(
+            NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(infantTotal),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ));
+      details.add(const SizedBox(height: 6));
+    }
+
+    // Giảm giá
+    if (discountPercent > 0) {
+      details.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.local_offer, color: Colors.green, size: 18),
+              const SizedBox(width: 4),
+              Text(
+                'Giảm giá (${discountPercent.toStringAsFixed(0)}%)',
+                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Text(
+            '- ' + NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(discountAmount),
+            style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ));
+      details.add(const SizedBox(height: 6));
+    }
+
+    return details;
   }
 }
