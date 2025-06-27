@@ -233,9 +233,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor.withOpacity(0.08) : secondaryColor,
+          color: Colors.white,
           border: Border.all(
-            color: isSelected ? primaryColor : Colors.grey.shade300,
+            color: Colors.white,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(14),
@@ -247,25 +247,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: isSelected ? primaryColor : Colors.grey.shade200,
+                color: isSelected ? Colors.white : Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.all(8),
-              child: Icon(icon, color: isSelected ? Colors.white : Colors.orange, size: 28),
+              child: Icon(icon, color: isSelected ? Colors.orange : Colors.orange, size: 28),
             ),
             const SizedBox(width: 18),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  color: isSelected ? primaryColor : Colors.black87,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 17,
                 ),
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: Colors.orange, size: 28),
+              const Icon(Icons.check_circle, color: Colors.green, size: 28),
           ],
         ),
       ),
@@ -331,12 +331,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
         padding: const EdgeInsets.all(22),
         child: Column(
           children: [
-            const Text('Quét mã QR để chuyển khoản', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.orange)),
+            const Text('Quét mã QR để chuyển khoản', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red)),
             const SizedBox(height: 18),
             qrBytes != null
                 ? Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.orange, width: 2),
+                      // border: Border.all(color: Colors.orange, width: 2),
                       borderRadius: BorderRadius.circular(16),
                       color: Colors.white,
                     ),
@@ -354,7 +354,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             _buildInfoRow('Số tài khoản:', bankQr!['accountNumber']),
             _buildInfoRow('Tên tài khoản:', bankQr!['accountName']),
             _buildInfoRow('Số tiền:', NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0).format(bankQr!['amount']) + ' đ'),
-            _buildInfoRow('Nội dung:', bankQr!['transferContent']),
+            _buildInfoRow('Nội dung chuyển khoản:', bankQr!['transferContent']),
             const SizedBox(height: 10),
             const Text('Vui lòng chuyển khoản đúng nội dung để được xác nhận tự động!', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
           ],
@@ -364,17 +364,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget _buildInfoRow(String label, String value) {
-    final isAmount = label == 'Số tiền:';
+    final isAmount = label.trim().toLowerCase().contains('số tiền');
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-          const SizedBox(width: 6),
           Expanded(
-            child: isAmount
-                ? Text(value, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20))
-                : Text(value, style: const TextStyle(fontSize: 15)),
+            child: Text(label, style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600, fontSize: 15)),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(color: isAmount ? Colors.red : Colors.black, fontSize: isAmount ? 18 : 15, fontWeight: isAmount ? FontWeight.bold : FontWeight.normal),
+              textAlign: TextAlign.right,
+            ),
           ),
         ],
       ),
@@ -383,11 +386,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   Widget _buildResultOverlay() {
     if (confirmResult == null) return const SizedBox();
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withOpacity(0.4),
-        child: Center(
-          child: Container(
+    return Center(
+      child: Stack(
+        children: [
+          Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -419,13 +421,26 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     backgroundColor: primaryColor,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  onPressed: () => setState(() => confirmResult = null),
-                  child: const Text('Đóng', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  onPressed: () {
+                    setState(() => confirmResult = null);
+                    if (confirmResult == 'success') {
+                      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                    }
+                  },
+                  child: const Text('Về trang chủ', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ],
             ),
           ),
-        ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+              onPressed: () => setState(() => confirmResult = null),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -467,7 +482,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Phương thức thanh toán', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange)),
+                        const Text('Phương thức thanh toán', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black)),
                         const SizedBox(height: 16),
                         _buildPaymentMethod(2, 'Chuyển khoản ngân hàng', Icons.account_balance),
                         // _buildPaymentMethod(5, 'Ví MoMo', Icons.account_balance_wallet),
@@ -501,7 +516,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     child: const Text('Thanh toán ngay', style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
                   child: const Text('Hủy', style: TextStyle(fontSize: 15)),
                 ),
               ],

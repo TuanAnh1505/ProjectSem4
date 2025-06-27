@@ -117,7 +117,7 @@ class _AppNavigationState extends State<AppNavigation> {
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.flight_takeoff),
-            label: 'Chuyến du lịch',
+            label: 'Chuyến đi',
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.person),
