@@ -23,7 +23,8 @@ axios.interceptors.response.use(
       const protectedRoutes = [
         '/booking-passenger',
         '/booking-confirmation',
-        '/momo-payment',
+        '/vnpay-payment',
+        '/vnpay-return',
         '/payment',
         '/account',
         '/admin'

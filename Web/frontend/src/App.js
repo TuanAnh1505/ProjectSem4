@@ -16,7 +16,7 @@ import AdminPage from './components/admin/AdminPage';
 import TourDashboard from './components/tour/TourDashboard';
 import TourDetailDashboard from './components/tour/TourDetailDashboard';
 import BookingPassenger from './components/booking/BookingPassenger';
-import MomoPaymentPage from './components/payment/MomoPaymentPage';
+
 import Payment from './pages/Payment';
 import UpdateInfoUser from './components/auth/UpdateInfoUser';
 import GuidePage from './components/guide/GuidePage';
@@ -139,11 +139,8 @@ const App = () => {
               <ProtectedRoute element={<BookingConfirmation />} />
             </Layout>
           } />
-          <Route path="/momo-payment" element={
-            <Layout>
-              <ProtectedRoute element={<MomoPaymentPage />} />
-            </Layout>
-          } />
+         
+         
           <Route path="/payment/:bookingId" element={
             <Layout>
               <ProtectedRoute element={<Payment />} />
@@ -182,10 +179,6 @@ const App = () => {
           <Route
             path="/booking-passenger"
             element={<ProtectedRoute element={<BookingPassenger />} />}
-          />
-          <Route
-            path="/momo-payment"
-            element={<ProtectedRoute element={<MomoPaymentPage />} />}
           />
 
             {/* Admin routes */}
@@ -404,6 +397,8 @@ const App = () => {
             path="/redirect"
             element={<AutoRedirect />}
           />
+
+        
         </Routes>
       </div>
     </Router>

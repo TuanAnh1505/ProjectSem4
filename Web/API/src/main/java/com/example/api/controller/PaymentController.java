@@ -88,42 +88,6 @@ public class PaymentController {
         }
     }
 
-    // MoMo specific endpoints
-    @PostMapping("/momo/create")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> createMomoPayment(@Valid @RequestBody PaymentRequestDTO dto) {
-        try {
-            String payUrl = paymentService.createMomoPayment(dto);
-            return ResponseEntity.ok(Map.of("payUrl", payUrl));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    @GetMapping("/momo/return")
-    public ResponseEntity<?> momoReturn(HttpServletRequest request) {
-        try {
-            Map<String, String> params = request.getParameterMap().entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()[0]));
-            PaymentResponseDTO payment = paymentService.handleMomoReturn(params);
-            return ResponseEntity.ok(payment);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    @PostMapping("/momo/notify")
-    public ResponseEntity<?> momoNotify(HttpServletRequest request) {
-        try {
-            Map<String, String> params = request.getParameterMap().entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()[0]));
-            paymentService.handleMomoNotify(params);
-            return ResponseEntity.ok("OK");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
-
     // Get all payment methods
     @GetMapping("/methods")
     public ResponseEntity<?> getPaymentMethods() {
@@ -241,6 +205,17 @@ public class PaymentController {
         try {
             var updated = paymentService.updatePaymentStatusToSupportContact(id);
             return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/transaction/{transactionId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getPaymentByTransactionId(@PathVariable String transactionId) {
+        try {
+            PaymentResponseDTO payment = paymentService.getPaymentByTransactionId(transactionId);
+            return ResponseEntity.ok(payment);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

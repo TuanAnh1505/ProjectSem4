@@ -18,6 +18,7 @@ const Payment = () => {
   const [confirmResult, setConfirmResult] = useState(null); // 'success' | 'failed' | null
   const [showPaidModal, setShowPaidModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [methods, setMethods] = useState([]);
 
   // Lấy giá tiền từ location.state (được truyền từ BookingConfirmation)
   const amountFromState = location.state?.amount;
@@ -51,30 +52,6 @@ const Payment = () => {
           }
         );
         setBooking(response.data);
-
-        // Kiểm tra trạng thái PENDING quá 1 tiếng
-        const bookingObj = response.data?.booking;
-        if (bookingObj && bookingObj.status?.statusName === 'PENDING') {
-          const bookingDate = new Date(bookingObj.bookingDate);
-          const now = new Date();
-          const diffMs = now - bookingDate;
-          const diffHours = diffMs / (1000 * 60 * 60);
-          if (diffHours > 1) {
-            // Gọi API chuyển trạng thái sang SUPPORT_CONTACT
-            await axios.put(
-              `http://localhost:8080/api/bookings/${bookingId}/support-contact`,
-              {},
-              { headers: { 'Authorization': `Bearer ${token}` } }
-            );
-            // Reload lại booking
-            const updated = await axios.get(
-              `http://localhost:8080/api/bookings/${bookingId}/detail`,
-              { headers: { 'Authorization': `Bearer ${token}` } }
-            );
-            setBooking(updated.data);
-            alert('Đơn đặt tour của bạn đã được chuyển sang trạng thái "Nhân viên hỗ trợ liên hệ" do chưa thanh toán sau 1 tiếng. Vui lòng chờ nhân viên liên hệ hoặc đặt lại tour mới.');
-          }
-        }
       } catch (err) {
         setError('Không thể tải thông tin đặt phòng');
         console.error('Error fetching booking:', err);
@@ -85,6 +62,22 @@ const Payment = () => {
 
     fetchBookingDetails();
   }, [bookingId, navigate]);
+
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res = await axios.get('http://localhost:8080/api/payments/methods', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setMethods(res.data);
+      } catch (err) {
+        // Có thể xử lý lỗi nếu muốn
+      }
+    };
+    fetchPaymentMethods();
+  }, []);
 
   const handleMethodSelect = (methodId) => {
     setSelectedMethod(methodId);
@@ -178,30 +171,9 @@ const Payment = () => {
         return;
       }
 
-      // Nếu là MoMo (giả sử methodId = 5 là MoMo)
-      if (selectedMethod === 5) {
-        if (existingPayment) {
-          // Nếu đã có payment chưa completed, dùng lại
-          // (Có thể redirect hoặc hiển thị thông tin payment)
-          setBankQr(existingPayment);
-          return;
-        }
-        const response = await axios.post(
-          'http://localhost:8080/api/payments/momo',
-          {
-            bookingId: parseInt(bookingId),
-            userId: parseInt(userId),
-            paymentMethodId: selectedMethod,
-            amount: amount
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-        window.location.href = response.data.payUrl;
+      // Nếu là VNPAY (giả sử methodId = 6 là VNPAY)
+      if (selectedMethod === 6) {
+        window.location.href = `/vnpay-payment?bookingId=${bookingId}`;
         return;
       }
 
@@ -272,42 +244,92 @@ const Payment = () => {
   }
 
   return (
-    <div className="payment-bg-gradient">
-      <div className="payment-main-card">
-        <h1 className="payment-title fintech">Thanh toán</h1>
-        <div className="payment-content fintech">
-          <div className="payment-methods fintech">
+    <div className="payment-page">
+      <div className="payment-container">
+        <h1 className="payment-title">Thanh toán</h1>
+        
+        {/* Hiển thị thông tin giá tiền */}
+        {/* <div style={{
+          background: '#f8f9fa',
+          padding: '16px',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          border: '1px solid #dee2e6'
+        }}>
+          <h3 style={{ margin: '0 0 12px 0', color: '#1976d2' }}>Thông tin thanh toán</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div><strong>Mã booking:</strong> {bookingId}</div>
+              <div><strong>Số tiền cần thanh toán:</strong></div>
+            </div>
+            <div style={{ 
+              fontSize: '24px', 
+              fontWeight: 'bold', 
+              color: '#d32f2f',
+              textAlign: 'right'
+            }}>
+              {(finalPriceFromState !== undefined ? finalPriceFromState : 
+                amountFromState || 
+                booking?.booking?.totalPrice || 
+                booking?.totalAmount || 0).toLocaleString()} VND
+            </div>
+          </div>
+          {amountFromState && (
+            <div style={{ 
+              fontSize: '12px', 
+              color: '#666', 
+              marginTop: '8px',
+              fontStyle: 'italic'
+            }}>
+              * Giá tiền được tính từ thông tin đặt tour
+              {finalPriceFromState !== undefined && finalPriceFromState !== amountFromState && 
+                ` (Final price: ${finalPriceFromState.toLocaleString()} VND)`
+              }
+            </div>
+          )}
+        </div> */}
+
+        <div className="payment-content">
+          <div className="payment-left">
             <PaymentMethodSelector
+              methods={methods}
               onSelectMethod={handleMethodSelect}
               selectedMethod={selectedMethod}
             />
           </div>
-          <div className="payment-qr fintech">
+          <div className="payment-right">
             {qrLoading && (
-              <div className="payment-loading fintech">Đang tạo mã QR chuyển khoản...</div>
+              <div className="payment-loading">Đang tạo mã QR chuyển khoản...</div>
             )}
             {bankQr && (
-              <div className="bank-transfer-qr fintech">
-                <h3 className="qr-title fintech">Quét mã QR để chuyển khoản</h3>
+              <div className="bank-transfer-qr-modal">
+                <h3>Quét mã QR để chuyển khoản</h3>
+                {console.log('Current bankQr state:', bankQr)}
                 <img 
                   src={bankQr.qrDataURL} 
                   alt="QR Bank Transfer" 
-                  className="qr-image fintech"
+                  style={{maxWidth: 300}}
+                  onError={(e) => {
+                    console.error('Error loading QR image:', e);
+                    console.log('Failed QR image src:', bankQr.qrDataURL);
+                  }}
                 />
-                <div className="qr-info fintech"><b>Ngân hàng:</b> <span>{bankQr.bankName}</span></div>
-                <div className="qr-info fintech"><b>Số tài khoản:</b> <span>{bankQr.accountNumber}</span></div>
-                <div className="qr-info fintech"><b>Tên tài khoản:</b> <span>{bankQr.accountName}</span></div>
-                <div className="qr-info fintech"><b>Số tiền:</b> <span>{bankQr.amount.toLocaleString()} VND</span></div>
-                <div className="qr-info fintech"><b>Nội dung chuyển khoản:</b> <span>{bankQr.transferContent}</span></div>
-                <div className="qr-warning fintech"><span className="qr-warning-icon">⚠️</span> Vui lòng chuyển khoản đúng nội dung để được xác nhận tự động!</div>
+                <div><b>Ngân hàng:</b> {bankQr.bankName}</div>
+                <div><b>Số tài khoản:</b> {bankQr.accountNumber}</div>
+                <div><b>Tên tài khoản:</b> {bankQr.accountName}</div>
+                <div><b>Số tiền:</b> {bankQr.amount.toLocaleString()} VND</div>
+                <div><b>Nội dung chuyển khoản:</b> {bankQr.transferContent}</div>
+                <div style={{color: 'red', marginTop: 8}}>Vui lòng chuyển khoản đúng nội dung để được xác nhận tự động!</div>
               </div>
             )}
           </div>
         </div>
-        <div className="payment-actions fintech">
+
+        <div className="payment-actions">
           {bankQr ? (
             <button
-              className="payment-btn fintech payment-confirm"
+              className="payment-button"
+              style={{ background: '#28a745' }}
               onClick={async () => {
                 setConfirmLoading(true);
                 setConfirmResult(null);
@@ -338,7 +360,7 @@ const Payment = () => {
             </button>
           ) : (
             <button
-              className="payment-btn fintech payment-pay"
+              className="payment-button"
               onClick={handlePayment}
               disabled={!selectedMethod}
             >
@@ -346,28 +368,124 @@ const Payment = () => {
             </button>
           )}
           <button
-            className="payment-btn fintech cancel-btn"
+            className="cancel-button"
             onClick={() => navigate(-1)}
           >
             Hủy
           </button>
         </div>
-        {/* Popup thông báo */}
+
         {confirmResult === 'success' && (
-          <div className="payment-modal-overlay fintech">
-            <div className="payment-modal fintech success">
-              <div className="modal-icon fintech">✔</div>
-              <div className="modal-title fintech">Thanh toán thành công!</div>
-              <button className="modal-close-btn fintech" onClick={() => navigate('/')}>Đóng</button>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999
+          }}>
+            <div style={{
+              background: '#fff',
+              borderRadius: 12,
+              padding: '32px 48px',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+              textAlign: 'center',
+              minWidth: 320
+            }}>
+              <div style={{ fontSize: 48, color: '#28a745', marginBottom: 16 }}>✔</div>
+              <div style={{ fontSize: 22, color: '#28a745', fontWeight: 600, marginBottom: 12 }}>Thanh toán thành công !</div>
+              <button
+                style={{
+                  marginTop: 16,
+                  padding: '10px 28px',
+                  background: '#28a745',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  fontSize: 16,
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+                onClick={() => {
+                  const publicId = localStorage.getItem('publicId');
+                  if (publicId) {
+                    navigate(`/account/${publicId}`);
+                  } else {
+                    navigate('/login');
+                  }
+                }}
+              >
+                Đóng
+              </button>
             </div>
           </div>
         )}
         {confirmResult === 'failed' && (
-          <div className="payment-modal-overlay fintech">
-            <div className="payment-modal fintech failed">
-              <div className="modal-icon fintech">✖</div>
-              <div className="modal-title fintech">Chưa nhận được thanh toán, vui lòng thử lại sau.</div>
-              <button className="modal-close-btn fintech" onClick={() => window.location.reload()}>Đóng</button>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999
+          }}>
+            <div style={{
+              background: '#fff0f0',
+              borderRadius: 12,
+              padding: '32px 48px',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+              textAlign: 'center',
+              minWidth: 320,
+              border: '1px solid #f5c2c7'
+            }}>
+              <div style={{ fontSize: 48, color: '#dc3545', marginBottom: 16 }}>✖</div>
+              <div style={{ fontSize: 20, color: '#dc3545', fontWeight: 600, marginBottom: 12 }}>
+                Chưa nhận được thanh toán, vui lòng thử lại sau.
+              </div>
+              <button
+                style={{
+                  marginTop: 16,
+                  padding: '10px 28px',
+                  background: '#dc3545',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  fontSize: 16,
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+                onClick={() => window.location.reload()}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        )}
+        {showPaidModal && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+          }}>
+            <div style={{ background: '#fff', borderRadius: 12, padding: '32px 48px', boxShadow: '0 4px 24px rgba(0,0,0,0.2)', textAlign: 'center', minWidth: 320, border: '1px solid #28a745' }}>
+              <div style={{ fontSize: 48, color: '#28a745', marginBottom: 16 }}>✔</div>
+              <div style={{ fontSize: 22, color: '#28a745', fontWeight: 600, marginBottom: 12 }}>Tour này đã được thanh toán!</div>
+              <button style={{ marginTop: 16, padding: '10px 28px', background: '#28a745', color: '#fff', border: 'none', borderRadius: 6, fontSize: 16, fontWeight: 500, cursor: 'pointer' }} onClick={() => { setShowPaidModal(false); navigate('/'); }}>Đóng</button>
+            </div>
+          </div>
+        )}
+        {showErrorModal && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+            <div style={{ background: '#fff0f0', borderRadius: 12, padding: '32px 48px', boxShadow: '0 4px 24px rgba(0,0,0,0.2)', textAlign: 'center', minWidth: 320, border: '1px solid #f5c2c7' }}>
+              <div style={{ fontSize: 48, color: '#dc3545', marginBottom: 16 }}>✖</div>
+              <div style={{ fontSize: 20, color: '#dc3545', fontWeight: 600, marginBottom: 12 }}>{error}</div>
+              <button style={{ marginTop: 16, padding: '10px 28px', background: '#dc3545', color: '#fff', border: 'none', borderRadius: 6, fontSize: 16, fontWeight: 500, cursor: 'pointer' }} onClick={() => setShowErrorModal(false)}>Đóng</button>
             </div>
           </div>
         )}

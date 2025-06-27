@@ -23,6 +23,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.TreeMap;
 
 @Service
 public class PaymentService {
@@ -65,12 +69,11 @@ public class PaymentService {
     @Autowired
     private DiscountRepository discountRepository;
 
-    private static final String PARTNER_CODE = "MOMO";
-    private static final String ACCESS_KEY = "F8BBA842ECF85";
-    private static final String SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-    private static final String MOMO_ENDPOINT = "https://test-payment.momo.vn/v2/gateway/api/create";
-    private static final String RETURN_URL = "http://localhost:8080/api/payments/momo/return";
-    private static final String NOTIFY_URL = "http://localhost:8080/api/payments/momo/notify";
+    private static final String PARTNER_CODE = "VNPAY";
+    private static final String SECRET_KEY = "VNPAY_SECRET_KEY";
+    private static final String VNPAY_ENDPOINT = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    private static final String RETURN_URL = "http://localhost:8080/api/payments/vnpay/return";
+    private static final String NOTIFY_URL = "http://localhost:8080/api/payments/vnpay/notify";
 
     @Transactional
     public PaymentResponseDTO createPayment(PaymentRequestDTO dto) {
@@ -222,66 +225,6 @@ public class PaymentService {
         return convertToDTO(payment);
     }
 
-    public String createMomoPayment(PaymentRequestDTO dto) throws IOException, InterruptedException {
-        // First create the payment record
-        PaymentResponseDTO payment = createPayment(dto);
-
-        String orderId = payment.getTransactionId();
-        String requestId = UUID.randomUUID().toString();
-        String amount = dto.getAmount().toString();
-
-        Map<String, String> rawData = new LinkedHashMap<>();
-        rawData.put("partnerCode", PARTNER_CODE);
-        rawData.put("accessKey", ACCESS_KEY);
-        rawData.put("requestId", requestId);
-        rawData.put("amount", amount);
-        rawData.put("orderId", orderId);
-        rawData.put("orderInfo", "Thanh toan tour");
-        rawData.put("returnUrl", RETURN_URL);
-        rawData.put("notifyUrl", NOTIFY_URL);
-        rawData.put("extraData", "");
-
-        String signature = generateSignature(rawData);
-        rawData.put("requestType", "captureWallet");
-        rawData.put("signature", signature);
-        rawData.put("lang", "vi");
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(MOMO_ENDPOINT))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(rawData)))
-                .build();
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        JsonNode json = new ObjectMapper().readTree(response.body());
-        return json.get("payUrl").asText();
-    }
-
-    @Transactional
-    public PaymentResponseDTO handleMomoReturn(Map<String, String> params) {
-        String orderId = params.get("orderId");
-        String resultCode = params.get("resultCode");
-
-        Payment payment = paymentRepository.findByTransactionId(orderId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
-
-        // Update payment status based on MoMo response
-        PaymentStatus newStatus = paymentStatusRepository.findById(
-                "0".equals(resultCode) ? 3 : 4) // 3 = Completed, 4 = Failed
-                .orElseThrow(() -> new RuntimeException("Payment status not found"));
-
-        return updatePaymentStatus(payment.getPaymentId(), newStatus.getPaymentStatusId(),
-                "MoMo payment " + ("0".equals(resultCode) ? "successful" : "failed"));
-    }
-
-    @Transactional
-    public void handleMomoNotify(Map<String, String> params) {
-        // Similar to handleMomoReturn but for server-to-server notification
-        handleMomoReturn(params);
-    }
-
     public List<PaymentMethod> getAllPaymentMethods() {
         return paymentMethodRepository.findAll();
     }
@@ -319,23 +262,28 @@ public class PaymentService {
         return convertToDTO(payment);
     }
 
-    /**
-     * Chuyển trạng thái payment sang SUPPORT_CONTACT (liên hệ khách hàng)
-     */
     @Transactional
     public PaymentResponseDTO updatePaymentStatusToSupportContact(Integer paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
+            .orElseThrow(() -> new RuntimeException("Payment not found"));
         PaymentStatus supportContactStatus = paymentStatusRepository.findByStatusName("SUPPORT_CONTACT")
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái SUPPORT_CONTACT"));
+            .orElseThrow(() -> new RuntimeException("Payment status SUPPORT_CONTACT not found"));
         payment.setStatus(supportContactStatus);
         payment = paymentRepository.save(payment);
+
         // Lưu lịch sử
         PaymentHistory history = new PaymentHistory();
         history.setPayment(payment);
         history.setStatus(supportContactStatus);
-        history.setNotes("Auto chuyển sang SUPPORT_CONTACT do quá hạn thanh toán");
+        history.setNotes("Chuyển trạng thái sang SUPPORT_CONTACT");
         paymentHistoryRepository.save(history);
+
+        return convertToDTO(payment);
+    }
+
+    public PaymentResponseDTO getPaymentByTransactionId(String transactionId) {
+        Payment payment = paymentRepository.findByTransactionId(transactionId)
+            .orElseThrow(() -> new RuntimeException("Payment not found"));
         return convertToDTO(payment);
     }
 
