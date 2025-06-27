@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaCreditCard, FaPaypal, FaMoneyBillWave, FaUniversity, FaWallet } from 'react-icons/fa';
+import { FaCreditCard, FaPaypal, FaMoneyBillWave, FaUniversity } from 'react-icons/fa';
 import './PaymentMethodSelector.css';
 
 const PaymentMethodSelector = ({ onSelectMethod, selectedMethod }) => {
@@ -47,8 +47,6 @@ const PaymentMethodSelector = ({ onSelectMethod, selectedMethod }) => {
         return <FaUniversity />;
       case 'cash':
         return <FaMoneyBillWave />;
-      case 'momo':
-        return <FaWallet />;
       default:
         return <FaCreditCard />;
     }
