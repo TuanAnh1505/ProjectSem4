@@ -18,5 +18,6 @@ public class BookingPassengerDTO {
     private String passengerType;
     private String gender;
     private String birthDate;
+    private Integer guardianPassengerId;
 }
 

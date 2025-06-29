@@ -44,6 +44,21 @@ export default function AddTour() {
         setDestinations(destRes.data);
         setEvents(eventRes.data);
         setStatuses(statusRes.data);
+
+        setFormData(prev => {
+          const isEmpty = !prev.name && !prev.description && !prev.price && !prev.duration && !prev.maxParticipants && !prev.statusId && !prev.imageUrl;
+          return isEmpty ? {
+            name: '',
+            description: '',
+            price: '',
+            duration: '',
+            maxParticipants: '',
+            statusId: '',
+            imageUrl: '',
+            destinationIds: [],
+            eventIds: []
+          } : prev;
+        });
       } catch (error) {
         setError(error.response?.data?.message || 'Failed to load data.');
         console.error('Failed to load data:', error);

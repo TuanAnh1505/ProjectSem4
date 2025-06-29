@@ -16,8 +16,8 @@ public class RegisterRequest {
 
     @NotBlank(message = "Mật khẩu không được để trống")
     @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
-    @Pattern(regexp = "^(?=.*[A-Z!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?])[^\\s]{8,}$", 
-             message = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 ký tự in hoa hoặc ký tự đặc biệt (!@#$%^&*()_+-=[]{};':\"\\|,.<>/?) và không được chứa khoảng trắng")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?])[^\\s]{8,}$", 
+             message = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ in hoa, chữ in thường, số và ký tự đặc biệt, không được chứa khoảng trắng")
     private String password;
 
     private String phone;

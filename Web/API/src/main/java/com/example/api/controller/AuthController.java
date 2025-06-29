@@ -176,4 +176,17 @@ public class AuthController {
                 .body("Lỗi khi lấy thông tin người dùng: " + e.getMessage());
         }
     }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmailExists(@RequestParam String email) {
+        try {
+            User existingUser = userService.findByEmail(email);
+            Map<String, Object> response = new HashMap<>();
+            response.put("exists", existingUser != null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi kiểm tra email: " + e.getMessage());
+        }
+    }
 }
