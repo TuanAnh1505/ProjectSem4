@@ -42,68 +42,229 @@ public class EmailService {
             MimeMessage mimeMessage = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             helper.setTo(to);
-            helper.setSubject("Kích hoạt tài khoản TravelTour");
 
-            String htmlContent = "<div style='max-width:600px;margin:0 auto;padding:32px 24px;background:#fff;border-radius:10px;font-family:Segoe UI,Arial,sans-serif;color:#222;'>"
-                    +
-                    "<h2 style='font-size:2rem;font-weight:700;margin-bottom:18px;'>Xin chào,</h2>" +
-                    "<p style='font-size:1.1rem;margin-bottom:10px;'>Cảm ơn bạn đã đăng ký tài khoản tại <b>TravelTour</b>.</p>"
-                    +
-                    "<p style='font-size:1.1rem;margin-bottom:24px;'>Bạn có thể kích hoạt tài khoản bằng cách nhấn vào nút dưới đây:</p>"
-                    +
-                    "<div style='margin:32px 0 28px 0;text-align:left;'>" +
-                    "<a href='" + webLink
-                    + "' style='display:inline-block;padding:12px 28px;background:#2196f3;color:#fff;text-decoration:none;border-radius:8px;font-size:1.1rem;font-weight:600;'>Kích hoạt tài khoản</a>"
-                    +
-                    "</div>" +
-                    "<p style='color:#444;font-size:1rem;margin-bottom:32px;'>Liên kết này sẽ hết hạn sau 24 giờ.</p>" +
-                    "<div style='margin-top:40px;color:#444;font-size:1rem;'>" +
-                    "Trân trọng,<br>Đội ngũ TravelTour" +
-                    "</div>" +
-                    "</div>";
-
-            helper.setText(htmlContent, true); // true để gửi HTML
+            String htmlContent;
             if (isGuide) {
                 helper.setSubject("Kích hoạt tài khoản Hướng dẫn viên - TravelTour");
-                htmlContent = "<p>Xin chào,</p>"
-                        + "<p>Chúc mừng bạn đã được admin tạo tài khoản hướng dẫn viên tại TravelTour.</p>"
-                        + "<p>Vui lòng kích hoạt tài khoản để bắt đầu sử dụng các chức năng dành cho hướng dẫn viên.</p>"
-                        + "<ul>";
-                if (isApp) {
-                    htmlContent += "<li><b>Trên app:</b> <a href=\"" + appLink
-                            + "\">Kích hoạt tài khoản trên app</a></li>";
-                } else {
-                    htmlContent += "<li><b>Trên web:</b> <a href=\"" + webLink
-                            + "\">Kích hoạt tài khoản trên web</a></li>";
-                }
-                htmlContent += "</ul>"
-                        + "<p>Liên kết này sẽ hết hạn sau 24 giờ.</p>"
-                        + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
-                helper.setText(htmlContent, true);
+                htmlContent = generateEmailTemplate(
+                    "Kích hoạt tài khoản Hướng dẫn viên",
+                    "Chúc mừng bạn đã được admin tạo tài khoản hướng dẫn viên tại TravelTour.",
+                    "Vui lòng kích hoạt tài khoản để bắt đầu sử dụng các chức năng dành cho hướng dẫn viên.",
+                    webLink, appLink, isApp, "Kích hoạt tài khoản"
+                );
             } else {
                 helper.setSubject("Kích hoạt tài khoản TravelTour");
-                htmlContent = "<p>Xin chào,</p>"
-                        + "<p>Cảm ơn bạn đã đăng ký tài khoản tại TravelTour.</p>"
-                        + "<p>Bạn có thể kích hoạt tài khoản bằng:</p>"
-                        + "<ul>";
-                if (isApp) {
-                    htmlContent += "<li><b>Trên app:</b> <a href=\"" + appLink
-                            + "\">Kích hoạt tài khoản trên app</a></li>";
-                } else {
-                    htmlContent += "<li><b>Trên web:</b> <a href=\"" + webLink
-                            + "\">Kích hoạt tài khoản trên web</a></li>";
-                }
-                htmlContent += "</ul>"
-                        + "<p>Liên kết này sẽ hết hạn sau 24 giờ.</p>"
-                        + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
-                helper.setText(htmlContent, true);
+                htmlContent = generateEmailTemplate(
+                    "Kích hoạt tài khoản TravelTour",
+                    "Cảm ơn bạn đã đăng ký tài khoản tại TravelTour.",
+                    "Bạn có thể kích hoạt tài khoản bằng cách nhấp vào liên kết bên dưới:",
+                    webLink, appLink, isApp, "Kích hoạt tài khoản"
+                );
             }
+            
+            helper.setText(htmlContent, true);
             emailSender.send(mimeMessage);
             logger.info("Successfully sent activation email to: {}", to);
         } catch (Exception e) {
             logger.error("Failed to send activation email to: {}. Error: {}", to, e.getMessage());
-            throw new RuntimeException("Gửi email thất bại: " + e.getMessage());
+            // Don't throw exception to prevent registration failure
+            // Instead, log the error and continue
+            logger.warn("Email sending failed, but user registration will continue. User can request email resend later.");
         }
+    }
+
+    private String generateEmailTemplate(String title, String greeting, String description, 
+                                       String webLink, String appLink, boolean isApp, String buttonText) {
+        return String.format("""
+            <!DOCTYPE html>
+            <html lang="vi">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>%s</title>
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        background-color: #f4f6f8;
+                    }
+                    .email-container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        background-color: #ffffff;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                    }
+                    .header {
+                        background: linear-gradient(135deg, #1976d2 0%%, #42a5f5 100%%);
+                        color: white;
+                        padding: 40px 30px;
+                        text-align: center;
+                    }
+                    .header h1 {
+                        font-size: 28px;
+                        font-weight: 600;
+                        margin-bottom: 10px;
+                    }
+                    .header p {
+                        font-size: 16px;
+                        opacity: 0.9;
+                    }
+                    .content {
+                        padding: 40px 30px;
+                    }
+                    .greeting {
+                        font-size: 18px;
+                        color: #1976d2;
+                        margin-bottom: 20px;
+                        font-weight: 500;
+                    }
+                    .description {
+                        font-size: 16px;
+                        color: #555;
+                        margin-bottom: 30px;
+                        line-height: 1.7;
+                    }
+                    .button-container {
+                        text-align: center;
+                        margin: 30px 0;
+                    }
+                    .cta-button {
+                        display: inline-block;
+                        padding: 16px 32px;
+                        background: linear-gradient(135deg, #28a745 0%%, #20c997 100%%);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                    }
+                    .cta-button:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+                    }
+                    .app-button {
+                        display: inline-block;
+                        padding: 12px 24px;
+                        background: linear-gradient(135deg, #6f42c1 0%%, #8e44ad 100%%);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 6px;
+                        font-size: 14px;
+                        font-weight: 500;
+                        margin-top: 15px;
+                        transition: all 0.3s ease;
+                    }
+                    .app-button:hover {
+                        transform: translateY(-1px);
+                    }
+                    .info-box {
+                        background-color: #e3f2fd;
+                        border-left: 4px solid #1976d2;
+                        padding: 20px;
+                        margin: 25px 0;
+                        border-radius: 0 8px 8px 0;
+                    }
+                    .info-box h3 {
+                        color: #1976d2;
+                        margin-bottom: 10px;
+                        font-size: 16px;
+                    }
+                    .info-box p {
+                        color: #555;
+                        font-size: 14px;
+                        margin: 0;
+                    }
+                    .footer {
+                        background-color: #f8f9fa;
+                        padding: 30px;
+                        text-align: center;
+                        border-top: 1px solid #e9ecef;
+                    }
+                    .footer p {
+                        color: #666;
+                        font-size: 14px;
+                        margin-bottom: 10px;
+                    }
+                    .footer .contact-info {
+                        color: #1976d2;
+                        font-weight: 500;
+                    }
+                    .logo {
+                        font-size: 24px;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    }
+                    @media only screen and (max-width: 600px) {
+                        .email-container {
+                            margin: 10px;
+                            border-radius: 8px;
+                        }
+                        .header, .content, .footer {
+                            padding: 20px;
+                        }
+                        .header h1 {
+                            font-size: 24px;
+                        }
+                        .cta-button {
+                            padding: 14px 28px;
+                            font-size: 15px;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="header">
+                        <div class="logo">🌍 TravelTour</div>
+                        <h1>%s</h1>
+                        <p>Khám phá Việt Nam cùng chúng tôi</p>
+                    </div>
+                    
+                    <div class="content">
+                        <div class="greeting">Xin chào!</div>
+                        <div class="description">
+                            %s<br><br>
+                            %s
+                        </div>
+                        
+                        <div class="button-container">
+                            <a href="%s" class="cta-button">%s trên Web</a>
+                            %s
+                        </div>
+                        
+                        <div class="info-box">
+                            <h3>📧 Thông tin quan trọng</h3>
+                            <p>• Liên kết này sẽ hết hạn sau 24 giờ<br>
+                            • Đảm bảo bạn đang sử dụng trình duyệt an toàn<br>
+                            • Nếu có vấn đề, vui lòng liên hệ hỗ trợ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="footer">
+                        <p><strong>TravelTour</strong> - Dịch vụ du lịch hàng đầu Việt Nam</p>
+                        <p class="contact-info">📞 Hotline: 1900 xxxx | 📧 Email: support@traveltour.com</p>
+                        <p>📍 Địa chỉ: 123 Đường Du Lịch, Quận 1, TP.HCM</p>
+                        <p style="margin-top: 15px; font-size: 12px; color: #999;">
+                            © 2024 TravelTour. Mọi quyền được bảo lưu.
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """,
+            title, title, greeting, description, webLink, buttonText,
+            isApp ? String.format("<br><a href=\"%s\" class=\"app-button\">%s trên App</a>", appLink, buttonText) : ""
+        );
     }
 
     public void sendPasswordResetEmail(String to, String publicId, boolean isApp) {
@@ -117,26 +278,12 @@ public class EmailService {
             String webLink = "http://localhost:3000/reset-password?publicId=" + publicId;
             String appLink = "myapp://reset-password?publicId=" + publicId;
 
-            String htmlContent = "<html><body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>"
-                    + "<div style='max-width: 600px; margin: 0 auto; padding: 20px;'>"
-                    + "<h2 style='color: #007BFF;'>Đặt lại mật khẩu TravelTour</h2>"
-                    + "<p>Xin chào,</p>"
-                    + "<p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>"
-                    + "<p>Vui lòng chọn một trong các cách sau để đặt lại mật khẩu:</p>"
-                    + "<ul style='list-style: none; padding: 0;'>";
-            if (isApp) {
-                htmlContent += "<li style='margin-bottom: 15px;'><b>Trên app:</b> <a href='" + appLink
-                        + "' style='display: inline-block; padding: 10px 20px; color: white; background-color: #28a745; text-decoration: none; border-radius: 5px;'>Đặt lại mật khẩu trên app</a></li>";
-            } else {
-                htmlContent += "<li style='margin-bottom: 15px;'><b>Trên Web:</b> <a href='" + webLink
-                        + "' style='display: inline-block; padding: 10px 20px; color: white; background-color: #28a745; text-decoration: none; border-radius: 5px;'>Đặt lại mật khẩu trên web</a></li>";
-            }
-            htmlContent += "</ul>"
-                    + "<p style='color: #dc3545;'><strong>Lưu ý:</strong> Link này sẽ hết hạn sau 30 phút.</p>"
-                    + "<p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>"
-                    + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>"
-                    + "</div>"
-                    + "</body></html>";
+            String htmlContent = generateEmailTemplate(
+                "Đặt lại mật khẩu TravelTour",
+                "Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.",
+                "Vui lòng chọn một trong các cách sau để đặt lại mật khẩu:",
+                webLink, appLink, isApp, "Đặt lại mật khẩu"
+            );
 
             helper.setText(htmlContent, true);
             emailSender.send(mimeMessage);
@@ -179,19 +326,12 @@ public class EmailService {
             helper.setTo(to);
             helper.setSubject("Yêu cầu gửi lại email kích hoạt - TravelTour");
 
-            String htmlContent = "<p>Xin chào,</p>"
-                    + "<p>Chúng tôi nhận được yêu cầu gửi lại email kích hoạt tài khoản TravelTour của bạn.</p>"
-                    + "<p>Bạn có thể kích hoạt tài khoản bằng:</p>"
-                    + "<ul>";
-            if (isApp) {
-                htmlContent += "<li><b>Trên app:</b> <a href=\"" + appLink + "\">Kích hoạt tài khoản trên app</a></li>";
-            } else {
-                htmlContent += "<li><b>Trên web:</b> <a href=\"" + webLink + "\">Kích hoạt tài khoản trên web</a></li>";
-            }
-            htmlContent += "</ul>"
-                    + "<p>Liên kết này sẽ hết hạn sau 24 giờ.</p>"
-                    + "<p>Nếu bạn không yêu cầu gửi lại email này, vui lòng bỏ qua.</p>"
-                    + "<p>Trân trọng,<br>Đội ngũ TravelTour</p>";
+            String htmlContent = generateEmailTemplate(
+                "Gửi lại email kích hoạt",
+                "Chúng tôi nhận được yêu cầu gửi lại email kích hoạt tài khoản TravelTour của bạn.",
+                "Bạn có thể kích hoạt tài khoản bằng cách nhấp vào liên kết bên dưới:",
+                webLink, appLink, isApp, "Kích hoạt tài khoản"
+            );
 
             helper.setText(htmlContent, true);
             emailSender.send(mimeMessage);
@@ -246,17 +386,6 @@ public class EmailService {
                                         <p><strong>Tổng tiền:</strong> %s VND</p>
                                         <p><strong>Phương thức thanh toán:</strong> %s</p>
                                         <p><strong>Trạng thái:</strong> <span style="color: #28a745;">Đã thanh toán</span></p>
-                                    </div>
-
-                                    <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                                        <h2 style="color: #856404; margin-top: 0;">Danh sách khách hàng</h2>
-                                        <table style="width: 100%%; border-collapse: collapse;">
-                                            <tr style="background-color: #f8f9fa;">
-                                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Họ và tên</th>
-                                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Số điện thoại</th>
-                                            </tr>
-                                            %s
-                                        </table>
                                     </div>
 
                                     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">

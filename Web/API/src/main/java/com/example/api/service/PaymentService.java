@@ -176,20 +176,240 @@ public class PaymentService {
                 java.util.List<User> admins = userRepository.findAdmins();
                 String subject = "[TravelTour] Có thanh toán mới cho tour: " + booking.getTour().getName();
                 String content = String.format(
-                    "<html><body>"
-                    + "<h2>Thông báo: Có khách hàng vừa thanh toán thành công!</h2>"
-                    + "<p><b>Khách hàng:</b> %s (%s)</p>"
-                    + "<p><b>Mã đặt tour:</b> %s</p>"
-                    + "<p><b>Tên tour:</b> %s</p>"
-                    + "<p><b>Ngày khởi hành:</b> %s</p>"
-                    + "<p><b>Số tiền:</b> %s VND</p>"
-                    + "<p><b>Phương thức thanh toán:</b> %s</p>"
-                    + "<p><b>Thời gian thanh toán:</b> %s</p>"
-                    + "</body></html>",
+                    """
+                    <!DOCTYPE html>
+                    <html lang="vi">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Thông báo thanh toán mới</title>
+                        <style>
+                            * {
+                                margin: 0;
+                                padding: 0;
+                                box-sizing: border-box;
+                            }
+                            body {
+                                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                                line-height: 1.6;
+                                color: #333;
+                                background-color: #f4f6f8;
+                            }
+                            .email-container {
+                                max-width: 600px;
+                                margin: 0 auto;
+                                background-color: #ffffff;
+                                border-radius: 12px;
+                                overflow: hidden;
+                                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                            }
+                            .header {
+                                background: linear-gradient(135deg, #28a745 0%%, #20c997 100%%);
+                                color: white;
+                                padding: 30px;
+                                text-align: center;
+                            }
+                            .header h1 {
+                                font-size: 24px;
+                                font-weight: 600;
+                                margin-bottom: 10px;
+                            }
+                            .header .icon {
+                                font-size: 48px;
+                                margin-bottom: 15px;
+                            }
+                            .content {
+                                padding: 30px;
+                            }
+                            .notification-title {
+                                font-size: 20px;
+                                color: #28a745;
+                                margin-bottom: 25px;
+                                font-weight: 600;
+                                text-align: center;
+                            }
+                            .info-grid {
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 20px;
+                                margin-bottom: 25px;
+                            }
+                            .info-item {
+                                background-color: #f8f9fa;
+                                padding: 15px;
+                                border-radius: 8px;
+                                border-left: 4px solid #28a745;
+                            }
+                            .info-item h3 {
+                                color: #28a745;
+                                font-size: 14px;
+                                margin-bottom: 8px;
+                                font-weight: 600;
+                            }
+                            .info-item p {
+                                color: #333;
+                                font-size: 16px;
+                                font-weight: 500;
+                                margin: 0;
+                            }
+                            .payment-details {
+                                background: linear-gradient(135deg, #e8f5e8 0%%, #f0f8f0 100%%);
+                                padding: 20px;
+                                border-radius: 10px;
+                                margin: 25px 0;
+                                border: 2px solid #28a745;
+                            }
+                            .payment-details h2 {
+                                color: #28a745;
+                                font-size: 18px;
+                                margin-bottom: 15px;
+                                text-align: center;
+                            }
+                            .payment-row {
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 10px 0;
+                                border-bottom: 1px solid #e0e0e0;
+                            }
+                            .payment-row:last-child {
+                                border-bottom: none;
+                                font-weight: 600;
+                                font-size: 18px;
+                                color: #28a745;
+                            }
+                            .payment-label {
+                                font-weight: 500;
+                                color: #555;
+                            }
+                            .payment-value {
+                                font-weight: 600;
+                                color: #333;
+                            }
+                            .footer {
+                                background-color: #f8f9fa;
+                                padding: 25px;
+                                text-align: center;
+                                border-top: 1px solid #e9ecef;
+                            }
+                            .footer p {
+                                color: #666;
+                                font-size: 14px;
+                                margin-bottom: 8px;
+                            }
+                            .footer .highlight {
+                                color: #28a745;
+                                font-weight: 600;
+                            }
+                            .action-buttons {
+                                text-align: center;
+                                margin: 25px 0;
+                            }
+                            .btn {
+                                display: inline-block;
+                                padding: 12px 24px;
+                                margin: 0 10px;
+                                background: linear-gradient(135deg, #1976d2 0%%, #42a5f5 100%%);
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                font-weight: 500;
+                                transition: all 0.3s ease;
+                            }
+                            .btn:hover {
+                                transform: translateY(-2px);
+                                box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+                            }
+                            @media only screen and (max-width: 600px) {
+                                .email-container {
+                                    margin: 10px;
+                                    border-radius: 8px;
+                                }
+                                .header, .content, .footer {
+                                    padding: 20px;
+                                }
+                                .info-grid {
+                                    grid-template-columns: 1fr;
+                                    gap: 15px;
+                                }
+                                .payment-row {
+                                    flex-direction: column;
+                                    align-items: flex-start;
+                                    gap: 5px;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="email-container">
+                            <div class="header">
+                                <div class="icon">💰</div>
+                                <h1>Thông báo thanh toán mới</h1>
+                                <p>Có khách hàng vừa thanh toán thành công!</p>
+                            </div>
+                            
+                            <div class="content">
+                                <div class="notification-title">🎉 Thanh toán thành công</div>
+                                
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <h3>👤 Khách hàng</h3>
+                                        <p>%s</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <h3>📧 Email</h3>
+                                        <p>%s</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <h3>🎫 Mã đặt tour</h3>
+                                        <p>%s</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <h3>📅 Ngày khởi hành</h3>
+                                        <p>%s</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-details">
+                                    <h2>💳 Chi tiết thanh toán</h2>
+                                    <div class="payment-row">
+                                        <span class="payment-label">Tên tour:</span>
+                                        <span class="payment-value">%s</span>
+                                    </div>
+                                    <div class="payment-row">
+                                        <span class="payment-label">Số tiền:</span>
+                                        <span class="payment-value">%s VND</span>
+                                    </div>
+                                    <div class="payment-row">
+                                        <span class="payment-label">Phương thức:</span>
+                                        <span class="payment-value">%s</span>
+                                    </div>
+                                    <div class="payment-row">
+                                        <span class="payment-label">Thời gian:</span>
+                                        <span class="payment-value">%s</span>
+                                    </div>
+                                </div>
+                                
+                                
+                            </div>
+                            
+                            <div class="footer">
+                                <p><strong>TravelTour</strong> - Hệ thống quản lý du lịch</p>
+                                <p class="highlight">📞 Hotline: 1900 xxxx | 📧 Email: admin@traveltour.com</p>
+                                <p>📍 Địa chỉ: 123 Đường Du Lịch, Quận 1, TP.HCM</p>
+                                <p style="margin-top: 15px; font-size: 12px; color: #999;">
+                                    © 2024 TravelTour. Mọi quyền được bảo lưu.
+                                </p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """,
                     user.getFullName(), user.getEmail(),
                     booking.getBookingCode(),
-                    booking.getTour().getName(),
                     booking.getScheduleId(),
+                    booking.getTour().getName(),
                     payment.getAmount(),
                     payment.getPaymentMethod().getMethodName(),
                     payment.getPaymentDate()

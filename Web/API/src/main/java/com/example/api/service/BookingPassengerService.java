@@ -114,6 +114,9 @@ public class BookingPassengerService {
                         .passengerType("adult")
                         .gender(detail.getGender())
                         .birthDate(detail.getBirthDate())
+                        .phone(detail.getPhone())
+                        .email(detail.getEmail())
+                        // .address(detail.getAddress())
                         .build();
                     BookingPassengerDTO saved = create(adult);
                     createdPassengers.add(saved);

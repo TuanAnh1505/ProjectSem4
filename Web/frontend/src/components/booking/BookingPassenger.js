@@ -7,10 +7,9 @@ import './BookingPassenger.css';
 import { toast } from 'react-toastify';
 import styles from './BookingPassenger.module.css';
 import DatePicker from '../common/DatePicker';
-import { FaExclamationCircle } from 'react-icons/fa';
 
 // Component cho mọi form nhập thông tin hành khách
-const PassengerForm = ({ value, onChange, type, index, isContact, guardianOptions, errors }) => {
+const PassengerForm = ({ value, onChange, type, index, isContact, guardianOptions }) => {
   const handleChange = (e) => {
     if (e.target.name === 'phoneNumber') {
       let input = e.target.value.replace(/\D/g, '');
@@ -28,7 +27,7 @@ const PassengerForm = ({ value, onChange, type, index, isContact, guardianOption
     onChange({ ...value, guardianIndex: parseInt(e.target.value, 10) });
   };
   let title = '';
-  if (isContact) title = 'Người liên hệ (Người lớn 1)';
+  if (isContact) title = 'Người liên hệ';
   else if (type === 'adult') title = `Người lớn ${index + 2}`;
   else if (type === 'child') title = `Trẻ em ${index + 1}`;
   else if (type === 'infant') title = `Em bé ${index + 1}`;
@@ -43,12 +42,10 @@ const PassengerForm = ({ value, onChange, type, index, isContact, guardianOption
         <div className={styles.inputGroup}>
           <label className={styles.label}>Họ và tên</label>
           <input className={styles.input} name="fullName" value={value.fullName} onChange={handleChange} placeholder="Họ và tên" />
-          {errors?.fullName && <div className={styles.inputError}><FaExclamationCircle style={{color: 'red', marginRight: 4}}/>{errors.fullName}</div>}
         </div>
         <div className={styles.inputGroup}>
           <label className={styles.label}>{birthLabel}</label>
           <DatePicker value={value.birthDate} onChange={handleDateChange} />
-          {errors?.birthDate && <div className={styles.inputError}><FaExclamationCircle style={{color: 'red', marginRight: 4}}/>{errors.birthDate}</div>}
         </div>
         <div className={styles.inputGroup}>
           <label className={styles.label}>Giới tính</label>
@@ -86,18 +83,17 @@ const PassengerForm = ({ value, onChange, type, index, isContact, guardianOption
                   maxLength={10}
                 />
               </div>
-              {errors?.phoneNumber && <div className={styles.inputError}><FaExclamationCircle style={{color: 'red', marginRight: 4}}/>{errors.phoneNumber}</div>}
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.label}>Email</label>
               <input className={styles.input} name="email" value={value.email || ''} onChange={handleChange} placeholder="Email" />
-              {errors?.email && <div className={styles.inputError}><FaExclamationCircle style={{color: 'red', marginRight: 4}}/>{errors.email}</div>}
             </div>
-            <div className={styles.inputGroup}>
-              <label className={styles.label}>Địa chỉ</label>
-              <input className={styles.input} name="address" value={value.address || ''} onChange={handleChange} placeholder="Địa chỉ" />
-              {errors?.address && <div className={styles.inputError}><FaExclamationCircle style={{color: 'red', marginRight: 4}}/>{errors.address}</div>}
-            </div>
+            {isContact && (
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Địa chỉ</label>
+                <input className={styles.input} name="address" value={value.address} onChange={handleChange} placeholder="Địa chỉ" />
+              </div>
+            )}
           </>
         )}
         {/* Nếu là trẻ em hoặc em bé thì có dropdown chọn người giám hộ */}
@@ -319,21 +315,10 @@ const BookingPassenger = () => {
       setAdditionalPassengers(prevDetails => {
         let updated = [...prevDetails[type]];
         if (operation === 'add') {
-          if (type === 'adult') {
-            // Chỉ thêm nếu số lượng adult thêm < newCount - 1
-            if (updated.length < newCount - 1) {
-              updated.push({ fullName: '', gender: 'Nam', birthDate: '', guardianIndex: 0, phoneNumber: '', address: '' });
-            }
-          } else {
-            updated.push({ fullName: '', gender: 'Nam', birthDate: '', guardianIndex: 0, phoneNumber: '', address: '' });
-          }
+          updated.push({ fullName: '', gender: 'Nam', birthDate: '', guardianIndex: 0 });
         }
-        // Luôn slice về đúng newCount - 1 cho adult, còn lại giữ nguyên
-        if (type === 'adult') {
-          updated = updated.slice(0, newCount - 1);
-        } else {
-          updated = updated.slice(0, newCount);
-        }
+        // Luôn slice về đúng newCount
+        updated = updated.slice(0, newCount);
         // Nếu là người lớn và newCount === 1 thì reset về []
         if (type === 'adult' && newCount === 1) {
           return { ...prevDetails, adult: [] };
@@ -370,60 +355,84 @@ const BookingPassenger = () => {
     );
   };
 
-  // 1. Thêm state lưu lỗi cho từng trường
-  const [contactErrors, setContactErrors] = useState({});
-  const [passengerErrors, setPassengerErrors] = useState({ adult: [], child: [], infant: [] });
-
-  // 2. Sửa validateData trả về object lỗi
+  // Validate dữ liệu trước khi submit
   const validateData = () => {
-    const contactErr = {};
-    const passengerErr = { adult: [], child: [], infant: [] };
+    const errors = [];
 
     // Validate thông tin liên hệ
-    if (!contactInfo.fullName?.trim()) contactErr.fullName = 'Họ tên không được để trống';
-    if (!contactInfo.email?.trim()) contactErr.email = 'Email không được để trống';
-    if (!contactInfo.phoneNumber?.trim()) contactErr.phoneNumber = 'Vui lòng nhập số điện thoại không được để trống';
-    if (!contactInfo.birthDate) contactErr.birthDate = 'Vui lòng nhập ngày sinh không được để trống';
-    if (!contactInfo.address?.trim()) contactErr.address = 'Vui lòng nhập địa chỉ ';
+    if (!contactInfo.fullName?.trim()) errors.push("Họ tên không được để trống");
+    if (!contactInfo.email?.trim()) errors.push("Email không được để trống");
+    if (!contactInfo.phoneNumber?.trim()) errors.push("Số điện thoại không được để trống");
+    if (!contactInfo.birthDate) errors.push("Ngày sinh không được để trống");
+    // Kiểm tra tuổi người lớn (người liên hệ)
     if (contactInfo.birthDate && selectedDate) {
       const age = getAgeAtDate(contactInfo.birthDate, selectedDate);
-      if (age === null || isNaN(age)) contactErr.birthDate = 'Ngày sinh người liên hệ không hợp lệ';
-      else if (age < 16) contactErr.birthDate = 'Người liên hệ phải trên 16 tuổi tại ngày khởi hành';
+      if (age === null || isNaN(age)) {
+        errors.push("Ngày sinh người liên hệ không hợp lệ");
+      } else if (age < 16) {
+        errors.push("Người liên hệ phải trên 16 tuổi tại ngày khởi hành");
+      }
     }
 
-    // Validate từng loại hành khách phụ
-    ['adult', 'child', 'infant'].forEach(type => {
-      additionalPassengers[type].forEach((p, idx) => {
-        const err = {};
-        if (!p.fullName?.trim()) err.fullName = `Vui lòng nhập tên cho ${type === 'adult' ? `Người lớn ${idx+2}` : type === 'child' ? `Trẻ em ${idx+1}` : `Em bé ${idx+1}`}`;
-        if (!p.birthDate) err.birthDate = `Vui lòng nhập ngày sinh cho ${type === 'adult' ? `Người lớn ${idx+2}` : type === 'child' ? `Trẻ em ${idx+1}` : `Em bé ${idx+1}`}`;
-        else if (selectedDate) {
-          const age = getAgeAtDate(p.birthDate, selectedDate);
-          if (age === null || isNaN(age)) err.birthDate = `Ngày sinh của ${type === 'adult' ? `Người lớn ${idx+2}` : type === 'child' ? `Trẻ em ${idx+1}` : `Em bé ${idx+1}`} không hợp lệ`;
-          else if (type === 'adult' && age < 16) err.birthDate = `Người lớn ${idx+2} phải trên 16 tuổi tại ngày khởi hành`;
-          else if (type === 'child' && (age < 2 || age >= 16)) err.birthDate = `Trẻ em ${idx+1} phải từ 2 đến dưới 16 tuổi tại ngày khởi hành`;
-          else if (type === 'infant' && age >= 2) err.birthDate = `Em bé ${idx+1} phải dưới 2 tuổi tại ngày khởi hành`;
+    // Validate thông tin hành khách phụ
+    additionalPassengers.adult.forEach((p, index) => {
+      if (!p.fullName?.trim()) {
+        errors.push(`Vui lòng nhập tên cho Người lớn ${index + 2}`);
+      }
+      if (!p.birthDate) {
+        errors.push(`Vui lòng nhập ngày sinh cho Người lớn ${index + 2}`);
+      } else if (selectedDate) {
+        const age = getAgeAtDate(p.birthDate, selectedDate);
+        if (age === null || isNaN(age)) {
+          errors.push(`Ngày sinh của Người lớn ${index + 2} không hợp lệ`);
+        } else if (age < 16) {
+          errors.push(`Người lớn ${index + 2} phải trên 16 tuổi tại ngày khởi hành`);
         }
-        // Chỉ validate phoneNumber, address cho adult thêm (không phải contact)
-        if (type === 'adult') {
-          if (!p.phoneNumber?.trim()) err.phoneNumber = `Vui lòng nhập số điện thoại cho Người lớn ${idx+2}`;
-          if (!p.address?.trim()) err.address = `Vui lòng nhập địa chỉ cho Người lớn ${idx+2}`;
-        }
-        passengerErr[type][idx] = err;
-      });
+      }
     });
-    return { contactErr, passengerErr };
+
+    additionalPassengers.child.forEach((p, index) => {
+      if (!p.fullName?.trim()) {
+        errors.push(`Vui lòng nhập tên cho Trẻ em ${index + 1}`);
+      }
+      if (!p.birthDate) {
+        errors.push(`Vui lòng nhập ngày sinh cho Trẻ em ${index + 1}`);
+      } else if (selectedDate) {
+        const age = getAgeAtDate(p.birthDate, selectedDate);
+        if (age === null || isNaN(age)) {
+          errors.push(`Ngày sinh của Trẻ em ${index + 1} không hợp lệ`);
+        } else if (age < 2 || age >= 16) {
+          errors.push(`Trẻ em ${index + 1} phải từ 2 đến dưới 16 tuổi tại ngày khởi hành`);
+        }
+      }
+    });
+
+    additionalPassengers.infant.forEach((p, index) => {
+      if (!p.fullName?.trim()) {
+        errors.push(`Vui lòng nhập tên cho Em bé ${index + 1}`);
+      }
+      if (!p.birthDate) {
+        errors.push(`Vui lòng nhập ngày sinh cho Em bé ${index + 1}`);
+      } else if (selectedDate) {
+        const age = getAgeAtDate(p.birthDate, selectedDate);
+        if (age === null || isNaN(age)) {
+          errors.push(`Ngày sinh của Em bé ${index + 1} không hợp lệ`);
+        } else if (age >= 2) {
+          errors.push(`Em bé ${index + 1} phải dưới 2 tuổi tại ngày khởi hành`);
+        }
+      }
+    });
+
+    return errors;
   };
 
   // Xử lý submit form
   const handleSubmitPassengers = async () => {
-    const { contactErr, passengerErr } = validateData();
-    setContactErrors(contactErr);
-    setPassengerErrors(passengerErr);
-    // Nếu có lỗi thì không submit
-    const hasContactError = Object.keys(contactErr).length > 0;
-    const hasPassengerError = Object.values(passengerErr).some(arr => arr.some(e => Object.keys(e).length > 0));
-    if (hasContactError || hasPassengerError) return;
+    const errors = validateData();
+    if (errors.length > 0) {
+      errors.forEach(err => toast.error(err));
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -663,7 +672,6 @@ const BookingPassenger = () => {
                 index={index}
                 isContact={false}
                 guardianOptions={guardianOptions}
-                errors={passengerErrors.child[index] || {}}
               />
             ))}
             {/* Em bé */}
