@@ -320,6 +320,11 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
               passengerData['email'] = passenger['email']?.trim();
             }
             
+            // Thêm trường guardianIndex cho child/infant
+            if (type == 'child' || type == 'infant') {
+              passengerData['guardianIndex'] = passenger['guardianIndex'] ?? 0;
+            }
+            
             allPassengers.add(passengerData);
           }
         }
@@ -1473,29 +1478,33 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                       
                       // Hiển thị người giám hộ cho trẻ em và em bé
                       if (type == 'child' || type == 'infant') ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue.shade200),
+                        DropdownButtonFormField<int>(
+                          value: passenger['guardianIndex'] ?? 0,
+                          decoration: InputDecoration(
+                            labelText: 'Người giám hộ',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.family_restroom, color: Colors.blue.shade700, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Người giám hộ: ${_fullNameController.text.isNotEmpty ? _fullNameController.text : 'Người lớn 1'}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.blue.shade700,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: 0,
+                              child: Text(_fullNameController.text.isNotEmpty ? _fullNameController.text : 'Người liên hệ'),
+                            ),
+                            ..._additionalPassengers['adult']!.asMap().entries.map((entry) {
+                              int idx = entry.key;
+                              var p = entry.value;
+                              return DropdownMenuItem(
+                                value: idx + 1,
+                                child: Text(p['fullName']?.isNotEmpty == true ? p['fullName'] : 'Người lớn ${idx + 2}'),
+                              );
+                            }).toList(),
+                          ],
+                          onChanged: (val) {
+                            setState(() {
+                              passenger['guardianIndex'] = val ?? 0;
+                            });
+                          },
                         ),
                         const SizedBox(height: 12),
                       ],

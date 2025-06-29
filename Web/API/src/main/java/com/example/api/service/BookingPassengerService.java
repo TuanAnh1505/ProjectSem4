@@ -87,45 +87,54 @@ public class BookingPassengerService {
             User user = userRepo.findByPublicId(request.getPublicId())
                     .orElseThrow(() -> new RuntimeException("User not found with publicId: " + request.getPublicId()));
 
-            // Luôn tạo contactPassenger cho người lớn 1
+            // 1. Tạo contactPassenger (người lớn 1)
             BookingPassengerDTO contactPassenger = createContactPassenger(request, booking.getBookingId(),
                     user.getPublicId());
             createdPassengers.add(contactPassenger);
+            List<Integer> adultPassengerIds = new ArrayList<>();
+            adultPassengerIds.add(contactPassenger.getPassengerId());
 
-            // Chỉ tạo thêm hành khách nếu có nhiều hơn 1 người lớn hoặc có trẻ em/em bé
+            // 2. Tạo các người lớn còn lại (nếu có)
             int numAdults = request.getPassengers().getAdult();
             int numChildren = request.getPassengers().getChild();
             int numInfants = request.getPassengers().getInfant();
-            if ((numAdults > 1 || numChildren > 0 || numInfants > 0) && request.getPassengerDetails() != null) {
-                // Nếu có nhiều hơn 1 người lớn, chỉ lấy các người lớn 2 trở đi từ
-                // passengerDetails
-                List<PassengerDetailDTO> filteredDetails = new ArrayList<>();
-                int expectedAdults = numAdults > 1 ? numAdults - 1 : 0;
-                int countAdults = 0;
-                for (PassengerDetailDTO detail : request.getPassengerDetails()) {
-                    if ("adult".equals(detail.getPassengerType())) {
-                        if (countAdults < expectedAdults) {
-                            filteredDetails.add(detail);
-                            countAdults++;
-                        }
-                    } else {
-                        filteredDetails.add(detail);
-                    }
+
+            List<PassengerDetailDTO> details = request.getPassengerDetails() != null ? request.getPassengerDetails() : new ArrayList<>();
+            int adultIdx = 1;
+            for (PassengerDetailDTO detail : details) {
+                if ("adult".equals(detail.getPassengerType()) && adultIdx < numAdults) {
+                    BookingPassengerDTO adult = BookingPassengerDTO.builder()
+                        .bookingId(booking.getBookingId())
+                        .publicId(user.getPublicId())
+                        .fullName(detail.getFullName())
+                        .passengerType("adult")
+                        .gender(detail.getGender())
+                        .birthDate(detail.getBirthDate())
+                        .build();
+                    BookingPassengerDTO saved = create(adult);
+                    createdPassengers.add(saved);
+                    adultPassengerIds.add(saved.getPassengerId());
+                    adultIdx++;
                 }
-                // Tạo các hành khách bổ sung
-                for (PassengerDetailDTO detail : filteredDetails) {
-                    log.info("Passenger detail: fullName={}, gender={}, birthDate={}, type={}, guardianPassengerId={}", detail.getFullName(),
-                            detail.getGender(), detail.getBirthDate(), detail.getPassengerType(), detail.getGuardianPassengerId());
-                    BookingPassengerDTO passenger = BookingPassengerDTO.builder()
-                            .bookingId(booking.getBookingId())
-                            .publicId(user.getPublicId())
-                            .fullName(detail.getFullName())
-                            .passengerType(detail.getPassengerType())
-                            .gender(detail.getGender())
-                            .birthDate(detail.getBirthDate())
-                            .guardianPassengerId(detail.getGuardianPassengerId())
-                            .build();
-                    createdPassengers.add(create(passenger));
+            }
+
+            // 3. Tạo trẻ em/em bé, mapping guardianIndex sang passengerId
+            for (PassengerDetailDTO detail : details) {
+                if (!"adult".equals(detail.getPassengerType())) {
+                    Integer guardianIndex = detail.getGuardianIndex(); // FE gửi lên
+                    Integer guardianPassengerId = (guardianIndex != null && guardianIndex < adultPassengerIds.size())
+                        ? adultPassengerIds.get(guardianIndex)
+                        : null;
+                    BookingPassengerDTO child = BookingPassengerDTO.builder()
+                        .bookingId(booking.getBookingId())
+                        .publicId(user.getPublicId())
+                        .fullName(detail.getFullName())
+                        .passengerType(detail.getPassengerType())
+                        .gender(detail.getGender())
+                        .birthDate(detail.getBirthDate())
+                        .guardianPassengerId(guardianPassengerId)
+                        .build();
+                    createdPassengers.add(create(child));
                 }
             }
 

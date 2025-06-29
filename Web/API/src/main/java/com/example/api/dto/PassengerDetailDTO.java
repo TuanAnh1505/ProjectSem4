@@ -11,6 +11,14 @@ public class PassengerDetailDTO {
     private String birthDate;
     private String passengerType;
     private Integer guardianPassengerId;
+    private Integer guardianIndex;
+
+    public Integer getGuardianIndex() {
+        return guardianIndex;
+    }
+    public void setGuardianIndex(Integer guardianIndex) {
+        this.guardianIndex = guardianIndex;
+    }
 }
 
 

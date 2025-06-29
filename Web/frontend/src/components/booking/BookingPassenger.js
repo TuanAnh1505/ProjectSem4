@@ -319,6 +319,10 @@ const BookingPassenger = () => {
         }
         // Luôn slice về đúng newCount
         updated = updated.slice(0, newCount);
+        // Nếu là người lớn và newCount === 1 thì reset về []
+        if (type === 'adult' && newCount === 1) {
+          return { ...prevDetails, adult: [] };
+        }
         return { ...prevDetails, [type]: updated };
       });
       return { ...prev, [type]: newCount };
@@ -476,6 +480,12 @@ const BookingPassenger = () => {
       console.log('additionalPassengers:', additionalPassengers);
 
       // Chỉ gửi Người lớn 2 trở đi, trẻ em, em bé vào passengerDetails
+      // Đầu tiên, tạo mảng tạm cho người lớn (contact + các adult khác) để mapping index sang passengerId
+      // Lưu ý: contactInfo là người lớn 1, các adult tiếp theo là adult 2, 3,...
+      // Khi gửi lên backend, guardianPassengerId phải là passengerId thực tế của người lớn (nếu đã có)
+      // Tuy nhiên, khi tạo mới booking, FE chưa có passengerId thực tế, nên chỉ gửi guardianIndex hoặc null
+      // => Giải pháp: Nếu bạn muốn gửi đúng ID, cần tách request thành 2 bước (gửi người lớn trước, lấy ID, rồi gửi trẻ em/em bé)
+      // Ở đây, ta sẽ gửi guardianIndex, backend sẽ phải mapping lại (nếu cần)
       const passengerDetails = [
         ...additionalPassengers.adult.map(p => ({
           fullName: p.fullName.trim(),
@@ -483,17 +493,19 @@ const BookingPassenger = () => {
           birthDate: p.birthDate,
           passengerType: 'adult'
         })),
-        ...additionalPassengers.child.map(p => ({
+        ...additionalPassengers.child.map((p, idx) => ({
           fullName: p.fullName.trim(),
           gender: p.gender,
           birthDate: p.birthDate,
-          passengerType: 'child'
+          passengerType: 'child',
+          guardianIndex: p.guardianIndex || 0 // Gửi index người giám hộ (0: contact, 1: adult 2, ...)
         })),
-        ...additionalPassengers.infant.map(p => ({
+        ...additionalPassengers.infant.map((p, idx) => ({
           fullName: p.fullName.trim(),
           gender: p.gender,
           birthDate: p.birthDate,
-          passengerType: 'infant'
+          passengerType: 'infant',
+          guardianIndex: p.guardianIndex || 0
         }))
       ];
 
