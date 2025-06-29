@@ -215,6 +215,13 @@ const AdminDashboard = ({ children }) => {
               <span className="menu-icon-circle"><FaUser /></span>
               <span className="menu-text-modern">Phân công</span>
             </li>
+            <li
+              onClick={() => navigate("/admin/tourguide")}
+              className={location.pathname === "/admin/tourguide" ? "active" : ""}
+            >
+              <span className="menu-icon-circle"><FaUser /></span>
+              <span className="menu-text-modern">Hướng dẫn viên</span>
+            </li>
             <div className="account-section-modern">
               <li className="menu-section-modern">Trang tài khoản</li>
               <li

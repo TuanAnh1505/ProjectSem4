@@ -31,6 +31,7 @@ import PaymentStatusManager from './PaymentStatusManager';
 import ExperienceIndex from "./experience/ExperienceIndex";
 import FeedbackIndex from "./feedback/FeedbackIndex";
 import AssignGuidePage from "./assignment/AssignGuidePage.js";
+import TourGuideList from "./tourguide/TourGuideList";
 
 const AdminPage = () => {
   const location = useLocation();
@@ -115,6 +116,10 @@ const AdminPage = () => {
 
     if (pathSegments.includes('user')) {
       return <UserIndex />;
+    }
+
+    if (pathSegments.includes('tourguide') || pathSegments.includes('tour-guides')) {
+      return <TourGuideList />;
     }
 
     if (pathSegments.includes('about') || pathSegments.includes('admin-about')) {

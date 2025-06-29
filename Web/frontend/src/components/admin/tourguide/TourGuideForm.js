@@ -28,12 +28,13 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
         const config = {
           headers: { 'Authorization': `Bearer ${token}` }
         };
-        const response = await axios.get('http://localhost:8080/api/users?role=ROLE_TOUR_GUIDE', config);
+        const response = await axios.get('http://localhost:8080/api/users?role=GUIDE', config);
         setGuideUsers(response.data.map(user => ({
           value: user.userid,
           label: `${user.fullName} (${user.email})`
         })));
       } catch (err) {
+        console.error('Lỗi khi tải danh sách user có role GUIDE:', err);
         setGuideUsers([]);
       }
     };
@@ -65,11 +66,14 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
           'Authorization': `Bearer ${token}`
         }
       };
-      const response = await axios.get(`http://localhost:8080/api/users/${userId}`, config);
-      setSelectedUser({
-        value: response.data.id,
-        label: `${response.data.fullName} (${response.data.email})`
-      });
+      const response = await axios.get(`http://localhost:8080/api/users?role=GUIDE`, config);
+      const user = response.data.find(u => u.userid === userId);
+      if (user) {
+        setSelectedUser({
+          value: user.userid,
+          label: `${user.fullName} (${user.email})`
+        });
+      }
     } catch (err) {
       console.error('Lỗi khi tải thông tin người dùng:', err);
     }
@@ -86,13 +90,16 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
           }
         };
         const response = await axios.get(
-          `http://localhost:8080/api/users/search?search=${inputValue}&role=ROLE_TOUR_GUIDE&page=0&size=10`,
+          `http://localhost:8080/api/users?role=GUIDE`,
           config
         );
-        const options = response.data.content.map(user => ({
-          value: user.id,
-          label: `${user.fullName} (${user.email})`
-        }));
+        const options = response.data
+          .filter(user => user.fullName.toLowerCase().includes(inputValue.toLowerCase()) || 
+                         user.email.toLowerCase().includes(inputValue.toLowerCase()))
+          .map(user => ({
+            value: user.userid,
+            label: `${user.fullName} (${user.email})`
+          }));
         callback(options);
       } catch (err) {
         console.error('Lỗi khi tìm kiếm người dùng:', err);
@@ -159,9 +166,11 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
 
     try {
       if (tourGuide) {
-        await axios.put(`http://localhost:8080/api/tour-guides/${tourGuide.id}`, formData, config);
+        await axios.put(`http://localhost:8080/api/tour-guides/${tourGuide.guideId}`, formData, config);
         setSuccess(true);
-        if (onSubmit) onSubmit();
+        setTimeout(() => {
+          if (onSubmit) onSubmit();
+        }, 1000);
       } else {
         await axios.post('http://localhost:8080/api/tour-guides', formData, config);
         setSuccess(true);
@@ -174,11 +183,13 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
           isAvailable: true
         });
         setSelectedUser(null);
-        if (onSubmit) onSubmit();
+        setTimeout(() => {
+          if (onSubmit) onSubmit();
+        }, 1000);
       }
     } catch (err) {
       console.error('Lỗi khi lưu hướng dẫn viên:', err);
-      setError(err.response?.data?.message || 'Đã xảy ra lỗi khi lưu hướng dẫn viên.');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Đã xảy ra lỗi khi lưu hướng dẫn viên.');
     }
   };
 

@@ -3,6 +3,7 @@ package com.example.api.repository;
 import com.example.api.model.Booking;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,4 +78,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             @Param("tourId") Integer tourId, 
             @Param("startDate") LocalDate startDate, 
             @Param("statusName") String statusName);
+
+    List<Booking> findByStatus_StatusNameAndBookingDateBefore(String statusName, LocalDateTime beforeDate);
 }

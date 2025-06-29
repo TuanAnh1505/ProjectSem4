@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tour-guides")
@@ -27,9 +29,13 @@ public class TourGuideController {
     // Create new tour guide - only admin can create
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TourGuideDTO> createTourGuide(@Valid @RequestBody TourGuideDTO tourGuideDTO) {
-        TourGuideDTO createdTourGuide = tourGuideService.createTourGuide(tourGuideDTO);
-        return ResponseEntity.ok(createdTourGuide);
+    public ResponseEntity<?> createTourGuide(@Valid @RequestBody TourGuideDTO tourGuideDTO) {
+        try {
+            TourGuideDTO createdTourGuide = tourGuideService.createTourGuide(tourGuideDTO);
+            return ResponseEntity.ok(createdTourGuide);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Get tour guide by ID
@@ -41,9 +47,85 @@ public class TourGuideController {
 
     // Get all tour guides
     @GetMapping
-    public ResponseEntity<List<TourGuideDTO>> getAllTourGuides() {
-        List<TourGuideDTO> tourGuides = tourGuideService.getAllTourGuides();
-        return ResponseEntity.ok(tourGuides);
+    public ResponseEntity<?> getAllTourGuides(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = "id,asc") String sort) {
+        try {
+            List<TourGuideDTO> tourGuides = tourGuideService.getAllTourGuides();
+            
+            // Filter by search term if provided
+            if (search != null && !search.trim().isEmpty()) {
+                tourGuides = tourGuides.stream()
+                    .filter(guide -> 
+                        (guide.getUserFullName() != null && guide.getUserFullName().toLowerCase().contains(search.toLowerCase())) ||
+                        (guide.getUserEmail() != null && guide.getUserEmail().toLowerCase().contains(search.toLowerCase())) ||
+                        (guide.getSpecialization() != null && guide.getSpecialization().toLowerCase().contains(search.toLowerCase())) ||
+                        (guide.getLanguages() != null && guide.getLanguages().toLowerCase().contains(search.toLowerCase()))
+                    )
+                    .collect(Collectors.toList());
+            }
+            
+            // Sort if provided
+            if (sort != null && !sort.trim().isEmpty()) {
+                String[] sortParts = sort.split(",");
+                String sortField = sortParts[0];
+                String sortDirection = sortParts.length > 1 ? sortParts[1] : "asc";
+                
+                tourGuides.sort((a, b) -> {
+                    int comparison = 0;
+                    switch (sortField.toLowerCase()) {
+                        case "id":
+                            comparison = a.getGuideId().compareTo(b.getGuideId());
+                            break;
+                        case "userfullname":
+                            comparison = (a.getUserFullName() != null ? a.getUserFullName() : "").compareTo(b.getUserFullName() != null ? b.getUserFullName() : "");
+                            break;
+                        case "useremail":
+                            comparison = (a.getUserEmail() != null ? a.getUserEmail() : "").compareTo(b.getUserEmail() != null ? b.getUserEmail() : "");
+                            break;
+                        case "experienceyears":
+                            comparison = Integer.compare(a.getExperienceYears() != null ? a.getExperienceYears() : 0, b.getExperienceYears() != null ? b.getExperienceYears() : 0);
+                            break;
+                        case "specialization":
+                            comparison = (a.getSpecialization() != null ? a.getSpecialization() : "").compareTo(b.getSpecialization() != null ? b.getSpecialization() : "");
+                            break;
+                        case "languages":
+                            comparison = (a.getLanguages() != null ? a.getLanguages() : "").compareTo(b.getLanguages() != null ? b.getLanguages() : "");
+                            break;
+                        case "rating":
+                            comparison = Double.compare(a.getRating() != null ? a.getRating() : 0.0, b.getRating() != null ? b.getRating() : 0.0);
+                            break;
+                        case "isavailable":
+                            comparison = Boolean.compare(a.getIsAvailable() != null ? a.getIsAvailable() : false, b.getIsAvailable() != null ? b.getIsAvailable() : false);
+                            break;
+                        default:
+                            comparison = a.getGuideId().compareTo(b.getGuideId());
+                    }
+                    return sortDirection.equalsIgnoreCase("desc") ? -comparison : comparison;
+                });
+            }
+            
+            // Pagination
+            int totalItems = tourGuides.size();
+            int totalPages = (int) Math.ceil((double) totalItems / size);
+            int startIndex = page * size;
+            int endIndex = Math.min(startIndex + size, totalItems);
+            
+            List<TourGuideDTO> paginatedTourGuides = tourGuides.subList(startIndex, endIndex);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", paginatedTourGuides);
+            response.put("totalPages", totalPages);
+            response.put("totalElements", totalItems);
+            response.put("currentPage", page);
+            response.put("size", size);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Update tour guide - only admin can update

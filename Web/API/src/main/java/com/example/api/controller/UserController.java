@@ -50,6 +50,23 @@ public class UserController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<?> getUsersByRole(@RequestParam(required = false) String role) {
+        try {
+            if (role != null) {
+                // Lấy danh sách user theo role
+                var users = userService.findUsersByRole(role);
+                return ResponseEntity.ok(users);
+            } else {
+                // Lấy tất cả user
+                var users = userService.getAllUsers();
+                return ResponseEntity.ok(users);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PutMapping("/{publicId}")
     public ResponseEntity<?> updateUser(
             @PathVariable String publicId,

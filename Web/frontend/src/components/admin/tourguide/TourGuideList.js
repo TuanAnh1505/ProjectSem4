@@ -38,12 +38,12 @@ const TourGuideList = () => {
       };
 
       const response = await axios.get(
-        `http://localhost:8080/api/tour-guides/search?page=${currentPage}&size=${itemsPerPage}&search=${searchTerm}&sort=${sortField},${sortDirection}`,
+        `http://localhost:8080/api/tour-guides?page=${currentPage}&size=${itemsPerPage}&search=${searchTerm}&sort=${sortField},${sortDirection}`,
         config
       );
       
-      setTourGuides(response.data.content);
-      setTotalPages(response.data.totalPages);
+      setTourGuides(response.data.content || []);
+      setTotalPages(response.data.totalPages || 0);
       setError(null);
     } catch (err) {
       console.error('Lỗi khi tải danh sách hướng dẫn viên:', err);
@@ -79,13 +79,21 @@ const TourGuideList = () => {
   };
 
   const handleEdit = (tourGuide) => {
-    setEditingTourGuide(tourGuide);
-    setShowForm(true);
+    if (tourGuide.guideId && tourGuide.guideId > 0) {
+      setEditingTourGuide(tourGuide);
+      setShowForm(true);
+    } else {
+      setError("Không thể chỉnh sửa hướng dẫn viên chưa có hồ sơ. Vui lòng tạo hồ sơ trước.");
+    }
   };
 
   const handleDelete = (tourGuide) => {
-    setTourGuideToDelete(tourGuide);
-    setShowDeleteModal(true);
+    if (tourGuide.guideId && tourGuide.guideId > 0) {
+      setTourGuideToDelete(tourGuide);
+      setShowDeleteModal(true);
+    } else {
+      setError("Không thể xóa hướng dẫn viên chưa có hồ sơ.");
+    }
   };
 
   const confirmDelete = async () => {
@@ -103,7 +111,7 @@ const TourGuideList = () => {
         withCredentials: true
       };
 
-      await axios.delete(`http://localhost:8080/api/tour-guides/${tourGuideToDelete.id}`, config);
+      await axios.delete(`http://localhost:8080/api/tour-guides/${tourGuideToDelete.guideId}`, config);
       fetchTourGuides(); // Refresh the list
       setShowDeleteModal(false);
       setTourGuideToDelete(null);
@@ -117,7 +125,9 @@ const TourGuideList = () => {
   const handleFormSubmit = () => {
     setShowForm(false);
     setEditingTourGuide(null);
-    fetchTourGuides();
+    setTimeout(() => {
+      fetchTourGuides();
+    }, 100);
   };
 
   if (loading) {
@@ -222,15 +232,15 @@ const TourGuideList = () => {
             </tr>
           </thead>
           <tbody>
-            {tourGuides && tourGuides.map((tourGuide) => (
-              <tr key={tourGuide.id}>
-                <td>{tourGuide.id}</td>
+            {tourGuides && tourGuides.length > 0 ? tourGuides.map((tourGuide) => (
+              <tr key={tourGuide.guideId || tourGuide.userId}>
+                <td>{tourGuide.guideId || 'N/A'}</td>
                 <td>{tourGuide.userId}</td>
-                <td>{tourGuide.userFullName}</td>
-                <td>{tourGuide.userEmail}</td>
-                <td>{tourGuide.experienceYears}</td>
-                <td>{tourGuide.specialization}</td>
-                <td>{tourGuide.languages}</td>
+                <td>{tourGuide.userFullName || 'N/A'}</td>
+                <td>{tourGuide.userEmail || 'N/A'}</td>
+                <td>{tourGuide.experienceYears || 'N/A'}</td>
+                <td>{tourGuide.specialization || 'N/A'}</td>
+                <td>{tourGuide.languages || 'N/A'}</td>
                 <td>{tourGuide.rating || 'N/A'}</td>
                 <td>
                   <span className={`badge ${tourGuide.isAvailable ? 'bg-success' : 'bg-danger'}`}>
@@ -238,25 +248,35 @@ const TourGuideList = () => {
                   </span>
                 </td>
                 <td>
-                  <button
-                    className="btn btn-sm btn-outline-primary me-2"
-                    onClick={() => handleEdit(tourGuide)}
-                    title="Chỉnh sửa"
-                    style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0 }}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    className="btn btn-sm btn-outline-danger"
-                    onClick={() => handleDelete(tourGuide)}
-                    title="Xóa"
-                    style={{ color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0 }}
-                  >
-                    <FaTrash />
-                  </button>
+                  {tourGuide.guideId && tourGuide.guideId > 0 ? (
+                    <>
+                      <button
+                        className="btn btn-sm btn-outline-primary me-2"
+                        onClick={() => handleEdit(tourGuide)}
+                        title="Chỉnh sửa"
+                        style={{ color: '#ffc107', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0 }}
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDelete(tourGuide)}
+                        title="Xóa"
+                        style={{ color: '#e74c3c', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0 }}
+                      >
+                        <FaTrash />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-muted">Chưa có hồ sơ</span>
+                  )}
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan="10" className="text-center">Không có dữ liệu</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

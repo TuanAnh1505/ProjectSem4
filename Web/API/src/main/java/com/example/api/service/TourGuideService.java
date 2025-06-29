@@ -69,12 +69,17 @@ public class TourGuideService {
         TourGuide savedTourGuide = tourGuideRepository.save(tourGuide);
 
         // Gán role hướng dẫn viên nếu chưa có
-        Role guideRole = roleRepository.findByRoleName("GUIDE");
-        if (guideRole != null && user.getRoles().stream().noneMatch(r -> r.getRoleName().equalsIgnoreCase("GUIDE"))) {
-            user.getRoles().add(guideRole);
-            userRepository.save(user);
-            // Bổ sung: luôn lưu vào userroles
-            userRoleRepository.save(new com.example.api.model.UserRole(user.getUserid(), guideRole.getRoleid()));
+        try {
+            Role guideRole = roleRepository.findByRoleName("GUIDE");
+            if (guideRole != null && user.getRoles().stream().noneMatch(r -> r.getRoleName().equalsIgnoreCase("GUIDE"))) {
+                user.getRoles().add(guideRole);
+                userRepository.save(user);
+                // Bổ sung: luôn lưu vào userroles
+                userRoleRepository.save(new com.example.api.model.UserRole(user.getUserid(), guideRole.getRoleid()));
+            }
+        } catch (Exception e) {
+            // Log lỗi nhưng không throw exception để không ảnh hưởng đến việc tạo guide
+            System.err.println("Lỗi khi gán role GUIDE: " + e.getMessage());
         }
 
         return convertToDTO(savedTourGuide);

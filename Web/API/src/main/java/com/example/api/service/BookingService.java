@@ -7,8 +7,7 @@ import com.example.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.math.BigDecimal;
+import org.springframework.scheduling.annotation.Scheduled;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.Random;
+import java.time.temporal.ChronoUnit;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -384,5 +385,24 @@ public class BookingService {
         }
 
         return code.toString();
+    }
+
+    // Scheduled job: Xóa booking PENDING chưa thanh toán sau 30 ngày
+    @Scheduled(cron = "0 0 3 * * *") // chạy lúc 3h sáng mỗi ngày
+    public void deleteOldPendingBookings() {
+        LocalDateTime threshold = LocalDateTime.now().minus(30, ChronoUnit.DAYS);
+        List<Booking> oldPendings = bookingRepository.findByStatus_StatusNameAndBookingDateBefore("PENDING", threshold);
+        int count = 0;
+        for (Booking b : oldPendings) {
+            // Chỉ xóa nếu booking chưa có payment nào
+            List<Payment> payments = paymentRepository.findByBooking_BookingId(b.getBookingId());
+            if (payments == null || payments.isEmpty()) {
+                bookingRepository.delete(b);
+                count++;
+            }
+        }
+        if (count > 0) {
+            System.out.println("[Scheduled] Đã xóa " + count + " booking PENDING quá 30 ngày chưa thanh toán.");
+        }
     }
 }

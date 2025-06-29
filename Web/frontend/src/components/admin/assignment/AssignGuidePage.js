@@ -23,7 +23,14 @@ export default function AssignGuidePage() {
 
   useEffect(() => {
     axios.get('http://localhost:8080/api/tours').then(res => setTours(res.data));
-    axios.get('http://localhost:8080/api/tour-guides').then(res => setGuides(res.data));
+    axios.get('http://localhost:8080/api/tour-guides').then(res => {
+      // Kiểm tra xem response có cấu trúc pagination không
+      if (res.data && res.data.content) {
+        setGuides(res.data.content);
+      } else {
+        setGuides(res.data || []);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -31,7 +38,14 @@ export default function AssignGuidePage() {
       axios.get(`http://localhost:8080/api/schedules/tour/${selectedTour}`)
         .then(res => setSchedules(res.data));
       axios.get(`http://localhost:8080/api/tour-guide-assignments/tour/${selectedTour}`)
-        .then(res => setAssignments(res.data));
+        .then(res => {
+          // Kiểm tra xem response có cấu trúc pagination không
+          if (res.data && res.data.content) {
+            setAssignments(res.data.content);
+          } else {
+            setAssignments(res.data || []);
+          }
+        });
     } else {
       setSchedules([]);
       setAssignments([]);
@@ -47,7 +61,7 @@ export default function AssignGuidePage() {
       setIsAssigning(false);
       return;
     }
-    const schedule = schedules.find(s => s.scheduleId === Number(selectedSchedule));
+    const schedule = Array.isArray(schedules) ? schedules.find(s => s.scheduleId === Number(selectedSchedule)) : null;
     if (!schedule) {
       setError('Không tìm thấy lịch trình đã chọn!');
       setIsAssigning(false);
@@ -77,7 +91,14 @@ export default function AssignGuidePage() {
       await axios.post('http://localhost:8080/api/tour-guide-assignments', payload);
       setSuccess('Gán hướng dẫn viên thành công!');
       axios.get(`http://localhost:8080/api/tour-guide-assignments/tour/${selectedTour}`)
-        .then(res => setAssignments(res.data));
+        .then(res => {
+          // Kiểm tra xem response có cấu trúc pagination không
+          if (res.data && res.data.content) {
+            setAssignments(res.data.content);
+          } else {
+            setAssignments(res.data || []);
+          }
+        });
     } catch (e) {
       if (e.response && e.response.data) {
         // Ưu tiên lấy error/message từ backend
@@ -102,7 +123,14 @@ export default function AssignGuidePage() {
       // Refresh assignment list
       if (selectedTour) {
         axios.get(`http://localhost:8080/api/tour-guide-assignments/tour/${selectedTour}`)
-          .then(res => setAssignments(res.data));
+          .then(res => {
+            // Kiểm tra xem response có cấu trúc pagination không
+            if (res.data && res.data.content) {
+              setAssignments(res.data.content);
+            } else {
+              setAssignments(res.data || []);
+            }
+          });
       }
     } catch (e) {
       setError('Lỗi khi xóa phân công!');
@@ -110,13 +138,13 @@ export default function AssignGuidePage() {
   };
 
   // Lọc danh sách assignment
-  const filteredAssignments = assignments.filter(assignment => {
+  const filteredAssignments = Array.isArray(assignments) ? assignments.filter(assignment => {
     const matchesSearch = searchTerm === '' || 
       assignment.guideName?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === '' || assignment.role === roleFilter;
     const matchesStatus = statusFilter === '' || assignment.status === statusFilter;
     return matchesSearch && matchesRole && matchesStatus;
-  });
+  }) : [];
 
   const getRoleDisplayName = (role) => {
     switch(role) {
@@ -149,14 +177,14 @@ export default function AssignGuidePage() {
             <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Chọn tour</label>
             <select value={selectedTour} onChange={e => setSelectedTour(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}>
               <option value="">-- Chọn tour --</option>
-              {tours.map(t => <option key={t.tourId} value={t.tourId}>{t.name}</option>)}
+              {Array.isArray(tours) && tours.map(t => <option key={t.tourId} value={t.tourId}>{t.name}</option>)}
             </select>
           </div>
           <div style={{ flex: 1, minWidth: 180 }}>
             <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Chọn lịch trình</label>
             <select value={selectedSchedule} onChange={e => setSelectedSchedule(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}>
               <option value="">-- Chọn lịch trình --</option>
-              {schedules.map(s => (
+              {Array.isArray(schedules) && schedules.map(s => (
                 dayjs(s.endDate).isBefore(dayjs(), 'day') ? null : (
                   <option key={s.scheduleId} value={s.scheduleId}>{s.startDate} - {s.endDate}</option>
                 )
@@ -167,7 +195,7 @@ export default function AssignGuidePage() {
             <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Chọn hướng dẫn viên</label>
             <select value={selectedGuide} onChange={e => setSelectedGuide(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd' }}>
               <option value="">-- Chọn HDV --</option>
-              {guides.filter(g => g.isActive === true).map(g => (
+              {Array.isArray(guides) && guides.filter(g => g.isActive === true).map(g => (
                 <option 
                   key={String(g.userId)} 
                   value={g.guideId} 

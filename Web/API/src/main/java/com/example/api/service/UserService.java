@@ -24,9 +24,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -362,5 +364,16 @@ public class UserService {
                 email, password);
         emailService.sendHtmlEmail(email, subject, content);
         return user;
+    }
+
+    public List<User> findUsersByRole(String roleName) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getRoleName().equalsIgnoreCase(roleName)))
+                .collect(Collectors.toList());
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }
