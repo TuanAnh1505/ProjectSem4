@@ -54,7 +54,11 @@ const Login = () => {
 
       toast.success('Đăng nhập thành công!');
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Có lỗi xảy ra!";
+      let errorMsg = err.response?.data?.message || err.response?.data || "Có lỗi xảy ra!";
+      // Chuẩn hóa thông báo tài khoản không tồn tại
+      if (typeof errorMsg === 'string' && (errorMsg.includes('User not found'))) {
+        errorMsg = 'Tài khoản không tồn tại hoặc chưa được đăng ký.';
+      }
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -99,7 +103,30 @@ const Login = () => {
           </p>
 
           {success && <p className="login-success">{success}</p>}
-          {error && <p className="login-error">{error}</p>}
+          {error && (
+            <>
+              <p className="login-error">{error}</p>
+              {(error.includes("Tài khoản chưa được kích hoạt") || error.includes("Tài khoản không tồn tại")) && (
+                <button
+                  className="login-resend-activation"
+                  style={{ marginTop: 8, color: '#1976d2', background: 'none', border: 'none', cursor: error.includes('không tồn tại') ? 'not-allowed' : 'pointer', textDecoration: 'underline' }}
+                  onClick={async () => {
+                    if (error.includes('không tồn tại')) return;
+                    try {
+                      await axios.post('http://localhost:8080/api/auth/resend-activation', { email, isApp: false });
+                      toast.success('Đã gửi lại email kích hoạt. Vui lòng kiểm tra hộp thư.');
+                    } catch (e) {
+                      toast.error('Không thể gửi lại email kích hoạt.');
+                    }
+                  }}
+                  type="button"
+                  disabled={error.includes('không tồn tại')}
+                >
+                  Gửi lại email kích hoạt
+                </button>
+              )}
+            </>
+          )}
 
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="login-input-group">

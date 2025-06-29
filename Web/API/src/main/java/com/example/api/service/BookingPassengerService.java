@@ -35,6 +35,9 @@ public class BookingPassengerService {
     private final DiscountRepository discountRepo;
 
     public BookingPassengerDTO create(BookingPassengerDTO dto) {
+        if (dto.getAddress() != null && dto.getAddress().trim().isEmpty()) {
+            dto.setAddress(null);
+        }
         BookingPassenger passenger = mapToEntity(dto);
         return mapToDTO(bookingPassengerRepo.save(passenger));
     }
@@ -45,7 +48,8 @@ public class BookingPassengerService {
         existing.setFullName(dto.getFullName());
         existing.setPhone(dto.getPhone());
         existing.setEmail(dto.getEmail());
-        existing.setAddress(dto.getAddress());
+        String address = dto.getAddress();
+        existing.setAddress(address != null && address.trim().isEmpty() ? null : address);
         existing.setPassengerType(BookingPassenger.PassengerType.valueOf(dto.getPassengerType()));
         return mapToDTO(bookingPassengerRepo.save(existing));
     }
@@ -225,6 +229,7 @@ public class BookingPassengerService {
 
     private BookingPassenger mapToEntity(BookingPassengerDTO dto) {
         log.info("DTO gender={}, birthDate={}", dto.getGender(), dto.getBirthDate());
+        String address = dto.getAddress();
         BookingPassenger.BookingPassengerBuilder builder = BookingPassenger.builder()
                 .booking(bookingRepo.findById(dto.getBookingId())
                         .orElseThrow(() -> new RuntimeException("Booking not found")))
@@ -233,7 +238,7 @@ public class BookingPassengerService {
                 .fullName(dto.getFullName())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
-                .address(dto.getAddress())
+                .address(address != null && address.trim().isEmpty() ? null : address)
                 .gender(dto.getGender())
                 .birthDate(dto.getBirthDate())
                 .passengerType(BookingPassenger.PassengerType.valueOf(dto.getPassengerType().toLowerCase()));

@@ -124,7 +124,7 @@ public class UserService {
         }
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getIsActive()) {
-            throw new RuntimeException("Tài khoản chưa được kích hoạt.");
+            throw new RuntimeException("Tài khoản chưa được kích hoạt. Vui lòng kiểm tra gmail để kích hoạt.");
         }
         if (passwordEncoder.matches(password, user.getPasswordHash())) {
             String token = jwtUtil.generateToken(email);
@@ -147,7 +147,7 @@ public class UserService {
         }
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getIsActive()) {
-            throw new RuntimeException("Tài khoản chưa được kích hoạt.");
+            throw new RuntimeException("Tài khoản chưa được kích hoạt. Vui lòng kiểm tra gmail để kích hoạt.");
         }
         if (passwordEncoder.matches(password, user.getPasswordHash())) {
             String token = jwtUtil.generateToken(email);

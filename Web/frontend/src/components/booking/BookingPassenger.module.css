@@ -94,6 +94,15 @@
   box-shadow: 0 0 0 1px #3182ce;
 }
 
+.inputError {
+  color: #e53e3e;
+  font-size: 13px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
 /* --- Buttons --- */
 .submitButtonWrapper {
     border-top: 1px solid #e2e8f0;
