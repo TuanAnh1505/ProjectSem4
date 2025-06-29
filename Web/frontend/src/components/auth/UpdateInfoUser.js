@@ -88,16 +88,17 @@ const UpdateInfoUser = () => {
             const response = await axios.get(`http://localhost:8080/api/users/${publicId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
-            if (response.data) {
-                setFormData({
-                    fullName: response.data.fullName || '',
-                    email: response.data.email || '',
-                    phone: response.data.phone || '',
-                    address: response.data.address || ''
-                });
-                setCreatedAt(response.data.createdAt || response.data.created_at || '');
-            }
+            const data = response.data;
+            setFormData(prev => {
+                const isEmpty = !prev.fullName && !prev.email && !prev.phone && !prev.address;
+                return isEmpty ? {
+                    fullName: data.fullName || '',
+                    email: data.email || '',
+                    phone: data.phone || '',
+                    address: data.address || ''
+                } : prev;
+            });
+            setCreatedAt(data.createdAt);
         } catch (error) {
             console.error('Error fetching user info:', error);
             handleApiError(error);

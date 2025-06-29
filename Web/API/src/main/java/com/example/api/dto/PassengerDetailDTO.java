@@ -10,6 +10,7 @@ public class PassengerDetailDTO {
     private String gender;
     private String birthDate;
     private String passengerType;
+    private Integer guardianPassengerId;
 }
 
 

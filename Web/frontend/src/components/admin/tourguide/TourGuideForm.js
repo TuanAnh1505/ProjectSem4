@@ -39,13 +39,16 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
     };
     fetchGuideUsers();
     if (tourGuide) {
-      setFormData({
-        userId: tourGuide.userId || '',
-        experienceYears: tourGuide.experienceYears || '',
-        specialization: tourGuide.specialization || '',
-        languages: tourGuide.languages || '',
-        rating: tourGuide.rating || '',
-        isAvailable: tourGuide.isAvailable ?? true
+      setFormData(prev => {
+        const isEmpty = !prev.userId && !prev.experienceYears && !prev.specialization && !prev.languages && !prev.rating;
+        return isEmpty ? {
+          userId: tourGuide.userId || '',
+          experienceYears: tourGuide.experienceYears || '',
+          specialization: tourGuide.specialization || '',
+          languages: tourGuide.languages || '',
+          rating: tourGuide.rating || '',
+          isAvailable: tourGuide.isAvailable ?? true
+        } : prev;
       });
       if (tourGuide.userId) {
         loadUserDetails(tourGuide.userId);

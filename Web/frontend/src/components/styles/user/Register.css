@@ -139,6 +139,12 @@
   outline: none;
 }
 
+.register-input.error {
+  border-color: #e74c3c;
+  background: #fdf2f2;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
 .register-password-group {
   position: relative;
 }
@@ -158,6 +164,120 @@
   color: #3498db;
 }
 
+/* Password Strength Indicator */
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 6px;
+  background: #ecf0f1;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 3px;
+}
+
+.strength-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Password Requirements */
+.password-requirements {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.password-requirements h4 {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  color: #495057;
+  font-weight: 600;
+}
+
+.requirement-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 6px;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.requirement-item:last-child {
+  margin-bottom: 0;
+}
+
+.validation-icon {
+  font-size: 0.8rem;
+  min-width: 12px;
+}
+
+.validation-icon.valid {
+  color: #27ae60;
+}
+
+.validation-icon.invalid {
+  color: #e74c3c;
+}
+
+/* Validation Messages */
+.validation-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  animation: slideIn 0.3s ease;
+}
+
+.validation-message.error {
+  background: #fdf2f2;
+  color: #e74c3c;
+  border: 1px solid #fecaca;
+}
+
+.validation-message.success {
+  background: #f0fdf4;
+  color: #27ae60;
+  border: 1px solid #bbf7d0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .register-btn {
   width: 100%;
   padding: 14px;
@@ -170,11 +290,42 @@
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 8px;
+  position: relative;
 }
-.register-btn:hover {
+
+.register-btn:hover:not(.disabled) {
   background: #2980b9;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.register-btn.disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .register-footer {
@@ -199,40 +350,59 @@
   vertical-align: middle;
   line-height: 1.5;
 }
+
 .register-link:hover {
   color: #2980b9;
   text-decoration: underline;
 }
 
 .register-success-message {
-  color: #27ae60;
-  margin-bottom: 16px;
-  text-align: center;
-  font-weight: 500;
-  padding: 12px;
-  background: rgba(39, 174, 96, 0.1);
+  background: #d4edda;
+  color: #155724;
+  padding: 12px 16px;
   border-radius: 8px;
+  border: 1px solid #c3e6cb;
+  font-size: 0.95rem;
+  margin-top: 16px;
+  animation: slideIn 0.3s ease;
 }
 
 .register-error-message {
-  color: #e74c3c;
-  margin-bottom: 16px;
-  text-align: center;
-  font-weight: 500;
-  padding: 12px;
-  background: rgba(231, 76, 60, 0.1);
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px 16px;
   border-radius: 8px;
+  border: 1px solid #f5c6cb;
+  font-size: 0.95rem;
+  margin-top: 16px;
+  animation: slideIn 0.3s ease;
 }
 
 @media (max-width: 768px) {
   .register-box {
     flex-direction: column;
-    max-width: 500px;
+    max-width: 100%;
+    margin: 10px;
   }
+
   .register-image-section {
     display: none;
   }
+
   .register-form-section {
     padding: 30px 20px;
+    max-width: 100%;
   }
+}
+
+.spinner-inline {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid #fff;
+  border-top: 2.5px solid #3498db;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  animation: spin 0.8s linear infinite;
 }

@@ -1,12 +1,116 @@
 // BookingPassenger.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Users, User, Smile } from 'lucide-react';
 import './BookingPassenger.css';
 import { toast } from 'react-toastify';
-import styles from './BookingPassenger.module.css'; // Sử dụng CSS Module
-import DatePicker from '../common/DatePicker'; // Import DatePicker mới
+import styles from './BookingPassenger.module.css';
+import DatePicker from '../common/DatePicker';
+
+// Component cho mọi form nhập thông tin hành khách
+const PassengerForm = ({ value, onChange, type, index, isContact, guardianOptions }) => {
+  const handleChange = (e) => {
+    if (e.target.name === 'phoneNumber') {
+      let input = e.target.value.replace(/\D/g, '');
+      // Cho phép nhập tối đa 10 số, số đầu có thể là 0
+      if (input.length > 10) input = input.slice(0, 10);
+      onChange({ ...value, phoneNumber: input });
+    } else {
+      onChange({ ...value, [e.target.name]: e.target.value });
+    }
+  };
+  const handleDateChange = (newDate) => {
+    onChange({ ...value, birthDate: newDate });
+  };
+  const handleGuardianChange = (e) => {
+    onChange({ ...value, guardianIndex: parseInt(e.target.value, 10) });
+  };
+  let title = '';
+  if (isContact) title = 'Người liên hệ';
+  else if (type === 'adult') title = `Người lớn ${index + 2}`;
+  else if (type === 'child') title = `Trẻ em ${index + 1}`;
+  else if (type === 'infant') title = `Em bé ${index + 1}`;
+  let birthLabel = 'Ngày sinh';
+  if (type === 'adult' && !isContact) birthLabel += ' (trên 16 tuổi)';
+  if (type === 'child') birthLabel += ' (từ 2 đến dưới 16 tuổi)';
+  if (type === 'infant') birthLabel += ' (dưới 2 tuổi)';
+  return (
+    <div className={styles.passengerForm}>
+      <h3 className={styles.passengerTitle}>{title}</h3>
+      <div className={styles.gridForm}>
+        <div className={styles.inputGroup}>
+          <label className={styles.label}>Họ và tên</label>
+          <input className={styles.input} name="fullName" value={value.fullName} onChange={handleChange} placeholder="Họ và tên" />
+        </div>
+        <div className={styles.inputGroup}>
+          <label className={styles.label}>{birthLabel}</label>
+          <DatePicker value={value.birthDate} onChange={handleDateChange} />
+        </div>
+        <div className={styles.inputGroup}>
+          <label className={styles.label}>Giới tính</label>
+          <select className={styles.input} name="gender" value={value.gender} onChange={handleChange}>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+        {/* Nếu là người liên hệ hoặc người lớn phụ thì có thêm các trường sau */}
+        {(isContact || (type === 'adult' && !isContact)) && (
+          <>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Số điện thoại</label>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{
+                  padding: '10px 12px',
+                  background: '#f5f6fa',
+                  border: '1px solid #cbd5e0',
+                  borderRadius: '6px 0 0 6px',
+                  fontSize: 14,
+                  color: '#4a5568',
+                  borderRight: 'none'
+                }}>+84</span>
+                <input
+                  className={styles.input}
+                  style={{ borderRadius: '0 6px 6px 0', borderLeft: 'none', width: '100%' }}
+                  name="phoneNumber"
+                  value={value.phoneNumber || ''}
+                  onChange={handleChange}
+                  placeholder="Số điện thoại"
+                  type="tel"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  maxLength={10}
+                />
+              </div>
+            </div>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Email</label>
+              <input className={styles.input} name="email" value={value.email || ''} onChange={handleChange} placeholder="Email" />
+            </div>
+            {isContact && (
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Địa chỉ</label>
+                <input className={styles.input} name="address" value={value.address} onChange={handleChange} placeholder="Địa chỉ" />
+              </div>
+            )}
+          </>
+        )}
+        {/* Nếu là trẻ em hoặc em bé thì có dropdown chọn người giám hộ */}
+        {(type === 'child' || type === 'infant') && guardianOptions && (
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Người giám hộ</label>
+            <select className={styles.input} name="guardianIndex" value={value.guardianIndex || 0} onChange={handleGuardianChange}>
+              {guardianOptions.map((g, idx) => (
+                <option key={idx} value={idx}>{g.fullName} {g.phoneNumber ? `(+84${g.phoneNumber})` : ''}</option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const BookingPassenger = () => {
   const location = useLocation();
@@ -35,6 +139,9 @@ const BookingPassenger = () => {
     birthDate: ''
   });
 
+  // Ref để track đã set contactInfo lần đầu chưa
+  const hasInitializedContactInfo = useRef(false);
+
   // State cho số lượng hành khách
   const initialPassengerCounts = location.state?.passengerCounts || {
     adult: 1,
@@ -45,7 +152,7 @@ const BookingPassenger = () => {
 
   // State cho thông tin chi tiết của các hành khách phụ
   const [additionalPassengers, setAdditionalPassengers] = useState({
-    adult: [], // Chỉ chứa thông tin người lớn 2 trở đi
+    adult: [],
     child: [],
     infant: []
   });
@@ -74,6 +181,12 @@ const BookingPassenger = () => {
       passengerCounts.infant * bookedTour.price * 0.25
     : 0;
 
+  // Đặt guardianOptions ở đây, trước return và ngoài mọi hàm
+  const guardianOptions = [
+    { ...contactInfo, fullName: contactInfo.fullName || 'Người liên hệ', phoneNumber: contactInfo.phoneNumber },
+    ...additionalPassengers.adult.map((p, idx) => ({ ...p, fullName: p.fullName || `Người lớn ${idx + 2}` }))
+  ];
+
   // Helper: Tính tuổi tại ngày khởi hành
   function getAgeAtDate(birthDateStr, refDateStr) {
     if (!birthDateStr || !refDateStr) return null;
@@ -96,23 +209,7 @@ const BookingPassenger = () => {
     return `${hour}:${m} ${ampm}`;
   }
 
-  // Cập nhật contactInfo khi toggle useLoggedInInfo
-  useEffect(() => {
-    if (useLoggedInInfo) {
-      setContactInfo(loggedInUser);
-    } else {
-      setContactInfo({
-        fullName: '',
-        phoneNumber: '',
-        email: '',
-        address: '',
-        gender: 'Nam',
-        birthDate: ''
-      });
-    }
-  }, [useLoggedInInfo, loggedInUser]);
-
-  // Fetch thông tin tour và user
+  // Chỉ fetch user info, không set contactInfo
   useEffect(() => {
     if (!bookingId || !tourInfo) return navigate('/tours');
     setBookedTour(tourInfo);
@@ -136,7 +233,6 @@ const BookingPassenger = () => {
           birthDate: ''
         };
         setLoggedInUser(userData);
-        setContactInfo(userData);
       } catch (err) {
         console.error(err);
         if (err.response?.status === 401) navigate('/login');
@@ -144,6 +240,14 @@ const BookingPassenger = () => {
     };
     fetchUserInfo();
   }, [bookingId, tourInfo, navigate]);
+
+  // useEffect riêng để set contactInfo từ loggedInUser
+  useEffect(() => {
+    if (useLoggedInInfo && loggedInUser.fullName && !hasInitializedContactInfo.current) {
+      setContactInfo(loggedInUser);
+      hasInitializedContactInfo.current = true;
+    }
+  }, [loggedInUser, useLoggedInInfo]);
 
   // Tính toán tổng giá (có áp dụng giảm giá nếu có)
   useEffect(() => {
@@ -167,15 +271,34 @@ const BookingPassenger = () => {
     }
   }, [passengerCounts, bookedTour, discountInfo]);
 
-  // Xử lý thay đổi thông tin liên hệ
-  const handleContactChange = (e) => {
-    setContactInfo(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+  // Khi bấm nút 'Dùng thông tin cá nhân', mới setContactInfo từ loggedInUser
+  const handleToggleUserInfo = () => {
+    setUseLoggedInInfo(prev => {
+      const newVal = !prev;
+      if (!prev) {
+        // Bật toggle: dùng thông tin user
+        setContactInfo(loggedInUser);
+      } else {
+        // Tắt toggle: xóa thông tin
+        setContactInfo({
+          fullName: '',
+          phoneNumber: '',
+          email: '',
+          address: '',
+          gender: 'Nam',
+          birthDate: ''
+        });
+      }
+      return newVal;
+    });
   };
 
-  // Xử lý thay đổi số lượng hành khách
+  // Xử lý thay đổi thông tin liên hệ từ ContactForm
+  const handleContactInfoChange = (newContactInfo) => {
+    setContactInfo(newContactInfo);
+  };
+
+  // Khi tăng/giảm số lượng, giữ lại state cũ cho các phần tử đã nhập
   const handlePassengerCountChange = (type, operation) => {
     setPassengerCounts(prev => {
       const totalCurrent = prev.adult + prev.child + prev.infant;
@@ -183,7 +306,6 @@ const BookingPassenger = () => {
       let newCount = operation === 'add'
         ? prev[type] + 1
         : Math.max(type === 'adult' ? 1 : 0, prev[type] - 1);
-      // Nếu là tăng, kiểm tra tổng số khách mới
       if (operation === 'add') {
         if (totalCurrent + 1 > max) {
           toast.error(`Số lượng khách không được vượt quá ${max} người!`);
@@ -192,43 +314,23 @@ const BookingPassenger = () => {
       }
       setAdditionalPassengers(prevDetails => {
         let updated = [...prevDetails[type]];
-        if (type === 'adult') {
-          if (updated.length < newCount - 1) {
-            while (updated.length < newCount - 1) {
-              updated.push({ fullName: '', gender: 'Nam', birthDate: '' });
-            }
-          } else if (updated.length > newCount - 1) {
-            updated = updated.slice(0, newCount - 1);
-          }
-        } else {
-          if (updated.length < newCount) {
-            while (updated.length < newCount) {
-              updated.push({ fullName: '', gender: 'Nam', birthDate: '' });
-            }
-          } else if (updated.length > newCount) {
-            updated = updated.slice(0, newCount);
-          }
+        if (operation === 'add') {
+          updated.push({ fullName: '', gender: 'Nam', birthDate: '', guardianIndex: 0 });
         }
+        // Luôn slice về đúng newCount
+        updated = updated.slice(0, newCount);
         return { ...prevDetails, [type]: updated };
       });
       return { ...prev, [type]: newCount };
     });
   };
 
-  // Xử lý thay đổi thông tin hành khách phụ
-  const handleAdditionalPassengerChange = (type, index, field, value) => {
+  // Hàm cập nhật từng hành khách phụ
+  const handleAdditionalPassengerChange = (type, index, newValue) => {
     setAdditionalPassengers(prev => {
-      // Luôn tạo mảng mới để React nhận biết thay đổi
-      const updated = prev[type].map((item, idx) =>
-        idx === index ? { ...item, [field]: value } : item
-      );
+      const updated = prev[type].map((item, idx) => idx === index ? newValue : item);
       return { ...prev, [type]: updated };
     });
-  };
-
-  // Toggle sử dụng thông tin đăng nhập
-  const handleToggleUserInfo = () => {
-    setUseLoggedInInfo(prev => !prev);
   };
 
   // Toggle hiển thị note điểm đến
@@ -395,6 +497,9 @@ const BookingPassenger = () => {
         }))
       ];
 
+      const rawPhone = contactInfo.phoneNumber;
+      const phoneToSend = rawPhone.startsWith('0') ? ('+84' + rawPhone.slice(1)) : ('+84' + rawPhone);
+
       const bookingPassengerRequest = {
         bookingId,
         publicId: localStorage.getItem('publicId'),
@@ -474,6 +579,11 @@ const BookingPassenger = () => {
     }
   };
 
+  // Log contactInfo để kiểm tra state khi nhập liệu
+  useEffect(() => {
+    console.log('contactInfo:', contactInfo);
+  }, [contactInfo]);
+
   if (!bookedTour) {
     return (
       <div className={styles.loadingContainer}>
@@ -510,25 +620,13 @@ const BookingPassenger = () => {
           {/* Form thông tin liên hệ */}
           <div className={styles.formSection}>
             <h2 className={styles.sectionTitle}>Thông tin người liên hệ</h2>
-            <div className={styles.gridForm}>
-              <InputField label="Họ và tên" id="fullName" name="fullName" value={contactInfo.fullName} onChange={handleContactChange} placeholder="Nguyễn Văn A" required />
-              <InputField label="Số điện thoại" id="phoneNumber" name="phoneNumber" value={contactInfo.phoneNumber} onChange={handleContactChange} placeholder="09xxxxxxxx" required />
-              <InputField label="Email" id="email" name="email" type="email" value={contactInfo.email} onChange={handleContactChange} placeholder="email@example.com" required />
-              <InputField label="Địa chỉ" id="address" name="address" value={contactInfo.address} onChange={handleContactChange} placeholder="Số nhà, đường, phường/xã,..." />
-              <div className={styles.inputGroup}>
-                <label htmlFor="birthDate" className={styles.label}>Ngày sinh (trên 16 tuổi)</label>
-                <DatePicker 
-                    id="birthDate"
-                    value={contactInfo.birthDate} 
-                    onChange={(newDate) => handleContactChange({ target: { name: 'birthDate', value: newDate } })}
-                />
-              </div>
-              <SelectField label="Giới tính" id="gender" name="gender" value={contactInfo.gender} onChange={handleContactChange}>
-                <option value="Nam">Nam</option>
-                <option value="Nữ">Nữ</option>
-                <option value="Khác">Khác</option>
-              </SelectField>
-            </div>
+            <PassengerForm
+              value={contactInfo}
+              onChange={handleContactInfoChange}
+              type="adult"
+              index={-1}
+              isContact={true}
+            />
           </div>
 
           {/* Form thông tin hành khách */}
@@ -536,69 +634,38 @@ const BookingPassenger = () => {
             <h2 className={styles.sectionTitle}>Thông tin hành khách</h2>
             {/* Người lớn */}
             {additionalPassengers.adult.map((p, index) => (
-              <div key={`adult-${index}`} className={styles.passengerForm}>
-                <h3 className={styles.passengerTitle}>Người lớn {index + 2}</h3>
-                <div className={styles.gridForm}>
-                  <InputField label="Họ và tên" id={`adult-fullName-${index}`} value={p.fullName} onChange={(e) => handleAdditionalPassengerChange('adult', index, 'fullName', e.target.value)} placeholder="Nguyễn Văn B" required />
-                  <div className={styles.inputGroup}>
-                    <label htmlFor={`adult-birthDate-${index}`} className={styles.label}>Ngày sinh (trên 16 tuổi)</label>
-                    <DatePicker 
-                        id={`adult-birthDate-${index}`}
-                        value={p.birthDate} 
-                        onChange={(newDate) => handleAdditionalPassengerChange('adult', index, 'birthDate', newDate)}
-                    />
-                  </div>
-                   <SelectField label="Giới tính" id={`adult-gender-${index}`} value={p.gender} onChange={(e) => handleAdditionalPassengerChange('adult', index, 'gender', e.target.value)}>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                    <option value="Khác">Khác</option>
-                  </SelectField>
-                </div>
-              </div>
+              <PassengerForm
+                key={`adult-${index}`}
+                value={p}
+                onChange={newVal => handleAdditionalPassengerChange('adult', index, newVal)}
+                type="adult"
+                index={index}
+                isContact={false}
+              />
             ))}
             {/* Trẻ em */}
             {additionalPassengers.child.map((p, index) => (
-              <div key={`child-${index}`} className={styles.passengerForm}>
-                <h3 className={styles.passengerTitle}>Trẻ em {index + 1}</h3>
-                <div className={styles.gridForm}>
-                  <InputField label="Họ và tên" id={`child-fullName-${index}`} value={p.fullName} onChange={(e) => handleAdditionalPassengerChange('child', index, 'fullName', e.target.value)} placeholder="Nguyễn Thị C" required />
-                  <div className={styles.inputGroup}>
-                    <label htmlFor={`child-birthDate-${index}`} className={styles.label}>Ngày sinh (từ 2 đến dưới 16 tuổi)</label>
-                    <DatePicker 
-                        id={`child-birthDate-${index}`}
-                        value={p.birthDate} 
-                        onChange={(newDate) => handleAdditionalPassengerChange('child', index, 'birthDate', newDate)}
-                    />
-                  </div>
-                   <SelectField label="Giới tính" id={`child-gender-${index}`} value={p.gender} onChange={(e) => handleAdditionalPassengerChange('child', index, 'gender', e.target.value)}>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                    <option value="Khác">Khác</option>
-                  </SelectField>
-                </div>
-              </div>
+              <PassengerForm
+                key={`child-${index}`}
+                value={p}
+                onChange={newVal => handleAdditionalPassengerChange('child', index, newVal)}
+                type="child"
+                index={index}
+                isContact={false}
+                guardianOptions={guardianOptions}
+              />
             ))}
             {/* Em bé */}
             {additionalPassengers.infant.map((p, index) => (
-              <div key={`infant-${index}`} className={styles.passengerForm}>
-                <h3 className={styles.passengerTitle}>Em bé {index + 1}</h3>
-                <div className={styles.gridForm}>
-                  <InputField label="Họ và tên" id={`infant-fullName-${index}`} value={p.fullName} onChange={(e) => handleAdditionalPassengerChange('infant', index, 'fullName', e.target.value)} placeholder="Nguyễn Văn D" required />
-                  <div className={styles.inputGroup}>
-                    <label htmlFor={`infant-birthDate-${index}`} className={styles.label}>Ngày sinh (dưới 2 tuổi)</label>
-                    <DatePicker 
-                        id={`infant-birthDate-${index}`}
-                        value={p.birthDate} 
-                        onChange={(newDate) => handleAdditionalPassengerChange('infant', index, 'birthDate', newDate)}
-                    />
-                  </div>
-                   <SelectField label="Giới tính" id={`infant-gender-${index}`} value={p.gender} onChange={(e) => handleAdditionalPassengerChange('infant', index, 'gender', e.target.value)}>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                    <option value="Khác">Khác</option>
-                  </SelectField>
-                </div>
-              </div>
+              <PassengerForm
+                key={`infant-${index}`}
+                value={p}
+                onChange={newVal => handleAdditionalPassengerChange('infant', index, newVal)}
+                type="infant"
+                index={index}
+                isContact={false}
+                guardianOptions={guardianOptions}
+              />
             ))}
           </div>
 

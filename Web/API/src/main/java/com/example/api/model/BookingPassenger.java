@@ -46,6 +46,10 @@ public class BookingPassenger {
     @Column(name = "birth_date")
     private String birthDate;
 
+    @ManyToOne
+    @JoinColumn(name = "guardian_passenger_id")
+    private BookingPassenger guardianPassenger;
+
     public enum PassengerType {
         adult, child, infant
     }

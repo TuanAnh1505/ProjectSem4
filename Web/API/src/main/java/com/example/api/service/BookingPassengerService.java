@@ -114,8 +114,8 @@ public class BookingPassengerService {
                 }
                 // Tạo các hành khách bổ sung
                 for (PassengerDetailDTO detail : filteredDetails) {
-                    log.info("Passenger detail: fullName={}, gender={}, birthDate={}, type={}", detail.getFullName(),
-                            detail.getGender(), detail.getBirthDate(), detail.getPassengerType());
+                    log.info("Passenger detail: fullName={}, gender={}, birthDate={}, type={}, guardianPassengerId={}", detail.getFullName(),
+                            detail.getGender(), detail.getBirthDate(), detail.getPassengerType(), detail.getGuardianPassengerId());
                     BookingPassengerDTO passenger = BookingPassengerDTO.builder()
                             .bookingId(booking.getBookingId())
                             .publicId(user.getPublicId())
@@ -123,6 +123,7 @@ public class BookingPassengerService {
                             .passengerType(detail.getPassengerType())
                             .gender(detail.getGender())
                             .birthDate(detail.getBirthDate())
+                            .guardianPassengerId(detail.getGuardianPassengerId())
                             .build();
                     createdPassengers.add(create(passenger));
                 }
@@ -215,7 +216,7 @@ public class BookingPassengerService {
 
     private BookingPassenger mapToEntity(BookingPassengerDTO dto) {
         log.info("DTO gender={}, birthDate={}", dto.getGender(), dto.getBirthDate());
-        return BookingPassenger.builder()
+        BookingPassenger.BookingPassengerBuilder builder = BookingPassenger.builder()
                 .booking(bookingRepo.findById(dto.getBookingId())
                         .orElseThrow(() -> new RuntimeException("Booking not found")))
                 .user(userRepo.findByPublicId(dto.getPublicId())
@@ -226,8 +227,14 @@ public class BookingPassengerService {
                 .address(dto.getAddress())
                 .gender(dto.getGender())
                 .birthDate(dto.getBirthDate())
-                .passengerType(BookingPassenger.PassengerType.valueOf(dto.getPassengerType().toLowerCase()))
-                .build();
+                .passengerType(BookingPassenger.PassengerType.valueOf(dto.getPassengerType().toLowerCase()));
+        // Set guardianPassenger nếu có
+        if (dto.getGuardianPassengerId() != null) {
+            BookingPassenger guardian = bookingPassengerRepo.findById(dto.getGuardianPassengerId())
+                    .orElse(null);
+            builder.guardianPassenger(guardian);
+        }
+        return builder.build();
     }
 
     private BookingPassengerDTO mapToDTO(BookingPassenger p) {
@@ -242,6 +249,7 @@ public class BookingPassengerService {
                 .gender(p.getGender())
                 .birthDate(p.getBirthDate())
                 .passengerType(p.getPassengerType().name())
+                .guardianPassengerId(p.getGuardianPassenger() != null ? p.getGuardianPassenger().getPassengerId() : null)
                 .build();
     }
 }

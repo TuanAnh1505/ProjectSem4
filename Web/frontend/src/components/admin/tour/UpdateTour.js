@@ -62,7 +62,10 @@ export default function UpdateTour() {
         setDestinations(destRes.data);
         setEvents(eventRes.data);
         setStatuses(statusRes.data);
-        setFormData(tour);
+        setFormData(prev => {
+          const isEmpty = !prev.name && !prev.description && !prev.price && !prev.duration && !prev.maxParticipants && !prev.statusId && !prev.imageUrl;
+          return isEmpty ? tour : prev;
+        });
         setExistingImages(tour.imageUrls || []);
         setNewFiles([]);
         setNewPreviews([]);

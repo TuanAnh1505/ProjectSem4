@@ -35,7 +35,10 @@ const UpdateDestination = () => {
             });
             
             if (response.data) {
-                setDestination(response.data);
+                setDestination(prev => {
+                    const isEmpty = !prev.name && !prev.category && !prev.description && !prev.location && !prev.rating;
+                    return isEmpty ? response.data : prev;
+                });
                 // Set initial preview URLs from existing files
                 if (response.data.filePaths) {
                     setPreviewUrls(response.data.filePaths.map(path => 
