@@ -1,8 +1,10 @@
 package com.example.api.scheduler;
 
 import com.example.api.model.Booking;
+import com.example.api.model.BookingPassenger;
 import com.example.api.model.TourSchedule;
 import com.example.api.repository.BookingRepository;
+import com.example.api.repository.BookingPassengerRepository;
 import com.example.api.repository.TourScheduleRepository;
 import com.example.api.service.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class FeedbackRequestScheduler {
     private static final Logger logger = LoggerFactory.getLogger(FeedbackRequestScheduler.class);
     private final BookingRepository bookingRepository;
     private final TourScheduleRepository tourScheduleRepository;
+    private final BookingPassengerRepository bookingPassengerRepository;
     private final EmailService emailService;
 
     // Chạy mỗi ngày một lần vào lúc 00:00
@@ -49,22 +52,24 @@ public class FeedbackRequestScheduler {
                         
                     String webFeedbackLink = "http://localhost:3000/feedback?bookingId=" + booking.getBookingId();
                     String appFeedbackLink = "myapp://feedback?bookingId=" + booking.getBookingId();
-                    String userName = booking.getUser().getFullName();
                     String tourName = booking.getTour().getName();
                     String endDate = schedule.getEndDate().toString();
                     
                     try {
-                        emailService.sendFeedbackRequestEmail(
-                            booking.getUser().getEmail(),
-                            userName,
+                        // Lấy danh sách passengers cho booking này
+                        List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
+                        
+                        emailService.sendFeedbackRequestEmailToAllPassengers(
+                            booking.getUser(),
+                            passengers,
                             tourName,
                             endDate,
                             webFeedbackLink,
                             appFeedbackLink);
-                        logger.info("Successfully sent feedback request email to: {}", booking.getUser().getEmail());
+                        logger.info("Successfully sent feedback request email for booking ID: {}", booking.getBookingId());
                     } catch (Exception e) {
-                        logger.error("Failed to send feedback request email to: {}. Error: {}", 
-                            booking.getUser().getEmail(), e.getMessage());
+                        logger.error("Failed to send feedback request email for booking ID: {}. Error: {}", 
+                            booking.getBookingId(), e.getMessage());
                     }
                 }
             }

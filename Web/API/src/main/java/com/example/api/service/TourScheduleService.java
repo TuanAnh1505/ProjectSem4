@@ -15,6 +15,9 @@ import com.example.api.model.TourSchedule;
 import com.example.api.repository.BookingRepository;
 import com.example.api.repository.TourRepository;
 import com.example.api.repository.TourScheduleRepository;
+import com.example.api.model.BookingPassenger;
+import com.example.api.model.User;
+import com.example.api.repository.BookingPassengerRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +34,7 @@ public class TourScheduleService {
     private final TourRepository tourRepository;
     private final EmailService emailService;
     private final TourItineraryService tourItineraryService;
+    private final BookingPassengerRepository bookingPassengerRepository;
 
     @Transactional
     public TourScheduleDTO create(TourScheduleDTO dto) {
@@ -205,24 +209,26 @@ public class TourScheduleService {
                 // Send reminder email to each booking
                 for (Booking booking : confirmedBookings) {
                     try {
-                        String userName = booking.getUser().getFullName();
-                        String userEmail = booking.getUser().getEmail();
+                        User user = booking.getUser();
                         String tourName = tour.getName();
                         String startDate = schedule.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                         String endDate = schedule.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                         String tourDetails = tour.getDescription() != null ? tour.getDescription()
                                 : "Không có thông tin chi tiết";
 
-                        emailService.sendTourReminderEmail(
-                                userEmail,
-                                userName,
+                        // Lấy danh sách passengers cho booking này
+                        List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
+
+                        emailService.sendTourReminderEmailToAllPassengers(
+                                user,
+                                passengers,
                                 tourName,
                                 startDate,
                                 endDate,
                                 tourDetails);
                         logger.info(
-                                "Đã gửi email nhắc nhở cho khách hàng {} (email: {}) - Tour: {} - Khởi hành ngày {}",
-                                userName, userEmail, tourName, startDate);
+                                "Đã gửi email nhắc nhở cho booking ID {} - Tour: {} - Khởi hành ngày {}",
+                                booking.getBookingId(), tourName, startDate);
                     } catch (Exception e) {
                         logger.error("Không thể gửi email nhắc nhở cho booking ID {}: {}",
                                 booking.getBookingId(), e.getMessage());
@@ -266,22 +272,24 @@ public class TourScheduleService {
                 // Gửi email cho từng booking
                 for (Booking booking : confirmedBookings) {
                     try {
-                        String userName = booking.getUser().getFullName();
-                        String userEmail = booking.getUser().getEmail();
+                        User user = booking.getUser();
                         String tourName = tour.getName();
                         String startDate = schedule.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                         String endDate = schedule.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-                        emailService.sendTourItineraryEmail(
-                                userEmail,
-                                userName,
+                        // Lấy danh sách passengers cho booking này
+                        List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
+
+                        emailService.sendTourItineraryEmailToAllPassengers(
+                                user,
+                                passengers,
                                 tourName,
                                 startDate,
                                 endDate,
                                 itineraries);
                         logger.info(
-                                "Đã gửi email chi tiết lịch trình cho khách hàng {} (email: {}) - Tour: {}",
-                                userName, userEmail, tourName);
+                                "Đã gửi email chi tiết lịch trình cho booking ID {} - Tour: {}",
+                                booking.getBookingId(), tourName);
                     } catch (Exception e) {
                         logger.error("Không thể gửi email chi tiết lịch trình cho booking ID {}: {}",
                                 booking.getBookingId(), e.getMessage());
