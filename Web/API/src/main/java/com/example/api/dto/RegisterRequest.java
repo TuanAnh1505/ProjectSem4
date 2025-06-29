@@ -20,8 +20,8 @@ public class RegisterRequest {
              message = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 ký tự in hoa hoặc ký tự đặc biệt (!@#$%^&*()_+-=[]{};':\"\\|,.<>/?) và không được chứa khoảng trắng")
     private String password;
 
-    private String phone;
-    private String address;
+    // private String phone;
+    // private String address;
     private Boolean isApp = false;
 
     // Getters and Setters
@@ -49,21 +49,21 @@ public class RegisterRequest {
         this.password = password;
     }
 
-    public String getPhone() {
-        return phone;
-    }
+    // public String getPhone() {
+    //     return phone;
+    // }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    // public void setPhone(String phone) {
+    //     this.phone = phone;
+    // }
 
-    public String getAddress() {
-        return address;
-    }
+    // public String getAddress() {
+    //     return address;
+    // }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    // public void setAddress(String address) {
+    //     this.address = address;
+    // }
 
     public Boolean getIsApp() {
         return isApp;

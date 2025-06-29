@@ -199,6 +199,8 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
             'fullName': '',
             'gender': 'Nam',
             'birthDate': '',
+            'phone': '',
+            'email': '',
             'birthDateController': TextEditingController(),
           });
         }
@@ -305,12 +307,20 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
       for (var type in ['adult', 'child', 'infant']) {
         for (var passenger in _additionalPassengers[type]!) {
           if (passenger['fullName']?.isNotEmpty == true) {
-            allPassengers.add({
+            Map<String, dynamic> passengerData = {
               'fullName': passenger['fullName'].trim(),
               'gender': passenger['gender'],
               'birthDate': passenger['birthDate'],
               'passengerType': type,
-            });
+            };
+            
+            // Thêm thông tin điện thoại và email cho người lớn
+            if (type == 'adult') {
+              passengerData['phone'] = passenger['phone']?.trim();
+              passengerData['email'] = passenger['email']?.trim();
+            }
+            
+            allPassengers.add(passengerData);
           }
         }
       }
@@ -589,11 +599,11 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                // Icon(Icons.attach_money, size: 25, color: Colors.orange),
+                                // Icon(Icons.attach_money, size: 16, color: Colors.orange ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Giá: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(widget.tour.price)}',
-                                  style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.orange),
+                                  '${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(widget.tour.price)}',
+                                  style: const TextStyle(fontSize: 19, color: Colors.red, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -609,9 +619,9 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                 SwitchListTile(
                   title: const Text('Sử dụng thông tin tài khoản đang đăng nhập'),
                   value: _useLoggedInInfo,
-                  activeColor: Colors.orange,
-                  inactiveTrackColor: Colors.orange.shade100,
-                  inactiveThumbColor: Colors.orange.shade200,
+                  // activeColor: Colors.blue,
+                  // inactiveTrackColor: Colors.blue.shade100,
+                  // inactiveThumbColor: Colors.blue.shade200,
                   onChanged: (bool value) {
                     setState(() {
                       _useLoggedInInfo = value;
@@ -1065,8 +1075,9 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                               style: const TextStyle(color: Colors.red),
                             ),
                           ),
+                        const SizedBox(height: 25),
                         const Divider(),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 25),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -1146,11 +1157,11 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                 label,
                 style: const TextStyle(fontSize: 16),
               ),
-              if (type == 'adult')
-                const Text(
-                  '(Từ 16 tuổi trở lên)',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
+              // if (type == 'adult')
+              //   const Text(
+              //     // '(Từ 16 tuổi trở lên)',
+              //     style: TextStyle(fontSize: 12, color: Colors.grey),
+              //   ),
             ],
           ),
         ),
@@ -1387,6 +1398,107 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                      
+                      // Hiển thị số điện thoại và email cho người lớn
+                      if (type == 'adult') ...[
+                        TextFormField(
+                          initialValue: passenger['phone'] ?? '',
+                          style: const TextStyle(fontSize: 15),
+                          decoration: InputDecoration(
+                            labelText: 'Số điện thoại',
+                            labelStyle: TextStyle(color: Colors.grey.shade600),
+                            prefixIcon: Icon(Icons.phone, color: Colors.orange.shade400, size: 20),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Vui lòng nhập số điện thoại';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) => passenger['phone'] = value,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          initialValue: passenger['email'] ?? '',
+                          style: const TextStyle(fontSize: 15),
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            labelStyle: TextStyle(color: Colors.grey.shade600),
+                            prefixIcon: Icon(Icons.email, color: Colors.orange.shade400, size: 20),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Vui lòng nhập email';
+                            }
+                            if (!value.contains('@')) {
+                              return 'Email không hợp lệ';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) => passenger['email'] = value,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      
+                      // Hiển thị người giám hộ cho trẻ em và em bé
+                      if (type == 'child' || type == 'infant') ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.blue.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.family_restroom, color: Colors.blue.shade700, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Người giám hộ: ${_fullNameController.text.isNotEmpty ? _fullNameController.text : 'Người lớn 1'}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                     ],
                   ),
                 );

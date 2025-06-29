@@ -104,7 +104,7 @@ class AppDrawer extends StatelessWidget {
                             child: OutlinedButton(
                               onPressed: () {
                                 Navigator.pop(context); // Close drawer
-                                Navigator.pushReplacementNamed(context, '/register');
+                                Navigator.pushNamed(context, '/register');
                               },
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.white,
@@ -139,7 +139,7 @@ class AppDrawer extends StatelessWidget {
                 title: const Text('Tours'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context, '/tours');
+                  Navigator.pushNamed(context, '/tours');
                 },
               ),
               if (token != null) ...[
@@ -156,7 +156,7 @@ class AppDrawer extends StatelessWidget {
                   title: const Text('Cài đặt'),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, '/setting-screen');
+                    Navigator.pushNamed(context, '/setting-screen');
                   },
                 ),
                 ListTile(

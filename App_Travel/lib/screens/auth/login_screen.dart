@@ -6,6 +6,7 @@ import '../home_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:another_flushbar/flushbar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -68,19 +69,66 @@ class _LoginScreenState extends State<LoginScreen> {
         print('Saved role: $savedRole');
         print('Saved email: $savedEmail');
         
+        // Hiển thị thông báo thành công
+        Flushbar(
+          message: 'Đăng nhập thành công!',
+          icon: Icon(Icons.check_circle, color: Colors.white),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+          borderRadius: BorderRadius.circular(10),
+          margin: EdgeInsets.all(16),
+          flushbarPosition: FlushbarPosition.TOP,
+        )..show(context);
+        
         Navigator.pushReplacementNamed(
           context,
           '/home',
           arguments: {
             'userRole': role,
             'email': _emailController.text,
+            'loginSuccess': true, 
           },
         );
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: ${e.toString()}')),
-        );
+        
+        // Xác định loại lỗi để hiển thị icon và màu sắc phù hợp
+        String errorMessage = e.toString().replaceAll('Exception: ', '');
+        IconData errorIcon = Icons.error_outline;
+        Color backgroundColor = Colors.red;
+        
+        if (errorMessage.contains('Mật khẩu không đúng')) {
+          errorIcon = Icons.lock_outline;
+          backgroundColor = Colors.orange;
+          // Clear password field khi sai mật khẩu
+          _passwordController.clear();
+        } else if (errorMessage.contains('Email không tồn tại')) {
+          errorIcon = Icons.email_outlined;
+          backgroundColor = Colors.red;
+          // Clear cả email và password khi email không tồn tại
+          _emailController.clear();
+          _passwordController.clear();
+        } else if (errorMessage.contains('Không thể kết nối')) {
+          errorIcon = Icons.wifi_off;
+          backgroundColor = Colors.grey;
+        } else if (errorMessage.contains('Dữ liệu không hợp lệ')) {
+          errorIcon = Icons.warning_amber_outlined;
+          backgroundColor = Colors.orange;
+        }
+        
+        Flushbar(
+          message: errorMessage,
+          icon: Icon(errorIcon, color: Colors.white),
+          duration: Duration(seconds: 4),
+          backgroundColor: backgroundColor,
+          borderRadius: BorderRadius.circular(10),
+          margin: EdgeInsets.all(16),
+          flushbarPosition: FlushbarPosition.TOP,
+          mainButton: TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Đóng', style: TextStyle(color: Colors.white)),
+          ),
+        )..show(context);
       } finally {
         if (mounted) {
           setState(() => _isLoading = false);
@@ -165,7 +213,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Vui lòng nhập email hoặc số điện thoại';
+                              return 'Vui lòng nhập email';
+                            }
+                            // Kiểm tra định dạng email
+                            final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                            if (!emailRegex.hasMatch(value)) {
+                              return 'Email không đúng định dạng. Vui lòng kiểm tra lại.';
                             }
                             return null;
                           },
@@ -198,6 +251,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Vui lòng nhập mật khẩu';
+                            }
+                            if (value.length < 6) {
+                              return 'Mật khẩu phải có ít nhất 6 ký tự';
                             }
                             return null;
                           },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../models/auth_models.dart';
+import 'package:another_flushbar/flushbar.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -14,25 +15,67 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
+  // Password validation state
+  String _password = '';
+  String _confirmPassword = '';
+  bool _isPassword8Char = false;
+  bool _hasUpperLower = false;
+  bool _hasNumber = false;
+  bool _hasSpecialChar = false;
+  bool _noWhitespace = true;
+  bool _passwordsMatch = true;
+
+  void _validatePassword(String value) {
+    setState(() {
+      _password = value;
+      _isPassword8Char = value.length >= 8;
+      _hasUpperLower = RegExp(r'(?=.*[a-z])(?=.*[A-Z])').hasMatch(value);
+      _hasNumber = RegExp(r'[0-9]').hasMatch(value);
+      _hasSpecialChar = RegExp(r'[!@#\$%^&*]').hasMatch(value);
+      _noWhitespace = !value.contains(' ');
+      _passwordsMatch = _confirmPassword == _password;
+    });
+  }
+
+  void _validateConfirmPassword(String value) {
+    setState(() {
+      _confirmPassword = value;
+      _passwordsMatch = _confirmPassword == _password;
+    });
+  }
+
+  Widget _buildPasswordCondition(bool condition, String text) {
+    return Row(
+      children: [
+        Icon(
+          condition ? Icons.check_circle : Icons.cancel,
+          color: condition ? Colors.green : Colors.red,
+          size: 18,
+        ),
+        SizedBox(width: 6),
+        Text(text, style: TextStyle(color: condition ? Colors.green : Colors.red)),
+      ],
+    );
+  }
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() &&
+        _isPassword8Char && _hasUpperLower && _hasNumber && _hasSpecialChar && _noWhitespace && _passwordsMatch) {
       setState(() => _isLoading = true);
       try {
         await _authService.register(
@@ -40,15 +83,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
             fullName: _fullNameController.text,
             email: _emailController.text,
             password: _passwordController.text,
-            phone: _phoneController.text,
-            address: _addressController.text,
           ),
         );
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.')),
-        );
-        Navigator.pop(context); // Return to login screen
+        Flushbar(
+          messageText: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 8),
+              Expanded(child: Text('Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.', style: TextStyle(color: Colors.white))),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+          borderRadius: BorderRadius.circular(10),
+          margin: EdgeInsets.all(16),
+          flushbarPosition: FlushbarPosition.TOP,
+        )..show(context);
+        await Future.delayed(Duration(milliseconds: 800));
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -152,6 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _passwordController,
+                          onChanged: _validatePassword,
                           decoration: InputDecoration(
                             labelText: 'Mật khẩu',
                             prefixIcon: const Icon(Icons.lock, color: Colors.grey),
@@ -177,48 +233,56 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             if (value == null || value.isEmpty) {
                               return 'Vui lòng nhập mật khẩu';
                             }
-                            if (value.length < 6) {
-                              return 'Mật khẩu phải có ít nhất 6 ký tự';
-                            }
                             return null;
                           },
                         ),
+                        const SizedBox(height: 8),
+                        if (_password.isNotEmpty && !(_isPassword8Char && _hasUpperLower && _hasNumber && _hasSpecialChar && _noWhitespace))
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Yêu cầu mật khẩu:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              _buildPasswordCondition(_isPassword8Char && _hasUpperLower, 'Ít nhất 8 ký tự ít nhất 1 ký tự hoa 1 ký tự thường'),
+                              _buildPasswordCondition(_hasNumber, 'Có số'),
+                              _buildPasswordCondition(_hasSpecialChar, 'Có ký tự đặc biệt (!@#\$%^&*)'),
+                              _buildPasswordCondition(_noWhitespace, 'Không có khoảng trắng'),
+                            ],
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
-                          controller: _phoneController,
+                          controller: _confirmPasswordController,
+                          onChanged: _validateConfirmPassword,
                           decoration: InputDecoration(
-                            labelText: 'Số điện thoại',
-                            prefixIcon: const Icon(Icons.phone, color: Colors.grey),
+                            labelText: 'Xác nhận mật khẩu',
+                            prefixIcon: const Icon(Icons.lock, color: Colors.grey),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             filled: true,
                             fillColor: Colors.white,
+                            suffixIcon: _confirmPassword.isEmpty
+                                ? IconButton(
+                                    icon: Icon(
+                                      _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                                      color: Colors.grey,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                                      });
+                                    },
+                                  )
+                                : (_passwordsMatch
+                                    ? Icon(Icons.check_circle, color: Colors.green)
+                                    : Icon(Icons.cancel, color: Colors.red)),
                           ),
-                          keyboardType: TextInputType.phone,
+                          obscureText: _obscureConfirmPassword,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Vui lòng nhập số điện thoại';
+                              return 'Vui lòng xác nhận mật khẩu';
                             }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _addressController,
-                          decoration: InputDecoration(
-                            labelText: 'Địa chỉ',
-                            prefixIcon: const Icon(Icons.location_on, color: Colors.grey),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                          maxLines: 2,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Vui lòng nhập địa chỉ';
+                            if (!_passwordsMatch) {
+                              return 'Mật khẩu xác nhận không khớp';
                             }
                             return null;
                           },
@@ -251,7 +315,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             const Text('Đã có tài khoản?'),
                             TextButton(
                               onPressed: () {
-                                Navigator.pop(context);
+                                Navigator.pushReplacementNamed(context, '/login');
                               },
                               child: const Text(
                                 'Đăng nhập',

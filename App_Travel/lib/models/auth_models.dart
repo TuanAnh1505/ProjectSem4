@@ -16,15 +16,15 @@ class RegisterRequest {
   final String fullName;
   final String email;
   final String password;
-  final String phone;
-  final String address;
+  // final String phone;
+  // final String address;
 
   RegisterRequest({
     required this.fullName,
     required this.email,
     required this.password,
-    required this.phone,
-    required this.address,
+    // required this.phone,
+    // required this.address,
   });
   
 
@@ -33,8 +33,8 @@ class RegisterRequest {
       'fullName': fullName,
       'email': email,
       'password': password,
-      'phone': phone,
-      'address': address,
+        // 'phone': phone,
+        // 'address': address,
     };
   }
 }

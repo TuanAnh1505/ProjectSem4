@@ -11,6 +11,7 @@ import 'screens/auth/personal_page_screen.dart';
 import 'screens/auth/update_info_user_screen.dart';
 import 'screens/setting_screen.dart';
 import 'screens/booking/history_user_booking_tour_screen.dart';
+import 'screens/auth/register_screen.dart';
 
 
 void main() async {
@@ -67,6 +68,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/home',
       routes: {
         '/login': (context) => const LoginScreen(),
+       
         '/home': (context) {
           final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
           return AppNavigation(
@@ -83,6 +85,7 @@ class _MyAppState extends State<MyApp> {
             currentIndex: 0,
           );
         },
+        '/register': (context) => RegisterScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/reset-password': (context) => ResetPasswordScreen(
               publicId: ModalRoute.of(context)!.settings.arguments as String,

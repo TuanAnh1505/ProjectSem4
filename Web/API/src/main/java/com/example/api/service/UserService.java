@@ -57,7 +57,7 @@ public class UserService {
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public User registerUser(String fullName, String email, String password, String phone, String address) {
+    public User registerUser(String fullName, String email, String password) {
         if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
             throw new IllegalArgumentException("Email and password must not be empty");
         }
@@ -70,8 +70,8 @@ public class UserService {
             user.setFullName(fullName);
             user.setEmail(email);
             user.setPasswordHash(passwordEncoder.encode(password));
-            user.setPhone(phone);
-            user.setAddress(address);
+            // user.setPhone(phone);
+            // user.setAddress(address);
             user.setIsActive(false);
             user.setPublicId(UUID.randomUUID().toString());
 

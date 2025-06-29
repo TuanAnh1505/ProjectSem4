@@ -298,6 +298,7 @@ class _GuideManagementScreenState extends State<GuideManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'Quản lý tour của tôi',
           style: TextStyle(

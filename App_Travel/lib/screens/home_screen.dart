@@ -8,6 +8,7 @@ import 'tour/tour_screen.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:another_flushbar/flushbar.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userName;
@@ -24,6 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int selectedFilter = 0;
   final List<String> filters = ['Tất cả', 'Miền bắc', 'Miền trung', 'Miền nam'];
   
+  // Thêm biến kiểm tra đã show thông báo thành công chưa
+  bool _loginSuccessChecked = false;
+  bool _shouldShowLoginSuccess = false;
   
   // Thêm danh sách ảnh banner
   final List<String> bannerImages = [
@@ -73,6 +77,48 @@ class _HomeScreenState extends State<HomeScreen> {
   // Hàm loại bỏ dấu tiếng Việt
   String removeDiacriticsVN(String str) {
     return removeDiacritics(str.toLowerCase());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_loginSuccessChecked) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args['loginSuccess'] == true) {
+        _shouldShowLoginSuccess = true;
+      }
+      _loginSuccessChecked = true;
+    }
+    if (_shouldShowLoginSuccess) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Flushbar(
+          messageText: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Đăng nhập thành công!', style: TextStyle(color: Colors.white)),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+          borderRadius: BorderRadius.circular(10),
+          margin: EdgeInsets.all(16),
+          flushbarPosition: FlushbarPosition.TOP,
+        )..show(context);
+        // Sau khi show, chuyển sang Home không có flag loginSuccess nữa
+        Future.delayed(Duration(milliseconds: 500), () {
+          Navigator.pushReplacementNamed(
+            context,
+            '/home',
+            arguments: {
+              'userRole': widget.userRole,
+              'userName': widget.userName,
+            },
+          );
+        });
+      });
+      _shouldShowLoginSuccess = false;
+    }
   }
 
   @override

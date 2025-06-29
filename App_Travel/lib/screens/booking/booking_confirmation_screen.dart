@@ -434,13 +434,13 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 25),
                 Text(
                   widget.tourInfo['name'] ?? '',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -458,79 +458,79 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade200),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.route, color: Colors.orange, size: 20),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Lịch trình đã chọn',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ...widget.itineraries.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final itinerary = entry.value;
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 14),
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade200),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.06),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                if (openedItineraryIndex == index) {
-                                  openedItineraryIndex = null;
-                                } else {
-                                  openedItineraryIndex = index;
-                                }
-                              });
-                            },
-                            child: Text(
-                              'Ngày ${index + 1}: ${itinerary['title'] ?? 'Lịch trình'}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1976d2),
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          if (openedItineraryIndex == index) ...[
-                            if (itinerary['startTime'] != null)
-                              Text('Giờ bắt đầu: ${itinerary['startTime']}'),
-                            if (itinerary['endTime'] != null)
-                              Text('Giờ kết thúc: ${itinerary['endTime']}'),
-                            if (itinerary['description'] != null)
-                              Text('Mô tả: ${itinerary['description']}'),
-                            if (itinerary['type'] != null)
-                              Text('Loại: ${itinerary['type']}'),
-                          ],
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
+              // child: Column(
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   children: [
+              //     Row(
+              //       children: [
+              //         const Icon(Icons.route, color: Colors.orange, size: 20),
+              //         const SizedBox(width: 8),
+              //         const Text(
+              //           'Lịch trình đã chọn',
+              //           style: TextStyle(
+              //             fontWeight: FontWeight.bold,
+              //             fontSize: 16,
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //     const SizedBox(height: 12),
+              //     ...widget.itineraries.asMap().entries.map((entry) {
+              //       final index = entry.key;
+              //       final itinerary = entry.value;
+              //       return Container(
+              //         margin: const EdgeInsets.only(bottom: 14),
+              //         padding: const EdgeInsets.all(14),
+              //         decoration: BoxDecoration(
+              //           color: Colors.white,
+              //           borderRadius: BorderRadius.circular(10),
+              //           border: Border.all(color: Colors.grey.shade200),
+              //           boxShadow: [
+              //             BoxShadow(
+              //               color: Colors.grey.withOpacity(0.06),
+              //               blurRadius: 6,
+              //               offset: const Offset(0, 2),
+              //             ),
+              //           ],
+              //         ),
+              //         child: Column(
+              //           crossAxisAlignment: CrossAxisAlignment.start,
+              //           children: [
+              //             GestureDetector(
+              //               onTap: () {
+              //                 setState(() {
+              //                   if (openedItineraryIndex == index) {
+              //                     openedItineraryIndex = null;
+              //                   } else {
+              //                     openedItineraryIndex = index;
+              //                   }
+              //                 });
+              //               },
+              //               child: Text(
+              //                 'Ngày ${index + 1}: ${itinerary['title'] ?? 'Lịch trình'}',
+              //                 style: const TextStyle(
+              //                   fontWeight: FontWeight.bold,
+              //                   color: Color(0xFF1976d2),
+              //                   fontSize: 15,
+              //                 ),
+              //               ),
+              //             ),
+              //             if (openedItineraryIndex == index) ...[
+              //               if (itinerary['startTime'] != null)
+              //                 Text('Giờ bắt đầu: ${itinerary['startTime']}'),
+              //               if (itinerary['endTime'] != null)
+              //                 Text('Giờ kết thúc: ${itinerary['endTime']}'),
+              //               if (itinerary['description'] != null)
+              //                 Text('Mô tả: ${itinerary['description']}'),
+              //               if (itinerary['type'] != null)
+              //                 Text('Loại: ${itinerary['type']}'),
+              //             ],
+              //           ],
+              //         ),
+              //       );
+              //     }).toList(),
+              //   ],
+              // ),
             ),
           ],
           const SizedBox(height: 20),

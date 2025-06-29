@@ -32,9 +32,9 @@ public class AuthController {
             User user = userService.registerUser(
                     registerRequest.getFullName(),
                     registerRequest.getEmail(),
-                    registerRequest.getPassword(),
-                    registerRequest.getPhone(),
-                    registerRequest.getAddress());
+                    registerRequest.getPassword());
+                    // registerRequest.getPhone(),
+                    // registerRequest.getAddress());
 
             user.setIsActive(false);
             userService.saveUser(user);

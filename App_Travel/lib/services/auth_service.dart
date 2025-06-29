@@ -27,10 +27,51 @@ class AuthService {
         
         return AuthResponse.fromJson(data);
       } else {
-        throw Exception(jsonDecode(response.body)['message'] ?? 'Login failed');
+        // Xử lý các mã lỗi cụ thể
+        String errorMessage = 'Đăng nhập thất bại';
+        try {
+          final errorData = jsonDecode(response.body);
+          errorMessage = errorData['message'] ?? errorMessage;
+        } catch (_) {
+          // Nếu không phải JSON, dùng luôn body làm thông báo nếu có
+          if (response.body.isNotEmpty) {
+            errorMessage = response.body;
+          }
+        }
+        
+        // Phân tích thông báo lỗi để hiển thị thông báo phù hợp
+        if (response.statusCode == 401) {
+          if (errorMessage.toLowerCase().contains('password') || 
+              errorMessage.toLowerCase().contains('mật khẩu')) {
+            throw Exception('Mật khẩu không đúng. Vui lòng kiểm tra lại.');
+          } else if (errorMessage.toLowerCase().contains('email') || 
+                     errorMessage.toLowerCase().contains('tài khoản')) {
+            throw Exception('Email không tồn tại trong hệ thống. Vui lòng kiểm tra lại.');
+          } else {
+            throw Exception('Thông tin đăng nhập không chính xác. Vui lòng kiểm tra email và mật khẩu.');
+          }
+        } else if (response.statusCode == 404) {
+          throw Exception('Email không tồn tại trong hệ thống. Vui lòng kiểm tra lại.');
+        } else if (response.statusCode == 400) {
+          throw Exception('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.');
+        } else {
+          throw Exception(errorMessage);
+        }
       }
     } catch (e) {
-      throw Exception('Failed to connect to server: $e');
+      // Xử lý lỗi kết nối
+      if (e.toString().contains('Failed to connect') || 
+          e.toString().contains('Connection refused') ||
+          e.toString().contains('SocketException')) {
+        throw Exception('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet và thử lại.');
+      }
+      // Nếu đã là Exception với thông báo tiếng Việt, trả về nguyên bản
+      if (e.toString().contains('Mật khẩu') || 
+          e.toString().contains('Email') ||
+          e.toString().contains('Thông tin đăng nhập')) {
+        throw e;
+      }
+      throw Exception('Đã xảy ra lỗi: $e');
     }
   }
 
