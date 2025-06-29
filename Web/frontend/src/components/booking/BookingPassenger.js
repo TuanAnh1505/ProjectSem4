@@ -88,12 +88,10 @@ const PassengerForm = ({ value, onChange, type, index, isContact, guardianOption
               <label className={styles.label}>Email</label>
               <input className={styles.input} name="email" value={value.email || ''} onChange={handleChange} placeholder="Email" />
             </div>
-            {isContact && (
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Địa chỉ</label>
-                <input className={styles.input} name="address" value={value.address} onChange={handleChange} placeholder="Địa chỉ" />
-              </div>
-            )}
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Địa chỉ</label>
+              <input className={styles.input} name="address" value={value.address || ''} onChange={handleChange} placeholder="Địa chỉ" />
+            </div>
           </>
         )}
         {/* Nếu là trẻ em hoặc em bé thì có dropdown chọn người giám hộ */}
@@ -314,16 +312,27 @@ const BookingPassenger = () => {
       }
       setAdditionalPassengers(prevDetails => {
         let updated = [...prevDetails[type]];
-        if (operation === 'add') {
-          updated.push({ fullName: '', gender: 'Nam', birthDate: '', guardianIndex: 0 });
+        if (type === 'adult') {
+          // Người liên hệ là người lớn 1, các form phụ là từ 2 trở đi
+          // Số form người lớn phụ = newCount - 1
+          const targetLength = newCount - 1;
+          if (updated.length < targetLength) {
+            // Thêm form mới nếu thiếu
+            for (let i = updated.length; i < targetLength; i++) {
+              updated.push({ fullName: '', gender: 'Nam', birthDate: '', guardianIndex: 0 });
+            }
+          } else if (updated.length > targetLength) {
+            // Cắt bớt nếu thừa
+            updated = updated.slice(0, targetLength);
+          }
+          return { ...prevDetails, adult: updated };
+        } else {
+          if (operation === 'add') {
+            updated.push({ fullName: '', gender: 'Nam', birthDate: '', guardianIndex: 0 });
+          }
+          updated = updated.slice(0, newCount);
+          return { ...prevDetails, [type]: updated };
         }
-        // Luôn slice về đúng newCount
-        updated = updated.slice(0, newCount);
-        // Nếu là người lớn và newCount === 1 thì reset về []
-        if (type === 'adult' && newCount === 1) {
-          return { ...prevDetails, adult: [] };
-        }
-        return { ...prevDetails, [type]: updated };
       });
       return { ...prev, [type]: newCount };
     });
@@ -456,7 +465,10 @@ const BookingPassenger = () => {
           fullName: p.fullName.trim(),
           gender: p.gender,
           birthDate: p.birthDate,
-          passengerType: 'adult'
+          passengerType: 'adult',
+          phone: p.phoneNumber?.trim() || '',
+          email: p.email?.trim() || '',
+          address: p.address?.trim() || ''
         });
       });
       additionalPassengers.child.forEach(p => {
@@ -491,7 +503,10 @@ const BookingPassenger = () => {
           fullName: p.fullName.trim(),
           gender: p.gender,
           birthDate: p.birthDate,
-          passengerType: 'adult'
+          passengerType: 'adult',
+          phone: p.phoneNumber?.trim() || '',
+          email: p.email?.trim() || '',
+          address: p.address?.trim() || ''
         })),
         ...additionalPassengers.child.map((p, idx) => ({
           fullName: p.fullName.trim(),

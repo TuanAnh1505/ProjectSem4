@@ -407,6 +407,14 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                 
                                 print('Rendering schedule $scheduleId with ${passengers.length} passengers');
                                 
+                                // Tạo map id -> tên và id -> số điện thoại cho tất cả passengers
+                                final Map<dynamic, String> idToName = {
+                                  for (var p in passengers) p['passengerId']: p['fullName']
+                                };
+                                final Map<dynamic, String> idToPhone = {
+                                  for (var p in passengers) p['passengerId']: (p['phone'] ?? p['phoneNumber'] ?? '')
+                                };
+
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -448,27 +456,101 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                         ),
                                       )
                                     else
-                                      SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: DataTable(
-                                          headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
-                                          columns: const [
-                                            DataColumn(label: Text('Họ tên')),
-                                            DataColumn(label: Text('Loại khách')),
-                                            DataColumn(label: Text('Số điện thoại')),
-                                            DataColumn(label: Text('Email')),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // Danh sách người lớn
+                                          if (passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'adult').isNotEmpty) ...[
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.shade50,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                'Người lớn (${passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'adult').length} người)',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.blue.shade700,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: DataTable(
+                                                headingRowColor: MaterialStateProperty.all(Colors.blue.shade50),
+                                                columns: const [
+                                                  DataColumn(label: Text('Họ tên')),
+                                                  DataColumn(label: Text('Số điện thoại')),
+                                                  DataColumn(label: Text('Email')),
+                                                ],
+                                                rows: passengers
+                                                    .where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'adult')
+                                                    .map((passenger) {
+                                                  return DataRow(
+                                                    cells: [
+                                                      DataCell(Text(passenger['fullName'] ?? '')),
+                                                      DataCell(Text(passenger['phone'] ?? passenger['phoneNumber'] ?? '')),
+                                                      DataCell(Text(passenger['email'] ?? '')),
+                                                    ],
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
                                           ],
-                                          rows: passengers.map((passenger) {
-                                            return DataRow(
-                                              cells: [
-                                                DataCell(Text(passenger['fullName'] ?? '')),
-                                                DataCell(Text(_getPassengerType(passenger['passengerType']))),
-                                                DataCell(Text(passenger['phone'] ?? passenger['phoneNumber'] ?? '')),
-                                                DataCell(Text(passenger['email'] ?? '')),
-                                              ],
-                                            );
-                                          }).toList(),
-                                        ),
+                                          
+                                          // Danh sách trẻ em và em bé
+                                          if (passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'child' || (p['passengerType']?.toLowerCase() ?? '') == 'infant').isNotEmpty) ...[
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.shade50,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                'Trẻ em & Em bé (${passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'child' || (p['passengerType']?.toLowerCase() ?? '') == 'infant').length} người)',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.blue.shade700,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: DataTable(
+                                                headingRowColor: MaterialStateProperty.all(Colors.blue.shade50),
+                                                columns: const [
+                                                  DataColumn(label: Text('Họ tên')),
+                                                  DataColumn(label: Text('Loại khách')),
+                                                  DataColumn(label: Text('Người giám hộ')),
+                                                ],
+                                                rows: passengers
+                                                    .where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'child' || (p['passengerType']?.toLowerCase() ?? '') == 'infant')
+                                                    .map((passenger) {
+                                                  return DataRow(
+                                                    cells: [
+                                                      DataCell(Text(passenger['fullName'] ?? '')),
+                                                      DataCell(Text(_getPassengerType(passenger['passengerType']))),
+                                                      DataCell(Text(
+                                                        idToName[passenger['guardianPassengerId']] != null
+                                                          ? '${idToName[passenger['guardianPassengerId']]}'
+                                                            '${idToPhone[passenger['guardianPassengerId']] != null && idToPhone[passenger['guardianPassengerId']]!.isNotEmpty
+                                                              ? ' (${idToPhone[passenger['guardianPassengerId']]})'
+                                                              : ''}'
+                                                          : 'Chưa xác định',
+                                                      )),
+                                                    ],
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     if (index != schedules.length - 1)
                                       const Divider(height: 32),
