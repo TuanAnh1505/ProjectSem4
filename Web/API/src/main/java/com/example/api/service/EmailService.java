@@ -1002,4 +1002,17 @@ public class EmailService {
         }
     }
 
+    public void sendSimpleEmail(String to, String subject, String content) {
+        logger.info("Sending simple email to: {}", to);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(content);
+            emailSender.send(message);
+            logger.info("Successfully sent simple email to: {}", to);
+        } catch (Exception e) {
+            logger.error("Failed to send simple email to: {}. Error: {}", to, e.getMessage());
+        }
+    }
 }

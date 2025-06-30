@@ -31,6 +31,10 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
   bool isLoadingPassengers = false;
   int? selectedScheduleId;
   int? expandedScheduleId;
+  int adultCurrentPage = 0;
+  final int adultRowsPerPage = 10;
+  int childCurrentPage = 0;
+  final int childRowsPerPage = 10;
 
   @override
   void initState() {
@@ -415,6 +419,18 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                   for (var p in passengers) p['passengerId']: (p['phone'] ?? p['phoneNumber'] ?? '')
                                 };
 
+                                final adultPassengers = passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'adult').toList();
+                                final int adultTotalPages = (adultPassengers.length / adultRowsPerPage).ceil();
+                                final int adultStartIndex = adultCurrentPage * adultRowsPerPage;
+                                final int adultEndIndex = (adultStartIndex + adultRowsPerPage) > adultPassengers.length ? adultPassengers.length : (adultStartIndex + adultRowsPerPage);
+                                final List<dynamic> adultPage = adultPassengers.sublist(adultStartIndex, adultEndIndex);
+
+                                final childInfantPassengers = passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'child' || (p['passengerType']?.toLowerCase() ?? '') == 'infant').toList();
+                                final int childTotalPages = (childInfantPassengers.length / childRowsPerPage).ceil();
+                                final int childStartIndex = childCurrentPage * childRowsPerPage;
+                                final int childEndIndex = (childStartIndex + childRowsPerPage) > childInfantPassengers.length ? childInfantPassengers.length : (childStartIndex + childRowsPerPage);
+                                final List<dynamic> childPage = childInfantPassengers.sublist(childStartIndex, childEndIndex);
+
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -460,7 +476,7 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           // Danh sách người lớn
-                                          if (passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'adult').isNotEmpty) ...[
+                                          if (adultPassengers.isNotEmpty) ...[
                                             Container(
                                               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                                               decoration: BoxDecoration(
@@ -468,7 +484,7 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Text(
-                                                'Người lớn (${passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'adult').length} người)',
+                                                'Người lớn (${adultPassengers.length} người)',
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w600,
@@ -479,31 +495,55 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                             const SizedBox(height: 8),
                                             SingleChildScrollView(
                                               scrollDirection: Axis.horizontal,
-                                              child: DataTable(
-                                                headingRowColor: MaterialStateProperty.all(Colors.blue.shade50),
-                                                columns: const [
-                                                  DataColumn(label: Text('Họ tên')),
-                                                  DataColumn(label: Text('Số điện thoại')),
-                                                  DataColumn(label: Text('Email')),
-                                                ],
-                                                rows: passengers
-                                                    .where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'adult')
-                                                    .map((passenger) {
-                                                  return DataRow(
-                                                    cells: [
-                                                      DataCell(Text(passenger['fullName'] ?? '')),
-                                                      DataCell(Text(passenger['phone'] ?? passenger['phoneNumber'] ?? '')),
-                                                      DataCell(Text(passenger['email'] ?? '')),
+                                              child: Column(
+                                                children: [
+                                                  DataTable(
+                                                    headingRowColor: MaterialStateProperty.all(Colors.blue.shade50),
+                                                    columns: const [
+                                                      DataColumn(label: Text('Họ tên')),
+                                                      DataColumn(label: Text('Số điện thoại')),
+                                                      DataColumn(label: Text('Email')),
                                                     ],
-                                                  );
-                                                }).toList(),
+                                                    rows: adultPage.map((passenger) {
+                                                      return DataRow(
+                                                        cells: [
+                                                          DataCell(Text(passenger['fullName'] ?? '')),
+                                                          DataCell(Text(passenger['phone'] ?? passenger['phoneNumber'] ?? '')),
+                                                          DataCell(Text(passenger['email'] ?? '')),
+                                                        ],
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                  if (adultTotalPages > 1)
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                                      child: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          IconButton(
+                                                            icon: Icon(Icons.chevron_left),
+                                                            onPressed: adultCurrentPage > 0
+                                                                ? () => setState(() => adultCurrentPage--)
+                                                                : null,
+                                                          ),
+                                                          Text('Trang ${adultCurrentPage + 1} / $adultTotalPages'),
+                                                          IconButton(
+                                                            icon: Icon(Icons.chevron_right),
+                                                            onPressed: adultCurrentPage < adultTotalPages - 1
+                                                                ? () => setState(() => adultCurrentPage++)
+                                                                : null,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                ],
                                               ),
                                             ),
                                             const SizedBox(height: 16),
                                           ],
                                           
                                           // Danh sách trẻ em và em bé
-                                          if (passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'child' || (p['passengerType']?.toLowerCase() ?? '') == 'infant').isNotEmpty) ...[
+                                          if (childInfantPassengers.isNotEmpty) ...[
                                             Container(
                                               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                                               decoration: BoxDecoration(
@@ -511,7 +551,7 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Text(
-                                                'Trẻ em & Em bé (${passengers.where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'child' || (p['passengerType']?.toLowerCase() ?? '') == 'infant').length} người)',
+                                                'Trẻ em & Em bé (${childInfantPassengers.length} người)',
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w600,
@@ -522,31 +562,55 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                             const SizedBox(height: 8),
                                             SingleChildScrollView(
                                               scrollDirection: Axis.horizontal,
-                                              child: DataTable(
-                                                headingRowColor: MaterialStateProperty.all(Colors.blue.shade50),
-                                                columns: const [
-                                                  DataColumn(label: Text('Họ tên')),
-                                                  DataColumn(label: Text('Loại khách')),
-                                                  DataColumn(label: Text('Người giám hộ')),
-                                                ],
-                                                rows: passengers
-                                                    .where((p) => (p['passengerType']?.toLowerCase() ?? '') == 'child' || (p['passengerType']?.toLowerCase() ?? '') == 'infant')
-                                                    .map((passenger) {
-                                                  return DataRow(
-                                                    cells: [
-                                                      DataCell(Text(passenger['fullName'] ?? '')),
-                                                      DataCell(Text(_getPassengerType(passenger['passengerType']))),
-                                                      DataCell(Text(
-                                                        idToName[passenger['guardianPassengerId']] != null
-                                                          ? '${idToName[passenger['guardianPassengerId']]}'
-                                                            '${idToPhone[passenger['guardianPassengerId']] != null && idToPhone[passenger['guardianPassengerId']]!.isNotEmpty
-                                                              ? ' (${idToPhone[passenger['guardianPassengerId']]})'
-                                                              : ''}'
-                                                          : 'Chưa xác định',
-                                                      )),
+                                              child: Column(
+                                                children: [
+                                                  DataTable(
+                                                    headingRowColor: MaterialStateProperty.all(Colors.blue.shade50),
+                                                    columns: const [
+                                                      DataColumn(label: Text('Họ tên')),
+                                                      DataColumn(label: Text('Loại khách')),
+                                                      DataColumn(label: Text('Người giám hộ')),
                                                     ],
-                                                  );
-                                                }).toList(),
+                                                    rows: childPage.map((passenger) {
+                                                      return DataRow(
+                                                        cells: [
+                                                          DataCell(Text(passenger['fullName'] ?? '')),
+                                                          DataCell(Text(_getPassengerType(passenger['passengerType']))),
+                                                          DataCell(Text(
+                                                            idToName[passenger['guardianPassengerId']] != null
+                                                              ? '${idToName[passenger['guardianPassengerId']]}'
+                                                                '${idToPhone[passenger['guardianPassengerId']] != null && idToPhone[passenger['guardianPassengerId']]!.isNotEmpty
+                                                                  ? ' (${idToPhone[passenger['guardianPassengerId']]})'
+                                                                  : ''}'
+                                                              : 'Chưa xác định',
+                                                          )),
+                                                        ],
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                  if (childTotalPages > 1)
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                                      child: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          IconButton(
+                                                            icon: Icon(Icons.chevron_left),
+                                                            onPressed: childCurrentPage > 0
+                                                                ? () => setState(() => childCurrentPage--)
+                                                                : null,
+                                                          ),
+                                                          Text('Trang ${childCurrentPage + 1} / $childTotalPages'),
+                                                          IconButton(
+                                                            icon: Icon(Icons.chevron_right),
+                                                            onPressed: childCurrentPage < childTotalPages - 1
+                                                                ? () => setState(() => childCurrentPage++)
+                                                                : null,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                ],
                                               ),
                                             ),
                                           ],
@@ -1320,67 +1384,98 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       )
-                    : (() {
-                        final assignmentStart = widget.assignment.startDate;
-                        final assignmentEnd = widget.assignment.endDate;
-                        final assignedSchedules = schedules.where((s) {
-                          final scheduleStart = DateTime.parse(s['startDate']);
-                          final scheduleEnd = DateTime.parse(s['endDate']);
-                          return scheduleStart.isAtSameMomentAs(assignmentStart) &&
-                                 scheduleEnd.isAtSameMomentAs(assignmentEnd);
-                        }).toList();
-                        return ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: assignedSchedules.length,
-                          itemBuilder: (context, index) {
-                            final schedule = assignedSchedules[index];
-                            print('Schedule data: $schedule'); // Debug log
-                            final scheduleId = schedule['scheduleId'] ?? schedule['id'];
-                            final isExpanded = expandedScheduleId == scheduleId;
-                            final scheduleItineraries = itineraries[scheduleId] ?? [];
-                            
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Schedule header
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue[50]?.withOpacity(0.3),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                    : Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton.icon(
+                              icon: Icon(Icons.edit_calendar, color: Colors.white),
+                              label: Text(
+                                'Yêu cầu thay đổi lịch trình',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF6BACEC), // Xanh dương đậm
+                                foregroundColor: Colors.white,
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                                shadowColor: Colors.blueAccent.withOpacity(0.2),
+                              ),
+                              onPressed: () {
+                                final firstSchedule = schedules.first;
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => ScheduleChangeRequestDialog(
+                                    scheduleId: firstSchedule['scheduleId'] ?? firstSchedule['id'],
+                                    guideId: widget.assignment.guideId,
+                                    tourName: widget.assignment.tourName ?? '',
+                                    onSuccess: () {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Gửi yêu cầu thành công!')),
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: schedules.length,
+                              itemBuilder: (context, index) {
+                                final schedule = schedules[index];
+                                print('Schedule data: $schedule'); // Debug log
+                                final scheduleId = schedule['scheduleId'] ?? schedule['id'];
+                                final isExpanded = expandedScheduleId == scheduleId;
+                                final scheduleItineraries = itineraries[scheduleId] ?? [];
+                                
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Schedule header
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue[50]?.withOpacity(0.3),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
-                                                children: [
-                                                  Text(
-                                                    'Lịch trình tour',
+                                              children: [
+                                                Text(
+                                                  'Lịch trình tour',
                                                   style: const TextStyle(
-                                                      fontSize: 16,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w600,
                                                     color: Colors.blue,
                                                   ),
                                                 ),
                                                 const Spacer(),
                                                 GestureDetector(
-                                        onTap: () async {
+                                                  onTap: () async {
                                                     print('Tapped schedule with id: $scheduleId');
-                                          if (isExpanded) {
-                                            setModalState(() {
-                                              expandedScheduleId = null;
-                                            });
-                                          } else {
-                                            if (itineraries[scheduleId] == null) {
-                                              await _loadItineraries(scheduleId);
-                                            }
-                                            setModalState(() {
-                                              expandedScheduleId = scheduleId;
-                                            });
-                                          }
-                                        },
+                                                    if (isExpanded) {
+                                                      setModalState(() {
+                                                        expandedScheduleId = null;
+                                                      });
+                                                    } else {
+                                                      if (itineraries[scheduleId] == null) {
+                                                        await _loadItineraries(scheduleId);
+                                                      }
+                                                      setModalState(() {
+                                                        expandedScheduleId = scheduleId;
+                                                      });
+                                                    }
+                                                  },
                                                   child: Icon(
                                                     isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                                                     color: Colors.grey[600],
@@ -1398,44 +1493,46 @@ class _AssignmentDetailsScreenState extends State<AssignmentDetailsScreen> {
                                             ),
                                           ],
                                         ),
-                                  ),
-                                  
-                                  // Itineraries
-                                  if (isExpanded)
-                                    Container(
-                                      padding: const EdgeInsets.only(top: 12),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: scheduleItineraries.isEmpty
-                                            ? [
-                                                const Center(
-                                                  child: Text(
-                                                    'Chưa có chi tiết hành trình',
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ]
-                                            : scheduleItineraries.asMap().entries.map((entry) {
-                                                final itinerary = entry.value;
-                                                print('Itinerary data: $itinerary');
-                                                final dayNumber = entry.key + 1;
-                                                
-                                                return _ItineraryItem(
-                                                  itinerary: itinerary,
-                                                  dayNumber: dayNumber,
-                                                );
-                                              }).toList(),
                                       ),
-                                    ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      })(),
+                                      
+                                      // Itineraries
+                                      if (isExpanded)
+                                        Container(
+                                          padding: const EdgeInsets.only(top: 12),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: scheduleItineraries.isEmpty
+                                                ? [
+                                                    const Center(
+                                                      child: Text(
+                                                        'Chưa có chi tiết hành trình',
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ]
+                                                : scheduleItineraries.asMap().entries.map((entry) {
+                                                    final itinerary = entry.value;
+                                                    print('Itinerary data: $itinerary');
+                                                    final dayNumber = entry.key + 1;
+                                                    
+                                                    return _ItineraryItem(
+                                                      itinerary: itinerary,
+                                                      dayNumber: dayNumber,
+                                                    );
+                                                  }).toList(),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
           ),
         ],
       ),
@@ -1655,5 +1752,287 @@ class _ItineraryItemState extends State<_ItineraryItem> {
         spans.add(TextSpan(text: line));
       }
     }
+  }
+}
+
+class ScheduleChangeRequestDialog extends StatefulWidget {
+  final int scheduleId;
+  final int guideId;
+  final String tourName;
+  final VoidCallback? onSuccess;
+  const ScheduleChangeRequestDialog({
+    Key? key,
+    required this.scheduleId,
+    required this.guideId,
+    required this.tourName,
+    this.onSuccess,
+  }) : super(key: key);
+  @override
+  State<ScheduleChangeRequestDialog> createState() => _ScheduleChangeRequestDialogState();
+}
+
+class _ScheduleChangeRequestDialogState extends State<ScheduleChangeRequestDialog> {
+  final _formKey = GlobalKey<FormState>();
+  String requestType = 'itinerary_change';
+  int? currentItineraryId;
+  String proposedChanges = '';
+  String reason = '';
+  String urgencyLevel = 'medium';
+  String effectiveDate = '';
+  bool loading = false;
+  String error = '';
+  List<dynamic> itineraries = [];
+  final effectiveDateController = TextEditingController();
+
+  @override
+  void dispose() {
+    effectiveDateController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchItineraries();
+  }
+
+  Future<void> fetchItineraries() async {
+    try {
+      final guideService = GuideService();
+      final data = await guideService.fetchItineraries(widget.scheduleId);
+      setState(() { itineraries = data; });
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() { loading = true; error = ''; });
+    try {
+      final guideService = GuideService();
+      await guideService.sendScheduleChangeRequest(
+        scheduleId: widget.scheduleId,
+        guideId: widget.guideId,
+        requestType: requestType,
+        currentItineraryId: currentItineraryId,
+        proposedChanges: proposedChanges,
+        reason: reason,
+        urgencyLevel: urgencyLevel,
+        effectiveDate: effectiveDate,
+      );
+      if (widget.onSuccess != null) widget.onSuccess!();
+      Navigator.of(context).pop();
+      // Hiển thị thông báo sau khi đóng dialog
+      Future.delayed(Duration(milliseconds: 300), () {
+        final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+        if (scaffoldMessenger != null) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(content: Text('Gửi yêu cầu thành công!'), backgroundColor: Colors.green),
+          );
+        }
+      });
+    } catch (e) {
+      setState(() { error = e.toString(); });
+    } finally {
+      setState(() { loading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: Colors.grey.shade300, width: 1.2),
+    );
+    final labelStyle = TextStyle(fontWeight: FontWeight.w600, color: Colors.grey[800]);
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.edit_calendar, color: Colors.orange, size: 26),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text('Yêu cầu thay đổi lịch trình',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.orange),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Text(widget.tourName, style: TextStyle(fontSize: 14, color: Colors.grey[700], fontWeight: FontWeight.w500)),
+                SizedBox(height: 25),
+                DropdownButtonFormField<String>(
+                  value: requestType,
+                  decoration: InputDecoration(
+                    labelText: 'Loại yêu cầu',
+                    labelStyle: labelStyle,
+                    border: border,
+                    enabledBorder: border,
+                    focusedBorder: border.copyWith(borderSide: BorderSide(color: Colors.orange, width: 1.5)),
+                    // prefixIcon: Icon(Icons.category, color: Colors.orange),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'itinerary_change', child: Row(children: [Icon(Icons.alt_route, size: 18, color: Colors.blue), SizedBox(width: 6), Text('Thay đổi lịch trình chi tiết')],)),
+                    DropdownMenuItem(value: 'schedule_change', child: Row(children: [Icon(Icons.calendar_today, size: 18, color: Colors.green), SizedBox(width: 6), Text('Thay đổi ngày giờ tour')],)),
+                    DropdownMenuItem(value: 'emergency_change', child: Row(children: [Icon(Icons.warning, size: 18, color: Colors.red), SizedBox(width: 6), Text('Thay đổi khẩn cấp')],)),
+                  ],
+                  onChanged: (val) => setState(() => requestType = val ?? 'itinerary_change'),
+                ),
+                if (requestType == 'itinerary_change') ...[
+                  SizedBox(height: 25),
+                  DropdownButtonFormField<int>(
+                    value: currentItineraryId,
+                    decoration: InputDecoration(
+                      labelText: 'Lịch trình cần thay đổi',
+                      labelStyle: labelStyle,
+                      border: border,
+                      enabledBorder: border,
+                      focusedBorder: border.copyWith(borderSide: BorderSide(color: Colors.orange, width: 1.5)),
+                      prefixIcon: Icon(Icons.route, color: Colors.blue),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                    items: [
+                      DropdownMenuItem(value: null, child: Text('Chọn lịch trình')),
+                      ...itineraries.asMap().entries.map((entry) => DropdownMenuItem(
+                        value: entry.value['itineraryId'],
+                        child: Text('Ngày ${entry.key + 1}: ${entry.value['title'] ?? ''}'),
+                      ))
+                    ],
+                    onChanged: (val) => setState(() => currentItineraryId = val),
+                  ),
+                ],
+                SizedBox(height: 25),
+                DropdownButtonFormField<String>(
+                  value: urgencyLevel,
+                  decoration: InputDecoration(
+                    labelText: 'Mức độ khẩn cấp',
+                    labelStyle: labelStyle,
+                    border: border,
+                    enabledBorder: border,
+                    focusedBorder: border.copyWith(borderSide: BorderSide(color: Colors.orange, width: 1.5)),
+                    prefixIcon: Icon(Icons.priority_high, color: Colors.redAccent),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'low', child: Text('Thấp')),
+                    DropdownMenuItem(value: 'medium', child: Text('Trung bình')),
+                    DropdownMenuItem(value: 'high', child: Text('Cao')),
+                    DropdownMenuItem(value: 'critical', child: Text('Khẩn cấp')),
+                  ],
+                  onChanged: (val) => setState(() => urgencyLevel = val ?? 'medium'),
+                ),
+                SizedBox(height: 25),
+                TextFormField(
+                  controller: effectiveDateController..text = effectiveDate,
+                  decoration: InputDecoration(
+                    labelText: 'Ngày hiệu lực',
+                    labelStyle: labelStyle,
+                    border: border,
+                    enabledBorder: border,
+                    focusedBorder: border.copyWith(borderSide: BorderSide(color: Colors.orange, width: 1.5)),
+                    prefixIcon: Icon(Icons.date_range, color: Colors.deepPurple),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  readOnly: true,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now().subtract(Duration(days: 1)),
+                      lastDate: DateTime.now().add(Duration(days: 365)),
+                    );
+                    if (picked != null) setState(() => effectiveDate = DateFormat('yyyy-MM-dd').format(picked));
+                  },
+                  validator: (val) => val == null || val.isEmpty ? 'Chọn ngày hiệu lực' : null,
+                ),
+                SizedBox(height: 25),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Thay đổi đề xuất',
+                    labelStyle: labelStyle,
+                    border: border,
+                    enabledBorder: border,
+                    focusedBorder: border.copyWith(borderSide: BorderSide(color: Colors.orange, width: 1.5)),
+                    prefixIcon: Icon(Icons.edit, color: Colors.orange),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  minLines: 2,
+                  maxLines: 4,
+                  onChanged: (val) => proposedChanges = val,
+                  validator: (val) => val == null || val.isEmpty ? 'Nhập thay đổi đề xuất' : null,
+                ),
+                SizedBox(height: 25),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Lý do thay đổi',
+                    labelStyle: labelStyle,
+                    border: border,
+                    enabledBorder: border,
+                    focusedBorder: border.copyWith(borderSide: BorderSide(color: Colors.orange, width: 1.5)),
+                    prefixIcon: Icon(Icons.help_outline, color: Colors.blueGrey),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  minLines: 2,
+                  maxLines: 4,
+                  onChanged: (val) => reason = val,
+                  validator: (val) => val == null || val.isEmpty ? 'Nhập lý do' : null,
+                ),
+                if (error.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(error, style: TextStyle(color: Colors.red)),
+                  ),
+                SizedBox(height: 25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton(
+                      onPressed: loading ? null : () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.orange,
+                        side: BorderSide(color: Colors.orange),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                      ),
+                      child: Text('Hủy'),
+                    ),
+                    SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: loading ? null : handleSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                        elevation: 2,
+                      ),
+                      child: loading
+                          ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : Text('Gửi yêu cầu', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

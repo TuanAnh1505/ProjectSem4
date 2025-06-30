@@ -509,4 +509,40 @@ class GuideService {
       throw Exception('Error auto updating all assignments: $e');
     }
   }
+
+  // Gửi yêu cầu thay đổi lịch trình
+  Future<void> sendScheduleChangeRequest({
+    required int scheduleId,
+    required int guideId,
+    required String requestType,
+    int? currentItineraryId,
+    required String proposedChanges,
+    required String reason,
+    required String urgencyLevel,
+    required String effectiveDate,
+  }) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('Token not found. Please login again.');
+    final body = {
+      'scheduleId': scheduleId,
+      'guideId': guideId,
+      'requestType': requestType,
+      'currentItineraryId': currentItineraryId,
+      'proposedChanges': proposedChanges,
+      'reason': reason,
+      'urgencyLevel': urgencyLevel,
+      'effectiveDate': effectiveDate,
+    };
+    final response = await http.post(
+      Uri.parse('$baseUrl/schedule-change-requests'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(body),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Gửi yêu cầu thất bại: ${response.body}');
+    }
+  }
 }

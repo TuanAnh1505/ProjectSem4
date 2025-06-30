@@ -9,6 +9,7 @@ class BookingConfirmationScreen extends StatefulWidget {
   final Map<String, dynamic> tourInfo;
   final Map<String, dynamic>? contactInfo;
   final List<Map<String, dynamic>> itineraries;
+  final double? finalPrice;
 
   const BookingConfirmationScreen({
     Key? key,
@@ -18,6 +19,7 @@ class BookingConfirmationScreen extends StatefulWidget {
     required this.tourInfo,
     this.contactInfo,
     this.itineraries = const [],
+    this.finalPrice,
   }) : super(key: key);
 
   @override
@@ -56,17 +58,12 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
   // Thay đổi hàm calculateTotal()
   double calculateTotal() {
+    if (widget.finalPrice != null) return widget.finalPrice!;
     if (widget.tourInfo.isEmpty) return 0;
-    
-    // Lấy giá đã giảm từ tourInfo
     final basePrice = widget.tourInfo['price'] as double;
-    
-    // Khởi tạo biến đếm số lượng từng loại hành khách
     int adultCount = 0;
     int childCount = 0;
     int infantCount = 0;
-
-    // Đếm số lượng từng loại hành khách
     for (var passenger in widget.passengers) {
       switch (passenger['passengerType']) {
         case 'adult':
@@ -80,22 +77,10 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
           break;
       }
     }
-
-    // Tính giá cho từng loại
     final adultTotal = adultCount * basePrice;
-    final childTotal = childCount * (basePrice * 0.5);  // Trẻ em 50% giá
-    final infantTotal = infantCount * (basePrice * 0.25);  // Em bé miễn phí - Sửa từ 0.25 thành 0.0
-
+    final childTotal = childCount * (basePrice * 0.5);
+    final infantTotal = infantCount * (basePrice * 0.25);
     final total = adultTotal + childTotal + infantTotal;
-
-    // Log để debug
-    print('Price calculation details:');
-    print('Base price per adult: $basePrice');
-    print('Adult count: $adultCount x $basePrice = $adultTotal');
-    print('Child count: $childCount x ${basePrice * 0.5} = $childTotal');
-    print('Infant count: $infantCount x ${basePrice * 0.25} = $infantTotal');
-    print('Total price: $total');
-
     return total;
   }
 

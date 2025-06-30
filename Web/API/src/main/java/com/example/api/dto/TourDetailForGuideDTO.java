@@ -33,4 +33,5 @@ public class TourDetailForGuideDTO {
     private Integer assignmentId;
     private String guideRole;
     private String assignmentStatus;
+    private Integer guideId;
 } 

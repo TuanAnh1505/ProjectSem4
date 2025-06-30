@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './TourDetailForGuide.css';
 import { X, Info, Calendar, Users, Briefcase, User, Phone, Mail, MapPin, ChevronDown, Clock } from 'lucide-react';
+import ScheduleChangeRequest from './ScheduleChangeRequest';
 
 const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -40,6 +41,7 @@ const TourDetailForGuide = ({ tourId, startDate, onClose }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('overview');
+    const [showChangeForm, setShowChangeForm] = useState(false);
 
     useEffect(() => {
         fetchTourDetail();
@@ -58,6 +60,7 @@ const TourDetailForGuide = ({ tourId, startDate, onClose }) => {
                     }
                 }
             );
+            console.log('tourDetail:', response.data);
             setTourDetail(response.data);
             setError(null);
         } catch (err) {
@@ -102,8 +105,23 @@ const TourDetailForGuide = ({ tourId, startDate, onClose }) => {
                 </nav>
 
                 <main className="modal-content">
+                    <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+                        <button className="btn-change-schedule" onClick={() => setShowChangeForm(true)}>
+                            Yêu cầu thay đổi lịch trình
+                        </button>
+                    </div>
                     {renderContent()}
                 </main>
+
+                {showChangeForm && (
+                    <ScheduleChangeRequest
+                        scheduleId={tourDetail.scheduleId}
+                        guideId={tourDetail.guideId}
+                        tourName={tourDetail.tourName}
+                        onClose={() => setShowChangeForm(false)}
+                        onSuccess={() => setShowChangeForm(false)}
+                    />
+                )}
             </div>
         </div>
     );

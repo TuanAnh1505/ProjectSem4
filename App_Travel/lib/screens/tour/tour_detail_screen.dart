@@ -1418,19 +1418,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       // Rating stars
-                                      Row(
-                                        children: [
-                                          ...List.generate(
-                                            (fb['rating'] ?? 0).toInt(),
-                                            (index) => Icon(Icons.star, color: Colors.amber, size: 24),
-                                          ),
-                                          ...List.generate(
-                                            (5 - (fb['rating'] ?? 0).toInt()).toInt(),
-                                            (index) => Icon(Icons.star_border, color: Colors.grey[400], size: 24),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 8),
+
                                       // User name
                                       Row(
                                         children: [
@@ -1449,6 +1437,19 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                         ],
                                       ),
                                       SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          ...List.generate(
+                                            (fb['rating'] ?? 0).toInt(),
+                                                (index) => Icon(Icons.star, color: Colors.amber, size: 24),
+                                          ),
+                                          ...List.generate(
+                                            (5 - (fb['rating'] ?? 0).toInt()).toInt(),
+                                                (index) => Icon(Icons.star_border, color: Colors.grey[400], size: 24),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
                                       // Date
                                       Text(
                                         fb['createdAt'] != null

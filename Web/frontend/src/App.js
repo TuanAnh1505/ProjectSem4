@@ -28,6 +28,7 @@ import BookingConfirmation from './components/booking/BookingConfirmation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Feedback from './components/feedback/Feedback';
+import ScheduleChangeRequests from './components/admin/schedule/ScheduleChangeRequests';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -396,6 +397,12 @@ const App = () => {
           <Route
             path="/redirect"
             element={<AutoRedirect />}
+          />
+
+          {/* Schedule Change Requests */}
+          <Route
+            path="/admin/schedule-change-requests"
+            element={<ProtectedRoute element={<ScheduleChangeRequests />} requiredRole="ADMIN" />}
           />
 
         

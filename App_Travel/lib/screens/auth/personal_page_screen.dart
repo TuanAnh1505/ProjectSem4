@@ -92,6 +92,28 @@ class PersonalPageScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
+            // Hiển thị email tài khoản
+            FutureBuilder(
+              future: SharedPreferences.getInstance(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const SizedBox.shrink();
+                final prefs = snapshot.data!;
+                final email = prefs.getString('email');
+                if (email == null || email.isEmpty) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    email,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF7B8D9E),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 6),
             FutureBuilder(
               future: SharedPreferences.getInstance(),
               builder: (context, snapshot) {
