@@ -387,7 +387,8 @@ public class TourGuideAssignmentService {
         dto.setCurrentBookings(confirmedBookings.size());
         dto.setItinerary(itineraries.stream().map(this::convertToItineraryDTO).collect(Collectors.toList()));
         dto.setPassengers(passengers.stream().map(this::convertToPassengerDTO).collect(Collectors.toList()));
-
+        dto.setScheduleId(schedule.getScheduleId());
+        dto.setGuideId(currentGuide.getGuideId().intValue());
         return dto;
     }
 

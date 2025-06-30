@@ -32,6 +32,7 @@ import ExperienceIndex from "./experience/ExperienceIndex";
 import FeedbackIndex from "./feedback/FeedbackIndex";
 import AssignGuidePage from "./assignment/AssignGuidePage.js";
 import TourGuideList from "./tourguide/TourGuideList";
+import ScheduleChangeRequests from "./schedule/ScheduleChangeRequests";
 
 const AdminPage = () => {
   const location = useLocation();
@@ -141,6 +142,8 @@ const AdminPage = () => {
     if (pathSegments.includes('assignment')) {
       return <AssignGuidePage />;
     }
+
+
 
     return <AdminDashboard />;
   };

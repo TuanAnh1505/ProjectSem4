@@ -222,6 +222,13 @@ const AdminDashboard = ({ children }) => {
               <span className="menu-icon-circle"><FaUser /></span>
               <span className="menu-text-modern">Hướng dẫn viên</span>
             </li>
+            <li
+              onClick={() => navigate("/admin/schedule-change-requests")}
+              className={location.pathname === "/admin/schedule-change-requests" ? "active" : ""}
+            >
+              <span className="menu-icon-circle"><FaCalendarAlt /></span>
+              <span className="menu-text-modern">Yêu cầu thay đổi lịch trình</span>
+            </li>
             <div className="account-section-modern">
               <li className="menu-section-modern">Trang tài khoản</li>
               <li
