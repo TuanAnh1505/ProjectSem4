@@ -136,31 +136,20 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
   }
 
   double _calculateTotalPrice() {
-    double basePrice = widget.finalPrice ?? widget.tour.price ?? 0.0;
+    double basePrice = widget.tour.price ?? 0.0;
     int adultCount = _passengerCounts['adult'] ?? 0;
     int childCount = _passengerCounts['child'] ?? 0;
     int infantCount = _passengerCounts['infant'] ?? 0;
 
-    // Calculate total price
     double total = 0;
-    total += adultCount * basePrice; // Adults pay full price
-    total += childCount * (basePrice * 0.5); // Children pay 50%
-    // Infants are free
+    total += adultCount * basePrice;
+    total += childCount * (basePrice * 0.5);
+    total += infantCount * (basePrice * 0.25);
 
-    // Apply discount if any
     if (_discountInfo != null && _discountInfo!['discountPercent'] != null) {
       final percent = _discountInfo!['discountPercent'] as double;
       total = total - (total * percent / 100);
     }
-
-    print('Price calculation:');
-    print('Base price: $basePrice');
-    print('Adult count: $adultCount');
-    print('Child count: $childCount');
-    print('Infant count: $infantCount');
-    print('Discount percentage: ${_discountInfo?['discountPercent']}');
-    print('Total before discount: ${adultCount * basePrice + childCount * (basePrice * 0.5)}');
-    print('Final total: $total');
 
     setState(() {
       _totalPrice = total;
@@ -381,7 +370,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
               'tourId': widget.tour.tourId,
               'name': widget.tour.name,
               'description': widget.tour.description,
-              'price': _discountedPrice,
+              'price': widget.tour.price,
               'originalPrice': widget.tour.price,
               'duration': widget.tour.duration,
               'maxParticipants': widget.tour.maxParticipants,
@@ -393,6 +382,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
             },
             contactInfo: contactInfo,
             itineraries: convertedItineraries,
+            finalPrice: _discountedPrice,
           ),
         ),
       );
@@ -1545,7 +1535,7 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
 
     List<Widget> details = [];
 
-    // Giá tour (giá đã giảm, giá gốc gạch ngang)
+    // Giá tour (giá 1 người lớn, có thể hiển thị giá đã giảm nếu có)
     details.add(Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -1558,22 +1548,31 @@ class _BookingPassengerScreenState extends State<BookingPassengerScreen> {
         ),
         Row(
           children: [
-            Text(
-              NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(totalAfterDiscount),
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
             if (discountPercent > 0) ...[
+              Text(
+                NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(adultUnitPrice),
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
               const SizedBox(width: 8),
               Text(
-                NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(totalBeforeDiscount),
+                NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(basePrice),
                 style: TextStyle(
                   color: Colors.grey,
                   decoration: TextDecoration.lineThrough,
                   fontSize: 16,
+                ),
+              ),
+            ] else ...[
+              Text(
+                NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(basePrice),
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
                 ),
               ),
             ]
