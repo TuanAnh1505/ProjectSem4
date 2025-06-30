@@ -43,12 +43,12 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
       setFormData(prev => {
         const isEmpty = !prev.userId && !prev.experienceYears && !prev.specialization && !prev.languages && !prev.rating;
         return isEmpty ? {
-          userId: tourGuide.userId || '',
-          experienceYears: tourGuide.experienceYears || '',
-          specialization: tourGuide.specialization || '',
-          languages: tourGuide.languages || '',
-          rating: tourGuide.rating || '',
-          isAvailable: tourGuide.isAvailable ?? true
+        userId: tourGuide.userId || '',
+        experienceYears: tourGuide.experienceYears || '',
+        specialization: tourGuide.specialization || '',
+        languages: tourGuide.languages || '',
+        rating: tourGuide.rating || '',
+        isAvailable: tourGuide.isAvailable ?? true
         } : prev;
       });
       if (tourGuide.userId) {
@@ -69,10 +69,10 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
       const response = await axios.get(`http://localhost:8080/api/users?role=GUIDE`, config);
       const user = response.data.find(u => u.userid === userId);
       if (user) {
-        setSelectedUser({
+      setSelectedUser({
           value: user.userid,
           label: `${user.fullName} (${user.email})`
-        });
+      });
       }
     } catch (err) {
       console.error('Lỗi khi tải thông tin người dùng:', err);
@@ -98,8 +98,8 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
                          user.email.toLowerCase().includes(inputValue.toLowerCase()))
           .map(user => ({
             value: user.userid,
-            label: `${user.fullName} (${user.email})`
-          }));
+          label: `${user.fullName} (${user.email})`
+        }));
         callback(options);
       } catch (err) {
         console.error('Lỗi khi tìm kiếm người dùng:', err);
@@ -169,7 +169,7 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
         await axios.put(`http://localhost:8080/api/tour-guides/${tourGuide.guideId}`, formData, config);
         setSuccess(true);
         setTimeout(() => {
-          if (onSubmit) onSubmit();
+        if (onSubmit) onSubmit();
         }, 1000);
       } else {
         await axios.post('http://localhost:8080/api/tour-guides', formData, config);
@@ -184,7 +184,7 @@ const TourGuideForm = ({ tourGuide, onSubmit, onCancel }) => {
         });
         setSelectedUser(null);
         setTimeout(() => {
-          if (onSubmit) onSubmit();
+        if (onSubmit) onSubmit();
         }, 1000);
       }
     } catch (err) {
