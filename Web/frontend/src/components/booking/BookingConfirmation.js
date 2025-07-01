@@ -37,7 +37,8 @@ const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   console.log('BookingConfirmation location.state:', location.state);
-  const { bookingId, bookingCode, passengers, tourInfo, contactInfo, itineraries = [], finalPrice, basePrice, passengerCounts } = location.state || {};
+  console.log('userId in location.state:', location.state?.userId);
+  const { bookingId, bookingCode, passengers, tourInfo, contactInfo, itineraries = [], finalPrice, basePrice, passengerCounts, paymentCode } = location.state || {};
 
   // Log để debug giá nhận được
   console.log('BookingConfirmation - Giá nhận được:', {
@@ -126,31 +127,39 @@ const BookingConfirmation = () => {
   // const bookingNote = '(Booking từ Travel.com.vn (Tour giá chợ -500.000 đ/ khách, ))';
   const flightInfo = 'Thông tin chuyến bay';
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     const calculatedAmount = calculateTotal();
-    
-    // Debug log để kiểm tra giá tiền
-    console.log('BookingConfirmation - handlePayment:', {
-      finalPrice,
-      calculatedAmount,
-      basePrice,
-      tourInfoPrice: tourInfo?.price,
-      passengerCounts,
-      amountToSend: finalPrice !== undefined ? finalPrice : calculatedAmount
-    });
-    
-    // Chuyển hướng đến trang lựa chọn phương thức thanh toán
-    navigate(`/payment/${bookingId}`, {
-      state: {
+    try {
+      const token = localStorage.getItem('token');
+      // Lấy userId từ bookingFromApi hoặc location.state
+      const userId = bookingFromApi?.user?.userid || location.state?.userId;
+      if (!userId) throw new Error('Không tìm thấy userId cho booking');
+      // Gọi API tạo payment mới
+      const res = await axios.post('http://localhost:8080/api/payments', {
         bookingId,
+        userId,
         amount: finalPrice !== undefined ? finalPrice : calculatedAmount,
-        tourInfo,
-        passengers,
-        passengerCounts,
-        basePrice,
-        finalPrice
-      }
-    });
+        paymentMethodId: 1 // hoặc 2 nếu muốn Bank Transfer
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const paymentCode = res.data.paymentCode;
+      if (!paymentCode) throw new Error('Không nhận được mã thanh toán');
+      // Điều hướng sang trang thanh toán với paymentCode
+      navigate(`/payment/${paymentCode}`, {
+        state: {
+          paymentCode,
+          amount: finalPrice !== undefined ? finalPrice : calculatedAmount,
+          tourInfo,
+          passengers,
+          passengerCounts,
+          basePrice,
+          finalPrice
+        }
+      });
+    } catch (err) {
+      alert('Không thể tạo thanh toán mới: ' + (err.response?.data?.message || err.message));
+    }
   };
 
   const handlePrevImage = () => {

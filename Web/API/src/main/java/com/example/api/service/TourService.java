@@ -28,6 +28,15 @@ public class TourService {
     private final TourRepository tourRepo;
     private final DestinationRepository destRepo;
     private final EventRepository eventRepo;
+    private final ExperienceRepository experienceRepo;
+    private final BookingRepository bookingRepo;
+    private final TourScheduleRepository tourScheduleRepo;
+    private final TourGuideAssignmentRepository tourGuideAssignmentRepo;
+    private final FeedbackRepository feedbackRepo;
+    private final UserDiscountRepository userDiscountRepo;
+    private final TourItineraryRepository tourItineraryRepo;
+    private final BookingPassengerRepository bookingPassengerRepo;
+    private final PaymentRepository paymentRepo;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -55,6 +64,66 @@ public class TourService {
     }
 
     public void deleteTour(Integer id) {
+        // Kiểm tra tour có tồn tại không
+        Tour tour = tourRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tour not found"));
+        
+        // Xóa tất cả các bản ghi liên quan theo thứ tự để tránh foreign key constraint
+        
+        // 1. Xóa experiences
+        List<Experience> experiences = experienceRepo.findByTour_TourId(id.longValue());
+        experienceRepo.deleteAll(experiences);
+        
+        // 2. Xóa user_discounts
+        List<UserDiscount> userDiscounts = userDiscountRepo.findAll().stream()
+                .filter(ud -> ud.getTourId().equals(id))
+                .collect(Collectors.toList());
+        userDiscountRepo.deleteAll(userDiscounts);
+        
+        // 3. Xóa feedbacks
+        List<Feedback> feedbacks = feedbackRepo.findByTour_TourId(id);
+        feedbackRepo.deleteAll(feedbacks);
+        
+        // 4. Xóa tour_guide_assignments
+        List<TourGuideAssignment> assignments = tourGuideAssignmentRepo.findByTourId(id);
+        tourGuideAssignmentRepo.deleteAll(assignments);
+        
+        // 5. Lấy tất cả schedule_id của tour này
+        List<TourSchedule> schedules = tourScheduleRepo.findByTourId(id);
+        List<Integer> scheduleIds = schedules.stream().map(TourSchedule::getScheduleId).collect(Collectors.toList());
+        
+        // 6. Xóa tất cả bookings có schedule_id thuộc các schedule này (dù tour_id là gì)
+        List<Booking> bookingsToDelete = bookingRepo.findAll().stream()
+            .filter(b -> scheduleIds.contains(b.getScheduleId()))
+            .collect(Collectors.toList());
+        for (Booking booking : bookingsToDelete) {
+            List<BookingPassenger> passengers = bookingPassengerRepo.findByBooking_BookingId(booking.getBookingId());
+            bookingPassengerRepo.deleteAll(passengers);
+            List<Payment> payments = paymentRepo.findByBooking_BookingId(booking.getBookingId());
+            paymentRepo.deleteAll(payments);
+        }
+        bookingRepo.deleteAll(bookingsToDelete);
+        
+        // 7. Xóa bookings còn lại có tour_id trùng (nếu có)
+        List<Booking> bookings = bookingRepo.findAll().stream()
+                .filter(b -> b.getTour().getTourId().equals(id))
+                .collect(Collectors.toList());
+        for (Booking booking : bookings) {
+            List<BookingPassenger> passengers = bookingPassengerRepo.findByBooking_BookingId(booking.getBookingId());
+            bookingPassengerRepo.deleteAll(passengers);
+            List<Payment> payments = paymentRepo.findByBooking_BookingId(booking.getBookingId());
+            paymentRepo.deleteAll(payments);
+        }
+        bookingRepo.deleteAll(bookings);
+        
+        // 8. Xóa tour_schedules và tour_itineraries
+        for (TourSchedule schedule : schedules) {
+            List<TourItinerary> itineraries = tourItineraryRepo.findByScheduleId(schedule.getScheduleId());
+            tourItineraryRepo.deleteAll(itineraries);
+        }
+        tourScheduleRepo.deleteAll(schedules);
+        
+        // 9. Cuối cùng xóa tour (các bảng many-to-many sẽ tự động được xử lý)
         tourRepo.deleteById(id);
     }
 
@@ -133,5 +202,11 @@ public class TourService {
         return tourRepo.findById(tourId)
                 .map(Tour::getEvents)
                 .orElse(Collections.emptyList());
+    }
+
+    public Tour getTourByName(String name) {
+        Tour tour = tourRepo.findByName(name);
+        if (tour == null) throw new RuntimeException("Tour not found");
+        return tour;
     }
 }

@@ -220,4 +220,15 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping("/code/{paymentCode}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getPaymentByCode(@PathVariable String paymentCode) {
+        try {
+            PaymentResponseDTO payment = paymentService.getPaymentByCode(paymentCode);
+            return ResponseEntity.ok(payment);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

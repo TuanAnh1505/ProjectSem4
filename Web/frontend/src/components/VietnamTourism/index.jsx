@@ -256,7 +256,7 @@ const Home = () => {
                         {tour.description?.substring(0, 100)}...
                       </p>
                       <Link
-                        to={`/tour-dashboard/detail/${tour.tourId}`}
+                        to={`/tour-dashboard/detail/${encodeURIComponent(tour.name)}`}
                         className={styles.tourCardBtn}
                       >
                         View Details

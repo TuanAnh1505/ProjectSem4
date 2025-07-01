@@ -485,12 +485,13 @@ const UpdateInfoUser = () => {
                                                                         <Button variant="contained" color="primary" sx={{ borderRadius: 2 }}
                                                                             onClick={async () => {
                                                                                 const token = localStorage.getItem('token');
+                                                                                let payment = undefined;
                                                                                 try {
                                                                                     // Lấy payment chưa thanh toán
                                                                                     const res = await axios.get(`http://localhost:8080/api/payments/booking/${booking.bookingId}`, {
                                                                                         headers: { 'Authorization': `Bearer ${token}` }
                                                                                     });
-                                                                                    const payment = res.data.find(p => ['SUPPORT_CONTACT', 'PENDING'].includes((p.statusName || '').toUpperCase()));
+                                                                                    payment = res.data.find(p => ['SUPPORT_CONTACT', 'PENDING'].includes((p.statusName || '').toUpperCase()));
                                                                                     if (payment && payment.statusName.toUpperCase() === 'SUPPORT_CONTACT') {
                                                                                         // Gọi API chuyển về PENDING (id = 1)
                                                                                         await axios.put(`http://localhost:8080/api/payments/${payment.paymentId}/status?statusId=1`, {}, {
@@ -500,7 +501,9 @@ const UpdateInfoUser = () => {
                                                                                 } catch (e) {
                                                                                     // Bỏ qua lỗi, vẫn cho phép chuyển hướng
                                                                                 }
-                                                                                navigate(`/payment/${booking.bookingId}`);
+                                                                                if (payment) {
+                                                                                    navigate(`/payment/${payment.paymentCode}`);
+                                                                                }
                                                                             }}>
                                                                             Tiếp tục thanh toán
                                                                         </Button>

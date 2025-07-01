@@ -148,7 +148,7 @@ export default function TourDashboard() {
           <div className="tour-grid">
             {tours.map(tour => (
               <div key={tour.tourId} className="tour-card">
-                 <Link to={`/tour-dashboard/detail/${tour.tourId}`} className="card-image-link">
+                 <Link to={`/tour-dashboard/detail/${encodeURIComponent(tour.name)}`} className="card-image-link">
                     <div className="card-image">
                       <img 
                         src={tour.imageUrls && tour.imageUrls.length > 0 ? `http://localhost:8080${tour.imageUrls[0]}` : 'https://via.placeholder.com/400x300?text=No+Image'} 
@@ -158,7 +158,7 @@ export default function TourDashboard() {
                  </Link>
                  <div className="card-content">
                     
-                    <Link to={`/tour-dashboard/detail/${tour.tourId}`} className="card-title-link">
+                    <Link to={`/tour-dashboard/detail/${encodeURIComponent(tour.name)}`} className="card-title-link">
                         <h3 className="card-title">{tour.name}</h3>
                     </Link>
                     
@@ -178,7 +178,7 @@ export default function TourDashboard() {
                             <span className="price-label">Giá từ</span>
                             <span className="price-value">{formatPrice(tour.price)}<span className="price-unit"> đ</span></span>
                         </div>
-                        <Link to={`/tour-dashboard/detail/${tour.tourId}`} className="details-button">
+                        <Link to={`/tour-dashboard/detail/${encodeURIComponent(tour.name)}`} className="details-button">
                             Xem chi tiết
                         </Link>
                     </div>

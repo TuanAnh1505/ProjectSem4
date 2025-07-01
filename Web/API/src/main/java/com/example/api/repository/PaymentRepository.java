@@ -13,6 +13,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     List<Payment> findByBooking_BookingId(Integer bookingId);
     Optional<Payment> findByTransactionId(String transactionId);
     List<Payment> findByStatus_StatusNameInAndPaymentDateBefore(List<String> statusNames, LocalDateTime beforeTime);
+    Optional<Payment> findByPaymentCode(String paymentCode);
 }
 
 

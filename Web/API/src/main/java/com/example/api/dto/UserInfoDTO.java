@@ -17,4 +17,5 @@ public class UserInfoDTO {
     private String phone;
     private String email;
     private String address;
+    private Long userid;
 }

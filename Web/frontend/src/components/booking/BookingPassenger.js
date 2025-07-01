@@ -204,6 +204,8 @@ const BookingPassenger = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = res.data;
+        console.log('User info:', data);
+        localStorage.setItem('userInfo', JSON.stringify(data));
         setLoggedInUser({
           fullName: data.fullName || '',
           phoneNumber: data.phone || '',
@@ -431,6 +433,9 @@ const BookingPassenger = () => {
       if (discountInfo && discountInfo.discountPercent) {
         finalPrice = Math.round(totalBeforeDiscount - (totalBeforeDiscount * discountInfo.discountPercent / 100));
       }
+      // Lấy userId từ localStorage user info (nếu đã fetch trước đó)
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const userId = userInfo.id || userInfo.userid || undefined;
       navigate('/booking-confirmation', {
         state: {
           bookingId,
@@ -441,7 +446,8 @@ const BookingPassenger = () => {
           basePrice: bookedTour.price,
           itineraries,
           passengerCounts,
-          contactInfo
+          contactInfo,
+          userId: userId
         }
       });
     } catch (err) {

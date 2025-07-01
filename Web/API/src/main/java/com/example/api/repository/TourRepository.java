@@ -16,4 +16,7 @@ public interface TourRepository extends JpaRepository<Tour, Integer>, JpaSpecifi
 
     @Query(value = "SELECT * FROM tour WHERE id != :excludeTourId ORDER BY RAND() LIMIT :count", nativeQuery = true)
     List<Tour> findRandomToursWithExclusion(@Param("count") int count, @Param("excludeTourId") Integer excludeTourId);
+
+    @Query("SELECT t FROM Tour t WHERE LOWER(t.name) = LOWER(:name)")
+    Tour findByName(@Param("name") String name);
 }

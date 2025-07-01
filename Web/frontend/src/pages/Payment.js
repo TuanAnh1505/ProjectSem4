@@ -5,10 +5,10 @@ import PaymentMethodSelector from '../components/payment/PaymentMethodSelector';
 import './Payment.css';
 
 const Payment = () => {
-  const { bookingId } = useParams();
+  const { paymentCode } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [booking, setBooking] = useState(null);
+  const [payment, setPayment] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,7 +35,7 @@ const Payment = () => {
   });
 
   useEffect(() => {
-    const fetchBookingDetails = async () => {
+    const fetchPayment = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
@@ -43,24 +43,24 @@ const Payment = () => {
       }
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/bookings/${bookingId}/detail`,
+          `http://localhost:8080/api/payments/code/${paymentCode}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
             }
           }
         );
-        setBooking(response.data);
+        setPayment(response.data);
+        console.log('Fetched payment:', response.data);
       } catch (err) {
-        setError('Không thể tải thông tin đặt phòng');
-        console.error('Error fetching booking:', err);
+        setError('Không thể tải thông tin thanh toán');
+        console.error('Error fetching payment:', err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchBookingDetails();
-  }, [bookingId, navigate]);
+    fetchPayment();
+  }, [paymentCode, navigate]);
 
   const handleMethodSelect = (methodId) => {
     setSelectedMethod(methodId);
@@ -74,80 +74,53 @@ const Payment = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
-
-      if (!token || !userId) {
-        navigate('/login');
+      const bookingId = payment?.bookingId;
+      const userId = payment?.userId || localStorage.getItem('userId');
+      console.log('token:', token, 'bookingId:', bookingId, 'userId:', userId);
+      if (!token || !userId || !bookingId) {
+        alert('Thiếu thông tin đăng nhập hoặc booking, vui lòng thử lại!');
         return;
       }
-
-      // Lấy số điện thoại user từ booking (giả sử booking.booking.user.phone)
-      const userPhone = booking?.booking?.user?.phone || '0123456789';
-      
-      // Ưu tiên sử dụng giá tiền từ location.state, nếu không có thì lấy từ API
-      // Ưu tiên: finalPriceFromState > amountFromState > booking API
+      const userPhone = payment?.booking?.user?.phone || '0123456789';
       const amount = finalPriceFromState !== undefined ? finalPriceFromState : 
                     amountFromState || 
-                    booking?.booking?.totalPrice || 
-                    booking?.totalAmount;
+                    payment?.booking?.totalPrice || 
+                    payment?.totalAmount;
 
       console.log('Payment amount:', {
         finalPriceFromState,
         amountFromState,
-        bookingTotalPrice: booking?.booking?.totalPrice,
-        bookingTotalAmount: booking?.totalAmount,
+        bookingTotalPrice: payment?.booking?.totalPrice,
+        bookingTotalAmount: payment?.totalAmount,
         finalAmount: amount
       });
-
-      // Kiểm tra payment đã tồn tại cho booking này chưa
-      const paymentRes = await axios.get(
-        `http://localhost:8080/api/payments/booking/${bookingId}`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
-      );
-      const existingPayment = paymentRes.data.find(
-        p => p.statusName !== 'Completed' && p.statusName !== 'Failed'
-      );
 
       // Nếu là Bank Transfer (methodId = 2)
       if (selectedMethod === 2) {
         setQrLoading(true);
         setBankQr(null);
         try {
-          if (existingPayment) {
-            setBankQr(existingPayment);
-          } else {
-            const response = await axios.post(
-              'http://localhost:8080/api/payments/bank-transfer-qr',
-              {
-                amount: amount,
-                phone: userPhone,
-                bookingId: parseInt(bookingId),
-                userId: parseInt(userId)
-              },
-              {
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json'
-                }
+          const response = await axios.post(
+            'http://localhost:8080/api/payments/bank-transfer-qr',
+            {
+              amount: amount,
+              phone: userPhone,
+              bookingId: parseInt(bookingId),
+              userId: parseInt(userId)
+            },
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
               }
-            );
-            setBankQr(response.data);
-          }
+            }
+          );
+          setBankQr(response.data);
+          console.log('bankQr:', response.data);
         } catch (err) {
           const errMsg = err.response?.data?.error || 'Không thể tạo mã QR. Vui lòng thử lại sau.';
-          // Kiểm tra lỗi booking đã thanh toán
-          if (errMsg.includes('đã thanh toán')) {
-            // Kiểm tra user hiện tại có phải chủ booking không
-            if (booking?.booking?.user?.userid?.toString() === userId) {
-              setShowPaidModal(true);
-            } else {
-              setError('Bạn không có quyền truy cập booking này!');
-              setShowErrorModal(true);
-            }
-          } else {
-            setError(errMsg);
-            setShowErrorModal(true);
-          }
+          setError(errMsg);
+          setShowErrorModal(true);
         } finally {
           setQrLoading(false);
         }
@@ -156,16 +129,10 @@ const Payment = () => {
 
       // Nếu là MoMo (giả sử methodId = 5 là MoMo)
       if (selectedMethod === 5) {
-        if (existingPayment) {
-          // Nếu đã có payment chưa completed, dùng lại
-          // (Có thể redirect hoặc hiển thị thông tin payment)
-          setBankQr(existingPayment);
-          return;
-        }
         const response = await axios.post(
           'http://localhost:8080/api/payments/momo',
           {
-            bookingId: parseInt(bookingId),
+            bookingId: parseInt(paymentCode),
             userId: parseInt(userId),
             paymentMethodId: selectedMethod,
             amount: amount
@@ -182,8 +149,7 @@ const Payment = () => {
       }
 
       // Xử lý các phương thức thanh toán khác ở đây
-      if (existingPayment) {
-        setBankQr(existingPayment);
+      if (bankQr) {
         setConfirmResult('success');
         setSelectedMethod(null);
         return;
@@ -191,7 +157,7 @@ const Payment = () => {
       const response = await axios.post(
         'http://localhost:8080/api/payments',
         {
-          bookingId: parseInt(bookingId),
+          bookingId: parseInt(paymentCode),
           userId: parseInt(userId),
           paymentMethodId: selectedMethod,
           amount: amount
@@ -316,7 +282,7 @@ const Payment = () => {
             <button
               className="payment-btn fintech payment-pay"
               onClick={handlePayment}
-              disabled={!selectedMethod}
+              disabled={!selectedMethod || !payment}
             >
               Thanh toán ngay
             </button>

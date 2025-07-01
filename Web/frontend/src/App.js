@@ -113,7 +113,7 @@ const App = () => {
               <TourDashboard />
             </Layout>
           } />
-          <Route path="/tour-dashboard/detail/:tourId" element={
+          <Route path="/tour-dashboard/detail/:tourName" element={
             <Layout>
               <TourDetailDashboard />
             </Layout>
@@ -142,7 +142,7 @@ const App = () => {
           } />
          
          
-          <Route path="/payment/:bookingId" element={
+          <Route path="/payment/:paymentCode" element={
             <Layout>
               <ProtectedRoute element={<Payment />} />
             </Layout>
@@ -174,7 +174,7 @@ const App = () => {
             } 
           />
           <Route
-            path="/tour-dashboard/detail/:tourId"
+            path="/tour-dashboard/detail/:tourName"
             element={<ProtectedRoute element={<TourDetailDashboard />} />}
           />
           <Route

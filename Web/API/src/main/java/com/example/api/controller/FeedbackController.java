@@ -13,6 +13,7 @@ import com.example.api.service.BookingService;
 import com.example.api.service.TourService;
 import com.example.api.repository.BookingRepository;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,21 +29,16 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/feedbacks")
+@RequiredArgsConstructor
 public class FeedbackController {
     private static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
 
-    @Autowired
-    private FeedbackService feedbackService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private FeedbackStatusService feedbackStatusService;
-    @Autowired
-    private BookingService bookingService;
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private TourService tourService;
+    private final FeedbackService feedbackService;
+    private final UserService userService;
+    private final FeedbackStatusService feedbackStatusService;
+    private final BookingService bookingService;
+    private final BookingRepository bookingRepository;
+    private final TourService tourService;
 
     @GetMapping
     public List<FeedbackDTO> getAllFeedbacks(@RequestParam(value = "tourId", required = false) Integer tourId) {

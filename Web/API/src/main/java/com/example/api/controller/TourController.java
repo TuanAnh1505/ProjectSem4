@@ -155,4 +155,9 @@ public class TourController {
         }
     }
 
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Tour> getTourByName(@PathVariable String name) {
+        return ResponseEntity.ok(tourService.getTourByName(name));
+    }
+
 }

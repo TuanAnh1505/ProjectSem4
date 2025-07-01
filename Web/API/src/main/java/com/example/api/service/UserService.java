@@ -209,7 +209,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return UserInfoDTO.builder()
-                // .userid(user.getUserid())
+                .userid(user.getUserid())
                 .publicId(user.getPublicId())
                 .fullName(user.getFullName())
                 .phone(user.getPhone())

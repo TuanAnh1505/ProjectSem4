@@ -5,7 +5,7 @@ import styles from '../styles/tour/TourDetailDashboard.module.css';
 import { toast } from 'react-toastify';
 
 export default function TourDetailDashboard() {
-  const { tourId } = useParams();
+  const { tourName } = useParams();
   const navigate = useNavigate();
   const [tour, setTour] = useState(null);
   const [error, setError] = useState('');
@@ -42,16 +42,16 @@ export default function TourDetailDashboard() {
         const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
         // Fetch Tour Details
-        const tourRes = await axios.get(`http://localhost:8080/api/tours/${tourId}`, config);
+        const tourRes = await axios.get(`http://localhost:8080/api/tours/name/${tourName}`, config);
         if (!tourRes.data) throw new Error('Tour not found');
         setTour(tourRes.data);
 
         // Fetch Gallery Images
-        const galleryRes = await axios.get(`http://localhost:8080/api/tours/${tourId}/images`);
+        const galleryRes = await axios.get(`http://localhost:8080/api/tours/${tourRes.data.tourId}/images`);
         setGalleryImages(galleryRes.data || []);
 
         // Fetch Schedules and Itineraries
-        const schedulesRes = await axios.get(`http://localhost:8080/api/schedules/tour/${tourId}`, config);
+        const schedulesRes = await axios.get(`http://localhost:8080/api/schedules/tour/${tourRes.data.tourId}`, config);
         const schedules = schedulesRes.data;
         const schedulesWithItineraries = [];
         for (const schedule of schedules) {
@@ -61,16 +61,16 @@ export default function TourDetailDashboard() {
         setItineraries(schedulesWithItineraries);
 
         // Fetch Destinations
-        const destinationsRes = await axios.get(`http://localhost:8080/api/tours/${tourId}/destinations`);
+        const destinationsRes = await axios.get(`http://localhost:8080/api/tours/${tourRes.data.tourId}/destinations`);
         setDestinations(destinationsRes.data || []);
 
         // Fetch Experiences
-        const expRes = await axios.get(`http://localhost:8080/api/experiences/tour/${tourId}`, config);
+        const expRes = await axios.get(`http://localhost:8080/api/experiences/tour/${tourRes.data.tourId}`, config);
         setExperiences(Array.isArray(expRes.data) ? expRes.data : []);
 
         // Fetch Feedbacks
         setFeedbackLoading(true);
-        const feedbackRes = await axios.get(`http://localhost:8080/api/feedbacks?tourId=${tourId}`);
+        const feedbackRes = await axios.get(`http://localhost:8080/api/feedbacks?tourId=${tourRes.data.tourId}`);
         setFeedbacks(Array.isArray(feedbackRes.data) ? feedbackRes.data : []);
         
       } catch (err) {
@@ -86,7 +86,7 @@ export default function TourDetailDashboard() {
       }
     };
 
-    if (tourId) {
+    if (tourName) {
       fetchAllData();
       // If user is a guide, fetch their assignments
       const role = localStorage.getItem('role');
@@ -94,10 +94,10 @@ export default function TourDetailDashboard() {
         fetchGuideAssignments();
       }
     } else {
-      setError('Invalid tour ID');
+      setError('Invalid tour name');
       setLoading(false);
     }
-  }, [tourId, navigate]);
+  }, [tourName, navigate]);
 
   const fetchGuideAssignments = async () => {
     try {
@@ -135,7 +135,7 @@ export default function TourDetailDashboard() {
           Bạn cần đăng nhập để đặt tour.<br />
           <button
             style={{ marginTop: 8, padding: "4px 12px", background: "#00AEEF", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer" }}
-            onClick={() => navigate("/login", { state: { tourId } })}
+            onClick={() => navigate("/login", { state: { tourName } })}
           >
             Đăng nhập ngay
           </button>
@@ -156,7 +156,7 @@ export default function TourDetailDashboard() {
     try {
       const res = await axios.post(
         "http://localhost:8080/api/bookings",
-        { userId: parseInt(userId), tourId, scheduleId: selectedScheduleId },
+        { userId: parseInt(userId), tourId: tour.tourId, scheduleId: selectedScheduleId },
         { headers: { Authorization: "Bearer " + token } }
       );
       if (res.data && res.data.bookingId) {
@@ -192,7 +192,7 @@ export default function TourDetailDashboard() {
       
       const expRes = await axios.post('http://localhost:8080/api/experiences', {
         userid: userId,
-        tourId: tourId,
+        tourId: tour.tourId,
         content: expContent,
         title: expTitle
       }, config);
@@ -218,7 +218,7 @@ export default function TourDetailDashboard() {
       setExpMedia([]);
       setExpTitle('');
       // Refresh experiences
-      const newExpRes = await axios.get(`http://localhost:8080/api/experiences/tour/${tourId}`, config);
+      const newExpRes = await axios.get(`http://localhost:8080/api/experiences/tour/${tour.tourId}`, config);
       setExperiences(Array.isArray(newExpRes.data) ? newExpRes.data : []);
     } catch (err) {
       alert('Gửi trải nghiệm thất bại!');

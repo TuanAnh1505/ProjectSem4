@@ -49,6 +49,9 @@ public class Payment {
     @JoinColumn(name = "payment_method_id", nullable = false)
     private PaymentMethod paymentMethod;
 
+    @Column(name = "payment_code", length = 6, unique = true)
+    private String paymentCode;
+
     @PrePersist
     protected void onCreate() {
         if (paymentDate == null) {

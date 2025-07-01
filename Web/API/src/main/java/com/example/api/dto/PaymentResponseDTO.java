@@ -18,4 +18,5 @@ public class PaymentResponseDTO {
     private LocalDateTime paymentDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String paymentCode;
 } 

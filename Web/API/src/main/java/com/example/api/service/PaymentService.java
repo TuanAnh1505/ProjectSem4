@@ -70,6 +70,30 @@ public class PaymentService {
     private static final String VNPAY_ENDPOINT = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     private static final String RETURN_URL = "http://localhost:8080/api/payments/vnpay/return";
     private static final String NOTIFY_URL = "http://localhost:8080/api/payments/vnpay/notify";
+    private static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String DIGITS = "0123456789";
+    private static final String ALL = LETTERS + DIGITS;
+    private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
+
+    private String generatePaymentCode() {
+        for (int attempt = 0; attempt < 10; attempt++) {
+            StringBuilder sb = new StringBuilder(6);
+            int letterCount = 0, digitCount = 0;
+            for (int i = 0; i < 6; i++) {
+                char c = ALL.charAt(RANDOM.nextInt(ALL.length()));
+                sb.append(c);
+                if (LETTERS.indexOf(c) >= 0) letterCount++;
+                if (DIGITS.indexOf(c) >= 0) digitCount++;
+            }
+            if (letterCount > 0 && digitCount > 0) {
+                String code = sb.toString();
+                if (!paymentRepository.findByPaymentCode(code).isPresent()) {
+                    return code;
+                }
+            }
+        }
+        throw new RuntimeException("Unable to generate unique payment code");
+    }
 
     @Transactional
     public PaymentResponseDTO createPayment(PaymentRequestDTO dto) {
@@ -86,6 +110,7 @@ public class PaymentService {
         payment.setAmount(dto.getAmount());
         payment.setTransactionId(UUID.randomUUID().toString());
         payment.setPaymentDate(LocalDateTime.now());
+        payment.setPaymentCode(generatePaymentCode());
 
         // Set initial status (pending)
         PaymentStatus pendingStatus = paymentStatusRepository.findById(1)
@@ -409,7 +434,7 @@ public class PaymentService {
                                 </html>
                                 """,
                         user.getFullName(), user.getEmail(),
-                        booking.getBookingCode(),
+                        payment.getPaymentCode(),
                         booking.getScheduleId(),
                         booking.getTour().getName(),
                         payment.getAmount(),
@@ -507,6 +532,12 @@ public class PaymentService {
         return convertToDTO(payment);
     }
 
+    public PaymentResponseDTO getPaymentByCode(String paymentCode) {
+        Payment payment = paymentRepository.findByPaymentCode(paymentCode)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        return convertToDTO(payment);
+    }
+
     private PaymentResponseDTO convertToDTO(Payment payment) {
         PaymentResponseDTO dto = new PaymentResponseDTO();
         dto.setPaymentId(payment.getPaymentId());
@@ -521,6 +552,7 @@ public class PaymentService {
         dto.setPaymentDate(payment.getPaymentDate());
         dto.setCreatedAt(payment.getCreatedAt());
         dto.setUpdatedAt(payment.getUpdatedAt());
+        dto.setPaymentCode(payment.getPaymentCode());
         return dto;
     }
 

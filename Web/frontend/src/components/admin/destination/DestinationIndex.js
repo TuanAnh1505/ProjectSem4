@@ -183,15 +183,15 @@ const DestinationIndex = () => {
                         <tr key={destination.destinationId}>
                             <td>{destination.destinationId}</td>
                             <td>
-                                {destination.filePaths.length > 0 && (
+                                {(destination.filePaths && destination.filePaths.length > 0) && (
                                     <div className="preview-container">
                                         <MediaPreview
-                                            filePath={destination.filePaths[0]}
-                                            onClick={() => setSelectedMedia(destination.filePaths)}
+                                            filePath={(destination.filePaths || [])[0]}
+                                            onClick={() => setSelectedMedia(destination.filePaths || [])}
                                         />
-                                        {destination.filePaths.length > 1 && (
+                                        {(destination.filePaths && destination.filePaths.length > 1) && (
                                             <span className="preview-count">
-                                                {destination.filePaths.length - 1}
+                                                {(destination.filePaths || []).length - 1}
                                             </span>
                                         )}
                                     </div>
