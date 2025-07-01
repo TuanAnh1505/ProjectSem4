@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import "../styles/admin/AdminDashboard.css";
 import {FaComment, FaCamera,FaInfo, FaChartLine, FaGlobeAsia, FaCalendarAlt, FaMapMarkedAlt, FaListAlt, FaUser, FaSignOutAlt, FaBook, FaChevronUp, FaChevronDown, FaSearch, FaDollarSign } from "react-icons/fa";
+import NotificationBell from "../common/NotificationBell";
 
 const AdminDashboard = ({ children }) => {
   const navigate = useNavigate();
@@ -16,11 +17,16 @@ const AdminDashboard = ({ children }) => {
   const tourMenuRef = useRef();
   const [searchTerm, setSearchTerm] = useState("");
   const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
+    const storedUserId = localStorage.getItem("userId");
     if (storedEmail) {
       setEmail(storedEmail);
+    }
+    if (storedUserId) {
+      setCurrentUserId(parseInt(storedUserId));
     }
   }, []);
 
@@ -28,6 +34,7 @@ const AdminDashboard = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("email");
     localStorage.removeItem("role");
+    localStorage.removeItem("userId");
     navigate("/login");
   };
 
@@ -223,8 +230,8 @@ const AdminDashboard = ({ children }) => {
               <span className="menu-text-modern">Hướng dẫn viên</span>
             </li>
             <li
-              onClick={() => navigate("/admin/schedule-change-requests")}
-              className={location.pathname === "/admin/schedule-change-requests" ? "active" : ""}
+              onClick={() => navigate("/admin/schedule-change-request")}
+              className={location.pathname === "/admin/schedule-change-request" ? "active" : ""}
             >
               <span className="menu-icon-circle"><FaCalendarAlt /></span>
               <span className="menu-text-modern">Yêu cầu thay đổi lịch trình</span>
@@ -271,19 +278,31 @@ const AdminDashboard = ({ children }) => {
         }}
       >
         <div className="dashboard-topbar">
-          <form className="dashboard-search-bar" onSubmit={handleDashboardSearch}>
-            <input
-              type="text"
-              className="dashboard-search-input"
-              placeholder="Tìm kiếm điểm đến, tour, sự kiện..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-            <button className="dashboard-search-btn" type="submit">
-              <FaSearch />
-            </button>
-          </form>
-          <FaUser className="user-icon" onClick={toggleDropdown} />
+          <div className="dashboard-topbar-right-group">
+            <form className="dashboard-search-bar" onSubmit={handleDashboardSearch}>
+              <input
+                type="text"
+                className="dashboard-search-input"
+                placeholder="Tìm kiếm điểm đến, tour, sự kiện..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+              <button className="dashboard-search-btn" type="submit">
+                <FaSearch />
+              </button>
+            </form>
+            {currentUserId && (
+              <NotificationBell 
+                userId={currentUserId}
+                onNotificationClick={(notification) => {
+                  if (notification.notificationType === 'schedule_change') {
+                    navigate('/admin/schedule-change-request');
+                  }
+                }}
+              />
+            )}
+            <FaUser className="user-icon" onClick={toggleDropdown} />
+          </div>
         </div>
         {isAsideCollapsed && (
           <button className="toggle-button-main" onClick={toggleAside}>

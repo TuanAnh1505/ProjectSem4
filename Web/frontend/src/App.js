@@ -28,7 +28,7 @@ import BookingConfirmation from './components/booking/BookingConfirmation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Feedback from './components/feedback/Feedback';
-import ScheduleChangeRequests from './components/admin/schedule/ScheduleChangeRequests';
+// import ScheduleChangeRequests from './components/admin/schedule/ScheduleChangeRequests';
 // import các component khác nếu có
 // Layout component that wraps tourism pages with Header and Footer
 const Layout = ({ children }) => {
@@ -372,8 +372,17 @@ const App = () => {
 
           <Route path="/feedback" element={<Feedback />} />
 
+          {/* Notification Detail Route */}
+
+
           <Route
             path="/admin/assignment"
+            element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
+          />
+
+          {/* Schedule Change Requests */}
+          <Route
+            path="/admin/schedule-change-request"
             element={<ProtectedRoute element={<AdminPage />} requiredRole="ADMIN" />}
           />
 
@@ -399,11 +408,7 @@ const App = () => {
             element={<AutoRedirect />}
           />
 
-          {/* Schedule Change Requests */}
-          <Route
-            path="/admin/schedule-change-requests"
-            element={<ProtectedRoute element={<ScheduleChangeRequests />} requiredRole="ADMIN" />}
-          />
+        
 
         
         </Routes>

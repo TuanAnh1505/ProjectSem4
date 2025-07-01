@@ -143,6 +143,9 @@ const AdminPage = () => {
       return <AssignGuidePage />;
     }
 
+    if (pathSegments.includes('schedule-change-request')) {
+      return <ScheduleChangeRequests />;
+    }
 
 
     return <AdminDashboard />;

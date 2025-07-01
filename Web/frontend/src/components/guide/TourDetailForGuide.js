@@ -98,18 +98,23 @@ const TourDetailForGuide = ({ tourId, startDate, onClose }) => {
                     <button onClick={onClose} className="close-button"><X size={24} /></button>
                 </header>
 
-                <nav className="modal-tabs">
-                    <TabButton icon={<Info size={18} />} label="Tổng quan" tabName="overview" activeTab={activeTab} onClick={setActiveTab} />
-                    <TabButton icon={<Calendar size={18} />} label={`Lịch trình (${tourDetail.itinerary?.length || 0})`} tabName="itinerary" activeTab={activeTab} onClick={setActiveTab} />
-                    <TabButton icon={<Users size={18} />} label={`Hành khách (${tourDetail.passengers?.length || 0})`} tabName="passengers" activeTab={activeTab} onClick={setActiveTab} />
+                <nav className="modal-tabs-with-action">
+                    <div className="modal-tabs">
+                        <TabButton icon={<Info size={18} />} label="Tổng quan" tabName="overview" activeTab={activeTab} onClick={setActiveTab} />
+                        <TabButton icon={<Calendar size={18} />} label={`Lịch trình (${tourDetail.itinerary?.length || 0})`} tabName="itinerary" activeTab={activeTab} onClick={setActiveTab} />
+                        <TabButton icon={<Users size={18} />} label={`Hành khách (${tourDetail.passengers?.length || 0})`} tabName="passengers" activeTab={activeTab} onClick={setActiveTab} />
+                        <TabButton
+                            icon={<Clock size={18} />} 
+                            label="Yêu cầu thay đổi lịch trình"
+                            tabName="change-request"
+                            activeTab={activeTab}
+                            onClick={() => setShowChangeForm(true)}
+                            isAction
+                        />
+                    </div>
                 </nav>
 
                 <main className="modal-content">
-                    <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
-                        <button className="btn-change-schedule" onClick={() => setShowChangeForm(true)}>
-                            Yêu cầu thay đổi lịch trình
-                        </button>
-                    </div>
                     {renderContent()}
                 </main>
 
@@ -127,10 +132,11 @@ const TourDetailForGuide = ({ tourId, startDate, onClose }) => {
     );
 };
 
-const TabButton = ({ icon, label, tabName, activeTab, onClick }) => (
+const TabButton = ({ icon, label, tabName, activeTab, onClick, isAction }) => (
     <button
-        className={`tab-button ${activeTab === tabName ? 'active' : ''}`}
-        onClick={() => onClick(tabName)}
+        className={`tab-button${activeTab === tabName ? ' active' : ''}${isAction ? ' is-action' : ''}`}
+        onClick={() => isAction ? onClick() : onClick(tabName)}
+        type="button"
     >
         {icon}
         <span>{label}</span>

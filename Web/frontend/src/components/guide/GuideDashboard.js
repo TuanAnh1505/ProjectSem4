@@ -5,6 +5,7 @@ import './GuideDashboard.css';
 import { CalendarCheck, Users, Star, Map, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import TourDetailForGuide from './TourDetailForGuide';
 import AuthenticatedImage from './AuthenticatedImage';
+import NotificationBell from '../common/NotificationBell';
 
 const GuideDashboard = () => {
     const [assignments, setAssignments] = useState([]);
@@ -15,14 +16,21 @@ const GuideDashboard = () => {
     const [selectedTour, setSelectedTour] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [guideRating, setGuideRating] = useState(0.0);
+    const [currentUserId, setCurrentUserId] = useState(null);
     const navigate = useNavigate();
 
     const fetchData = async () => {
         setLoading(true);
         const token = localStorage.getItem('token');
+        const storedUserId = localStorage.getItem('userId');
+        
         if (!token) {
             navigate('/login');
             return;
+        }
+        
+        if (storedUserId) {
+            setCurrentUserId(parseInt(storedUserId));
         }
 
         try {
@@ -153,8 +161,23 @@ const GuideDashboard = () => {
     return (
         <div className="guide-dashboard">
             <header className="dashboard-header">
-                <h1>Bảng điều khiển</h1>
-                <p>Chào mừng trở lại! Dưới đây là tổng quan về các tour của bạn.</p>
+                <div className="header-content">
+                    <div>
+                        <h1>Bảng điều khiển</h1>
+                        <p>Chào mừng trở lại! Dưới đây là tổng quan về các tour của bạn.</p>
+                    </div>
+                    {currentUserId && (
+                        <NotificationBell 
+                            userId={currentUserId}
+                            onNotificationClick={(notification) => {
+                                if (notification.notificationType === 'schedule_change') {
+                                    // Chuyển đến trang lịch sử yêu cầu thay đổi lịch trình
+                                    navigate('/guide/schedule-history');
+                                }
+                            }}
+                        />
+                    )}
+                </div>
             </header>
 
             <section className="stats-grid">
