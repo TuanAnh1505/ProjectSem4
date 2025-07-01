@@ -517,7 +517,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                 TextButton(
                   onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
-                  child: const Text('Hủy', style: TextStyle(fontSize: 15)),
+                  child: const Text('Thoát', style: TextStyle(fontSize: 15)),
                 ),
               ],
             ),

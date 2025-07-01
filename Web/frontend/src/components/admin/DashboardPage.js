@@ -335,14 +335,14 @@ const DashboardPage = () => {
           <div>
             <div className="dashboard-summary-title">Doanh thu tháng {summary.month}</div>
             <div className="dashboard-summary-value">{formatVND(summary.monthRevenue)}</div>
-            <div className={`dashboard-summary-change ${summary.revenueChange >= 0 ? 'up' : 'down'}`}>
+            {/* <div className={`dashboard-summary-change ${summary.revenueChange >= 0 ? 'up' : 'down'}`}>
               {summary.revenueChange >= 0 ? (
                 <span style={{color: '#4caf50', fontWeight: 700, marginRight: 4}}>▲</span>
               ) : (
                 <span style={{color: '#f44336', fontWeight: 700, marginRight: 4}}>▼</span>
               )}
               {formatPercent(summary.revenueChange)} so với tháng trước
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

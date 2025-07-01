@@ -4,23 +4,24 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.18);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(2px);
 }
 
 .schedule-change-content {
-    background: white;
-    border-radius: 16px;
-    padding: 2rem;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
+    background: #fff;
+    border-radius: 24px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 500px;
+    max-height: 92vh;
     overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    margin: 0 auto;
 }
 
 .schedule-change-header {
@@ -32,14 +33,16 @@
 
 .schedule-change-header h2 {
     color: #1e293b;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.7rem;
+    font-weight: 800;
     margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
 }
 
 .schedule-change-header p {
     color: #64748b;
-    font-size: 1rem;
+    font-size: 1.05rem;
+    margin-bottom: 0;
 }
 
 .schedule-change-error {
@@ -47,17 +50,18 @@
     border: 1px solid #fee2e2;
     color: #dc2626;
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 10px;
     margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 1rem;
 }
 
 .schedule-change-form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.2rem;
 }
 
 .form-group {
@@ -67,46 +71,45 @@
 }
 
 .form-group label {
-    font-weight: 600;
-    color: #374151;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    font-weight: 700;
+    color: #334155;
+    font-size: 1.07rem;
+    margin-bottom: 0.1rem;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1.1rem;
     border: 2px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 1rem;
-    transition: all 0.3s ease;
+    background: #f8fafc;
+    transition: border 0.2s, box-shadow 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px #dbeafe;
 }
 
 .form-group textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 100px;
 }
 
 .urgency-levels {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.5rem;
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
 }
 
 .urgency-option {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     cursor: pointer;
 }
 
@@ -116,44 +119,44 @@
 
 .urgency-label {
     display: block;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.1rem;
     border: 2px solid #e5e7eb;
-    border-radius: 6px;
+    border-radius: 10px;
     text-align: center;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    font-size: 0.97rem;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #334155;
+    transition: all 0.2s;
+    min-width: 70px;
 }
 
 .urgency-option input[type="radio"]:checked + .urgency-label {
-    background: #f0f9ff;
-    border-color: #3b82f6;
+    background: #e0e7ff;
+    border-color: #2563eb;
     color: #1d4ed8;
 }
 
 .schedule-change-actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 2px solid #f1f5f9;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 30px;
 }
 
 .btn-cancel,
 .btn-submit {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
+    min-width: 120px;
+    padding: 13px 0;
+    border-radius: 12px;
     border: none;
+    font-size: 17px;
+    font-weight: 700;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
     cursor: pointer;
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    min-width: 120px;
     justify-content: center;
 }
 
@@ -162,56 +165,50 @@
     color: #374151;
 }
 
-.btn-cancel:hover {
+.btn-cancel:hover:not(:disabled) {
     background: #e5e7eb;
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: white;
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(90deg, #2563eb 60%, #1d4ed8 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 0 16px;
+    min-width: 120px;
+    min-height: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    gap: 8px;
 }
 
 .btn-submit:disabled {
-    background: #e5e7eb;
-    color: #9ca3af;
+    background: linear-gradient(90deg, #a5b4fc 60%, #93c5fd 100%);
+    color: #fff;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.loading-spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid transparent;
-    border-top: 2px solid currentColor;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    opacity: 1;
 }
 
 @media (max-width: 768px) {
     .schedule-change-content {
         margin: 1rem;
-        padding: 1.5rem;
+        padding: 1.2rem 0.5rem;
     }
-    
     .urgency-levels {
-        grid-template-columns: repeat(2, 1fr);
+        flex-direction: column;
+        gap: 0.5rem;
     }
-    
     .schedule-change-actions {
         flex-direction: column;
+        gap: 12px;
     }
-    
     .btn-cancel,
     .btn-submit {
         width: 100%;

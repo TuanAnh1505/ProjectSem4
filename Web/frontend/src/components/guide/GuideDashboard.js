@@ -142,7 +142,10 @@ const GuideDashboard = () => {
                         </div>
                     </div>
                     <p className="card-description">{assignment.tourDescription}</p>
-                    <button className="card-action-button" onClick={() => navigate(`/tour-dashboard/detail/${encodeURIComponent(assignment.tourName)}`)}>
+                    {/* <button className="card-action-button" onClick={() => navigate(`/tour-dashboard/detail/${encodeURIComponent(assignment.tourName)}`)}>
+                        Xem chi tiết
+                    </button> */}
+                    <button className="card-action-button" onClick={() => handleViewDetails(assignment.tourId, assignment.startDate)}>
                         Xem chi tiết
                     </button>
                 </div>

@@ -219,10 +219,10 @@ const ScheduleChangeRequest = ({ scheduleId, guideId, tourName, onClose, onSucce
                             disabled={loading}
                         >
                             {loading ? (
-                                <div className="loading-spinner" />
+                                'Đang gửi...'
                             ) : (
                                 <>
-                                    <Send size={16} />
+                                    <Send size={16} style={{ marginRight: 6 }} />
                                     Gửi yêu cầu
                                 </>
                             )}

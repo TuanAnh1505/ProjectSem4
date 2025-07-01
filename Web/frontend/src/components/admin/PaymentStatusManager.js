@@ -20,6 +20,15 @@ const statusBadge = (statusName) => {
   return <span className="payment-badge">{statusName}</span>;
 };
 
+const statusOrder = [
+  'pending',
+  'processing',
+  'completed',
+  'failed',
+  'refunded',
+  'cancelled'
+];
+
 const PaymentStatusManager = () => {
   const [payments, setPayments] = useState([]);
   const [statuses, setStatuses] = useState([]);
@@ -181,16 +190,24 @@ const PaymentStatusManager = () => {
                 <td>{p.bookingId}</td>
                 <td><b>{p.amount?.toLocaleString()} VND</b></td>
                 <td>
-                  <select
-                    className={`payment-table-select select-${(allStatuses.find(s => s.paymentStatusId == (editStatus[p.paymentId] ?? p.statusId))?.statusName || '').toLowerCase()}`}
-                    value={editStatus[p.paymentId] ?? p.statusId}
-                    onChange={e => handleStatusChange(p.paymentId, e.target.value)}
-                    disabled={updating[p.paymentId]}
-                  >
-                    {allStatuses.map(s => (
-                      <option key={s.paymentStatusId} value={s.paymentStatusId}>{s.statusName}</option>
-                    ))}
-                  </select>
+                  {(() => {
+                    const currentStatusName = (allStatuses.find(s => s.paymentStatusId == (editStatus[p.paymentId] ?? p.statusId))?.statusName || '').toLowerCase();
+                    const currentStatusIndex = statusOrder.indexOf(currentStatusName);
+                    return (
+                      <select
+                        className={`payment-table-select select-${currentStatusName}`}
+                        value={editStatus[p.paymentId] ?? p.statusId}
+                        onChange={e => handleStatusChange(p.paymentId, e.target.value)}
+                        disabled={updating[p.paymentId]}
+                      >
+                        {allStatuses
+                          .filter(s => statusOrder.indexOf(s.statusName.toLowerCase()) >= currentStatusIndex)
+                          .map(s => (
+                            <option key={s.paymentStatusId} value={s.paymentStatusId}>{s.statusName}</option>
+                          ))}
+                      </select>
+                    );
+                  })()}
                 </td>
                 <td>{p.paymentDate ? new Date(p.paymentDate).toLocaleString() : ''}</td>
                 <td>
@@ -199,11 +216,11 @@ const PaymentStatusManager = () => {
                     onClick={() => handleSave(p.paymentId)}
                     disabled={updating[p.paymentId] || (editStatus[p.paymentId] ?? p.statusId) === p.statusId}
                   >
-                    Lưu
+                    {updating[p.paymentId] ? <span className="payment-btn-spinner"></span> : "Lưu"}
                   </button>
                 </td>
               </tr>
-            );
+            );  
           })}
         </tbody>
       </table>
