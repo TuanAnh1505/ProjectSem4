@@ -25,6 +25,7 @@ public class ScheduleChangeRequestService {
     private final NotificationService notificationService;
     private final EmailService emailService;
     private final TourItineraryRepository tourItineraryRepository;
+    private final BookingRepository bookingRepository;
 
     @Transactional
     public ScheduleChangeRequestDTO createRequest(ScheduleChangeRequestDTO dto) {
@@ -102,6 +103,9 @@ public class ScheduleChangeRequestService {
         // Gửi thông báo cho guide
         notifyGuide(savedRequest, "approved");
         
+        // Gửi email lịch trình mới cho khách hàng
+        sendNewItineraryToCustomers(savedRequest);
+        
         return convertToDTO(savedRequest);
     }
 
@@ -139,7 +143,7 @@ public class ScheduleChangeRequestService {
             for (User admin : admins) {
                 notificationService.createNotification(
                     admin.getUserid(),
-                    null,
+                    guide.getUser().getUserid(),
                     "Yêu cầu thay đổi lịch trình mới",
                     String.format("Guide %s đã yêu cầu thay đổi lịch trình cho tour (Schedule ID: %d). Mức độ khẩn cấp: %s", 
                         guide.getUser().getFullName(), request.getScheduleId(), request.getUrgencyLevel()),
@@ -149,24 +153,40 @@ public class ScheduleChangeRequestService {
             }
             
             // Gửi email cho admin
+            String proposedChangesHtml = request.getProposedChanges() != null
+                ? request.getProposedChanges().replaceAll("(\r\n|\n)", "<br>")
+                : "";
+            String reasonHtml = request.getReason() != null
+                ? request.getReason().replaceAll("(\r\n|\n)", "<br>")
+                : "";
+
             String subject = String.format("[TravelTour] Yêu cầu thay đổi lịch trình - %s", request.getUrgencyLevel().name().toUpperCase());
             String content = String.format(
-                "Guide %s đã yêu cầu thay đổi lịch trình cho tour.\n" +
-                "Schedule ID: %d\n" +
-                "Loại yêu cầu: %s\n" +
-                "Lý do: %s\n" +
-                "Thay đổi đề xuất: %s\n" +
-                "Mức độ khẩn cấp: %s",
+                "<div style='font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;'>"
+              + "<div style='max-width: 520px; margin: auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 32px 28px;'>"
+              + "<h2 style='color: #2563eb; margin-bottom: 18px;'>Yêu cầu thay đổi lịch trình mới</h2>"
+              + "<div style='margin-bottom: 12px;'><b>Guide:</b> %s</div>"
+              + "<div style='margin-bottom: 12px;'><b>Schedule ID:</b> %d</div>"
+              + "<div style='margin-bottom: 12px;'><b>Loại yêu cầu:</b> %s</div>"
+              + "<div style='margin-bottom: 12px;'><b>Lý do:</b><div style='background:#f8fafc; border-radius:6px; padding:8px 12px; margin-top:4px;'>%s</div></div>"
+              + "<div style='margin-bottom: 12px;'><b>Thay đổi đề xuất:</b><div style='background:#e0f2fe; border-radius:6px; padding:8px 12px; margin-top:4px;'>%s</div></div>"
+              + "<div style='margin-bottom: 12px;'><b>Mức độ khẩn cấp:</b> <span style='color: #d97706;'>%s</span></div>"
+              + "<div style='font-size: 15px; color: #374151; margin-top: 18px;'>Vui lòng đăng nhập hệ thống để xem chi tiết và xử lý yêu cầu này.</div>"
+              + "<div style='margin-top: 28px; text-align: center;'>"
+              + "<a href='http://localhost:3000/admin/schedule-change-request' style='display: inline-block; background: #2563eb; color: #fff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: bold; font-size: 16px;'>Truy cập hệ thống</a>"
+              + "</div>"
+              + "</div>"
+              + "<div style='text-align: center; color: #94a3b8; font-size: 13px; margin-top: 24px;'>TravelTour &copy; 2024</div>"
+              + "</div>",
                 guide.getUser().getFullName(),
                 request.getScheduleId(),
                 request.getRequestType(),
-                request.getReason(),
-                request.getProposedChanges(),
+                reasonHtml,
+                proposedChangesHtml,
                 request.getUrgencyLevel()
             );
-            
             for (User admin : admins) {
-                emailService.sendSimpleEmail(admin.getEmail(), subject, content);
+                emailService.sendHtmlEmail(admin.getEmail(), subject, content);
             }
             
         } catch (Exception e) {
@@ -183,26 +203,79 @@ public class ScheduleChangeRequestService {
                 "Yêu cầu thay đổi lịch trình đã được phê duyệt" :
                 "Yêu cầu thay đổi lịch trình đã bị từ chối";
             
-            String message = String.format("Yêu cầu thay đổi lịch trình của bạn (Request ID: %d) đã được %s. %s", 
-                request.getRequestId(), 
+            String adminResponseHtml = request.getAdminResponse() != null
+                ? request.getAdminResponse().replaceAll("(\r\n|\n)", "<br>")
+                : "";
+            
+            String htmlMessage = String.format(
+                "<div style='font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;'>"
+              + "<div style='max-width: 520px; margin: auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 32px 28px;'>"
+              + "<h2 style='color: #2563eb; margin-bottom: 18px;'>%s</h2>"
+              + "<div style='margin-bottom: 12px;'>Yêu cầu thay đổi lịch trình của bạn (<b>Request ID: %d</b>) đã được <b>%s</b>.</div>"
+              + (request.getAdminResponse() != null ? "<div style='margin-bottom: 12px;'><b>Phản hồi admin:</b><div style='background:#f8fafc; border-radius:6px; padding:8px 12px; margin-top:4px;'>" + adminResponseHtml + "</div></div>" : "")
+              + "<div style='font-size: 15px; color: #374151; margin-top: 18px;'>Vui lòng đăng nhập hệ thống để xem chi tiết.</div>"
+              + "</div>"
+              + "<div style='text-align: center; color: #94a3b8; font-size: 13px; margin-top: 24px;'>TravelTour &copy; 2024</div>"
+              + "</div>",
+                title,
+                request.getRequestId(),
+                action.equals("approved") ? "phê duyệt" : "từ chối"
+            );
+            
+            String notificationMessage = String.format(
+                "Yêu cầu thay đổi lịch trình của bạn (Request ID: %d) đã được %s. %s",
+                request.getRequestId(),
                 action.equals("approved") ? "phê duyệt" : "từ chối",
-                request.getAdminResponse() != null ? "Phản hồi: " + request.getAdminResponse() : "");
+                request.getAdminResponse() != null ? "Phản hồi: " + request.getAdminResponse() : ""
+            );
             
             notificationService.createNotification(
                 guide.getUser().getUserid(),
                 request.getAdminId(),
                 title,
-                message,
+                notificationMessage,
                 "schedule_change",
                 request.getRequestId()
             );
             
             // Gửi email cho guide
             String subject = String.format("[TravelTour] %s", title);
-            emailService.sendSimpleEmail(guide.getUser().getEmail(), subject, message);
-            
+            emailService.sendHtmlEmail(guide.getUser().getEmail(), subject, htmlMessage);
         } catch (Exception e) {
             logger.error("Error notifying guide about schedule change request response: {}", e.getMessage());
+        }
+    }
+
+    // Gửi email lịch trình mới cho khách hàng
+    private void sendNewItineraryToCustomers(ScheduleChangeRequest request) {
+        try {
+            List<Booking> bookings = bookingRepository.findByScheduleIdAndStatus_StatusName(
+                request.getScheduleId(), "CONFIRMED"
+            );
+            String subject = "Lịch trình tour của bạn đã được cập nhật";
+            String itineraryHtml = request.getProposedChanges() != null
+                ? request.getProposedChanges().replaceAll("(\r\n|\n)", "<br>")
+                : "";
+            String content = String.format(
+                "<div style='font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;'>"
+              + "<div style='max-width: 520px; margin: auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 32px 28px;'>"
+              + "<h2 style='color: #2563eb; margin-bottom: 18px;'>Lịch trình tour của bạn đã được cập nhật</h2>"
+              + "<div style='margin-bottom: 12px;'><b>Schedule ID:</b> %d</div>"
+              + "<div style='margin-bottom: 12px;'><b>Lịch trình mới:</b><div style='background:#e0f2fe; border-radius:6px; padding:8px 12px; margin-top:4px;'>%s</div></div>"
+              + "<div style='font-size: 15px; color: #374151; margin-top: 18px;'>Nếu có thắc mắc, vui lòng liên hệ với chúng tôi.</div>"
+              + "</div>"
+              + "<div style='text-align: center; color: #94a3b8; font-size: 13px; margin-top: 24px;'>TravelTour &copy; 2024</div>"
+              + "</div>",
+                request.getScheduleId(),
+                itineraryHtml
+            );
+            for (Booking booking : bookings) {
+                if (booking.getUser() != null && booking.getUser().getEmail() != null) {
+                    emailService.sendHtmlEmail(booking.getUser().getEmail(), subject, content);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error sending new itinerary email to customers: {}", e.getMessage());
         }
     }
 
