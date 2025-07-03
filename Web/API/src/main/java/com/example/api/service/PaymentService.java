@@ -97,13 +97,13 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponseDTO createPayment(PaymentRequestDTO dto) {
-        // Validate booking and user
+        
         Booking booking = bookingRepository.findById(dto.getBookingId())
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Create payment record
+       
         Payment payment = new Payment();
         payment.setBooking(booking);
         payment.setUser(user);
@@ -112,20 +112,20 @@ public class PaymentService {
         payment.setPaymentDate(LocalDateTime.now());
         payment.setPaymentCode(generatePaymentCode());
 
-        // Set initial status (pending)
+      
         PaymentStatus pendingStatus = paymentStatusRepository.findById(1)
                 .orElseThrow(() -> new RuntimeException("Payment status not found"));
         payment.setStatus(pendingStatus);
 
-        // Set payment method
+      
         PaymentMethod method = paymentMethodRepository.findById(dto.getPaymentMethodId())
                 .orElseThrow(() -> new RuntimeException("Payment method not found"));
         payment.setPaymentMethod(method);
 
-        // Save payment
+     
         payment = paymentRepository.save(payment);
 
-        // Create initial history record
+       
         PaymentHistory history = new PaymentHistory();
         history.setPayment(payment);
         history.setStatus(pendingStatus);
@@ -160,15 +160,13 @@ public class PaymentService {
         PaymentStatus newStatus = paymentStatusRepository.findById(statusId)
                 .orElseThrow(() -> new RuntimeException("Payment status not found"));
 
-        // Chỉ gửi email nếu trạng thái trước đó chưa phải Completed và trạng thái mới
-        // là Completed
+       
         boolean wasCompleted = "Completed".equalsIgnoreCase(payment.getStatus().getStatusName());
         payment.setStatus(newStatus);
         payment = paymentRepository.save(payment);
 
-        // Nếu thanh toán thành công (status_id = 3), cập nhật trạng thái booking sang
-        // CONFIRMED
-        if (!wasCompleted && newStatus.getPaymentStatusId() == 3) { // 3 = Completed
+    
+        if (!wasCompleted && newStatus.getPaymentStatusId() == 3) { 
             Booking booking = bookingRepository.findById(payment.getBooking().getBookingId())
                     .orElseThrow(() -> new RuntimeException("Booking not found"));
             BookingStatus confirmedStatus = bookingStatusRepository.findByStatusName("CONFIRMED")
@@ -176,7 +174,7 @@ public class PaymentService {
             booking.setStatus(confirmedStatus);
             bookingRepository.save(booking);
 
-            // Đánh dấu mã giảm giá đã sử dụng nếu có
+           
             if (booking.getDiscountId() != null) {
                 UserDiscount ud = new UserDiscount();
                 ud.setUserid(booking.getUser().getUserid());
@@ -185,7 +183,7 @@ public class PaymentService {
                 ud.setUsed(true);
                 userDiscountRepository.save(ud);
 
-                // Cập nhật used_quantity cho discount
+               
                 Discount discount = discountRepository.findById(booking.getDiscountId()).orElse(null);
                 if (discount != null) {
                     discountService.checkAndUpdateDiscountQuantity(discount);
@@ -199,7 +197,7 @@ public class PaymentService {
                         .findByBooking_BookingId(booking.getBookingId());
                 emailService.sendPaymentSuccessEmail(user, booking, payment, passengers);
 
-                // Gửi thông báo cho admin
+               
                 java.util.List<User> admins = userRepository.findAdmins();
                 String subject = "[TravelTour] Có thanh toán mới cho tour: " + booking.getTour().getName();
                 String content = String.format(
@@ -454,16 +452,16 @@ public class PaymentService {
                     + newStatus.getStatusName() + " (ID: " + newStatus.getPaymentStatusId() + ")");
         }
 
-        // Create history record
+      
         PaymentHistory history = new PaymentHistory();
         history.setPayment(payment);
         history.setStatus(newStatus);
         history.setNotes(notes != null ? notes : "Status updated to " + newStatus.getStatusName());
         paymentHistoryRepository.save(history);
 
-        // Nếu thanh toán thành công (status_id = 3), kiểm tra và cập nhật trạng thái
-        // lịch trình
-        if (newStatus.getPaymentStatusId() == 3) { // 3 = Completed
+       
+       
+        if (newStatus.getPaymentStatusId() == 3) { 
             tourScheduleService.checkAndUpdateScheduleStatus(payment.getBooking().getBookingId());
         }
 
@@ -488,7 +486,7 @@ public class PaymentService {
     public PaymentResponseDTO requestRefund(Integer paymentId, String notes, String email) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
-        // Kiểm tra user có quyền (email phải trùng với payment.user.email)
+      
         if (!payment.getUser().getEmail().equalsIgnoreCase(email)) {
             throw new RuntimeException("Bạn không có quyền yêu cầu hoàn tiền cho payment này!");
         }
@@ -497,7 +495,7 @@ public class PaymentService {
         payment.setStatus(refundStatus);
         payment = paymentRepository.save(payment);
 
-        // Lưu lịch sử
+     
         PaymentHistory history = new PaymentHistory();
         history.setPayment(payment);
         history.setStatus(refundStatus);
@@ -516,7 +514,7 @@ public class PaymentService {
         payment.setStatus(supportContactStatus);
         payment = paymentRepository.save(payment);
 
-        // Lưu lịch sử
+       
         PaymentHistory history = new PaymentHistory();
         history.setPayment(payment);
         history.setStatus(supportContactStatus);

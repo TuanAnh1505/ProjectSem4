@@ -25,7 +25,7 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    // Create payment for any method
+ 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPayment(@Valid @RequestBody PaymentRequestDTO dto) {
@@ -37,7 +37,7 @@ public class PaymentController {
         }
     }
 
-    // Get payment by ID
+
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getPayment(@PathVariable Integer id) {
@@ -49,7 +49,6 @@ public class PaymentController {
         }
     }
 
-    // Get payments by booking ID
     @GetMapping("/booking/{bookingId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getPaymentsByBooking(@PathVariable Integer bookingId) {
@@ -61,7 +60,7 @@ public class PaymentController {
         }
     }
 
-    // Get payment history
+
     @GetMapping("/{id}/history")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getPaymentHistory(@PathVariable Integer id) {
@@ -73,7 +72,7 @@ public class PaymentController {
         }
     }
 
-    // Update payment status (admin only)
+  
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updatePaymentStatus(
@@ -88,7 +87,7 @@ public class PaymentController {
         }
     }
 
-    // Get all payment methods
+  
     @GetMapping("/methods")
     public ResponseEntity<?> getPaymentMethods() {
         try {
@@ -98,7 +97,7 @@ public class PaymentController {
         }
     }
 
-    // Get all payment statuses
+
     @GetMapping("/statuses")
     public ResponseEntity<?> getPaymentStatuses() {
         try {
@@ -116,17 +115,17 @@ public class PaymentController {
             int bookingId = (int) payload.getOrDefault("bookingId", 0);
             int userId = (int) payload.getOrDefault("userId", 0);
 
-            // Lấy tất cả payment của booking này
+           
             List<PaymentResponseDTO> existingPayments = paymentService.getPaymentsByBooking(bookingId);
 
-            // Nếu đã có payment Completed cho booking này, trả về lỗi/thông báo đã thanh toán
+           
             boolean hasCompleted = existingPayments.stream()
                 .anyMatch(p -> "Completed".equalsIgnoreCase(p.getStatusName()));
             if (hasCompleted) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Booking này đã thanh toán xong!"));
             }
 
-            // Nếu đã có payment Pending/Processing, trả về payment đó
+           
             PaymentResponseDTO payment = existingPayments.stream()
                 .filter(p -> !"Failed".equalsIgnoreCase(p.getStatusName()))
                 .findFirst()
@@ -138,11 +137,10 @@ public class PaymentController {
                 dto.setBookingId(bookingId);
                 dto.setUserId((long) userId);
                 dto.setAmount(new java.math.BigDecimal(amount));
-                dto.setPaymentMethodId(2); // Bank Transfer
+                dto.setPaymentMethodId(2); 
                 payment = paymentService.createPayment(dto);
             }
 
-            // Gọi service để sinh QR
             String qrDataURL = paymentService.generateVietQr("9021400417865", "Pham Van Tuan Anh", amount, phone);
             Map<String, Object> result = new HashMap<>();
             result.put("qrDataURL", qrDataURL);
@@ -183,7 +181,7 @@ public class PaymentController {
         }
     }
 
-    // Cho phép user yêu cầu hoàn tiền (chỉ cho payment của chính mình)
+   
     @PutMapping("/{id}/request-refund")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> requestRefund(
@@ -198,7 +196,7 @@ public class PaymentController {
         }
     }
 
-    // Chuyển trạng thái payment sang SUPPORT_CONTACT (liên hệ khách hàng)
+    
     @PutMapping("/{id}/support-contact")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updatePaymentStatusToSupportContact(@PathVariable Integer id) {

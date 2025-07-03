@@ -24,7 +24,7 @@ public class EventService {
     @Autowired
     private EventStatusRepository eventStatusRepository;
 
-    // Thêm sự kiện
+  
     public EventDTO createEvent(EventDTO eventDTO) {
         Event event = new Event();
         mapToEntity(eventDTO, event);
@@ -32,7 +32,7 @@ public class EventService {
         return mapToDTO(savedEvent);
     }
 
-    // Sửa sự kiện
+  
     public EventDTO updateEvent(Integer eventId, EventDTO eventDTO) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
@@ -41,7 +41,7 @@ public class EventService {
         return mapToDTO(updatedEvent);
     }
 
-    // Xóa sự kiện
+ 
     public void deleteEvent(Integer eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
@@ -58,21 +58,20 @@ public class EventService {
         eventRepository.deleteById(eventId);
     }
 
-    // Lấy danh sách sự kiện
     public List<EventDTO> getAllEvents() {
         return eventRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    // Lấy sự kiện theo ID
+
     public EventDTO getEventById(Integer eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
         return mapToDTO(event);
     }
 
-    // Ánh xạ DTO sang Entity
+
     private void mapToEntity(EventDTO eventDTO, Event event) {
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
@@ -88,7 +87,7 @@ public class EventService {
         event.setStatus(status);
     }
 
-    // Ánh xạ Entity sang DTO
+  
     private EventDTO mapToDTO(Event event) {
         EventDTO eventDTO = new EventDTO();
         eventDTO.setEventId(event.getEventId());

@@ -56,11 +56,11 @@ public class UserController {
     public ResponseEntity<?> getUsersByRole(@RequestParam(required = false) String role) {
         try {
             if (role != null) {
-                // Lấy danh sách user theo role
+              
                 var users = userService.findUsersByRole(role);
                 return ResponseEntity.ok(users);
             } else {
-                // Lấy tất cả user
+              
                 var users = userService.getAllUsers();
                 return ResponseEntity.ok(users);
             }

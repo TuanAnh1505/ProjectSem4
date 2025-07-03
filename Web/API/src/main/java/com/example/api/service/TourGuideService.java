@@ -37,7 +37,7 @@ public class TourGuideService {
     private UserRoleRepository userRoleRepository;
 
     public TourGuideDTO createTourGuide(TourGuideDTO tourGuideDTO) {
-        // Check if current user has ADMIN role
+    
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(currentUserEmail)
             .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
@@ -49,11 +49,11 @@ public class TourGuideService {
             throw new AccessDeniedException("Only administrators can create tour guides");
         }
 
-        // Check if user exists
+
         User user = userRepository.findById(tourGuideDTO.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + tourGuideDTO.getUserId()));
 
-        // Check if user is already a tour guide
+      
         if (tourGuideRepository.existsByUserId(tourGuideDTO.getUserId())) {
             throw new IllegalStateException("User is already a tour guide");
         }
@@ -68,17 +68,17 @@ public class TourGuideService {
 
         TourGuide savedTourGuide = tourGuideRepository.save(tourGuide);
 
-        // Gán role hướng dẫn viên nếu chưa có
+       
         try {
             Role guideRole = roleRepository.findByRoleName("GUIDE");
             if (guideRole != null && user.getRoles().stream().noneMatch(r -> r.getRoleName().equalsIgnoreCase("GUIDE"))) {
                 user.getRoles().add(guideRole);
                 userRepository.save(user);
-                // Bổ sung: luôn lưu vào userroles
+              
                 userRoleRepository.save(new com.example.api.model.UserRole(user.getUserid(), guideRole.getRoleid()));
             }
         } catch (Exception e) {
-            // Log lỗi nhưng không throw exception để không ảnh hưởng đến việc tạo guide
+           
             System.err.println("Lỗi khi gán role GUIDE: " + e.getMessage());
         }
 
@@ -92,29 +92,29 @@ public class TourGuideService {
     }
 
     public List<TourGuideDTO> getAllTourGuides() {
-        // Lấy tất cả user có role là GUIDE
+      
         List<User> guideUsers = userRepository.findAll().stream()
                 .filter(user -> user.getRoles().stream()
                         .anyMatch(role -> role.getRoleName().equalsIgnoreCase("GUIDE")))
                 .collect(Collectors.toList());
 
-        // Chuyển đổi sang DTO
+      
         return guideUsers.stream().map(user -> {
             Optional<TourGuide> tourGuideOpt = tourGuideRepository.findByUserId(user.getUserid());
             if (tourGuideOpt.isPresent()) {
-                // Nếu có hồ sơ guide, dùng convertToDTO hiện có
+         
                 return convertToDTO(tourGuideOpt.get());
             } else {
-                // Nếu chưa có hồ sơ, tạo DTO từ thông tin User
+               
                 TourGuideDTO dto = new TourGuideDTO();
                 dto.setUserId(user.getUserid());
                 dto.setUserFullName(user.getFullName());
                 dto.setUserEmail(user.getEmail());
-                dto.setIsAvailable(user.getIsActive()); // Dùng trạng thái active của user
+                dto.setIsAvailable(user.getIsActive()); 
                 dto.setIsActive(user.getIsActive());
                 
-                // Đánh dấu là chưa có hồ sơ guide
-                dto.setGuideId(0L); // Dùng 0L để đánh dấu chưa có guideId
+               
+                dto.setGuideId(0L); 
                 dto.setSpecialization("Chưa có hồ sơ");
 
                 return dto;
@@ -123,7 +123,7 @@ public class TourGuideService {
     }
 
     public TourGuideDTO updateTourGuide(Long id, TourGuideDTO tourGuideDTO) {
-        // Check if current user has ADMIN role
+       
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(currentUserEmail)
             .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
@@ -138,7 +138,7 @@ public class TourGuideService {
         TourGuide tourGuide = tourGuideRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tour guide not found with id: " + id));
 
-        // Update fields
+       
         if (tourGuideDTO.getExperienceYears() != null) {
             tourGuide.setExperienceYears(tourGuideDTO.getExperienceYears());
         }
@@ -160,7 +160,7 @@ public class TourGuideService {
     }
 
     public void deleteTourGuide(Long id) {
-        // Check if current user has ADMIN role
+       
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(currentUserEmail)
             .orElseThrow(() -> new EntityNotFoundException("Current user not found"));

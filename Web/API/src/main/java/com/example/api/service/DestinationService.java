@@ -30,13 +30,13 @@ public class DestinationService {
 
     public DestinationDTO createDestination(DestinationDTO destinationDTO, List<MultipartFile> files) {
         try {
-            // Create directory if it doesn't exist
+          
             File directory = new File(uploadDir);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
 
-            // Process and save files
+          
             List<String> filePaths = new ArrayList<>();
             for (MultipartFile file : files) {
                 String originalFilename = file.getOriginalFilename();
@@ -52,7 +52,6 @@ public class DestinationService {
                 filePaths.add("/uploads/destinations/" + newFilename);
             }
 
-            // Create and save destination
             destinationDTO.setImageUrls(filePaths);
             Destination destination = mapToEntity(destinationDTO);
             Destination savedDestination = destinationRepository.save(destination);
@@ -94,10 +93,10 @@ public class DestinationService {
     public DestinationDTO updateDestination(Integer id, DestinationDTO destinationDTO, List<MultipartFile> files) {
         return destinationRepository.findById(id)
                 .map(destination -> {
-                    // Update basic fields
+                    
                     updateEntityFromDTO(destination, destinationDTO);
 
-                    // Handle file updates if present
+                 
                     if (files != null && !files.isEmpty()) {
                         try {
                             List<String> filePaths = new ArrayList<>();
@@ -115,7 +114,6 @@ public class DestinationService {
                                 filePaths.add("/uploads/destinations/" + newFilename);
                             }
 
-                            // Keep existing files if no new ones uploaded
                             if (!filePaths.isEmpty()) {
                                 destination.setFilePaths(filePaths);
                             }

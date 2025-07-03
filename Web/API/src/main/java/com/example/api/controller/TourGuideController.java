@@ -26,7 +26,7 @@ public class TourGuideController {
     @Autowired
     private UserService userService;
 
-    // Create new tour guide - only admin can create
+   
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createTourGuide(@Valid @RequestBody TourGuideDTO tourGuideDTO) {
@@ -38,14 +38,14 @@ public class TourGuideController {
         }
     }
 
-    // Get tour guide by ID
+
     @GetMapping("/{id}")
     public ResponseEntity<TourGuideDTO> getTourGuideById(@PathVariable Long id) {
         TourGuideDTO tourGuide = tourGuideService.getTourGuideById(id);
         return ResponseEntity.ok(tourGuide);
     }
 
-    // Get all tour guides
+    
     @GetMapping
     public ResponseEntity<?> getAllTourGuides(
             @RequestParam(required = false, defaultValue = "0") int page,
@@ -55,7 +55,7 @@ public class TourGuideController {
         try {
             List<TourGuideDTO> tourGuides = tourGuideService.getAllTourGuides();
             
-            // Filter by search term if provided
+           
             if (search != null && !search.trim().isEmpty()) {
                 tourGuides = tourGuides.stream()
                     .filter(guide -> 
@@ -67,7 +67,7 @@ public class TourGuideController {
                     .collect(Collectors.toList());
             }
             
-            // Sort if provided
+           
             if (sort != null && !sort.trim().isEmpty()) {
                 String[] sortParts = sort.split(",");
                 String sortField = sortParts[0];
@@ -107,7 +107,7 @@ public class TourGuideController {
                 });
             }
             
-            // Pagination
+           
             int totalItems = tourGuides.size();
             int totalPages = (int) Math.ceil((double) totalItems / size);
             int startIndex = page * size;
@@ -128,7 +128,7 @@ public class TourGuideController {
         }
     }
 
-    // Update tour guide - only admin can update
+   
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TourGuideDTO> updateTourGuide(
@@ -138,7 +138,7 @@ public class TourGuideController {
         return ResponseEntity.ok(updatedTourGuide);
     }
 
-    // Delete tour guide - only admin can delete
+   
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTourGuide(@PathVariable Long id) {
@@ -174,14 +174,14 @@ public class TourGuideController {
         return ResponseEntity.ok(tourGuides);
     }
 
-    // Thêm endpoint tìm kiếm tour guide theo trạng thái (isAvailable)
+    
     @GetMapping("/search/available")
     public ResponseEntity<List<TourGuideDTO>> findByIsAvailable(@RequestParam Boolean isAvailable) {
         List<TourGuideDTO> tourGuides = tourGuideService.findByIsAvailable(isAvailable);
         return ResponseEntity.ok(tourGuides);
     }
 
-    // Thêm endpoint tìm kiếm tổng hợp (ví dụ: tìm tour guide có rating >= minRating, experience >= minExperience, specialization, language, isAvailable)
+
     @GetMapping("/search")
     public ResponseEntity<List<TourGuideDTO>> searchTourGuides(
             @RequestParam(required = false) Double minRating,
@@ -196,7 +196,7 @@ public class TourGuideController {
     @PostMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createGuideAccount(@RequestBody CreateGuideRequestDTO dto) {
-        // 1. Tạo user mới với role GUIDE, gửi mail thông tin tài khoản
+
         var user = userService.createGuideUserAndSendMail(
             dto.getFullName(),
             dto.getEmail(),
@@ -204,7 +204,7 @@ public class TourGuideController {
             dto.getPhone(),
             dto.getAddress()
         );
-        // 2. Tạo bản ghi tour_guides
+
         var guide = tourGuideService.createTourGuideForUser(
             user.getUserid(),
             dto.getExperienceYears(),

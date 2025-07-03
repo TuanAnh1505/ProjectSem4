@@ -50,7 +50,7 @@ const UpdateInfoUser = () => {
         phone: '',
         address: ''
     });
-    // Booking states
+ 
     const [bookings, setBookings] = useState([]);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [showBookingDetail, setShowBookingDetail] = useState(false);
@@ -71,7 +71,7 @@ const UpdateInfoUser = () => {
             return;
         }
 
-        // Verify if the user is accessing their own profile
+
         if (publicId !== storedPublicId) {
             setError('Không có quyền truy cập thông tin này');
             setTimeout(() => navigate('/'), 2000);

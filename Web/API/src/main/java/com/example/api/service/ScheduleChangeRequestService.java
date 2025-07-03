@@ -43,7 +43,7 @@ public class ScheduleChangeRequestService {
         
         ScheduleChangeRequest savedRequest = scheduleChangeRequestRepository.save(request);
         
-        // Gửi thông báo cho admin
+  
         notifyAdmins(savedRequest);
         
         return convertToDTO(savedRequest);
@@ -89,7 +89,7 @@ public class ScheduleChangeRequestService {
         request.setAdminId(adminId);
         request.setRespondedAt(LocalDateTime.now());
         
-        // Tự động cập nhật itinerary nếu là yêu cầu thay đổi itinerary
+      
         if (request.getRequestType() == ScheduleChangeRequest.RequestType.itinerary_change
             && request.getCurrentItineraryId() != null) {
             TourItinerary itinerary = tourItineraryRepository.findById(request.getCurrentItineraryId())
@@ -100,10 +100,10 @@ public class ScheduleChangeRequestService {
         
         ScheduleChangeRequest savedRequest = scheduleChangeRequestRepository.save(request);
         
-        // Gửi thông báo cho guide
+       
         notifyGuide(savedRequest, "approved");
         
-        // Gửi email lịch trình mới cho khách hàng
+       
         sendNewItineraryToCustomers(savedRequest);
         
         return convertToDTO(savedRequest);
@@ -123,7 +123,7 @@ public class ScheduleChangeRequestService {
         
         ScheduleChangeRequest savedRequest = scheduleChangeRequestRepository.save(request);
         
-        // Gửi thông báo cho guide
+      
         notifyGuide(savedRequest, "rejected");
         
         return convertToDTO(savedRequest);
@@ -131,14 +131,14 @@ public class ScheduleChangeRequestService {
 
     private void notifyAdmins(ScheduleChangeRequest request) {
         try {
-            // Lấy thông tin guide và schedule
+           
             TourGuide guide = tourGuideRepository.findById(request.getGuideId().longValue())
                     .orElseThrow(() -> new RuntimeException("Guide not found"));
             
             TourSchedule schedule = tourScheduleRepository.findById(request.getScheduleId())
                     .orElseThrow(() -> new RuntimeException("Schedule not found"));
             
-            // Gửi thông báo cho tất cả admin
+           
             List<User> admins = userRepository.findAdmins();
             for (User admin : admins) {
                 notificationService.createNotification(
@@ -152,7 +152,7 @@ public class ScheduleChangeRequestService {
                 );
             }
             
-            // Gửi email cho admin
+            
             String proposedChangesHtml = request.getProposedChanges() != null
                 ? request.getProposedChanges().replaceAll("(\r\n|\n)", "<br>")
                 : "";
@@ -238,7 +238,7 @@ public class ScheduleChangeRequestService {
                 request.getRequestId()
             );
             
-            // Gửi email cho guide
+          
             String subject = String.format("[TravelTour] %s", title);
             emailService.sendHtmlEmail(guide.getUser().getEmail(), subject, htmlMessage);
         } catch (Exception e) {
@@ -246,7 +246,6 @@ public class ScheduleChangeRequestService {
         }
     }
 
-    // Gửi email lịch trình mới cho khách hàng
     private void sendNewItineraryToCustomers(ScheduleChangeRequest request) {
         try {
             List<Booking> bookings = bookingRepository.findByScheduleIdAndStatus_StatusName(
@@ -296,7 +295,7 @@ public class ScheduleChangeRequestService {
         dto.setRespondedAt(request.getRespondedAt());
         dto.setEffectiveDate(request.getEffectiveDate());
         
-        // Thêm thông tin bổ sung
+      
         try {
             TourGuide guide = tourGuideRepository.findById(request.getGuideId().longValue()).orElse(null);
             if (guide != null) {

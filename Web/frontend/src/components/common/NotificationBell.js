@@ -17,7 +17,7 @@ const NotificationBell = ({ userId, onNotificationClick }) => {
       fetchUnreadCount();
       fetchNotifications();
       
-      // Polling để cập nhật thông báo mới mỗi 30 giây
+    
       const interval = setInterval(() => {
         fetchUnreadCount();
       }, 30000);
@@ -26,7 +26,7 @@ const NotificationBell = ({ userId, onNotificationClick }) => {
     }
   }, [userId]);
 
-  // Handle click outside to close dropdown
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -73,19 +73,14 @@ const NotificationBell = ({ userId, onNotificationClick }) => {
       // Mark as read
       await axios.put(`http://localhost:8080/api/notifications/${notification.notificationId}/mark-read`);
       
-      // Update unread count
       setUnreadCount(prev => Math.max(0, prev - 1));
       
-      // Remove from notifications list
       setNotifications(prev => prev.filter(n => n.notificationId !== notification.notificationId));
-      
-      // Close dropdown
+ 
       setShowDropdown(false);
       
-      // Navigate to notification detail page
       navigate(`/notification/${notification.notificationId}`);
       
-      // Call parent callback if provided
       if (onNotificationClick) {
         onNotificationClick(notification);
       }

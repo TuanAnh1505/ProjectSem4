@@ -64,35 +64,32 @@ public class TourService {
     }
 
     public void deleteTour(Integer id) {
-        // Kiểm tra tour có tồn tại không
+     
         Tour tour = tourRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tour not found"));
-        
-        // Xóa tất cả các bản ghi liên quan theo thứ tự để tránh foreign key constraint
-        
-        // 1. Xóa experiences
+   
         List<Experience> experiences = experienceRepo.findByTour_TourId(id.longValue());
         experienceRepo.deleteAll(experiences);
         
-        // 2. Xóa user_discounts
+     
         List<UserDiscount> userDiscounts = userDiscountRepo.findAll().stream()
                 .filter(ud -> ud.getTourId().equals(id))
                 .collect(Collectors.toList());
         userDiscountRepo.deleteAll(userDiscounts);
         
-        // 3. Xóa feedbacks
+       
         List<Feedback> feedbacks = feedbackRepo.findByTour_TourId(id);
         feedbackRepo.deleteAll(feedbacks);
         
-        // 4. Xóa tour_guide_assignments
+      
         List<TourGuideAssignment> assignments = tourGuideAssignmentRepo.findByTourId(id);
         tourGuideAssignmentRepo.deleteAll(assignments);
         
-        // 5. Lấy tất cả schedule_id của tour này
+       
         List<TourSchedule> schedules = tourScheduleRepo.findByTourId(id);
         List<Integer> scheduleIds = schedules.stream().map(TourSchedule::getScheduleId).collect(Collectors.toList());
         
-        // 6. Xóa tất cả bookings có schedule_id thuộc các schedule này (dù tour_id là gì)
+       
         List<Booking> bookingsToDelete = bookingRepo.findAll().stream()
             .filter(b -> scheduleIds.contains(b.getScheduleId()))
             .collect(Collectors.toList());
@@ -104,7 +101,7 @@ public class TourService {
         }
         bookingRepo.deleteAll(bookingsToDelete);
         
-        // 7. Xóa bookings còn lại có tour_id trùng (nếu có)
+     
         List<Booking> bookings = bookingRepo.findAll().stream()
                 .filter(b -> b.getTour().getTourId().equals(id))
                 .collect(Collectors.toList());
@@ -116,14 +113,14 @@ public class TourService {
         }
         bookingRepo.deleteAll(bookings);
         
-        // 8. Xóa tour_schedules và tour_itineraries
+      
         for (TourSchedule schedule : schedules) {
             List<TourItinerary> itineraries = tourItineraryRepo.findByScheduleId(schedule.getScheduleId());
             tourItineraryRepo.deleteAll(itineraries);
         }
         tourScheduleRepo.deleteAll(schedules);
         
-        // 9. Cuối cùng xóa tour (các bảng many-to-many sẽ tự động được xử lý)
+      
         tourRepo.deleteById(id);
     }
 
@@ -153,7 +150,7 @@ public class TourService {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice));
             }
             
-            // Note: This assumes you have TourSchedule entities linked to your Tour
+        
             if (month != null || year != null) {
                 Join<Tour, TourSchedule> scheduleJoin = root.join("schedules");
                 if (month != null) {
@@ -164,7 +161,7 @@ public class TourService {
                 }
             }
             
-            // This prevents duplicate tours when joining with destinations or schedules
+          
             query.distinct(true);
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

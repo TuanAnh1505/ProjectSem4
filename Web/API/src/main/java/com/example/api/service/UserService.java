@@ -77,7 +77,7 @@ public class UserService {
             user.setIsActive(false);
             user.setPublicId(UUID.randomUUID().toString());
 
-            // Gán role mặc định USER
+          
             Set<Role> roles = new HashSet<>();
             Role userRole = roleRepository.findByRoleName("USER");
             if (userRole == null) {
@@ -88,13 +88,12 @@ public class UserService {
             roles.add(userRole);
             user.setRoles(roles);
 
-            // Lưu người dùng vào DB
             User savedUser = userRepository.save(user);
 
-            // Gửi email kích hoạt
+       
             emailService.sendActivationEmail(savedUser.getEmail(), savedUser.getPublicId(), true, false);
 
-            // Gửi mã giảm giá NEWUSER10 nếu còn hạn
+      
             Discount welcome = discountRepository.findByCode("NEWUSER10").orElse(null);
             if (welcome != null && LocalDateTime.now().isBefore(welcome.getEndDate())) {
                 emailService.sendDiscountCodeEmail(savedUser.getEmail(), welcome.getCode(), welcome.getDescription());
@@ -246,7 +245,7 @@ public class UserService {
     }
 
     public User createGuideUser(String fullName, String email, String password, String phone, String address) {
-        // Kiểm tra email đã tồn tại chưa
+        
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email đã tồn tại!");
         }
@@ -259,13 +258,13 @@ public class UserService {
         user.setIsActive(false);
         user.setPublicId(UUID.randomUUID().toString());
         user = userRepository.save(user);
-        // Gán role GUIDE
+       
         Role guideRole = roleRepository.findByRoleName("GUIDE");
         if (guideRole == null) {
             throw new RuntimeException("Role GUIDE không tồn tại!");
         }
         userRoleRepository.save(new UserRole(user.getUserid(), guideRole.getRoleid()));
-        // Gửi email kích hoạt
+        
         emailService.sendActivationEmail(user.getEmail(), user.getPublicId(), true, true);
         return user;
     }
@@ -281,16 +280,16 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setPhone(phone);
         user.setAddress(address);
-        user.setIsActive(true); // Kích hoạt luôn
+        user.setIsActive(true);
         user.setPublicId(UUID.randomUUID().toString());
         user = userRepository.save(user);
-        // Gán role GUIDE
+       
         Role guideRole = roleRepository.findByRoleName("GUIDE");
         if (guideRole == null) {
             throw new RuntimeException("Role GUIDE không tồn tại!");
         }
         userRoleRepository.save(new UserRole(user.getUserid(), guideRole.getRoleid()));
-        // Gửi mail thông tin tài khoản
+      
         String subject = "Thông tin tài khoản hướng dẫn viên TravelTour";
         String content = String.format(
                 """

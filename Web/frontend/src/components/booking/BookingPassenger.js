@@ -8,7 +8,7 @@ import styles from './BookingPassenger.module.css';
 import DatePicker from '../common/DatePicker';
 import { FaExclamationCircle } from 'react-icons/fa';
 
-// Component cho form nhập thông tin hành khách
+
 const PassengerForm = ({ value, onChange, type, index, isContact, guardianOptions, errors, clearFieldError }) => {
   const handleChange = (e) => {
     if (e.target.name === 'phoneNumber') {
@@ -120,7 +120,6 @@ const BookingPassenger = () => {
   const navigate = useNavigate();
   const { bookingId, bookingCode, tourInfo, selectedDate, itineraries = [], finalPrice } = location.state || {};
 
-  // State cho thông tin người đặt tour
   const [useLoggedInInfo, setUseLoggedInInfo] = useState(true);
   const [contactInfo, setContactInfo] = useState({
     fullName: '',

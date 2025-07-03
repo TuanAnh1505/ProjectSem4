@@ -15,11 +15,10 @@ const Payment = () => {
   const [bankQr, setBankQr] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [confirmResult, setConfirmResult] = useState(null); // 'success' | 'failed' | null
+  const [confirmResult, setConfirmResult] = useState(null); 
   const [showPaidModal, setShowPaidModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
 
-  // Lấy giá tiền từ location.state (được truyền từ BookingConfirmation)
   const amountFromState = location.state?.amount;
   const finalPriceFromState = location.state?.finalPrice;
   const basePriceFromState = location.state?.basePrice;
@@ -95,7 +94,6 @@ const Payment = () => {
         finalAmount: amount
       });
 
-      // Nếu là Bank Transfer (methodId = 2)
       if (selectedMethod === 2) {
         setQrLoading(true);
         setBankQr(null);
@@ -127,7 +125,6 @@ const Payment = () => {
         return;
       }
 
-      // Nếu là MoMo (giả sử methodId = 5 là MoMo)
       if (selectedMethod === 5) {
         const response = await axios.post(
           'http://localhost:8080/api/payments/momo',
@@ -148,7 +145,6 @@ const Payment = () => {
         return;
       }
 
-      // Xử lý các phương thức thanh toán khác ở đây
       if (bankQr) {
         setConfirmResult('success');
         setSelectedMethod(null);

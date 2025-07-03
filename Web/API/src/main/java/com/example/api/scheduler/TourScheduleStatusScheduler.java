@@ -14,7 +14,7 @@ import java.util.List;
 public class TourScheduleStatusScheduler {
     private final TourScheduleRepository tourScheduleRepository;
 
-    // Chạy mỗi ngày lúc 0h05 sáng
+   
     @Scheduled(cron = "0 5 0 * * ?")
     public void updateClosedSchedules() {
         LocalDate today = LocalDate.now();

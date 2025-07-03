@@ -40,7 +40,7 @@ public class ExperienceController {
         Experience exp = new Experience();
         exp.setTitle(dto.getTitle());
         exp.setContent(dto.getContent());
-        exp.setStatus("pending"); // Thêm dòng này
+        exp.setStatus("pending"); 
         User user = userRepo.findById(dto.getUserid()).orElseThrow();
         Tour tour = tourRepo.findById(dto.getTourId().intValue()).orElseThrow();
         exp.setUser(user);
@@ -73,7 +73,7 @@ public class ExperienceController {
             ExperienceWithMediaDTO dto = new ExperienceWithMediaDTO();
             BeanUtils.copyProperties(exp, dto);
 
-            // Explicitly set fields that might not be copied correctly
+      
             dto.setTourId(exp.getTour().getTourId() != null ? exp.getTour().getTourId().longValue() : null);
             dto.setStatus(exp.getStatus());
             List<Media> mediaList = mediaRepo.findByExperienceId(exp.getExperienceId());

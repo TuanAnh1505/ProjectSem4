@@ -79,7 +79,7 @@ public class FeedbackController {
             return ResponseEntity.status(404).body("User not found");
         }
 
-        // Kiểm tra xem người dùng có đặt tour này không
+       
         List<Booking> userBookings = bookingRepository.findAllByUser_Userid(user.getUserid());
         boolean hasBookedTour = userBookings.stream()
             .anyMatch(booking -> booking.getTour().getTourId().equals(request.getTourId()));
@@ -121,7 +121,7 @@ public class FeedbackController {
             return ResponseEntity.notFound().build();
         }
 
-        // Kiểm tra xem người dùng có quyền cập nhật feedback này không
+        
         if (!existingFeedback.get().getUser().getEmail().equals(authentication.getName())) {
             logger.warn("User {} attempted to update feedback {} without permission", 
                 authentication.getName(), id);
@@ -129,7 +129,7 @@ public class FeedbackController {
         }
 
         feedback.setFeedbackId(id);
-        feedback.setUser(existingFeedback.get().getUser()); // Giữ nguyên user
+        feedback.setUser(existingFeedback.get().getUser());
         feedback.setUpdatedAt(LocalDateTime.now());
         Feedback updated = feedbackService.saveFeedback(feedback);
         logger.info("Successfully updated feedback with ID: {}", id);
@@ -150,7 +150,7 @@ public class FeedbackController {
             return ResponseEntity.notFound().build();
         }
 
-        // Kiểm tra xem người dùng có quyền xóa feedback này không
+       
         if (!feedback.get().getUser().getEmail().equals(authentication.getName())) {
             logger.warn("User {} attempted to delete feedback {} without permission", 
                 authentication.getName(), id);

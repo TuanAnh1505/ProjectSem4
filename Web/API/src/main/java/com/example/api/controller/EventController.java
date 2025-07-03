@@ -36,7 +36,7 @@ public class EventController {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    // Thêm sự kiện
+    
     @PostMapping
     public ResponseEntity<EventDTO> createEvent(@Valid @ModelAttribute EventDTO eventDTO,
             @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
@@ -47,7 +47,7 @@ public class EventController {
         return ResponseEntity.ok(eventService.createEvent(eventDTO));
     }
 
-    // Sửa sự kiện
+   
     @PutMapping("/{id}")
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Integer id, @Valid @ModelAttribute EventDTO eventDTO,
             @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
@@ -63,33 +63,33 @@ public class EventController {
                     }
                 });
             }
-            // Lưu file mới
+            
             List<String> filePaths = saveFiles(files);
             eventDTO.setFilePaths(filePaths);
         }
         return ResponseEntity.ok(eventService.updateEvent(id, eventDTO));
     }
 
-    // Xóa sự kiện
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable Integer id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Lấy danh sách sự kiện
+  
     @GetMapping
     public ResponseEntity<List<EventDTO>> getAllEvents() {
         return ResponseEntity.ok(eventService.getAllEvents());
     }
 
-    // Lấy sự kiện theo ID
+   
     @GetMapping("/{id}")
     public ResponseEntity<EventDTO> getEventById(@PathVariable Integer id) {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
 
-    // Phục vụ file
+   
     @GetMapping("/files/{fileName:.+}")
     public ResponseEntity<Resource> serveFile(@PathVariable String fileName) throws IOException {
         Path filePath = Paths.get(uploadDir, fileName).normalize();
@@ -109,7 +109,7 @@ public class EventController {
         return ResponseEntity.ok(statuses);
     }
 
-    // Lưu file và trả về danh sách đường dẫn
+   
     private List<String> saveFiles(List<MultipartFile> files) throws IOException {
         List<String> filePaths = new ArrayList<>();
         File uploadDirFile = new File(uploadDir);

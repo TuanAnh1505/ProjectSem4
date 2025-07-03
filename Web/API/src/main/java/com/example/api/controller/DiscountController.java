@@ -25,8 +25,7 @@ public class DiscountController {
     @PostMapping("/check")
     public ResponseEntity<?> checkDiscount(@RequestBody java.util.Map<String, Object> payload) {
         String code = (String) payload.get("code");
-        // Có thể nhận thêm tourId nếu muốn kiểm tra theo tour
-        // Integer tourId = payload.get("tourId") != null ? Integer.parseInt(payload.get("tourId").toString()) : null;
+        
         if (code == null || code.isBlank()) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", "Mã giảm giá không hợp lệ"));
         }

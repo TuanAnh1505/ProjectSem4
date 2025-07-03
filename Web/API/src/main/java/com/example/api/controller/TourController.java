@@ -98,12 +98,12 @@ public class TourController {
             }
 
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path uploadPath = Paths.get("uploads", "tours"); // Changed to include tours subdirectory
+            Path uploadPath = Paths.get("uploads", "tours"); 
             Files.createDirectories(uploadPath);
             Path filePath = uploadPath.resolve(fileName);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            String imageUrl = "/uploads/tours/" + fileName; // Updated URL path
+            String imageUrl = "/uploads/tours/" + fileName; 
             return ResponseEntity.ok(imageUrl);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -4,7 +4,7 @@ import { FaEye, FaEyeSlash, FaPlaneDeparture } from 'react-icons/fa';
 import axios from "axios";
 import "../styles/user/Register.css";
 
-// Cấu hình axios
+
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = 'http://localhost:8080';
 
@@ -57,14 +57,14 @@ const Register = () => {
       
       if (response.data) {
         setSuccess(SUCCESS_MESSAGE);
-        // Redirect sau 2 giây
+
         setTimeout(() => {
           navigate('/login');
         }, 2000);
       }
     } catch (err) {
       console.error('Registration error:', err);
-      // Ưu tiên lấy message chi tiết từ backend nếu có
+ 
       const errorMessage =
         err.response?.data?.message ||
         err.response?.data?.error ||

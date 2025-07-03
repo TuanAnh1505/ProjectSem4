@@ -149,12 +149,9 @@ const DescriptionSection = ({ description }) => {
     const contentRef = useRef(null);
 
     useEffect(() => {
-        // After the component mounts, we check if the content is overflowing.
-        // If scrollHeight > clientHeight, it means the text has been truncated by CSS.
         if (contentRef.current && contentRef.current.scrollHeight > contentRef.current.clientHeight) {
             setNeedsButton(true);
         }
-        // We only need to run this check once when the description is first rendered.
     }, [description]);
 
     if (!description) {
@@ -211,16 +208,15 @@ const OverviewTab = ({ tour }) => (
 const ItineraryTab = ({ itinerary }) => {
     const [openIndex, setOpenIndex] = useState(0);
 
-    // Function to detect and highlight time patterns
+   
     const highlightTimeInText = (text) => {
         if (!text) return text;
         
-        // Regex patterns for time detection
         const timePatterns = [
-            /(\d{1,2}:\d{2}(?:\s*[AP]M)?)/gi,  // 9:30, 14:30, 9:30 AM
-            /(\d{1,2}h\d{2})/gi,                // 9h30, 14h30
-            /(\d{1,2}\s*giờ\s*\d{1,2})/gi,      // 9 giờ 30
-            /(\d{1,2}\s*:\s*\d{2}\s*giờ)/gi,    // 9 : 30 giờ
+            /(\d{1,2}:\d{2}(?:\s*[AP]M)?)/gi,  
+            /(\d{1,2}h\d{2})/gi,                
+            /(\d{1,2}\s*giờ\s*\d{1,2})/gi,      
+            /(\d{1,2}\s*:\s*\d{2}\s*giờ)/gi,   
         ];
 
         let highlightedText = text;

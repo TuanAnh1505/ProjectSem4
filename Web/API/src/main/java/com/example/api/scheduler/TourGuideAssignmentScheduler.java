@@ -13,7 +13,7 @@ public class TourGuideAssignmentScheduler {
         this.assignmentService = assignmentService;
     }
 
-    // Chạy mỗi ngày lúc 1:00 sáng (giờ server)
+  
     // @Scheduled(cron = "0 0 1 * * ?")
     @Scheduled(cron = "0 0 6 * * ?")
     public void autoUpdateAssignmentsDaily() {

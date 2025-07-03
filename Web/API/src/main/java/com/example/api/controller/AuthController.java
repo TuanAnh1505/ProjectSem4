@@ -163,7 +163,6 @@ public class AuthController {
             userInfo.put("phone", user.getPhone());
             userInfo.put("address", user.getAddress());
             
-            // Lấy role đầu tiên của user (thường là role chính)
             String role = user.getRoles().stream()
                 .findFirst()
                 .map(r -> r.getRoleName())

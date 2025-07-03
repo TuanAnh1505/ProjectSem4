@@ -174,7 +174,7 @@ const GuideDashboard = () => {
                             userId={currentUserId}
                             onNotificationClick={(notification) => {
                                 if (notification.notificationType === 'schedule_change') {
-                                    // Chuyển đến trang lịch sử yêu cầu thay đổi lịch trình
+                                    
                                     navigate('/guide/schedule-history');
                                 }
                             }}

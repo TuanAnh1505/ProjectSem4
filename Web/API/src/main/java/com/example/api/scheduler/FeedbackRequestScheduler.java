@@ -25,7 +25,7 @@ public class FeedbackRequestScheduler {
     private final BookingPassengerRepository bookingPassengerRepository;
     private final EmailService emailService;
 
-    // Chạy mỗi ngày một lần vào lúc 00:00
+    
     @Scheduled(cron = "0 0 0 * * ?")
     // @Scheduled(fixedDelay = 60000)
     public void sendFeedbackRequestEmails() {
@@ -38,7 +38,7 @@ public class FeedbackRequestScheduler {
             if (booking.getScheduleId() != null && booking.getUser() != null) {
                 TourSchedule schedule = tourScheduleRepository.findById(booking.getScheduleId()).orElse(null);
                 if (schedule != null && today.equals(schedule.getEndDate())) {
-                    // Kiểm tra xem người dùng có tồn tại và có email không
+                    
                     if (booking.getUser().getEmail() == null || booking.getUser().getEmail().isEmpty()) {
                         logger.warn("Cannot send feedback email: User {} has no email address", 
                             booking.getUser().getFullName());
@@ -56,7 +56,7 @@ public class FeedbackRequestScheduler {
                     String endDate = schedule.getEndDate().toString();
                     
                     try {
-                        // Lấy danh sách passengers cho booking này
+                        
                         List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
                         
                         emailService.sendFeedbackRequestEmailToAllPassengers(

@@ -48,16 +48,15 @@ const BookingConfirmation = () => {
     tourInfo: tourInfo?.price
   });
 
-  // Thêm state để lưu booking lấy từ backend
+
   const [bookingFromApi, setBookingFromApi] = React.useState(null);
 
-  // Đặt ở đầu component, sau các khai báo React.useState khác:
+
   const [currentImage, setCurrentImage] = React.useState(0);
 
-  // Đặt imageCount sau khi đã có tourInfo:
   const imageCount = tourInfo && tourInfo.imageUrls ? tourInfo.imageUrls.length : 0;
 
-  // Thêm state cho swipe
+
   const [touchStartX, setTouchStartX] = React.useState(null);
   const [touchEndX, setTouchEndX] = React.useState(null);
   const [dragging, setDragging] = React.useState(false);
@@ -82,19 +81,19 @@ const BookingConfirmation = () => {
     );
   }
 
-  // Lấy thông tin liên lạc từ contactInfo hoặc passengers[0]
+
   const contact = contactInfo || passengers[0] || {};
 
   const calculateTotal = () => {
     if (!tourInfo || !passengerCounts) return 0;
     
-    // Sử dụng finalPrice đã được tính toán từ BookingPassenger
+
     if (finalPrice !== undefined) {
       console.log('BookingConfirmation - Using finalPrice:', finalPrice);
       return finalPrice;
     }
     
-    // Fallback: tính toán lại nếu không có finalPrice
+
     const adultPrice = basePrice || tourInfo.price;
     const childPrice = adultPrice * 0.5;
     const infantPrice = 0; // Em bé miễn phí
@@ -105,7 +104,6 @@ const BookingConfirmation = () => {
 
     const total = adultTotal + childTotal + infantTotal;
 
-    // Log để debug
     console.log('BookingConfirmation - Price calculation:', {
       basePrice: adultPrice,
       passengerCounts,
@@ -122,30 +120,30 @@ const BookingConfirmation = () => {
     return total;
   };
 
-  // Mock trạng thái và ghi chú nếu chưa có
+
   const bookingStatus = 'Đã xác nhận';
-  // const bookingNote = '(Booking từ Travel.com.vn (Tour giá chợ -500.000 đ/ khách, ))';
+
   const flightInfo = 'Thông tin chuyến bay';
 
   const handlePayment = async () => {
     const calculatedAmount = calculateTotal();
     try {
       const token = localStorage.getItem('token');
-      // Lấy userId từ bookingFromApi hoặc location.state
+
       const userId = bookingFromApi?.user?.userid || location.state?.userId;
       if (!userId) throw new Error('Không tìm thấy userId cho booking');
-      // Gọi API tạo payment mới
+
       const res = await axios.post('http://localhost:8080/api/payments', {
         bookingId,
         userId,
         amount: finalPrice !== undefined ? finalPrice : calculatedAmount,
-        paymentMethodId: 1 // hoặc 2 nếu muốn Bank Transfer
+        paymentMethodId: 1 
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const paymentCode = res.data.paymentCode;
       if (!paymentCode) throw new Error('Không nhận được mã thanh toán');
-      // Điều hướng sang trang thanh toán với paymentCode
+    
       navigate(`/payment/${paymentCode}`, {
         state: {
           paymentCode,

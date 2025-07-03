@@ -46,7 +46,7 @@ public class BookingService {
             System.out.println("Schedule ID: " + request.getScheduleId());
             System.out.println("Discount Code: " + request.getDiscountCode());
 
-            // Validate required fields
+           
             if (request.getUserId() == null) {
                 throw new RuntimeException("Thiếu thông tin người dùng.");
             }
@@ -57,23 +57,23 @@ public class BookingService {
                 throw new RuntimeException("Vui lòng chọn lịch trình cho tour.");
             }
 
-            // Find and validate user
+          
             User user = userRepository.findById(request.getUserId())
                     .orElseThrow(
                             () -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
 
-            // Find and validate tour
+           
             Tour tour = tourRepository.findById(request.getTourId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với ID: " + request.getTourId()));
 
-            // Find and validate schedule
+         
             Optional<TourSchedule> scheduleOpt = tourScheduleRepository.findById(request.getScheduleId());
             if (!scheduleOpt.isPresent()) {
                 throw new RuntimeException("Không tìm thấy lịch trình với ID: " + request.getScheduleId());
             }
             TourSchedule schedule = scheduleOpt.get();
 
-            // Check if user is a guide and is already assigned to this schedule
+           
             boolean isGuide = user.getRoles().stream()
                                   .anyMatch(role -> role.getRoleName().equalsIgnoreCase("GUIDE"));
             if (isGuide) {
@@ -92,21 +92,20 @@ public class BookingService {
                 }
             }
 
-            // Validate schedule belongs to tour
+          
             if (!schedule.getTourId().equals(tour.getTourId())) {
                 throw new RuntimeException("Lịch trình không thuộc tour này!");
             }
 
-            // Validate schedule status
+          
             if (!"available".equalsIgnoreCase(schedule.getStatus().getValue())) {
                 throw new RuntimeException("Lịch trình không ở trạng thái available!");
             }
 
-            // Count current participants for this schedule
             long currentParticipants = bookingRepository.countByScheduleIdAndStatus_StatusName(request.getScheduleId(),
                     "CONFIRMED");
 
-            // Check if schedule is full based on tour's maxParticipants
+            
             if (currentParticipants >= tour.getMaxParticipants()) {
                 schedule.setStatus(TourSchedule.Status.full);
                 tourScheduleRepository.save(schedule);
@@ -115,7 +114,7 @@ public class BookingService {
 
             BigDecimal price = tour.getPrice();
 
-            // Handle discount if provided
+          
             Discount discount = null;
             if (request.getDiscountCode() != null && !request.getDiscountCode().isBlank()) {
                 discount = discountRepository.findByCode(request.getDiscountCode())
@@ -135,7 +134,7 @@ public class BookingService {
                             "Bạn đã sử dụng mã giảm giá này cho tour này: " + request.getDiscountCode());
                 }
 
-                // Kiểm tra số lượng mã giảm giá còn lại
+                
                 if (!discountService.isDiscountAvailable(discount)) {
                     throw new RuntimeException("Mã giảm giá đã hết số lượng: " + request.getDiscountCode());
                 }
@@ -145,11 +144,11 @@ public class BookingService {
                 price = price.subtract(discountAmount);
             }
 
-            // Get default status
+           
             BookingStatus status = bookingStatusRepository.findByStatusName("PENDING")
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái đặt tour mặc định."));
 
-            // Kiểm tra booking PENDING đã tồn tại cho user/tour/schedule
+            
             Optional<Booking> existingPending = bookingRepository
                     .findByUser_UseridAndTour_TourIdAndScheduleIdAndStatus_StatusName(
                             request.getUserId(), request.getTourId(), request.getScheduleId(), "PENDING");
@@ -157,12 +156,12 @@ public class BookingService {
             Booking booking;
             if (existingPending.isPresent()) {
                 Booking pending = existingPending.get();
-                // Kiểm tra xem booking này có payment nào chưa
+               
                 List<Payment> payments = paymentRepository.findByBooking_BookingId(pending.getBookingId());
                 if (payments == null || payments.isEmpty()) {
-                    // Nếu chưa có payment nào, xóa booking này để user có thể đặt lại
+                    
                     bookingRepository.delete(pending);
-                    // Sau đó tạo booking mới như bình thường
+                    
                     booking = new Booking();
                     booking.setUser(user);
                     booking.setTour(tour);
@@ -173,7 +172,7 @@ public class BookingService {
                     if (discount != null) {
                         booking.setDiscountCode(discount.getCode());
                         booking.setDiscountId(discount.getDiscountId());
-                        // Cập nhật số lượng mã giảm giá đã dùng
+                        
                         if (!discountService.checkAndUpdateDiscountQuantity(discount)) {
                             throw new RuntimeException("Mã giảm giá đã hết số lượng!");
                         }
@@ -184,7 +183,7 @@ public class BookingService {
                     } while (bookingRepository.existsByBookingCode(bookingCode));
                     booking.setBookingCode(bookingCode);
                 } else {
-                    // Nếu đã có payment, cập nhật lại booking như logic hiện tại
+                    
                     booking = pending;
                     booking.setBookingDate(LocalDateTime.now());
                     booking.setTotalPrice(price);
@@ -193,7 +192,7 @@ public class BookingService {
                     booking.setDiscountId(discount != null ? discount.getDiscountId() : null);
                 }
             } else {
-                // Tạo booking mới như hiện tại
+                
                 booking = new Booking();
                 booking.setUser(user);
                 booking.setTour(tour);
@@ -204,7 +203,7 @@ public class BookingService {
                 if (discount != null) {
                     booking.setDiscountCode(discount.getCode());
                     booking.setDiscountId(discount.getDiscountId());
-                    // Cập nhật số lượng mã giảm giá đã dùng
+                    
                     if (!discountService.checkAndUpdateDiscountQuantity(discount)) {
                         throw new RuntimeException("Mã giảm giá đã hết số lượng!");
                     }
@@ -217,7 +216,7 @@ public class BookingService {
             }
             Booking saved = bookingRepository.save(booking);
 
-            // Update schedule status if needed
+            
             long updatedParticipants = bookingRepository.countByScheduleIdAndStatus_StatusName(request.getScheduleId(),
                     "CONFIRMED");
             if (updatedParticipants >= tour.getMaxParticipants()) {
@@ -225,7 +224,7 @@ public class BookingService {
                 tourScheduleRepository.save(schedule);
             }
 
-            // Xóa phần lưu UserDiscount ở đây vì sẽ chuyển sang PaymentService
+            
             return saved;
         } catch (Exception e) {
             System.err.println("Lỗi khi đặt tour: " + e.getMessage());
@@ -261,7 +260,7 @@ public class BookingService {
         bookingDetails.put("totalPrice", booking.getTotalPrice());
         bookingDetails.put("scheduleId", booking.getScheduleId());
 
-        // Get schedule details if scheduleId exists
+       
         if (booking.getScheduleId() != null) {
             TourSchedule schedule = tourScheduleRepository.findById(booking.getScheduleId())
                     .orElse(null);
@@ -274,7 +273,7 @@ public class BookingService {
             }
         }
 
-        // User
+        
         if (booking.getUser() != null) {
             Map<String, Object> userDetails = new HashMap<>();
             userDetails.put("userid", booking.getUser().getUserid());
@@ -285,7 +284,7 @@ public class BookingService {
             bookingDetails.put("user", userDetails);
         }
 
-        // Tour
+     
         if (booking.getTour() != null) {
             Map<String, Object> tourDetails = new HashMap<>();
             tourDetails.put("tourId", booking.getTour().getTourId());
@@ -297,7 +296,6 @@ public class BookingService {
             bookingDetails.put("tour", tourDetails);
         }
 
-        // Status
         if (booking.getStatus() != null) {
             Map<String, Object> statusDetails = new HashMap<>();
             statusDetails.put("statusId", booking.getStatus().getBookingStatusId());
@@ -305,7 +303,7 @@ public class BookingService {
             bookingDetails.put("status", statusDetails);
         }
 
-        // Passengers
+        
         List<Map<String, Object>> passengerList = passengers.stream().map(p -> {
             Map<String, Object> map = new HashMap<>();
             map.put("passengerId", p.getPassengerId());
@@ -333,7 +331,7 @@ public class BookingService {
         var user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         List<Booking> bookings = bookingRepository.findAllByUser_Userid(user.getUserid());
-        // Sắp xếp theo bookingDate giảm dần
+       
         bookings.sort((a, b) -> b.getBookingDate().compareTo(a.getBookingDate()));
         List<Map<String, Object>> result = new java.util.ArrayList<>();
         for (Booking b : bookings) {
@@ -341,7 +339,7 @@ public class BookingService {
             map.put("bookingId", b.getBookingId());
             map.put("bookingCode", b.getBookingCode());
             map.put("tourName", b.getTour() != null ? b.getTour().getName() : null);
-            // Lấy lịch trình (nếu có)
+          
             String scheduleInfo = null;
             if (b.getScheduleId() != null) {
                 var scheduleOpt = tourScheduleRepository.findById(b.getScheduleId());
@@ -351,12 +349,12 @@ public class BookingService {
                 }
             }
             map.put("scheduleInfo", scheduleInfo);
-            // Số người: đếm số BookingPassenger của booking này
+           
             int passengerCount = bookingPassengerRepository.findByBooking_BookingId(b.getBookingId()).size();
             map.put("passengerCount", passengerCount);
             map.put("totalPrice", b.getTotalPrice());
             map.put("status", b.getStatus() != null ? b.getStatus().getStatusName() : null);
-            // Lấy trạng thái payment
+           
             var payments = paymentRepository.findByBooking_BookingId(b.getBookingId());
             String paymentStatus = payments != null && !payments.isEmpty() && payments.get(0).getStatus() != null
                     ? payments.get(0).getStatus().getStatusName()
@@ -367,16 +365,16 @@ public class BookingService {
         return result;
     }
 
-    // Generate booking code: BKyyyyMMddHHmmssSSS + 3 random digits
+   
     private String generateBookingCode() {
         String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         String numbers = "0123456789";
         StringBuilder code = new StringBuilder("BK");
         Random random = new Random();
 
-        // Generate 18 random mixed characters
+        
         for (int i = 0; i < 18; i++) {
-            // Randomly decide whether to add a letter or number
+            
             if (random.nextBoolean()) {
                 code.append(letters.charAt(random.nextInt(letters.length())));
             } else {
@@ -387,14 +385,14 @@ public class BookingService {
         return code.toString();
     }
 
-    // Scheduled job: Xóa booking PENDING chưa thanh toán sau 30 ngày
-    @Scheduled(cron = "0 0 3 * * *") // chạy lúc 3h sáng mỗi ngày
+   
+    @Scheduled(cron = "0 0 3 * * *") 
     public void deleteOldPendingBookings() {
         LocalDateTime threshold = LocalDateTime.now().minus(30, ChronoUnit.DAYS);
         List<Booking> oldPendings = bookingRepository.findByStatus_StatusNameAndBookingDateBefore("PENDING", threshold);
         int count = 0;
         for (Booking b : oldPendings) {
-            // Chỉ xóa nếu booking chưa có payment nào
+            
             List<Payment> payments = paymentRepository.findByBooking_BookingId(b.getBookingId());
             if (payments == null || payments.isEmpty()) {
                 bookingRepository.delete(b);

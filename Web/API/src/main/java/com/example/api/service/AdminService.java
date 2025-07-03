@@ -61,7 +61,7 @@ public class AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User does not exist."));
 
-        // Delete the user
+       
         userRepository.delete(user);
     }
 }

@@ -102,7 +102,7 @@ public class TourGuideAssignmentController {
         }
     }
 
-    /////////
+   
     @PutMapping("/{assignmentId}/status")
     public ResponseEntity<?> updateAssignmentStatus(
             @PathVariable Integer assignmentId,
@@ -137,7 +137,7 @@ public class TourGuideAssignmentController {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         }
     }
-    //////
+   
 
     @DeleteMapping("/{assignmentId}")
     public ResponseEntity<Void> deleteAssignment(

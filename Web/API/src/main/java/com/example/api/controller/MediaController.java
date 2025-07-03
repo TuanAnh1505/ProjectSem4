@@ -31,16 +31,16 @@ public class MediaController {
         @RequestParam("experienceId") Long experienceId,
         @RequestParam("fileType") String fileType
     ) throws IOException {
-        // Lưu file vào thư mục (ví dụ: /uploads/media)
+      
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path filePath = Paths.get("uploads/media", fileName);
         Files.createDirectories(filePath.getParent());
         Files.copy(file.getInputStream(), filePath);
 
-        // Lấy user từ userid
+        
         User user = userRepo.findById(userid).orElseThrow();
 
-        // Lưu thông tin vào DB
+        
         Media media = new Media();
         media.setUser(user);
         media.setExperienceId(experienceId);

@@ -43,10 +43,9 @@ const Login = () => {
       localStorage.setItem("role", role);
       localStorage.setItem('user', JSON.stringify(user));
 
-      // Redirect based on role
+     
       if (role === 'GUIDE') {
-        // Guide có thể truy cập trang chính, không redirect ngay lập tức
-        // navigate('/guide');
+        
         navigate('/');
       } else {
         navigate("/");
@@ -55,7 +54,7 @@ const Login = () => {
       toast.success('Đăng nhập thành công!');
     } catch (err) {
       let errorMsg = err.response?.data?.message || err.response?.data || "Có lỗi xảy ra!";
-      // Chuẩn hóa thông báo tài khoản không tồn tại
+      
       if (typeof errorMsg === 'string' && (errorMsg.includes('User not found'))) {
         errorMsg = 'Tài khoản không tồn tại hoặc chưa được đăng ký.';
       }

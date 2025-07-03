@@ -73,35 +73,35 @@ public class TourGuideAssignmentService {
     }
 
     public TourGuideAssignmentDTO createAssignment(TourGuideAssignmentDTO dto) {
-        // Check if tour exists
+     
         Tour tour = tourRepository.findById(dto.getTourId())
                 .orElseThrow(() -> new EntityNotFoundException("Tour not found with id: " + dto.getTourId()));
 
-        // Check if guide exists
+     
         TourGuide guide = tourGuideRepository.findById(dto.getGuideId().longValue())
                 .orElseThrow(() -> new EntityNotFoundException("Tour guide not found with id: " + dto.getGuideId()));
 
-        // Check if guide is available
+     
         if (!guide.getIsAvailable()) {
             throw new IllegalStateException("Hướng dẫn viên hiện không sẵn sàng!");
         }
 
-        // Check if guide's user account is active
+       
         if (guide.getUser() == null || guide.getUser().getIsActive() == null || !guide.getUser().getIsActive()) {
             throw new IllegalStateException("Tài khoản hướng dẫn viên không hoạt động, không thể phân công!");
         }
 
-        // Check if dates are valid
+     
         if (dto.getStartDate().isAfter(dto.getEndDate())) {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc!");
         }
 
-        // Check if schedule has already ended
+      
         if (dto.getEndDate().isBefore(LocalDate.now())) {
             throw new IllegalStateException("Không thể gán hướng dẫn viên cho lịch trình đã kết thúc!");
         }
 
-        // Check if guide has already been assigned to this specific schedule
+       
         boolean alreadyAssigned = assignmentRepository.existsByGuideIdAndTourSchedule_ScheduleId(
             dto.getGuideId(), dto.getScheduleId()
         );
@@ -109,7 +109,7 @@ public class TourGuideAssignmentService {
             throw new IllegalStateException("Hướng dẫn viên đã được phân công vào lịch trình này rồi!");
         }
 
-        // Check if guide has any overlapping assignments
+       
         if (assignmentRepository.existsOverlappingAssignment(
                 dto.getGuideId(),
                 dto.getStartDate(),
@@ -120,7 +120,7 @@ public class TourGuideAssignmentService {
         TourSchedule schedule = tourScheduleRepository.findById(dto.getScheduleId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Schedule ID: " + dto.getScheduleId()));
         
-        // Check if schedule matches tour
+    
         if (!schedule.getTourId().equals(dto.getTourId())) {
             throw new IllegalArgumentException("Schedule does not belong to the specified tour.");
         }
@@ -172,14 +172,14 @@ public class TourGuideAssignmentService {
                 .collect(Collectors.toList());
     }
 
-    // New method: Get current guide's assignments
+
     public List<TourGuideAssignmentDTO> getCurrentGuideAssignments() {
-        // Get current user from security context
+    
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         var currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
 
-        // Find the tour guide record for current user
+      
         TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
                 .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
 
@@ -188,14 +188,14 @@ public class TourGuideAssignmentService {
                 .collect(Collectors.toList());
     }
 
-    // New method: Get current guide's assignments with detailed information
+   
     public List<Map<String, Object>> getCurrentGuideAssignmentsWithDetails() {
-        // Get current user from security context
+       
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         var currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
 
-        // Find the tour guide record for current user
+       
         TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
                 .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
 
@@ -212,12 +212,12 @@ public class TourGuideAssignmentService {
             assignmentDetail.put("endDate", assignment.getEndDate());
             assignmentDetail.put("status", assignment.getStatus());
 
-            // Add tour information
+          
             if (assignment.getTour() != null) {
                 Tour tour = assignment.getTour();
                 assignmentDetail.put("tourName", tour.getName());
                 assignmentDetail.put("tourDescription", tour.getDescription());
-                // Lấy ảnh đầu tiên từ list, hoặc null nếu list rỗng
+          
                 String firstImageUrl = (tour.getImageUrls() != null && !tour.getImageUrls().isEmpty())
                         ? tour.getImageUrls().get(0)
                         : null;
@@ -226,11 +226,11 @@ public class TourGuideAssignmentService {
                 assignmentDetail.put("tourDuration", tour.getDuration());
             }
 
-            // Add scheduleId by finding the schedule based on tourId and startDate
+         
             tourScheduleRepository.findByTourIdAndStartDate(assignment.getTourId(), assignment.getStartDate())
                     .ifPresent(schedule -> assignmentDetail.put("scheduleId", schedule.getScheduleId()));
 
-            // Add guide information
+         
             if (assignment.getGuide() != null) {
                 TourGuide guide = assignment.getGuide();
                 assignmentDetail.put("guideName", guide.getUser() != null ? guide.getUser().getFullName() : null);
@@ -239,15 +239,15 @@ public class TourGuideAssignmentService {
                 assignmentDetail.put("guideRating", guide.getRating());
             }
 
-            // Determine assignment category based on dates and status
+           
             LocalDate today = LocalDate.now();
             String category;
             if (assignment.getEndDate().isBefore(today)) {
-                category = "completed"; // Đã hoàn thành
+                category = "completed"; 
             } else if (assignment.getStartDate().isAfter(today)) {
-                category = "upcoming"; // Sắp tới
+                category = "upcoming";
             } else {
-                category = "ongoing"; // Đang diễn ra
+                category = "ongoing"; 
             }
             assignmentDetail.put("category", category);
 
@@ -265,32 +265,32 @@ public class TourGuideAssignmentService {
         return convertToDTO(updatedAssignment);
     }
 
-    // New method: Update assignment status (only for main_guide)
+
     public TourGuideAssignmentDTO updateAssignmentStatusByMainGuide(Integer assignmentId, String newStatus) {
-        // Get current user from security context
+      
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         var currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
 
-        // Find the tour guide record for current user
+      
         TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
                 .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
 
-        // Find the assignment
+   
         TourGuideAssignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Assignment not found with id: " + assignmentId));
 
-        // Check if current guide is assigned to this assignment
+     
         if (!assignment.getGuideId().equals(currentGuide.getGuideId().intValue())) {
             throw new IllegalStateException("Bạn không có quyền cập nhật trạng thái của assignment này!");
         }
 
-        // Check if current guide has main_guide role for this assignment
+       
         if (assignment.getRole() != TourGuideAssignment.GuideRole.main_guide) {
             throw new IllegalStateException("Chỉ hướng dẫn viên chính (main_guide) mới có quyền cập nhật trạng thái!");
         }
 
-        // Parse and validate new status
+      
         TourGuideAssignment.AssignmentStatus status;
         try {
             status = TourGuideAssignment.AssignmentStatus.valueOf(newStatus.toLowerCase());
@@ -298,7 +298,7 @@ public class TourGuideAssignmentService {
             throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatus);
         }
 
-        // Update the status
+  
         assignment.setStatus(status);
         TourGuideAssignment updatedAssignment = assignmentRepository.save(assignment);
         return convertToDTO(updatedAssignment);
@@ -322,14 +322,14 @@ public class TourGuideAssignmentService {
         dto.setEndDate(assignment.getEndDate());
         dto.setStatus(assignment.getStatus());
 
-        // Set tour information if available
+    
         if (assignment.getTour() != null) {
             Tour tour = assignment.getTour();
             dto.setTourName(tour.getName());
             dto.setTourDescription(tour.getDescription());
         }
 
-        // Set guide information if available
+   
         if (assignment.getGuide() != null) {
             TourGuide guide = assignment.getGuide();
             dto.setGuideName(guide.getUser() != null ? guide.getUser().getFullName() : null);
@@ -341,37 +341,37 @@ public class TourGuideAssignmentService {
         return dto;
     }
 
-    // New method: Get detailed tour information for guide
+  
     public TourDetailForGuideDTO getTourDetailForGuide(Integer tourId, LocalDate startDate) {
-        // Get current user from security context
+    
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         var currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
         TourGuide currentGuide = tourGuideRepository.findByUserId(currentUser.getUserid())
                 .orElseThrow(() -> new EntityNotFoundException("Current user is not a tour guide"));
 
-        // 1. Verify this guide is assigned to this tour schedule
+     
         assignmentRepository.findByTourIdAndGuideIdAndStartDate(tourId, currentGuide.getGuideId().intValue(), startDate)
                 .orElseThrow(() -> new IllegalStateException("Bạn không được phân công cho tour này vào ngày này."));
 
-        // 2. Fetch required entities
+    
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tour với ID: " + tourId));
         TourSchedule schedule = tourScheduleRepository.findByTourIdAndStartDate(tourId, startDate)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Không tìm thấy lịch trình cho tour " + tourId + " vào ngày " + startDate));
 
-        // Correctly fetch itinerary using scheduleId
+ 
         List<TourItinerary> itineraries = tourItineraryRepository.findByScheduleId(schedule.getScheduleId());
 
-        // 3. Fetch passengers for this specific schedule
+
         List<Booking> confirmedBookings = bookingRepository
                 .findByScheduleIdAndStatus_StatusName(schedule.getScheduleId(), "CONFIRMED");
         List<BookingPassenger> passengers = confirmedBookings.stream()
                 .flatMap(booking -> bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId()).stream())
                 .collect(Collectors.toList());
 
-        // 4. Convert to DTO
+     
         TourDetailForGuideDTO dto = new TourDetailForGuideDTO();
         dto.setTourId(tour.getTourId());
         dto.setTourName(tour.getName());
@@ -415,8 +415,7 @@ public class TourGuideAssignmentService {
         return dto;
     }
 
-    //////////////////////////////
-    // New method: Auto update assignment status based on time
+  
     public TourGuideAssignmentDTO autoUpdateAssignmentStatus(Integer assignmentId) {
         TourGuideAssignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Assignment not found with id: " + assignmentId));
@@ -433,7 +432,7 @@ public class TourGuideAssignmentService {
         return convertToDTO(assignment);
     }
 
-    // New method: Auto update all assignments
+
     public Map<String, Object> autoUpdateAllAssignments() {
         List<TourGuideAssignment> allAssignments = assignmentRepository.findAll();
         LocalDate today = LocalDate.now();
@@ -458,30 +457,30 @@ public class TourGuideAssignmentService {
         return result;
     }
 
-    // Helper method to determine status based on time
+    
     private TourGuideAssignment.AssignmentStatus determineAutoStatus(TourGuideAssignment assignment, LocalDate today) {
-        // If assignment is already cancelled, don't change it
+       
         if (assignment.getStatus() == TourGuideAssignment.AssignmentStatus.cancelled) {
             return assignment.getStatus();
         }
 
-        // If assignment has ended, mark as completed
+        
         if (assignment.getEndDate().isBefore(today)) {
             return TourGuideAssignment.AssignmentStatus.completed;
         }
 
-        // If assignment is currently ongoing (today is between start and end date)
+        
         if (!assignment.getStartDate().isAfter(today) && !assignment.getEndDate().isBefore(today)) {
             return TourGuideAssignment.AssignmentStatus.inprogress;
         }
 
-        // If assignment hasn't started yet, keep as assigned
+      
         if (assignment.getStartDate().isAfter(today)) {
             return TourGuideAssignment.AssignmentStatus.assigned;
         }
 
-        // Default case
+       
         return assignment.getStatus();
     }
-    ////////////////////////////////
+    
 }

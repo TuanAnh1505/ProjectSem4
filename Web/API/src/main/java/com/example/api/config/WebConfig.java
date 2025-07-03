@@ -30,10 +30,10 @@ public class WebConfig implements WebMvcConfigurer {
 
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                // Lấy đường dẫn tuyệt đối của thư mục gốc
+                
                 String rootPath = System.getProperty("user.dir");
 
-                // Tạo và kiểm tra thư mục uploads/media
+              
                 File mediaDir = new File(rootPath, "uploads/media");
                 if (!mediaDir.exists()) {
                         boolean created = mediaDir.mkdirs();
@@ -44,7 +44,6 @@ public class WebConfig implements WebMvcConfigurer {
                         }
                 }
 
-                // Tạo và kiểm tra thư mục uploads/tours
                 File toursDir = new File(rootPath, "uploads/tours");
                 if (!toursDir.exists()) {
                         boolean created = toursDir.mkdirs();
@@ -55,24 +54,24 @@ public class WebConfig implements WebMvcConfigurer {
                         }
                 }
 
-                // Log đường dẫn tuyệt đối
+        
                 logger.info("Root path: " + rootPath);
                 logger.info("Media directory path: " + mediaDir.getAbsolutePath());
                 logger.info("Tours directory path: " + toursDir.getAbsolutePath());
 
-                // Cấu hình ResourceHandler cho media
+        
                 registry.addResourceHandler("/uploads/media/**")
                                 .addResourceLocations("file:" + mediaDir.getAbsolutePath() + File.separator)
                                 .setCachePeriod(3600)
                                 .resourceChain(true);
 
-                // Cấu hình ResourceHandler cho tours
+              
                 registry.addResourceHandler("/uploads/tours/**")
                                 .addResourceLocations("file:" + toursDir.getAbsolutePath() + File.separator)
                                 .setCachePeriod(3600)
                                 .resourceChain(true);
 
-                // Log cấu hình
+              
                 logger.info("Resource handlers configured successfully");
         }
 }

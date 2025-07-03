@@ -91,14 +91,14 @@ public class BookingPassengerService {
             User user = userRepo.findByPublicId(request.getPublicId())
                     .orElseThrow(() -> new RuntimeException("User not found with publicId: " + request.getPublicId()));
 
-            // 1. Tạo contactPassenger (người lớn 1)
+          
             BookingPassengerDTO contactPassenger = createContactPassenger(request, booking.getBookingId(),
                     user.getPublicId());
             createdPassengers.add(contactPassenger);
             List<Integer> adultPassengerIds = new ArrayList<>();
             adultPassengerIds.add(contactPassenger.getPassengerId());
 
-            // 2. Tạo các người lớn còn lại (nếu có)
+            
             int numAdults = request.getPassengers().getAdult();
             int numChildren = request.getPassengers().getChild();
             int numInfants = request.getPassengers().getInfant();
@@ -125,10 +125,10 @@ public class BookingPassengerService {
                 }
             }
 
-            // 3. Tạo trẻ em/em bé, mapping guardianIndex sang passengerId
+          
             for (PassengerDetailDTO detail : details) {
                 if (!"adult".equals(detail.getPassengerType())) {
-                    Integer guardianIndex = detail.getGuardianIndex(); // FE gửi lên
+                    Integer guardianIndex = detail.getGuardianIndex(); 
                     Integer guardianPassengerId = (guardianIndex != null && guardianIndex < adultPassengerIds.size())
                         ? adultPassengerIds.get(guardianIndex)
                         : null;
@@ -145,13 +145,13 @@ public class BookingPassengerService {
                 }
             }
 
-            // Lấy giá đã được giảm từ booking hiện tại
+           
             BigDecimal discountedBasePrice = booking.getTotalPrice();
             int adults = request.getPassengers().getAdult();
             int children = request.getPassengers().getChild();
             int infants = request.getPassengers().getInfant();
 
-            // Tính toán lại tổng giá dựa trên giá đã giảm
+        
             BigDecimal totalPrice = discountedBasePrice
                     .multiply(BigDecimal.valueOf(adults))
                     .add(discountedBasePrice.multiply(BigDecimal.valueOf(0.5)).multiply(BigDecimal.valueOf(children)))
@@ -166,7 +166,7 @@ public class BookingPassengerService {
                     discountedBasePrice.multiply(BigDecimal.valueOf(0.25)).multiply(BigDecimal.valueOf(infants)));
             log.info("Total price: {}", totalPrice);
 
-            // Nếu có discountedPrice từ request, ưu tiên cập nhật giá booking bằng giá đã giảm
+            
             if (request.getDiscountedPrice() != null && request.getDiscountedPrice() > 0) {
                 booking.setTotalPrice(BigDecimal.valueOf(request.getDiscountedPrice()));
                 // Cập nhật discount_code và discount_id nếu có
@@ -245,7 +245,7 @@ public class BookingPassengerService {
                 .gender(dto.getGender())
                 .birthDate(dto.getBirthDate())
                 .passengerType(BookingPassenger.PassengerType.valueOf(dto.getPassengerType().toLowerCase()));
-        // Set guardianPassenger nếu có
+       
         if (dto.getGuardianPassengerId() != null) {
             BookingPassenger guardian = bookingPassengerRepo.findById(dto.getGuardianPassengerId())
                     .orElse(null);

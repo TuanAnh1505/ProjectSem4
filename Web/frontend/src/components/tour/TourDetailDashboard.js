@@ -33,7 +33,6 @@ export default function TourDetailDashboard() {
   const maxThumbs = 5;
   const extraCount = galleryImages.length - maxThumbs;
 
-  // Fetch all data
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
@@ -41,16 +40,13 @@ export default function TourDetailDashboard() {
         const token = localStorage.getItem('token');
         const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-        // Fetch Tour Details
         const tourRes = await axios.get(`http://localhost:8080/api/tours/name/${tourName}`, config);
         if (!tourRes.data) throw new Error('Tour not found');
         setTour(tourRes.data);
 
-        // Fetch Gallery Images
         const galleryRes = await axios.get(`http://localhost:8080/api/tours/${tourRes.data.tourId}/images`);
         setGalleryImages(galleryRes.data || []);
 
-        // Fetch Schedules and Itineraries
         const schedulesRes = await axios.get(`http://localhost:8080/api/schedules/tour/${tourRes.data.tourId}`, config);
         const schedules = schedulesRes.data;
         const schedulesWithItineraries = [];
@@ -60,15 +56,12 @@ export default function TourDetailDashboard() {
         }
         setItineraries(schedulesWithItineraries);
 
-        // Fetch Destinations
         const destinationsRes = await axios.get(`http://localhost:8080/api/tours/${tourRes.data.tourId}/destinations`);
         setDestinations(destinationsRes.data || []);
 
-        // Fetch Experiences
         const expRes = await axios.get(`http://localhost:8080/api/experiences/tour/${tourRes.data.tourId}`, config);
         setExperiences(Array.isArray(expRes.data) ? expRes.data : []);
 
-        // Fetch Feedbacks
         setFeedbackLoading(true);
         const feedbackRes = await axios.get(`http://localhost:8080/api/feedbacks?tourId=${tourRes.data.tourId}`);
         setFeedbacks(Array.isArray(feedbackRes.data) ? feedbackRes.data : []);
@@ -88,7 +81,6 @@ export default function TourDetailDashboard() {
 
     if (tourName) {
       fetchAllData();
-      // If user is a guide, fetch their assignments
       const role = localStorage.getItem('role');
       if (role === 'GUIDE') {
         fetchGuideAssignments();
@@ -118,7 +110,6 @@ export default function TourDetailDashboard() {
 
     return parts.map((part, index) => {
       if (regex.test(part)) {
-        // Reset regex state for global regex
         regex.lastIndex = 0;
         return <strong key={index} className={styles.itineraryTimeHighlight}>{part}</strong>;
       }
@@ -217,7 +208,6 @@ export default function TourDetailDashboard() {
       setExpContent('');
       setExpMedia([]);
       setExpTitle('');
-      // Refresh experiences
       const newExpRes = await axios.get(`http://localhost:8080/api/experiences/tour/${tour.tourId}`, config);
       setExperiences(Array.isArray(newExpRes.data) ? newExpRes.data : []);
     } catch (err) {

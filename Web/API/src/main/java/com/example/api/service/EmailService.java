@@ -69,8 +69,7 @@ public class EmailService {
             logger.info("Successfully sent activation email to: {}", to);
         } catch (Exception e) {
             logger.error("Failed to send activation email to: {}. Error: {}", to, e.getMessage());
-            // Don't throw exception to prevent registration failure
-            // Instead, log the error and continue
+            
             logger.warn("Email sending failed, but user registration will continue. User can request email resend later.");
         }
     }

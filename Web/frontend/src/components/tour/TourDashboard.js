@@ -64,7 +64,6 @@ export default function TourDashboard() {
 
   useEffect(() => {
     fetchTours();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFilterChange = (e) => {

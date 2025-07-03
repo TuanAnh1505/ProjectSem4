@@ -26,7 +26,7 @@ public class DestinationController {
             throw new IllegalArgumentException("At least one file is required");
         }
 
-        // Validate file types
+        
         for (MultipartFile file : files) {
             String contentType = file.getContentType();
             if (!contentType.startsWith("image/") && !contentType.equals("video/mp4")
