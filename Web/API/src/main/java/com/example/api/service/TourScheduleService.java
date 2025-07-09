@@ -131,7 +131,7 @@ public class TourScheduleService {
         }
         logger.info("Found scheduleId: {}", scheduleId);
 
-        // Bước 2: Lấy danh sách booking đã xác nhận để kiểm tra
+        //  Lấy danh sách booking đã xác nhận để kiểm tra
         List<Booking> confirmedBookings = bookingRepository.findConfirmedBookingsForSchedule(scheduleId);
         logger.info("Found {} confirmed bookings for schedule {}", confirmedBookings.size(), scheduleId);
 

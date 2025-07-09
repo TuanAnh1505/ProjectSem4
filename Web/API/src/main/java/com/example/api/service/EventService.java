@@ -72,7 +72,7 @@ public class EventService {
         return mapToDTO(event);
     }
 
-    // Ánh xạ DTO sang Entity
+
     private void mapToEntity(EventDTO eventDTO, Event event) {
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
