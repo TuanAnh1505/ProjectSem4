@@ -22,17 +22,13 @@ public class TourSchedule {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(20)")
     private Status status = Status.available;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
-
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
-
     public enum Status {
         available("available"),
         full("full"),

@@ -123,7 +123,7 @@ public class TourScheduleService {
     public void checkAndUpdateScheduleStatus(Integer bookingId) {
         logger.info("Checking schedule status for bookingId: {}", bookingId);
 
-     
+        // Bước 1: Xác định lịch trình từ booking_id
         Integer scheduleId = bookingRepository.findScheduleIdByBookingId(bookingId);
         if (scheduleId == null) {
             logger.warn("No schedule found for bookingId: {}", bookingId);
@@ -131,11 +131,11 @@ public class TourScheduleService {
         }
         logger.info("Found scheduleId: {}", scheduleId);
 
-      
+        //  Lấy danh sách booking đã xác nhận để kiểm tra
         List<Booking> confirmedBookings = bookingRepository.findConfirmedBookingsForSchedule(scheduleId);
         logger.info("Found {} confirmed bookings for schedule {}", confirmedBookings.size(), scheduleId);
 
-       
+        // Log chi tiết từng booking
         for (Booking booking : confirmedBookings) {
             logger.info("Booking {} - User: {} (ID: {})",
                     booking.getBookingId(),
@@ -143,11 +143,12 @@ public class TourScheduleService {
                     booking.getUser().getUserid());
         }
 
- 
+        // Bước 3: Đếm số lượng hành khách đã thanh toán thành công
         long confirmedPassengers = bookingRepository.countConfirmedPassengersForSchedule(scheduleId);
         long bookingsWithoutBookerAsPassenger = bookingRepository.countBookingsWithoutBookerAsPassenger(scheduleId);
 
-      
+        // Tổng số người tham gia = số hành khách + số booking mà người đặt không phải
+        // là hành khách
         long totalParticipants = confirmedPassengers + bookingsWithoutBookerAsPassenger;
 
         logger.info("Detailed count for schedule {}:", scheduleId);
@@ -155,7 +156,7 @@ public class TourScheduleService {
         logger.info("- Number of bookings where booker is not a passenger: {}", bookingsWithoutBookerAsPassenger);
         logger.info("- Total participants: {}", totalParticipants);
 
-       
+        // Bước 4: Lấy thông tin tour và max_participants
         TourSchedule schedule = repository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch trình"));
 
@@ -168,7 +169,7 @@ public class TourScheduleService {
         logger.info("- Max participants: {}", tour.getMaxParticipants());
         logger.info("- Current schedule status: {}", schedule.getStatus().getValue());
 
-     
+        // Bước 5: So sánh và cập nhật trạng thái
         if (totalParticipants >= tour.getMaxParticipants()) {
             logger.info("Updating schedule status to FULL. Total participants ({}) >= max participants ({})",
                     totalParticipants, tour.getMaxParticipants());
@@ -187,24 +188,25 @@ public class TourScheduleService {
     public void sendTourReminders() {
         logger.info("Bắt đầu gửi email nhắc nhở tour (1 ngày trước khi khởi hành)");
         LocalDate oneDayLater = LocalDate.now().plusDays(1);
-        
+        // twoDayLater
+        // Find all schedules starting in 1 day
         List<TourSchedule> schedules = repository.findByStartDate(oneDayLater);
         logger.info("Tìm thấy {} lịch trình tour sẽ khởi hành sau 1 ngày (ngày {})",
                 schedules.size(), oneDayLater.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
         for (TourSchedule schedule : schedules) {
             try {
-                
+                // Get all confirmed bookings for this schedule
                 List<Booking> confirmedBookings = bookingRepository
                         .findConfirmedBookingsForSchedule(schedule.getScheduleId());
                 logger.info("Lịch trình tour ID {}: Tìm thấy {} booking đã xác nhận",
                         schedule.getScheduleId(), confirmedBookings.size());
 
-              
+                // Get tour details
                 Tour tour = tourRepository.findById(schedule.getTourId())
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin tour"));
 
-              
+                // Send reminder email to each booking
                 for (Booking booking : confirmedBookings) {
                     try {
                         User user = booking.getUser();
@@ -214,7 +216,7 @@ public class TourScheduleService {
                         String tourDetails = tour.getDescription() != null ? tour.getDescription()
                                 : "Không có thông tin chi tiết";
 
-                      
+                        // Lấy danh sách passengers cho booking này
                         List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
 
                         emailService.sendTourReminderEmailToAllPassengers(
@@ -247,27 +249,27 @@ public class TourScheduleService {
         logger.info("Bắt đầu gửi email chi tiết lịch trình tour");
         LocalDate today = LocalDate.now();
 
-     
+        // Tìm tất cả lịch trình bắt đầu vào ngày hôm nay
         List<TourSchedule> schedules = repository.findByStartDate(today);
         logger.info("Tìm thấy {} lịch trình tour bắt đầu vào ngày {}",
                 schedules.size(), today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
         for (TourSchedule schedule : schedules) {
             try {
-           
+                // Lấy tất cả booking đã xác nhận cho lịch trình này
                 List<Booking> confirmedBookings = bookingRepository
                         .findConfirmedBookingsForSchedule(schedule.getScheduleId());
                 logger.info("Lịch trình tour ID {}: Tìm thấy {} booking đã xác nhận",
                         schedule.getScheduleId(), confirmedBookings.size());
 
-             
+                // Lấy thông tin tour
                 Tour tour = tourRepository.findById(schedule.getTourId())
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin tour"));
 
-              
+                // Lấy chi tiết lịch trình
                 List<TourItineraryDTO> itineraries = tourItineraryService.getByScheduleId(schedule.getScheduleId());
 
-           
+                // Gửi email cho từng booking
                 for (Booking booking : confirmedBookings) {
                     try {
                         User user = booking.getUser();
@@ -275,7 +277,7 @@ public class TourScheduleService {
                         String startDate = schedule.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                         String endDate = schedule.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-                      
+                        // Lấy danh sách passengers cho booking này
                         List<BookingPassenger> passengers = bookingPassengerRepository.findByBooking_BookingId(booking.getBookingId());
 
                         emailService.sendTourItineraryEmailToAllPassengers(
@@ -317,15 +319,16 @@ public class TourScheduleService {
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
 
+        // Đếm số người đã tham gia
         long confirmedPassengers = bookingRepository.countConfirmedPassengersForSchedule(entity.getScheduleId());
         long bookingsWithoutBookerAsPassenger = bookingRepository
                 .countBookingsWithoutBookerAsPassenger(entity.getScheduleId());
         int totalParticipants = (int) (confirmedPassengers + bookingsWithoutBookerAsPassenger);
 
-     
+        // Lấy maxParticipants từ tour
         Tour tour = tourRepository.findById(entity.getTourId()).orElse(null);
 
-      
+        // Nếu đã qua ngày bắt đầu, cập nhật trạng thái closed
         LocalDate today = LocalDate.now();
         if (!today.isBefore(entity.getStartDate())) {
             if (!"closed".equals(entity.getStatus().getValue())) {
